@@ -285,44 +285,10 @@ class GLWindow : public Fl_Gl_Window, public boost::mutex
 
         // now draw with picking
         _DoPicking();
-        _GetDepthBuffer();
 
         CheckForGLErrors();
     }
 
-    /////////////////////////////////////////////////////////////////////////////////
-    void _GetDepthBuffer()
-    {
-        static int n = 0;
-//        std::string sFile = std::string("gabe") + n + ".m";
-        char buf[128];
-        sprintf( buf, "image%d.m", n++ );
-        FILE* f = fopen( buf, "w" ); 
-        GLint viewport[4];
-        glGetIntegerv(GL_VIEWPORT, viewport);
-        GLint width = viewport[2];
-        GLint height = viewport[3];
-
-        //GLfloat *pixels = new GLfloat[ width * height*4 ];
-        if( width * height*4 > m_vDepthBuffer.size() ){
-            m_vDepthBuffer.resize( width*height*4 );
-        }
-
-        glPixelStorei( GL_PACK_ROW_LENGTH, viewport[2] );
-        glReadPixels( 0, 0, width, height, GL_DEPTH_COMPONENT, GL_FLOAT, &m_vDepthBuffer[0] );
-
-        /*
-        fprintf( f, " im = [ ...\n");
-        for( size_t nrow = 0; nrow < height; nrow++ ){
-            fprintf( f, "  [ ");
-            for( size_t ncol = 0; ncol < width; ncol++ ){
-                fprintf( f, "%f ", pixels[ (nrow*width + ncol)] );
-            }
-            fprintf( f, "];...\n");
-        }
-        fprintf( f, "];\n");
-        */
-    }
 
     /////////////////////////////////////////////////////////////////////////////////
     void _DoPicking()
