@@ -18,14 +18,14 @@ find_package( ZeroMQ REQUIRED )
 find_package( Protobuf REQUIRED )
 find_package( ASSIMP REQUIRED )
 
-include_directories( . )
-include_directories( ${BOOST_INCLUDE_DIR} )
-include_directories( ${FLTK_INCLUDE_DIR} )
-include_directories( ${CVARS_INCLUDE_DIR} )
-include_directories( ${OpenCV_INCLUDE_DIRS} )
-include_directories( ${EIGEN3_INCLUDE_DIR} )
-include_directories( ${ZeroMQ_INCLUDE_DIRS} )
-include_directories( ${ASSIMP_INCLUDE_DIR} )
+#include_directories( . )
+#include_directories( ${BOOST_INCLUDE_DIR} )
+#include_directories( ${FLTK_INCLUDE_DIR} )
+#include_directories( ${CVARS_INCLUDE_DIR} )
+#include_directories( ${OpenCV_INCLUDE_DIRS} )
+#include_directories( ${EIGEN3_INCLUDE_DIR} )
+#include_directories( ${ZeroMQ_INCLUDE_DIRS} )
+#include_directories( ${ASSIMP_INCLUDE_DIR} )
 
 set( hdrs   GLWindow.h
             GLHelpers.h
@@ -36,13 +36,13 @@ set( hdrs   GLWindow.h
             AssetLoader.h
    )
 
-set( srcs   GLWindow.cpp )
+#set( srcs   GLWindow.cpp )
 
-add_executable( RayTracer ${srcs} ${hdrs} )
-target_link_libraries( RayTracer ${Boost_THREAD_LIBRARY} )
-target_link_libraries( RayTracer ${CVARS_LIBRARIES} )
-target_link_libraries( RayTracer ${FLTK_LIBRARIES} )
-target_link_libraries( RayTracer ${OPENGL_LIBRARIES} )
-target_link_libraries( RayTracer ${OpenCV_LIBS} )
-target_link_libraries( RayTracer ${ASSIMP_LIBRARIES} )
+#add_executable( RayTracer ${srcs} ${hdrs} )
+#target_link_libraries( RayTracer ${Boost_THREAD_LIBRARY} )
+#target_link_libraries( RayTracer ${CVARS_LIBRARIES} )
+#target_link_libraries( RayTracer ${FLTK_LIBRARIES} )
+#target_link_libraries( RayTracer ${OPENGL_LIBRARIES} )
+#target_link_libraries( RayTracer ${OpenCV_LIBS} )
+#target_link_libraries( RayTracer ${ASSIMP_LIBRARIES} )
 
