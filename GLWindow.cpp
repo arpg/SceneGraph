@@ -153,7 +153,7 @@ int GLWindow::handle( int e )
 ////////////////////////////////////////////////////////////////////////////
 void GLWindow::Update()
 {
-    printf("user update function called\n");
+//    printf("user update function called\n");
 }
 
 
