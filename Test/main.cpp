@@ -7,8 +7,6 @@
 
 #include <Fl/Enumerations.H>
 
-#include "AssetLoader.h"
-
 
 ////////////////////////////////////////////////////////////////////////////
 int GLWindow::HandleNavInput( int e )

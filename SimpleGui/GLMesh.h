@@ -2,7 +2,7 @@
 #define _GL_MESH_H_
 
 #include "GLObject.h"
-#include "AssetLoader.h"
+//#include "AssetLoader.h"
 
 #include "assimp/assimp.h"
 #include "assimp/aiPostProcess.h"

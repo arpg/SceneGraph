@@ -1,0 +1,12 @@
+
+SimpleGui is just that, as simple OpenGL GUI class.
+
+It has a rudimentary scene graph, the nodes of which are C++ classes inherited
+from "GLObject".  These objects must have a "draw()" funciton.
+
+A GLObject, o, is registred with a GLSceneGraph, g, via g.AddChild( &o ).
+
+The object creator is responsible for the objects lifetime.
+
+
+

@@ -4,6 +4,7 @@
 #include <FL/Fl.H>
 #include <FL/Fl_Gl_Window.H>
 #include <FL/gl.h>
+#include <Fl/Enumerations.H>
 
 #include <FLConsole/FLConsole.h>
 #include <CVars/CVar.h>
@@ -18,10 +19,11 @@
 
 const double g_dFPS = 1.0/20.0;
 
-
+/////////////////////////////////////////////////////////////////////////////////
 enum eGuiMode { eConsole, eFPSNav, eSelect };
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////
+/// Convert xyz,roll,pitch,yaw into a 4x4 homogeneous transform matrix
 inline Eigen::Matrix4d GLCart2T(
                               double x,
                               double y,
@@ -62,7 +64,8 @@ inline Eigen::Matrix4d GLCart2T(
 }
 
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////
+/// Convert roll, pitch and yaw into a rotation matrix
 inline Eigen::Matrix3d GLCart2R(
                      const double& r,
                      const double& p,
@@ -96,19 +99,21 @@ inline Eigen::Matrix3d GLCart2R(
 
 
 
+/////////////////////////////////////////////////////////////////////////////////
 /// FLTK OpenGL window.
 class GLWindow : public Fl_Gl_Window, public boost::mutex
 {
+    /////////////////////////////////////////////////////////////////////////////////
     /// timer callback drives animation and forces drawing at 20 hz
     static void _Timer(void *userdata) {
         GLWindow *pWin = (GLWindow*)userdata;
-        pWin->Update();
 		pWin->redraw();
         Fl::repeat_timeout( g_dFPS, _Timer, userdata );
     }
 
     public:
 
+    /////////////////////////////////////////////////////////////////////////////////
     void DrawSceneGraph()
     {
         for( size_t ii = 0; ii < m_vSceneGraph.size(); ii++ ){
@@ -127,6 +132,7 @@ class GLWindow : public Fl_Gl_Window, public boost::mutex
         }
     }
 
+    /////////////////////////////////////////////////////////////////////////////////
     /// Constructor.
     GLWindow(int x,int y,int w,int h,const char *l=0) : Fl_Gl_Window(x,y,w,h,l)
     {
@@ -139,6 +145,7 @@ class GLWindow : public Fl_Gl_Window, public boost::mutex
 		show();
     }
 
+    /////////////////////////////////////////////////////////////////////////////////
     // position the camera at "origin"
     void ResetCamera()
     {
@@ -155,6 +162,7 @@ class GLWindow : public Fl_Gl_Window, public boost::mutex
         m_dCamUp[2] = -1;
     }
 
+    /////////////////////////////////////////////////////////////////////////////////
 	// bird's eye view
 	void CameraOrtho()
     {
@@ -171,6 +179,7 @@ class GLWindow : public Fl_Gl_Window, public boost::mutex
         m_dCamUp[2] = 0;
     }
 
+    /////////////////////////////////////////////////////////////////////////////////
     // Reset clear all registered objects
     void Reset()
     {
@@ -178,6 +187,7 @@ class GLWindow : public Fl_Gl_Window, public boost::mutex
         m_vSceneGraph.clear();
     }
 
+    /////////////////////////////////////////////////////////////////////////////////
     /// Init OpenGL
     void Init()
     {
@@ -189,6 +199,7 @@ class GLWindow : public Fl_Gl_Window, public boost::mutex
         glClearColor( 0.0, 0.0, 0.0, 1.0 );
     }
 
+    /////////////////////////////////////////////////////////////////////////////////
     bool IsSelected( unsigned int nId )
     {
         std::map<int,bool>::iterator it = m_mSelected.find( nId );
@@ -198,6 +209,7 @@ class GLWindow : public Fl_Gl_Window, public boost::mutex
         return m_mSelected[nId];
     }
 
+    /////////////////////////////////////////////////////////////////////////////////
 	GLObject* SelectedObject()
     {
 		std::map<int,bool>::iterator it;
@@ -209,6 +221,7 @@ class GLWindow : public Fl_Gl_Window, public boost::mutex
 		return NULL;
 	}
 
+    /////////////////////////////////////////////////////////////////////////////////
     unsigned int SelectedId()
     {
 		std::map<int,bool>::iterator it;
@@ -220,6 +233,7 @@ class GLWindow : public Fl_Gl_Window, public boost::mutex
 		return INT_MAX;
 	}
 
+    /////////////////////////////////////////////////////////////////////////////////
     unsigned int AllocSelectionId( GLObject* pObj )
     {
         int nId = m_nSelectionId++;
@@ -228,16 +242,19 @@ class GLWindow : public Fl_Gl_Window, public boost::mutex
     }
 
 
+    /////////////////////////////////////////////////////////////////////////////////
     void SetSelected( unsigned int nId )
     {
         m_mSelected[ nId ] = true;
     }
 
+    /////////////////////////////////////////////////////////////////////////////////
     void UnSelect( unsigned int nId )
     {
         m_mSelected[ nId ] = false;
     }
 
+    /////////////////////////////////////////////////////////////////////////////////
     /// Main function called by FLTK to draw the scene.
     void draw() {
 
@@ -318,12 +335,12 @@ class GLWindow : public Fl_Gl_Window, public boost::mutex
         glMatrixMode( GL_MODELVIEW );
         glFlush();
         GLint nHits = glRenderMode( GL_RENDER );
-        ProcessHits( nHits, vSelectBuf );
+        _ProcessHits( nHits, vSelectBuf );
 
     }
 
     /////////////////////////////////////////////////////////////////////////////////
-    void ProcessHits( GLint hits, GLuint buffer[] )
+    void _ProcessHits( GLint hits, GLuint buffer[] )
     {
         unsigned int i, j;
         GLuint names, *ptr;
@@ -388,18 +405,23 @@ class GLWindow : public Fl_Gl_Window, public boost::mutex
         m_dPosUnderCursor << posX, posY, posZ;
     }
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////
     // handle input events
     int handle( int e );
 
-	// function called to update objects
-	void Update();
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    // function called to update objects
+    void Update();
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////
     // function handles input when in normal FPS mode
     int HandleNavInput( int e );
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////
     // function handles input when in selection mode
     int HandleSelectionInput( int e );
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////
 	// Add new object to scene graph
     void RegisterObject( GLObject* pObj )
     {
@@ -413,10 +435,17 @@ class GLWindow : public Fl_Gl_Window, public boost::mutex
 		unlock();
     }
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////
     GLObject* GetObject( unsigned int nId )
     {
         printf("m_vSceneGraph[%d] = %d\n", nId, m_vSceneGraph[nId]->Id() );
         return m_vSceneGraph[nId];
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    int Run()
+    {
+        return( Fl::run() );
     }
 
     private:
@@ -444,45 +473,54 @@ class GLWindow : public Fl_Gl_Window, public boost::mutex
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
-/// Certain GLObject code has to be implemented here, after GLWindow.
+/// Certain GLObject code has to be implemented here, after GLWindow.  E.g., code that access 
+// the window member variable.
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
+///////////////////////////////////////////////////////////////////////////////////////////////
 inline int GLObject::WindowWidth()
 {
     return m_pWin->w();
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////
 inline int GLObject::WindowHeight()
 {
     return m_pWin->h();
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////
 inline bool GLObject::IsSelected( unsigned int nId )
 {
     return m_pWin->IsSelected( nId );
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////
 inline void GLObject::UnSelect( unsigned int nId )
 {
     m_pWin->UnSelect( nId );
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////
 inline unsigned int GLObject::AllocSelectionId()
 {
 	unsigned int nId =  m_pWin->AllocSelectionId( this );
     return nId;
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////
 inline Eigen::Vector3d GLObject::GetPosUnderCursor()
 {
 	return m_pWin->GetPosUnderCursor();
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////
 inline Eigen::Vector2i GLObject::GetCursorPos()
 {
 	return m_pWin->GetCursorPos();
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////
 inline bool GLObject::valid()
 {
     if( m_pWin && m_pWin->valid() ) {
