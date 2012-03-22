@@ -12,6 +12,7 @@ find_package( FLTK REQUIRED )
 find_package( CVARS REQUIRED )
 find_package( OpenGL REQUIRED )
 find_package( ASSIMP REQUIRED )
+find_package( Eigen3 REQUIRED )
 
 set( SimpleGui_HEADERS
         GLWindow.h
