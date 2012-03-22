@@ -14,6 +14,12 @@ find_package( OpenGL REQUIRED )
 find_package( ASSIMP REQUIRED )
 find_package( Eigen3 REQUIRED )
 
+set( SimpleGui_SOURCES
+        GLWindow.cpp
+        GLObject.cpp
+        GLSceneGraph.cpp
+   )
+
 set( SimpleGui_HEADERS
         GLWindow.h
         GLHelpers.h
@@ -25,7 +31,7 @@ set( SimpleGui_HEADERS
 
 # set for "export_library", below 
 set( SimpleGui_INCLUDE_DIRS
-        ${CMAKE_CURRENT_SOURCE_DIR}
+        ${CMAKE_CURRENT_SOURCE_DIR}/..
         ${CVARS_INCLUDE_DIR} 
         ${FLTK_INCLUDE_DIR} 
         ${EIGEN3_INCLUDE_DIR}
@@ -41,6 +47,10 @@ set( SimpleGui_LIBRARIES
         ${ASSIMP_LIBRARIES}
         ${Boost_THREAD_LIBRARY}
    )
+
+include_directories( ${SimpleGui_INCLUDE_DIRS} )
+add_library( SimpleGui ${SimpleGui_SOURCES} ${SimpleGui_SOURCES} )
+target_link_libraries( SimpleGui ${SimpleGui_LIBRARIES} )
 
 # If set, this will use global variables SimpleGui_INCLUDE_DIRS and SimpleGui_LIBRARIES 
 # and will write a SimpleGuiConfig.cmake file with these values filled in.

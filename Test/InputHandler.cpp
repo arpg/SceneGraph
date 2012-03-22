@@ -1,7 +1,7 @@
 
 // here you fill out the core callback GLWindow::handle( int e ) to you hearts delight
 
-#include "GLWindow.h"
+#include <SimpleGui/GLWindow.h>
 
 ////////////////////////////////////////////////////////////////////////////
 int GLWindow::HandleNavInput( int e )

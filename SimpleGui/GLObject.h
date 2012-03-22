@@ -1,18 +1,18 @@
 #ifndef _GL_OBJECT_
 #define _GL_OBJECT_
 
+#include <Eigen/Eigen>
+
 class GLWindow;
 
 #include <string>
+#include <vector>
 
 class GLObject
 {
     public:
 
-        GLObject()
-        {
-            m_bVisible = true;
-        }
+        GLObject();
 
         // User supplied gl drawing routine
 		virtual void draw() = 0;
@@ -23,20 +23,33 @@ class GLObject
 
 		virtual void release() {}
 
-        // set the parent window pointer
-        void init( GLWindow* pWin )
-        {
-            m_pWin = pWin;
-        }
+        GLWindow* Window();
+
+        void SetVisible();
+
+        void SetInVisible();
+
+        bool IsVisible();
+
+        void SetName( const std::string& sName );
+        
+        const char* ObjectName();
+
+        void SetId( unsigned int nId );
+
+        unsigned int Id();
+
+        /// set the parent window pointer
+        void InitWindowPtr( GLWindow* pWin );
 
 		// Check if window is valid
-		bool valid();
+		bool valid(); 
 
         /// Get parent window width.
-		int WindowWidth();
+		int WindowWidth(); 
 
         /// Get parent window height.
-        int WindowHeight();
+        int WindowHeight(); 
 
         /// If the name nId is selected
         bool IsSelected( unsigned int nId );
@@ -44,54 +57,28 @@ class GLObject
         /// Unselect name nId
         void UnSelect( unsigned int nId );
 
-        unsigned int AllocSelectionId();
+        unsigned int AllocSelectionId(); 
 
         Eigen::Vector3d GetPosUnderCursor();
 
-		Eigen::Vector2i GetCursorPos();
+		Eigen::Vector2i GetCursorPos(); 
 
-        void SetVisible()
-        {
-            m_bVisible = true;
-        }
+        void AddChild( GLObject* pChild ); 
 
-        void SetInVisible()
-        {
-            m_bVisible = false;
-        }
-
-        bool IsVisible()
-        {
-            return m_bVisible;
-        }
-
-        void SetName( const std::string& sName )
-        {
-            m_sObjectName = sName;
-        }
-
-        const char* ObjectName()
-        {
-            return m_sObjectName.c_str();
-        }
-
-        void SetId( unsigned int nId )
-        {
-            m_nId = nId;
-        }
-
-        unsigned int Id()
-        {
-            return m_nId;
-        }
-
-    protected:
-        std::string     m_sObjectName;
+        std::vector< GLObject* >  m_vpChildren;
 
     private:
-        unsigned int    m_nId;          // Object handle
-        GLWindow*  		m_pWin; 		//< The window the object belongs to
-        bool            m_bVisible;
+        void  _RecursivelyInitObjects( GLObject* pObj, GLWindow* pWin );
+
+    protected:
+        std::string               m_sObjectName;
+        GLObject*                 m_pParent;
+
+    private:
+        unsigned int              m_nId;      //< Object handle
+        GLWindow*                 m_pWin;     //< The window the object belongs to
+        bool                      m_bVisible;
+
 };
 
 

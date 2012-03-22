@@ -1,8 +1,5 @@
 
-#include "GLWindow.h"
-#include "GLGrid.h"
-#include "GLText.h"
-#include "GLMesh.h"
+#include <SimpleGui/Gui.h>
 #include "GetPot"
 
 
@@ -29,8 +26,8 @@ int main( int argc, char** argv )
     mesh.Init( pScene );
 
 	// register objects
-	pWin->RegisterObject( &grid );
-    pWin->RegisterObject( &mesh );
+	pWin->AddChildToRoot( &grid );
+    pWin->AddChildToRoot( &mesh );
 
     return( pWin->Run() );
 }
