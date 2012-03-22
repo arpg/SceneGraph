@@ -2,9 +2,6 @@
 // here you fill out the core callback GLWindow::handle( int e ) to you hearts delight
 
 #include "GLWindow.h"
-#include "GLGrid.h"
-#include "GLText.h"
-#include "GLMesh.h"
 
 ////////////////////////////////////////////////////////////////////////////
 int GLWindow::HandleNavInput( int e )
