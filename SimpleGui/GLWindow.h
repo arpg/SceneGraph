@@ -9,6 +9,8 @@
 #include <FLConsole/FLConsole.h>
 #include <CVars/CVar.h>
 
+#undef Success
+
 #include <Eigen/Eigen>
 
 #include <boost/thread.hpp>

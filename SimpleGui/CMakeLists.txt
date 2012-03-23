@@ -27,6 +27,7 @@ set( SimpleGui_HEADERS
         GLMesh.h
         GLText.h
         GLGrid.h
+        SceneGraphListener.h
    )
 
 # set for "export_library", below 

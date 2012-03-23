@@ -20,6 +20,13 @@ void GLSceneGraph::Reset()
 /////////////////////////////////////////////////////////////////////////////////
 void GLSceneGraph::draw() 
 {
+    // Pass this event to any and all scene graph listeners who may be, well, listening
+    std::vector<SceneGraphListener*>::iterator it;
+    for ( it = m_sceneGraphListeners.begin(); it != m_sceneGraphListeners.end(); it++ )
+    {
+        (*it)->OnSceneGraphDrawn();
+    }
+
     // try to draw all children
     for( size_t ii = 0; ii < m_vpChildren.size(); ii++ ){
         _RecursiveDraw( m_vpChildren[ii] );
@@ -55,4 +62,7 @@ void GLSceneGraph::_RecursiveDraw( GLObject* pObj )
     }
 }
 
-
+void GLSceneGraph::RegisterSceneGraphListener( SceneGraphListener *pSceneGraphListener )
+{
+    m_sceneGraphListeners.push_back( pSceneGraphListener );
+}
