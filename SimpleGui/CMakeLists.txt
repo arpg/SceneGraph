@@ -1,5 +1,5 @@
 project( SimpleGui )
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required( VERSION 2.8 )
 
 # scoop up our macros
 include( Common.cmake )
@@ -32,24 +32,25 @@ set( SimpleGui_HEADERS
 # set for "export_library", below 
 set( SimpleGui_INCLUDE_DIRS
         ${CMAKE_CURRENT_SOURCE_DIR}/..
-        ${CVARS_INCLUDE_DIR} 
-        ${FLTK_INCLUDE_DIR} 
-        ${EIGEN3_INCLUDE_DIR}
-        ${ASSIMP_INCLUDE_DIR}
         ${BOOST_INCLUDE_DIR}
+        ${FLTK_INCLUDE_DIR}
+        ${CVARS_INCLUDE_DIR}
+	${OPENGL_INCLUDE_DIR}
+        ${ASSIMP_INCLUDE_DIR}
+        ${EIGEN3_INCLUDE_DIR}
    )
 
 # set for "export_library", below 
 set( SimpleGui_LIBRARIES
-        ${OPENGL_LIBRARIES} 
-        ${FLTK_LIBRARIES} 
-        ${CVARS_LIBRARIES} 
-        ${ASSIMP_LIBRARIES}
         ${Boost_THREAD_LIBRARY}
+        ${FLTK_LIBRARIES}
+        ${CVARS_LIBRARIES}
+        ${OPENGL_LIBRARIES}
+        ${ASSIMP_LIBRARIES}
    )
 
 include_directories( ${SimpleGui_INCLUDE_DIRS} )
-add_library( SimpleGui ${SimpleGui_SOURCES} ${SimpleGui_SOURCES} )
+add_library( SimpleGui ${SimpleGui_SOURCES} ${SimpleGui_HEADERS} )
 target_link_libraries( SimpleGui ${SimpleGui_LIBRARIES} )
 
 # If set, this will use global variables SimpleGui_INCLUDE_DIRS and SimpleGui_LIBRARIES 

@@ -224,6 +224,9 @@ class GLMesh : public GLObject
             }
         }
 
+        // Getters and setters
+        const struct aiScene *GetScene( void ) { return m_pScene; }
+
     private:
         const struct aiScene*   m_pScene;
 };
