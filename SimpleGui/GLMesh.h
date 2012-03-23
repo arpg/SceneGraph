@@ -1,12 +1,11 @@
 #ifndef _GL_MESH_H_
 #define _GL_MESH_H_
 
-#include "GLObject.h"
-//#include "AssetLoader.h"
+#include <SimpleGui/GLObject.h>
 
-#include "assimp/assimp.h"
-#include "assimp/aiPostProcess.h"
-#include "assimp/aiScene.h"
+#include <assimp/assimp.h>
+#include <assimp/aiPostProcess.h>
+#include <assimp/aiScene.h>
 
 //#define aisgl_min(x,y) (x<y?x:y)
 //#define aisgl_max(x,y) (y>x?y:x)

@@ -1,7 +1,7 @@
 #ifndef _GL_GRID_H_
 #define _GL_GRID_H_
 
-#include "GLObject.h"
+#include <SimpleGui/GLObject.h>
 
 
 /////////////////////////////////////////////////////////////////////////////

@@ -19,10 +19,13 @@ class GLSceneGraph : public GLObject
 
         void draw();
 
+        void ApplyDfsVisitor( void(*pVisitorFunc)(GLObject*) );
+
         void RegisterSceneGraphListener( SceneGraphListener *pSceneGraphListener );
 
     private:
         void _RecursiveDraw( GLObject* pObj );
+        void _RecursiveVisit( void(*pVisitorFunc)(GLObject*), GLObject* pObj );
 
     private:
         std::vector<SceneGraphListener*> m_sceneGraphListeners;

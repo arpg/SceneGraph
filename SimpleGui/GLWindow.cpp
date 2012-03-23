@@ -1,5 +1,5 @@
 
-#include "GLWindow.h"
+#include <SimpleGui/GLWindow.h>
 
 /////////////////////////////////////////////////////////////////////////////////
 /// timer callback drives animation and forces drawing at 20 hz
@@ -42,6 +42,13 @@ GLWindow::GLWindow(int x,int y,int w,int h,const char *l ) : Fl_Gl_Window(x,y,w,
     end();
     resizable( this );
     show();
+}
+
+
+/////////////////////////////////////////////////////////////////////////////////
+void GLWindow::AddFrameListner( void(*f)(void) )
+{
+    m_vListners.push_back( f );
 }
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -204,6 +211,12 @@ void GLWindow::draw() {
     _DoPicking();
 
     CheckForGLErrors();
+
+    // call all the frame listners
+    for( size_t ii = 0; ii < m_vListners.size(); ii++ ){
+        (*m_vListners[ii])(); 
+    }
+
 }
 
 
@@ -281,8 +294,15 @@ Eigen::Vector3d GLWindow::GetPosUnderCursor()
 }
 
 /////////////////////////////////////////////////////////////////////////////////
+Eigen::Vector3d GLWindow::GetNormalUnderCursor()
+{
+    return m_dNormalUnderCursor;
+}
+
+/////////////////////////////////////////////////////////////////////////////////
 void GLWindow::_UpdatePosUnderCursor()
 {
+    /*
     int x = Fl::event_x();
     int y = Fl::event_y();
     GLint viewport[4];
@@ -303,6 +323,60 @@ void GLWindow::_UpdatePosUnderCursor()
     gluUnProject( winX, winY, winZ, modelview, projection, viewport, &posX, &posY, &posZ);
 
     m_dPosUnderCursor << posX, posY, posZ;
+    */
+    m_nMouseX = Fl::event_x();
+    m_nMouseY = Fl::event_y();
+
+    GLint viewport[4];
+    GLdouble modelview[16];
+    GLdouble projection[16];
+    GLfloat winX, winY;//, winZ;
+    //GLdouble posX1, posY1, posZ1;
+    //GLdouble posX2, posY2, posZ2;
+
+    glGetDoublev( GL_MODELVIEW_MATRIX, modelview );
+    glGetDoublev( GL_PROJECTION_MATRIX, projection );
+    glGetIntegerv( GL_VIEWPORT, viewport );
+
+    /*
+       winX = (float)x;
+       winY = (float)viewport[3] - (float)y;
+
+       glReadPixels( x, int(winY), 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &winZ );
+
+       std::cout << "Z is " << winZ << std::endl;
+
+       gluUnProject( winX, winY, winZ, modelview, projection, viewport, &posX, &posY, &posZ);
+     */
+
+    const int nPatchWidth = 3;
+    const int nPatchHeight = 3;
+
+    float vPatch[ nPatchWidth ][ nPatchHeight ];
+    winX = (float)m_nMouseX;
+    winY = (float)viewport[3] - (float)m_nMouseY;
+    glReadPixels( winX-nPatchWidth/2, int(winY)-nPatchHeight/2, nPatchWidth, nPatchHeight, GL_DEPTH_COMPONENT, GL_FLOAT, (float*)&vPatch[0][0] );
+
+    Eigen::Vector3d Vec1;
+    Eigen::Vector3d Vec2;
+    Eigen::Vector3d VecA;
+    Eigen::Vector3d VecB;
+
+    int uL = 0, uM = nPatchWidth/2, uR = nPatchWidth - 1;
+    int vT = 0, vM = nPatchHeight/2, vB = nPatchHeight - 1;
+    gluUnProject( winX - nPatchWidth/2, winY, vPatch[vM][uL], modelview, projection, viewport, &Vec1[0], &Vec1[1], &Vec1[2] );
+    gluUnProject( winX + nPatchWidth/2, winY, vPatch[vM][uR], modelview, projection, viewport, &Vec2[0], &Vec2[1], &Vec2[2] );
+    VecA = Vec2 - Vec1;
+
+    gluUnProject( winX, winY - nPatchHeight/2, vPatch[vT][uM], modelview, projection, viewport, &Vec1[0], &Vec1[1], &Vec1[2] );
+    gluUnProject( winX, winY + nPatchHeight/2, vPatch[vB][uM], modelview, projection, viewport, &Vec2[0], &Vec2[1], &Vec2[2] );
+    VecB = Vec2 - Vec1;
+
+    m_dNormalUnderCursor = VecA.cross(VecB);
+    m_dNormalUnderCursor = m_dNormalUnderCursor/m_dNormalUnderCursor.norm();
+
+    gluUnProject( winX, winY, vPatch[vM][uM], modelview, projection, viewport, &m_dPosUnderCursor[0], &m_dPosUnderCursor[1], &m_dPosUnderCursor[2] );
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////

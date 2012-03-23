@@ -3,16 +3,89 @@
  *
  *  $Id: GLHelpers.h 177 2010-04-18 23:40:37Z effer $
  */ 
- 
+
 #ifndef _GLHELPERS_H_
 #define _GLHELPERS_H_
+
+#ifdef HAVE_APPLE_OPENGL_FRAMEWORK
+#    include <GL/glew.h>
+#    include <GL/glext.h>
+#    include <OpenGL/gl.h>
+#    include <OpenGL/glu.h>
+#    include <GLUT/glut.h>
+#else
+#    include <GL/glew.h>
+#    include <GL/glext.h>
+#    include <GL/gl.h>
+#    include <GL/glu.h>
+#    include <GL/glut.h>
+#endif
 
 #include <Fl/gl.h>
 #include <FL/glu.h>
 
-#include <math.h>
+#include <iostream>
+#include <unistd.h>
 #include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
+#include <vector>
 #include <string>
+#include <Eigen/Core>
+#include <Eigen/LU>
+
+//////////////////////////////////////////////////////////////////////////////                       
+// Extract current camera pose from opengl in the Robotics Coordinate frame convention               
+inline Eigen::Matrix4d GLGetCameraPose()                                                             
+{
+    Eigen::Matrix<double,4,4,Eigen::ColMajor> M; // for opengl                                       
+    glGetDoublev( GL_MODELVIEW_MATRIX, M.data() );                                                   
+
+    Eigen::Matrix3d gl2v;                                                                            
+    gl2v << 0,0,-1,  1,0,0,  0,-1,0;                                                                 
+
+    Eigen::Vector3d xyz = -M.block<3,3>(0,0).transpose()*M.block<3,1>(0,3);                          
+    //    Vector3d pqr = R2Cart( gl2v*M.block<3,3>(0,0) );                                               
+
+    Eigen::Matrix4d T;                                                                               
+
+    T.block<3,3>(0,0) = gl2v*M.block<3,3>(0,0);                                                      
+    T.block<3,1>(0,3) = -M.block<3,3>(0,0).transpose()*M.block<3,1>(0,3);                            
+    T.block<1,4>(3,0) << 0, 0, 0, 1;                                                                 
+
+    return T;
+}
+
+
+
+///////////////////////////////////////////////////////////////////////////////                      
+/// Convert opengl projection matrix into computer vision K matrix
+inline Eigen::Matrix3d GLGetProjectionMatrix()
+{                                                                                                    
+    Eigen::Matrix<double,4,4,Eigen::ColMajor> P; // for opengl                                       
+    glGetDoublev( GL_PROJECTION_MATRIX, P.data() );                                                  
+    GLint vViewport[4];
+    glGetIntegerv( GL_VIEWPORT, vViewport );                                                         
+
+    //    fovy = 2*atan( h/2/f );
+    //    f = tan(fovy/2)/(h/2)
+
+    Eigen::Matrix3d K;
+    K(0,0) = P(0,0); // P00 = 1/tan(fov/2) ==> fx = P00                                              
+    K(0,1) = 0.0; // sx                                                                              
+    K(0,2) = vViewport[2]/2.0; // cx                                                                 
+    K(1,0) = 0.0;
+    K(1,1) = P(1,1); // fy
+    K(1,2) = vViewport[3]/2.0; // cy                                                                 
+    K(2,0) = 0.0;
+    K(2,1) = 0.0;
+    K(2,2) = 1.0;                                                                                    
+
+    //    cout << P(0,0) * vViewport[2]/(double)vViewport[3] << endl;                                    
+    //    cout << "K:\n" << K <<  endl << endl;                                                          
+
+    return K;
+} 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///  If a GL error has occurred, this function outputs "msg" and the

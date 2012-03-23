@@ -1,6 +1,8 @@
 #ifndef _GLWINDOW_H_
 #define _GLWINDOW_H_
 
+#include <SimpleGui/GLHelpers.h>
+
 #include <FL/Fl.H>
 #include <FL/Fl_Gl_Window.H>
 #include <FL/gl.h>
@@ -112,12 +114,19 @@ class GLWindow : public Fl_Gl_Window, public boost::mutex
 
     /// Constructor.
     GLWindow(int x,int y,int w,int h,const char *l=0);
+
+    // allow users to register frame listeners
+    void AddFrameListner( void(*f)(void) );
+
     // position the camera at "origin"
     void ResetCamera();
+
     // bird's eye view
     void CameraOrtho();
+
     // Reset clear all registered objects
     void Reset();
+
     /// Init OpenGL
     void Init();
     bool IsSelected( unsigned int nId );
@@ -126,10 +135,13 @@ class GLWindow : public Fl_Gl_Window, public boost::mutex
     unsigned int AllocSelectionId( GLObject* pObj );
     void SetSelected( unsigned int nId );
     void UnSelect( unsigned int nId );
+
     /// Main function called by FLTK to draw the scene.
     void draw();
     Eigen::Vector2i GetCursorPos();
     Eigen::Vector3d GetPosUnderCursor();
+    Eigen::Vector3d GetNormalUnderCursor();
+
     // handle input events
     int handle( int e );
     // function handles input when in normal FPS mode
@@ -147,6 +159,9 @@ class GLWindow : public Fl_Gl_Window, public boost::mutex
     GLSceneGraph& SceneGraph();
 
     private:
+    int                             m_nMouseX;
+    int                             m_nMouseY;
+
 
     void  _RecursivelyInitObjects( GLObject* pObj );
     void _DoPicking();
@@ -169,6 +184,7 @@ class GLWindow : public Fl_Gl_Window, public boost::mutex
     FLConsoleInstance 	   			m_Console;
 
     Eigen::Vector3d                 m_dPosUnderCursor;
+    Eigen::Vector3d                 m_dNormalUnderCursor;
 
     eGuiMode                        m_eGuiMode;
 
@@ -177,6 +193,9 @@ class GLWindow : public Fl_Gl_Window, public boost::mutex
     GLObject*                       m_pSelectedObject;
 
     GLSceneGraph                    m_SceneGraph;
+
+    std::vector<void(*)(void)>      m_vListners;
+
 };
 
 #endif

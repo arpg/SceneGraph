@@ -1,6 +1,6 @@
-#include "GLObject.h"
-#include "GLSceneGraph.h"
-#include "GLWindow.h"
+#include <SimpleGui/GLObject.h>
+#include <SimpleGui/GLSceneGraph.h>
+#include <SimpleGui/GLWindow.h>
 
 extern std::map<int,GLObject*>   g_mObjects; // map of id to objects
 
@@ -53,7 +53,7 @@ void GLSceneGraph::_RecursiveDraw( GLObject* pObj )
         Window()->unlock();
     }
     else{
-        printf("NOT Drawing %s\n", pObj->ObjectName() );
+//        printf("NOT Drawing %s\n", pObj->ObjectName() );
     }
 
     // try to draw all children
@@ -62,7 +62,28 @@ void GLSceneGraph::_RecursiveDraw( GLObject* pObj )
     }
 }
 
+/////////////////////////////////////////////////////////////////////////////////
+void GLSceneGraph::_RecursiveVisit( void(*pVisitorFunc)(GLObject*), GLObject* pObj )
+{
+    (*pVisitorFunc)( pObj );
+    // try to draw all children
+    for( size_t ii = 0; ii < m_vpChildren.size(); ii++ ){
+        _RecursiveVisit( pVisitorFunc, m_vpChildren[ii] );
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////////
+void GLSceneGraph::ApplyDfsVisitor( void(*pVisitorFunc)(GLObject*) )
+{
+    // try to draw all children
+    for( size_t ii = 0; ii < m_vpChildren.size(); ii++ ){
+        _RecursiveVisit( pVisitorFunc, m_vpChildren[ii] );
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////////
 void GLSceneGraph::RegisterSceneGraphListener( SceneGraphListener *pSceneGraphListener )
 {
     m_sceneGraphListeners.push_back( pSceneGraphListener );
 }
+

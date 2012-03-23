@@ -123,21 +123,21 @@ macro( export_library LibName )
     file( WRITE ${LibName}Config.cmake.in "# automatically generated ${LibName}.cmake.in file\n" )
     if( NOT "${${LibName}_LIBRARIES}" STREQUAL "" )
         file( APPEND ${LibName}Config.cmake.in 
-                "SET( ${LibName}_LIBRARIES  @${LibName}_LIBRARIES@ CACHE INTERNAL "
+                "SET( ${LibName}_LIBRARIES  \@${LibName}_LIBRARIES\@ CACHE INTERNAL "
                 "\"${LibName} libraries\" FORCE )\n"
                 "mark_as_advanced( ${LibName}_LIBRARIES )\n"
             )
     endif()
     if( NOT "${${LibName}_INCLUDE_DIRS}" STREQUAL "" )
         file( APPEND ${LibName}Config.cmake.in 
-            "SET( ${LibName}_INCLUDE_DIRS  @${LibName}_INCLUDE_DIRS@ CACHE INTERNAL "
+            "SET( ${LibName}_INCLUDE_DIRS  \@${LibName}_INCLUDE_DIRS\@ CACHE INTERNAL "
             "\"${LibName} include directories\" FORCE )\n"
             "mark_as_advanced( ${LibName}_INCLUDE_DIRS )\n"
         )
     endif()
     if( NOT "${${LibName}_LIBRARY_DIRS}" STREQUAL "" )
         file( APPEND ${LibName}Config.cmake.in 
-           "SET( ${LibName}_LIBRARY_DIRS  @${LibName}_LIBRARY_DIRS@ CACHE INTERNAL "
+           "SET( ${LibName}_LIBRARY_DIRS  \@${LibName}_LIBRARY_DIRS\@ CACHE INTERNAL "
            "\"${LibName} library directories\" FORCE )\n"
            "mark_as_advanced( ${LibName}_LIBRARY_DIRS )\n"
            )
