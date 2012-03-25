@@ -14,3 +14,11 @@ projects can just call find_package( SimpelGui ) to set SimpleGui_INCLUDE_DIRS
 and SimpleGui_LIBRARIES (which includes all of SimpleGui's dependencies as 
 well).
 
+
+Dependencies:
+FLTK
+CVARS (via glconsole from sf.net)
+OpenGL
+ASSIMP
+Eigen3
+
