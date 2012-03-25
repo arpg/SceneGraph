@@ -1,5 +1,5 @@
 #include <SimpleGui/Gui.h> // simple OpenGL scene graph using FLTK 
-#include "GetPot" // for friendy command line parsing
+#include <SimpleGui/GetPot> // for friendy command line parsing
 
 int main( int argc, char** argv )
 {

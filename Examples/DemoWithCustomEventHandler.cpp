@@ -1,5 +1,5 @@
 #include <SimpleGui/Gui.h> // simple OpenGL scene graph using FLTK 
-#include "GetPot" // for friendy command line parsing
+#include <SimpleGui/GetPot> // for friendy command line parsing
 
 // Compare to Demo.cpp
 
@@ -20,7 +20,7 @@ private:
         // Here we let GLWindow::SimpleDefaultEventHandler handle the event...
         // Typically you would replace this with your own logic (though
         // SimpleDefaultEventHandler is a starting point that can serve as a
-        // nice exampe.
+        // nice example.
         return SimpleDefaultEventHandler( e ); 
     }
 };
