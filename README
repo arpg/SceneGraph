@@ -17,7 +17,7 @@ well).
 
 Dependencies:
 FLTK
-CVARS (via glconsole from sf.net)
+CVARS (svn co https://glconsole.svn.sourceforge.net/svnroot/glconsole glconsole)
 OpenGL
 ASSIMP
 Eigen3
