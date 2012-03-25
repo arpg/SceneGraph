@@ -67,8 +67,8 @@ void GLSceneGraph::_RecursiveVisit( void(*pVisitorFunc)(GLObject*), GLObject* pO
 {
     (*pVisitorFunc)( pObj );
     // try to draw all children
-    for( size_t ii = 0; ii < m_vpChildren.size(); ii++ ){
-        _RecursiveVisit( pVisitorFunc, m_vpChildren[ii] );
+    for( size_t ii = 0; ii < pObj->m_vpChildren.size(); ii++ ){
+        _RecursiveVisit( pVisitorFunc, pObj->m_vpChildren[ii] );
     }
 }
 

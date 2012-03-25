@@ -14,6 +14,10 @@ class GLMesh : public GLObject
 {
 
     public:
+        GLMesh()
+        {
+            m_sObjectName = "Mesh";
+        }
 
         ////////////////////////////////////////////////////////////////////////////
         void Init( const struct aiScene* pScene )
@@ -30,7 +34,7 @@ class GLMesh : public GLObject
             f[3] = c->a;
         }
 
-        // ----------------------------------------------------------------------------
+        ////////////////////////////////////////////////////////////////////////////
         void set_float4(float f[4], float a, float b, float c, float d)
         {
             f[0] = a;

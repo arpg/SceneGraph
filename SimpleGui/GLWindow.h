@@ -151,9 +151,8 @@ class GLWindow : public Fl_Gl_Window, public boost::mutex
 
     GLSceneGraph& SceneGraph();
 
-    void AddPreRenderCallback( void(*f)(void) );
-
-    void AddPostRenderCallback( void(*f)(void) );
+    void AddPreRenderCallback( void(*f)(GLWindow*) );
+    void AddPostRenderCallback( void(*f)(GLWindow*) );
 
     // event handlers -- these can serve as examples
     virtual int handle( int e ); // inherit and override if you want
@@ -197,8 +196,8 @@ class GLWindow : public Fl_Gl_Window, public boost::mutex
 
     GLSceneGraph                    m_SceneGraph;
 
-    std::vector<void(*)(void)>      m_vPreRenderCallbacks;
-    std::vector<void(*)(void)>      m_vPostRenderCallbacks;
+    std::vector<void(*)(GLWindow*)>      m_vPreRenderCallbacks;
+    std::vector<void(*)(GLWindow*)>      m_vPostRenderCallbacks;
 
 };
 

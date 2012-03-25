@@ -13,6 +13,7 @@ find_package( CVARS REQUIRED )
 find_package( OpenGL REQUIRED )
 find_package( ASSIMP REQUIRED )
 find_package( Eigen3 REQUIRED )
+find_package( GLEW REQUIRED )
 
 set( SimpleGui_SOURCES
         GLWindow.cpp
@@ -36,7 +37,8 @@ set( SimpleGui_INCLUDE_DIRS
         ${BOOST_INCLUDE_DIR}
         ${FLTK_INCLUDE_DIR}
         ${CVARS_INCLUDE_DIR}
-	${OPENGL_INCLUDE_DIR}
+    	${OPENGL_INCLUDE_DIR}
+        ${GLEW_INCLUDE_DIR}
         ${ASSIMP_INCLUDE_DIR}
         ${EIGEN3_INCLUDE_DIR}
    )
@@ -47,6 +49,7 @@ set( SimpleGui_LIBRARIES
         ${FLTK_LIBRARIES}
         ${CVARS_LIBRARIES}
         ${OPENGL_LIBRARIES}
+        ${GLEW_LIBRARIES}
         ${ASSIMP_LIBRARIES}
    )
 

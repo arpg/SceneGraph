@@ -14,6 +14,7 @@ class GLText : public GLObject
 		GLText()
         {
 			InitReset();
+            m_sObjectName = "Text";
         }
 
 		void InitReset()

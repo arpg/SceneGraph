@@ -9,6 +9,11 @@ class GLGrid : public GLObject
 {
     public:
 
+        GLGrid()
+        {
+            m_sObjectName = "Grid";
+        }
+
         // from mvl dispview
         void draw(void)
         {

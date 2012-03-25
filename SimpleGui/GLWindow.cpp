@@ -157,7 +157,7 @@ void GLWindow::draw() {
 
     // call reistered Pre-draw frame listeners
     for( size_t ii = 0; ii < m_vPreRenderCallbacks.size(); ii++ ){
-        (*m_vPreRenderCallbacks[ii])();
+        (*m_vPreRenderCallbacks[ii])(this);
     }
 
     // Clear
@@ -191,7 +191,7 @@ void GLWindow::draw() {
 
     // call all the Post-draw frame listners
     for( size_t ii = 0; ii < m_vPostRenderCallbacks.size(); ii++ ){
-        (*m_vPostRenderCallbacks[ii])(); 
+        (*m_vPostRenderCallbacks[ii])(this); 
     }
 
 }
@@ -387,13 +387,13 @@ GLSceneGraph& GLWindow::SceneGraph()
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
-void GLWindow::AddPreRenderCallback( void(*f)(void) )
+void GLWindow::AddPreRenderCallback( void(*f)(GLWindow*) )
 {
     m_vPreRenderCallbacks.push_back( f );
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
-void GLWindow::AddPostRenderCallback( void(*f)(void) )
+void GLWindow::AddPostRenderCallback( void(*f)(GLWindow*) )
 {
     m_vPostRenderCallbacks.push_back( f );
 }
