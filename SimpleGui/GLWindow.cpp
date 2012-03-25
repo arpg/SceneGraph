@@ -9,27 +9,6 @@ void GLWindow::_Timer(void *userdata) {
     Fl::repeat_timeout( g_dFPS, _Timer, userdata );
 }
 
-/*
-/////////////////////////////////////////////////////////////////////////////////
-void DrawSceneGraph()
-{
-for( size_t ii = 0; ii < m_vSceneGraph.size(); ii++ ){
-if( m_vSceneGraph[ii]->IsVisible() ){
-if( valid() ){
-lock();
-//            printf("Drawing %s\n", m_vSceneGraph[ii]->ObjectName() );
-CheckForGLErrors();
-m_vSceneGraph[ii]->draw();
-unlock();
-}
-}
-else{
-//                printf("NOT Drawing %s\n", m_vSceneGraph[ii]->ObjectName() );
-}
-}
-}
- */
-
 /////////////////////////////////////////////////////////////////////////////////
 /// Constructor.
 GLWindow::GLWindow(int x,int y,int w,int h,const char *l ) : Fl_Gl_Window(x,y,w,h,l)
@@ -42,13 +21,6 @@ GLWindow::GLWindow(int x,int y,int w,int h,const char *l ) : Fl_Gl_Window(x,y,w,
     end();
     resizable( this );
     show();
-}
-
-
-/////////////////////////////////////////////////////////////////////////////////
-void GLWindow::AddFrameListner( void(*f)(void) )
-{
-    m_vListners.push_back( f );
 }
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -183,6 +155,11 @@ void GLWindow::draw() {
         return;
     }
 
+    // call reistered Pre-draw frame listeners
+    for( size_t ii = 0; ii < m_vPreRenderCallbacks.size(); ii++ ){
+        (*m_vPreRenderCallbacks[ii])();
+    }
+
     // Clear
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
@@ -212,9 +189,9 @@ void GLWindow::draw() {
 
     CheckForGLErrors();
 
-    // call all the frame listners
-    for( size_t ii = 0; ii < m_vListners.size(); ii++ ){
-        (*m_vListners[ii])(); 
+    // call all the Post-draw frame listners
+    for( size_t ii = 0; ii < m_vPostRenderCallbacks.size(); ii++ ){
+        (*m_vPostRenderCallbacks[ii])(); 
     }
 
 }
@@ -270,7 +247,7 @@ void GLWindow::_ProcessHits( unsigned int hits, GLuint buffer[] )
             int nId = *ptr;
             SetSelected( nId );
 
-//            GLObject* pObj = SelectedObject();
+            //            GLObject* pObj = SelectedObject();
             //                printf("set %s as selected\n", pObj->ObjectName() );
 
             ptr++;
@@ -303,27 +280,27 @@ Eigen::Vector3d GLWindow::GetNormalUnderCursor()
 void GLWindow::_UpdatePosUnderCursor()
 {
     /*
-    int x = Fl::event_x();
-    int y = Fl::event_y();
-    GLint viewport[4];
-    GLdouble modelview[16];
-    GLdouble projection[16];
-    GLfloat winX, winY, winZ;
-    GLdouble posX, posY, posZ;
+       int x = Fl::event_x();
+       int y = Fl::event_y();
+       GLint viewport[4];
+       GLdouble modelview[16];
+       GLdouble projection[16];
+       GLfloat winX, winY, winZ;
+       GLdouble posX, posY, posZ;
 
-    glGetDoublev( GL_MODELVIEW_MATRIX, modelview );
-    glGetDoublev( GL_PROJECTION_MATRIX, projection );
-    glGetIntegerv( GL_VIEWPORT, viewport );
+       glGetDoublev( GL_MODELVIEW_MATRIX, modelview );
+       glGetDoublev( GL_PROJECTION_MATRIX, projection );
+       glGetIntegerv( GL_VIEWPORT, viewport );
 
-    winX = (float)x;
-    winY = (float)viewport[3] - (float)y;
-    glReadPixels( x, int(winY), 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &winZ );
+       winX = (float)x;
+       winY = (float)viewport[3] - (float)y;
+       glReadPixels( x, int(winY), 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &winZ );
 
 
-    gluUnProject( winX, winY, winZ, modelview, projection, viewport, &posX, &posY, &posZ);
+       gluUnProject( winX, winY, winZ, modelview, projection, viewport, &posX, &posY, &posZ);
 
-    m_dPosUnderCursor << posX, posY, posZ;
-    */
+       m_dPosUnderCursor << posX, posY, posZ;
+     */
     m_nMouseX = Fl::event_x();
     m_nMouseY = Fl::event_y();
 
@@ -380,22 +357,6 @@ void GLWindow::_UpdatePosUnderCursor()
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
-// handle input events
-//int GLWindow::handle( int e );
-
-///////////////////////////////////////////////////////////////////////////////////////////////
-// function called to update objects
-//void GLWindow::Update();
-
-///////////////////////////////////////////////////////////////////////////////////////////////
-// function handles input when in normal FPS mode
-//int GLWindow::HandleNavInput( int e );
-
-///////////////////////////////////////////////////////////////////////////////////////////////
-// function handles input when in selection mode
-//int GLWindow::HandleSelectionInput( int e );
-
-///////////////////////////////////////////////////////////////////////////////////////////////
 // Add new object to scene graph
 void GLWindow::AddChildToRoot( GLObject* pObj )
 {
@@ -424,4 +385,168 @@ GLSceneGraph& GLWindow::SceneGraph()
 {
     return m_SceneGraph;
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+void GLWindow::AddPreRenderCallback( void(*f)(void) )
+{
+    m_vPreRenderCallbacks.push_back( f );
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+void GLWindow::AddPostRenderCallback( void(*f)(void) )
+{
+    m_vPostRenderCallbacks.push_back( f );
+}
+
+////////////////////////////////////////////////////////////////////////////
+int GLWindow::handle( int e )
+{
+    return SimpleDefaultEventHandler( e );
+}
+
+////////////////////////////////////////////////////////////////////////////
+int GLWindow::SimpleDefaultEventHandler( int e )
+{
+    GLObject* pSelect = SelectedObject();
+    if( pSelect && e == FL_PUSH ){
+        //        printf("%s selected\n", pSelect->ObjectName() );
+        m_eGuiMode = eSelect;
+    }
+
+    switch( m_eGuiMode ){
+        case eConsole:
+            {
+                bool res = m_Console.handle( e );
+                if( !m_Console.IsOpen() ){
+                    m_eGuiMode = eFPSNav;
+                }
+                return res;
+            }
+        case eFPSNav:
+            return HandleNavInput( e );
+        case eSelect:
+            return HandleSelectionInput( e );
+    }
+
+    return false;
+}
+
+
+////////////////////////////////////////////////////////////////////////////
+/// generates first-person style control
+int GLWindow::HandleNavInput( int e )
+{
+    switch( e ){
+        case FL_PUSH:
+            m_nMousePushX = Fl::event_x();
+            m_nMousePushY = Fl::event_y();
+            return 1;
+        case FL_MOUSEWHEEL:
+            {
+                int dy = Fl::event_dy();
+                // move camera along vector from CamPostion to CamTarget
+                Eigen::Vector3d d = m_dCamTarget - m_dCamPosition;
+                d = d / d.norm();
+                if( Fl::event_ctrl() ) {
+                    // up and down
+                    m_dCamTarget   += -dy*m_dCamUp;
+                    m_dCamPosition += -dy*m_dCamUp;
+                } else {
+                    m_dCamPosition = m_dCamPosition - dy*d;
+                    m_dCamTarget = m_dCamPosition + d;
+                }
+                return 1;
+            }
+            break;
+        case FL_DRAG:
+            {
+                int dx = Fl::event_x() - m_nMousePushX;
+                int dy = Fl::event_y() - m_nMousePushY;
+                if( Fl::event_button3() ) {
+                    // "move" the world
+                    double th = std::max( fabs(m_dCamPosition[2] / 100.0), 0.01 ); // move more or less depending on height
+                    Eigen::Vector3d dForward = m_dCamTarget - m_dCamPosition;
+                    dForward = dForward / dForward.norm();
+                    Eigen::Vector3d dLR = dForward.cross(m_dCamUp);
+                    // sideways
+                    m_dCamTarget   += -dx * th*dLR;
+                    m_dCamPosition += -dx * th*dLR;
+                    // re-use "forward"
+                    dForward = m_dCamUp.cross(dLR);
+                    m_dCamTarget   += dy * th*dForward;
+                    m_dCamPosition += dy * th*dForward;
+                } else {
+                    // just aim the camera -- we can write a better UI later...
+                    Eigen::Vector3d dForward = m_dCamTarget - m_dCamPosition;
+                    dForward = dForward / dForward.norm();
+
+                    Eigen::Matrix3d dYaw   = GLCart2R( 0,        0, 0.001 * dx );
+                    Eigen::Matrix3d dPitch = GLCart2R( 0, 0.001 * dy,        0 );
+
+                    dForward = dYaw*dForward;
+                    dForward = dPitch*dForward;
+
+                    m_dCamTarget = m_dCamPosition + dForward;
+                }
+                m_nMousePushX = Fl::event_x();
+                m_nMousePushY = Fl::event_y();
+                return 1;
+            }
+            break;
+        case FL_KEYBOARD:
+            switch( Fl::event_key() ) {
+                case '`':
+                    m_Console.OpenConsole();
+                    m_eGuiMode = eConsole;
+                    break;
+                case FL_F+1:
+                    ResetCamera();
+                    break;
+                case FL_F+2:
+                    CameraOrtho();
+                    break;
+            }
+            return 1;
+            break;
+
+        case FL_KEYUP:
+            switch( Fl::event_key() )
+            {
+                break;
+            }
+            break;
+    }
+    return false;
+}
+
+////////////////////////////////////////////////////////////////////////////
+/// Handles object selection using result of glPicking
+int GLWindow::HandleSelectionInput( int e )
+{
+    m_nMousePushX = Fl::event_x();
+    m_nMousePushY = Fl::event_y();
+    switch ( e ) {
+        case FL_PUSH:
+            {
+                GLObject* pSelect = SelectedObject();
+                if( pSelect ){
+                    pSelect->select( SelectedId() );
+                    m_pSelectedObject = pSelect;
+                }
+            }
+            break;
+        case FL_DRAG:
+            if(m_pSelectedObject){
+                m_pSelectedObject->drag();
+            }
+            break;
+        case FL_RELEASE:
+            m_eGuiMode = eFPSNav;
+            if(m_pSelectedObject){
+                m_pSelectedObject->release();
+            }
+    }
+    return true;
+}
+
 

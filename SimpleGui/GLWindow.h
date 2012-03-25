@@ -142,14 +142,7 @@ class GLWindow : public Fl_Gl_Window, public boost::mutex
     Eigen::Vector3d GetPosUnderCursor();
     Eigen::Vector3d GetNormalUnderCursor();
 
-    // handle input events
-    int handle( int e );
-    // function handles input when in normal FPS mode
-    int HandleNavInput( int e );
-    // function handles input when in selection mode
-    int HandleSelectionInput( int e );
-
-    // Add new object to scene graph
+   // Add new object to scene graph
     void AddChildToRoot( GLObject* pObj );
 
     GLObject* GetObject( unsigned int nId );
@@ -157,6 +150,17 @@ class GLWindow : public Fl_Gl_Window, public boost::mutex
     int Run();
 
     GLSceneGraph& SceneGraph();
+
+    void AddPreRenderCallback( void(*f)(void) );
+
+    void AddPostRenderCallback( void(*f)(void) );
+
+    // event handlers -- these can serve as examples
+    virtual int handle( int e ); // inherit and override if you want
+    int SimpleDefaultEventHandler( int e ); // simple example handler
+    int HandleNavInput( int e );
+    int HandleSelectionInput( int e );
+
 
     private:
     int                             m_nMouseX;
@@ -168,8 +172,7 @@ class GLWindow : public Fl_Gl_Window, public boost::mutex
     void _ProcessHits( unsigned int hits, GLuint buffer[] );
     void _UpdatePosUnderCursor();
 
-
-    private:
+    protected:
     int                             m_nMousePushX;
     int                             m_nMousePushY;
 
@@ -194,7 +197,8 @@ class GLWindow : public Fl_Gl_Window, public boost::mutex
 
     GLSceneGraph                    m_SceneGraph;
 
-    std::vector<void(*)(void)>      m_vListners;
+    std::vector<void(*)(void)>      m_vPreRenderCallbacks;
+    std::vector<void(*)(void)>      m_vPostRenderCallbacks;
 
 };
 
