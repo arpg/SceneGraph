@@ -158,16 +158,20 @@ void _SetupLighting()
     glColorMaterial(GL_FRONT,GL_AMBIENT_AND_DIFFUSE);
     glEnable(GL_NORMALIZE);                                     // normalize normal vectors
 
-    // to check lighting
-    glColor4f( 1, 1, 1, 1 );
-    for( int y = -100; y < 100; y+=10 ){
-        for( int x = -100; x < 100; x+=10 ){
-            glPushMatrix();
-            glTranslatef( x, y, 0 );
-            glutSolidSphere( 2, 32, 32 );
-            glPopMatrix();
+    /*
+    if( g_bDebugLighting ){
+        // to check lighting
+        glColor4f( 1, 1, 1, 1 );
+        for( int y = -100; y < 100; y+=10 ){
+            for( int x = -100; x < 100; x+=10 ){
+                glPushMatrix();
+                glTranslatef( x, y, 0 );
+                glutSolidSphere( 2, 32, 32 );
+                glPopMatrix();
+            }
         }
     }
+    */
 
 }
 
