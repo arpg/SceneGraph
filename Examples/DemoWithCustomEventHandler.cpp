@@ -29,6 +29,7 @@ private:
 ////////////////////////////////////////////////////////////////////////////
 int main( int argc, char** argv )
 {
+    glutInit(&argc, argv);
     GetPot cl(argc,argv);
 
     std::string sMesh = cl.follow( "Ramp.STL", 1, "-mesh" );
