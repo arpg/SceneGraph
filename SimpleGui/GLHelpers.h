@@ -31,6 +31,21 @@
 #include <Eigen/Core>
 #include <Eigen/LU>
 
+#define CheckForGLErrors() _CheckForGLErrors( __FILE__, __LINE__ );
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///  If a GL error has occured, this function outputs "msg" and the
+//   programme exits. To avoid exiting @see WarnForGLErrors.
+inline void _CheckForGLErrors( const char *sFile = NULL, const int nLine = -1 )
+{
+    GLenum glError = glGetError();
+    if( glError != GL_NO_ERROR ) {
+        fprintf( stderr, "ERROR: %s -- %s line %d\n", 
+                (char*)gluErrorString(glError), sFile, nLine );
+        exit( -1 );
+    }
+}
+
 
 //////////////////////////////////////////////////////////////////////////////
 // Extract current camera pose from opengl in the Robotics Coordinate frame convention
@@ -83,22 +98,6 @@ inline Eigen::Matrix3d GLGetProjectionMatrix()
 //    cout << "K:\n" << K <<  endl << endl;
 
     return K;
-}
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-///  If a GL error has occured, this function outputs "msg" and the
-//   programme exits. To avoid exiting @see WarnForGLErrors.
-inline void CheckForGLErrors( const char * msg = NULL )
-{
-    GLenum glError = glGetError();
-    if( glError != GL_NO_ERROR ) {
-        if( msg ) {
-            fprintf( stderr, "%s\n", msg );
-        }
-        fprintf( stderr, "ERROR: %s\n", (char *) gluErrorString(glError) );
-        exit( -1 );
-    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -423,11 +422,160 @@ inline void ReshapeViewport( int w, int h )
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     GLfloat ratio = float(w) / float(h);
-    Perspective( 60.0, 1.0*ratio, 1.0, 100.0 );
+    Perspective( 60.0, 1.0*ratio, 1.0, 1000.0 );
 
     // Model view
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+inline Eigen::Vector4d Vec4( double a, double b, double c, double d )
+{
+        Eigen::Vector4d tmp;
+            tmp << a, b, c, d;
+                return tmp;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+inline void DrawCamera(
+        int nTexWidth,
+        int nTexHeight,
+        int nTexId,
+        Eigen::Matrix4d dModelViewMatrix,
+        Eigen::Matrix4d dProjectionMatrix
+        )
+{
+    // OK 
+    Eigen::Matrix4d M = dProjectionMatrix.inverse();
+    Eigen::Matrix4d T = dModelViewMatrix.inverse();
+
+    Eigen::Vector4d lbn = T*M*Vec4( -1,-1,-1, 1 );  lbn/=lbn[3];
+    Eigen::Vector4d rbn = T*M*Vec4(  1,-1,-1, 1 );  rbn/=rbn[3];
+    Eigen::Vector4d ltn = T*M*Vec4( -1, 1,-1, 1 );  ltn/=ltn[3];
+    Eigen::Vector4d rtn = T*M*Vec4(  1, 1,-1, 1 );  rtn/=rtn[3];
+
+    Eigen::Vector4d lbf = T*M*Vec4( -1,-1, 1, 1 );  lbf/=lbf[3];
+    Eigen::Vector4d rbf = T*M*Vec4(  1,-1, 1, 1 );  rbf/=rbf[3];
+    Eigen::Vector4d ltf = T*M*Vec4( -1, 1, 1, 1 );  ltf/=ltf[3];
+    Eigen::Vector4d rtf = T*M*Vec4(  1, 1, 1, 1 );  rtf/=rtf[3];
+
+    glColor4f( 1,1,1,1 );
+    glColor4f( 1,1,1,1 ); // so GL_MODULATE will just light the texture
+
+    /// Draw texture
+    glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL );
+    glEnable( GL_TEXTURE_RECTANGLE_ARB );
+    glBindTexture( GL_TEXTURE_RECTANGLE_ARB, nTexId );
+
+    glEnable(GL_DEPTH_TEST);
+    glEnable( GL_LIGHTING );
+    glEnable(GL_LIGHT0);
+    glDisable(GL_CULL_FACE );
+
+    glBegin( GL_QUADS );
+    glNormal3f( -1,0,0 );
+    glTexCoord2f(       0.0,       0.0  ); glVertex3dv( lbn.data() );
+    glTexCoord2f( nTexWidth,       0.0  ); glVertex3dv( rbn.data() );
+    glTexCoord2f( nTexWidth, nTexHeight ); glVertex3dv( rtn.data() );
+    glTexCoord2f(       0.0, nTexHeight ); glVertex3dv( ltn.data() );
+    glEnd();
+    glBindTexture( GL_TEXTURE_RECTANGLE_ARB, 0 );
+    glDisable(GL_TEXTURE_RECTANGLE_ARB);
+    glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
+
+    // draw frustrum
+    glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+    glBegin( GL_QUADS );
+
+    // near
+    glVertex3dv( lbn.data() );
+    glVertex3dv( rbn.data() );
+    glVertex3dv( rtn.data() );
+    glVertex3dv( ltn.data() );
+
+    // far
+    glVertex3dv( rbf.data() );
+    glVertex3dv( lbf.data() );
+    glVertex3dv( ltf.data() );
+    glVertex3dv( rtf.data() );
+
+    // left
+    glVertex3dv( lbf.data() );
+    glVertex3dv( lbn.data() );
+    glVertex3dv( ltn.data() );
+    glVertex3dv( ltf.data() );
+
+    // right
+    glVertex3dv( rbn.data() );
+    glVertex3dv( rbf.data() );
+    glVertex3dv( rtf.data() );
+    glVertex3dv( rtn.data() );
+
+    // top
+    glVertex3dv( ltn.data() );
+    glVertex3dv( rtn.data() );
+    glVertex3dv( rtf.data() );
+    glVertex3dv( ltf.data() );
+
+    // bottom
+    glVertex3dv( lbn.data() );
+    glVertex3dv( rbn.data() );
+    glVertex3dv( rbf.data() );
+    glVertex3dv( lbf.data() );
+
+    glEnd();
+    glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+
+//    glDisable( GL_DEPTH_TEST );
+    glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+    //    glBlendFunc( GL_SRC_ALPHA_SATURATE,  GL_ONE );
+    glEnable( GL_BLEND );
+    glColor4f( 1,1,1,0.1 );
+    glBegin( GL_QUADS );
+
+    // near
+    glVertex3dv( lbn.data() );
+    glVertex3dv( rbn.data() );
+    glVertex3dv( rtn.data() );
+    glVertex3dv( ltn.data() );
+
+
+    // far
+    glVertex3dv( rbf.data() );
+    glVertex3dv( lbf.data() );
+    glVertex3dv( ltf.data() );
+    glVertex3dv( rtf.data() );
+
+    // left
+    glVertex3dv( lbf.data() );
+    glVertex3dv( lbn.data() );
+    glVertex3dv( ltn.data() );
+    glVertex3dv( ltf.data() );
+
+    // right
+    glVertex3dv( rbn.data() );
+    glVertex3dv( rbf.data() );
+    glVertex3dv( rtf.data() );
+    glVertex3dv( rtn.data() );
+
+    // top
+    glVertex3dv( ltn.data() );
+    glVertex3dv( rtn.data() );
+    glVertex3dv( rtf.data() );
+    glVertex3dv( ltf.data() );
+
+    // bottom
+    glVertex3dv( lbn.data() );
+    glVertex3dv( rbn.data() );
+    glVertex3dv( rbf.data() );
+    glVertex3dv( lbf.data() );
+
+    glEnd();
+    glDisable( GL_BLEND );
+    glEnable( GL_DEPTH_TEST );
+    glEnable( GL_CULL_FACE );
+
 }
 
 

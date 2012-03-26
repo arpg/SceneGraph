@@ -21,7 +21,7 @@
 #include <SimpleGui/GLObject.h>
 #include <SimpleGui/GLSceneGraph.h>
 
-const double g_dFPS = 1.0/20.0;
+const double g_dFPS = 1.0/50.0;
 
 /////////////////////////////////////////////////////////////////////////////////
 enum eGuiMode { eConsole, eFPSNav, eSelect };

@@ -104,14 +104,16 @@ class FBO
                 // Create a standard texture with the width and height of our window  
                 glTexImage2D( GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGBA, m_nTexWidth, 
                         m_nTexHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL );
+                CheckForGLErrors();
 
                 // Setup the basic texture parameters  
-                glTexParameterf( GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+//                glTexParameterf( GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
                 glTexParameterf( GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
                 glTexParameterf( GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
                 glTexParameteri( GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
                 glTexParameteri( GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
             }
+            CheckForGLErrors();
 
             // Generate one depth texture
             {
@@ -136,6 +138,7 @@ class FBO
                 //  Unbind the texture  
                 glBindTexture(GL_TEXTURE_RECTANGLE_ARB, 0);  
             }
+            CheckForGLErrors();
 
 
             // create a framebuffer object, you need to delete them when program exits.
@@ -170,6 +173,7 @@ class FBO
             // check FBO status
             CheckFBOStatus();
             glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+            CheckForGLErrors();
 
         }  
 

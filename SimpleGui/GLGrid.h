@@ -23,19 +23,24 @@ class GLGrid : public GLObject
 #define LDELTA 1
 
             glPushMatrix();
+            glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+            //    glBlendFunc( GL_SRC_ALPHA_SATURATE,  GL_ONE );
+            glEnable( GL_BLEND );
+//            glColor4f( 1,1,1,0.1 );
 
-            glDepthMask (GL_TRUE);
-            glEnable (GL_BLEND);
-            glDisable(GL_LIGHTING);
+            glDisable( GL_LIGHTING );
+//            glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+//            glEnable( GL_BLEND );
+//            glDepthMask (GL_TRUE);
 
             glBegin(GL_LINES);
 
             for(i = -NLINES; i < NLINES; i++){
-                glColor4ub(32, 32, 32, 255);
+                glColor4ub(32, 32, 32, 155);
                 glVertex3f( LDELTA*NLINES, i*LDELTA, 0.0);
                 glVertex3f(-LDELTA*NLINES, i*LDELTA, 0.0);
 
-                glColor4ub(32, 32, 32, 255);
+                glColor4ub(32, 32, 32, 155);
                 glVertex3f(i*LDELTA,  LDELTA*NLINES, 0.0);
                 glVertex3f(i*LDELTA, -LDELTA*NLINES, 0.0);
             }
@@ -50,9 +55,8 @@ class GLGrid : public GLObject
 
             glEnd();
 
+            /*
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL );
-            glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-            glEnable( GL_BLEND );
 
             // so we generate depth on the ground plane
             glEnable( GL_DEPTH_TEST );
@@ -63,15 +67,18 @@ class GLGrid : public GLObject
             glVertex3f( -LDELTA*NLINES , -LDELTA*NLINES, 0.01);
             glVertex3f(  LDELTA*NLINES , -LDELTA*NLINES, 0.01);
             glEnd();
+            */
             glPopMatrix();
-
+            /*
             Eigen::Vector3d v = GetPosUnderCursor();
             glPointSize( 5 );
             glBegin( GL_POINTS );
             glColor4ub( 255, 255, 255, 255 );
             glVertex3f( v[0],  v[1], v[2] );
             glEnd();
+            */
 
+            glDisable( GL_BLEND );
 
         }
 

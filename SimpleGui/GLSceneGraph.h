@@ -9,6 +9,7 @@
 class GLSceneGraph : public GLObject
 {
     public:
+        GLSceneGraph();
         GLObject* Root();
 
         GLObject* GetObject( unsigned int nId );

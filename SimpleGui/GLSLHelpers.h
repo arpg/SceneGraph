@@ -93,6 +93,7 @@ inline bool LoadShaders(
 {
     GLuint v = glCreateShader( GL_VERTEX_SHADER );
     GLuint f = glCreateShader( GL_FRAGMENT_SHADER );
+    CheckForGLErrors();
 
     char *vs = ReadTextFile( sVertexShader.c_str() );
     char *fs = ReadTextFile( sFragmentShader.c_str() );
@@ -101,6 +102,7 @@ inline bool LoadShaders(
 
     glShaderSource( v, 1, &vv, NULL );
     glShaderSource( f, 1, &ff, NULL );
+    CheckForGLErrors();
 
     free(vs);
     free(fs);
@@ -112,6 +114,7 @@ inline bool LoadShaders(
         printf( "ERROR compiling shader.\n");
         return false;
     }
+    CheckForGLErrors();
 
     glCompileShader(f);
     glGetShaderiv( f, GL_COMPILE_STATUS, &nResult );
@@ -121,20 +124,24 @@ inline bool LoadShaders(
         printf( "ERROR compiling shader.\n");
         return false;
     }
+    CheckForGLErrors();
 
     nShaderProgram = glCreateProgram();
 
     glAttachShader(nShaderProgram,f);
     glAttachShader(nShaderProgram,v);
+    CheckForGLErrors();
 
     glLinkProgram(nShaderProgram);
-    glGetShaderiv( nShaderProgram, GL_LINK_STATUS, &nResult );
+//    glGetShaderiv( nShaderProgram, GL_LINK_STATUS, &nResult );
+    glGetProgramiv( nShaderProgram, GL_LINK_STATUS, &nResult );
     if( nResult == GL_FALSE ){
         PrintProgramInfoLog( nShaderProgram );
         printf( "ERROR linking shader.\n");
         return false;
     }
 
+    CheckForGLErrors();
 //    glUseProgram(nShaderProgram);
 //    ListUniforms(nShaderProgram);
 
