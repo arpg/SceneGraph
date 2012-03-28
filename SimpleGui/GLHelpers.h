@@ -9,17 +9,20 @@
 
 
 #ifdef HAVE_APPLE_OPENGL_FRAMEWORK
-#    include <GL/glew.h>
-#    include <GL/glext.h>
-#    include <OpenGL/gl.h>
-#    include <OpenGL/glu.h>
-#    include <GLUT/glut.h>
+//#    include <GL/glew.h>
+//#    include <GL/glext.h>
+//#    include <OpenGL/gl.h>
+//#    include <OpenGL/glu.h>
+//#    include <GLUT/glut.h>
+#    include <FL/gl.h>
+#    include <FL/glu.h>
+#    include <FL/glut.H>
 #else
 #    include <GL/glew.h>
 #    include <GL/glext.h>
-#    include <GL/gl.h>
-#    include <GL/glu.h>
-#    include <GL/glut.h>
+#    include <FL/gl.h>
+#    include <FL/glu.h>
+#    include <FL/glut.H>
 #endif
 
 #include <iostream>
@@ -60,7 +63,7 @@ inline Eigen::Matrix4d GLGetCameraPose()
     Eigen::Matrix3d gl2v;
     gl2v << 0,0,-1,  1,0,0,  0,-1,0;
 
-    Eigen::Vector3d xyz = -M.block<3,3>(0,0).transpose()*M.block<3,1>(0,3);
+//    Eigen::Vector3d xyz = -M.block<3,3>(0,0).transpose()*M.block<3,1>(0,3);
 //    Vector3d pqr = R2Cart( gl2v*M.block<3,3>(0,0) );
 
     Eigen::Matrix4d T;

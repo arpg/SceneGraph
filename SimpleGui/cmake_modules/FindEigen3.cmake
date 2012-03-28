@@ -19,6 +19,7 @@ find_path(EIGEN3_INCLUDE_DIR NAMES Eigen/Core
      PATHS
      ${INCLUDE_INSTALL_DIR}
      ${KDE4_INCLUDE_DIR}
+     /opt/local/include/eigen3
      PATH_SUFFIXES eigen3
    )
 
