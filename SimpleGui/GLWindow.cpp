@@ -1,5 +1,8 @@
 
 #include <SimpleGui/GLWindow.h>
+#include <SimpleGui/GLCVars.h>
+
+GLWindowConfig gConfig;
 
 /////////////////////////////////////////////////////////////////////////////////
 /// timer callback drives animation and forces drawing at 20 hz
@@ -158,8 +161,7 @@ void _SetupLighting()
     glColorMaterial(GL_FRONT,GL_AMBIENT_AND_DIFFUSE);
     glEnable(GL_NORMALIZE);                                     // normalize normal vectors
 
-    /*
-    if( g_bDebugLighting ){
+    if( gConfig.m_bDebugLighting ){
         // to check lighting
         glColor4f( 1, 1, 1, 1 );
         for( int y = -100; y < 100; y+=10 ){
@@ -171,7 +173,6 @@ void _SetupLighting()
             }
         }
     }
-    */
 
 }
 
