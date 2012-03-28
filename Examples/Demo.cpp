@@ -24,8 +24,11 @@ int main( int argc, char** argv )
 
 	// register objects
     pWin->AddChildToRoot( &mesh );
-	pWin->AddChildToRoot( &grid );
+    pWin->AddChildToRoot( &grid );
 
+    // This causes the window to create a context, which lets glewInit() work.
+    // glewInit() is needed for any of the fltk stuff to work.
+    pWin->make_current();
     return( pWin->Run() );
 }
 

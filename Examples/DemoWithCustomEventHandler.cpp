@@ -48,9 +48,13 @@ int main( int argc, char** argv )
 
     mesh.Init( pScene );
 
-	// register objects
-	pWin->AddChildToRoot( &grid );
+    // register objects
+    pWin->AddChildToRoot( &grid );
     pWin->AddChildToRoot( &mesh );
+  
+    // This causes the window to create a context, which lets glewInit() work.
+    // glewInit is needed for the fltk stuff.
+    pWin->make_current();
 
     return( pWin->Run() );
 }
