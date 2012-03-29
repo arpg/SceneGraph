@@ -31,6 +31,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <vector>
+#undef Success
 #include <Eigen/Core>
 #include <Eigen/LU>
 

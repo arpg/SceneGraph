@@ -1,6 +1,7 @@
 #ifndef _GL_OBJECT_
 #define _GL_OBJECT_
 
+#undef Success
 #include <Eigen/Eigen>
 
 class GLWindow;
