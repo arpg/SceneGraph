@@ -24,6 +24,12 @@ GLWindow::GLWindow(int x,int y,int w,int h,const char *l ) : Fl_Gl_Window(x,y,w,
     end();
     resizable( this );
     show();
+    make_current();
+    // glew has to be initialized before we use extensions...
+    GLenum err = glewInit();
+    if( GLEW_OK != err ){
+        fprintf(stderr, "Error: %s\n", glewGetErrorString(err) );
+    }
 }
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -73,7 +79,8 @@ void GLWindow::Reset()
 void GLWindow::Init()
 {
     // OpenGL settings
-    glShadeModel( GL_SMOOTH );
+//    glShadeModel( GL_SMOOTH );
+    glShadeModel( GL_FLAT );
     glEnable( GL_DEPTH_TEST );
     glDepthFunc( GL_LEQUAL );
     glEnable(GL_LINE_SMOOTH);
@@ -105,13 +112,6 @@ void GLWindow::Init()
     glClearStencil (0 );           // clear stencil buffer
     glClearDepth( 1.0f );          // 0 is near, 1 is far
     glDepthFunc( GL_LEQUAL );
-/*
-    // glew has to be initialized before we use extensions...
-    GLenum err = glewInit();
-    if( GLEW_OK != err ){
-        fprintf(stderr, "Error: %s\n", glewGetErrorString(err) );
-    }
-    */
 }
 
 /////////////////////////////////////////////////////////////////////////////////
