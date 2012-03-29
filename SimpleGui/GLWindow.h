@@ -13,13 +13,14 @@
 
 #undef Success
 
-#include <Eigen/Core>
+#include <Eigen/Eigen>
 
 #include <boost/thread.hpp>
 
 #include <SimpleGui/GLHelpers.h>
 #include <SimpleGui/GLObject.h>
 #include <SimpleGui/GLSceneGraph.h>
+#include <SimpleGui/GLSphereGrid.h>
 
 const double g_dFPS = 1.0/50.0;
 
@@ -150,10 +151,10 @@ class GLWindow : public Fl_Gl_Window, public boost::mutex
     int Run();
 
     GLSceneGraph& SceneGraph();
-
+    
     void AddPreRenderCallback( void(*pUserFunc)(GLWindow*,void*), void* pUserData = NULL );
     void AddPostRenderCallback( void(*pUserFunc)(GLWindow*,void*), void* pUserData = NULL );
-
+    
     // event handlers -- these can serve as examples
     virtual int handle( int e ); // inherit and override if you want
     int SimpleDefaultEventHandler( int e ); // simple example handler
@@ -195,17 +196,18 @@ class GLWindow : public Fl_Gl_Window, public boost::mutex
     GLObject*                       m_pSelectedObject;
 
     GLSceneGraph                    m_SceneGraph;
-
-    /// little struct to hold user callback funciton and user data
+   
+    // DELETE ME
+    // little struct to hold user callback funciton and user data
     struct CallbackInfo
     {
         void(*m_pFuncPtr)(GLWindow*,void*);
         void*                      m_pUserData;
     };
-
+   
     std::vector<CallbackInfo>      m_vPreRenderCallbacks;
     std::vector<CallbackInfo>      m_vPostRenderCallbacks;
-
+    GLSphereGrid                         m_SphereGrid;
 };
 
 #endif

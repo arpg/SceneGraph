@@ -163,7 +163,7 @@ class GLMesh : public GLObject
         {
             glPolygonMode( GL_FRONT_AND_BACK, fill_mode );
             glBegin( face_mode );
-            for( int ii = 0; ii < face->mNumIndices; ii++ ) {
+            for( unsigned int ii = 0; ii < face->mNumIndices; ii++ ) {
                 int index = face->mIndices[ii];
                 if( mesh->mColors[0] != NULL ){
                     float *c = (float*)&mesh->mColors[0][index];
@@ -181,7 +181,6 @@ class GLMesh : public GLObject
         ////////////////////////////////////////////////////////////////////////////
         void recursive_render( const struct aiScene *sc, const struct aiNode* nd )
         {
-            int i;
             unsigned int n = 0, t;
             struct aiMatrix4x4 m = nd->mTransformation;
 

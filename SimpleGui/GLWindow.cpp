@@ -1,7 +1,6 @@
 
 #include <SimpleGui/GLWindow.h>
 #include <SimpleGui/GLCVars.h>
-#include <SimpleGui/SimCam.h>
 
 GLWindowConfig gConfig;
 
@@ -25,11 +24,12 @@ GLWindow::GLWindow(int x,int y,int w,int h,const char *l ) : Fl_Gl_Window(x,y,w,
     end();
     resizable( this );
     show();
+
     make_current();
     // glew has to be initialized before we use extensions...
     GLenum err = glewInit();
     if( GLEW_OK != err ){
-        fprintf(stderr, "Error: %s\n", glewGetErrorString(err) );
+      fprintf(stderr, "Error: %s\n", glewGetErrorString(err) );
     }
 }
 
@@ -80,8 +80,8 @@ void GLWindow::Reset()
 void GLWindow::Init()
 {
     // OpenGL settings
-//    glShadeModel( GL_SMOOTH );
     glShadeModel( GL_FLAT );
+    // glShadeModel( GL_SMOOTH );
     glEnable( GL_DEPTH_TEST );
     glDepthFunc( GL_LEQUAL );
     glEnable(GL_LINE_SMOOTH);
@@ -113,6 +113,8 @@ void GLWindow::Init()
     glClearStencil (0 );           // clear stencil buffer
     glClearDepth( 1.0f );          // 0 is near, 1 is far
     glDepthFunc( GL_LEQUAL );
+
+    AddChildToRoot(&m_SphereGrid);
 }
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -196,18 +198,6 @@ void _SetupLighting()
     glColorMaterial(GL_FRONT,GL_AMBIENT_AND_DIFFUSE);
     glEnable(GL_NORMALIZE);                                     // normalize normal vectors
 
-    if( gConfig.m_bDebugLighting ){
-        // to check lighting
-        glColor4f( 1, 1, 1, 1 );
-        for( int y = -100; y < 100; y+=10 ){
-            for( int x = -100; x < 100; x+=10 ){
-                glPushMatrix();
-                glTranslatef( x, y, 0 );
-                glutSolidSphere( 2, 32, 32 );
-                glPopMatrix();
-            }
-        }
-    }
 
 }
 
@@ -234,11 +224,15 @@ void GLWindow::draw() {
         return;
     }
 
-    // call reistered Pre-draw frame listeners
+    // FIX ME!
     for( size_t ii = 0; ii < m_vPreRenderCallbacks.size(); ii++ ){
         CallbackInfo& cb = m_vPreRenderCallbacks[ii];
         (*cb.m_pFuncPtr)(this,cb.m_pUserData);
     }
+    // call reistered Pre-draw frame listeners    
+    //for( size_t ii = 0; ii < m_vPreRenderCallbacks.size(); ii++ ){
+      //(*m_vPreRenderCallbacks[ii])(this);
+	//}
 
     // Clear
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
@@ -259,11 +253,17 @@ void GLWindow::draw() {
     //DrawSceneGraph();
     m_SceneGraph.draw();
 
-    // call all the Post-draw frame listners
+    
+    // FIX ME!
     for( size_t ii = 0; ii < m_vPostRenderCallbacks.size(); ii++ ){
         CallbackInfo& cb = m_vPostRenderCallbacks[ii];
-        (*cb.m_pFuncPtr)(this,cb.m_pUserData);
+       (*cb.m_pFuncPtr)(this,cb.m_pUserData);
     }
+    
+    // call all the Post-draw frame listners
+    //for( size_t ii = 0; ii < m_vPostRenderCallbacks.size(); ii++ ){
+    //    (*m_vPostRenderCallbacks[ii])(this); 
+    //}
 
     // Draw console last
     glDisable(GL_CULL_FACE);
@@ -470,6 +470,7 @@ GLSceneGraph& GLWindow::SceneGraph()
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
+// FIX ME!
 void GLWindow::AddPreRenderCallback( void(*pFuncPtr)(GLWindow*,void*), void* pUserData )
 {
     CallbackInfo cb;
@@ -479,12 +480,14 @@ void GLWindow::AddPreRenderCallback( void(*pFuncPtr)(GLWindow*,void*), void* pUs
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
+// FIX ME!
 void GLWindow::AddPostRenderCallback( void(*pFuncPtr)(GLWindow*,void*), void* pUserData )
 {
+  //    m_vPostRenderCallbacks.push_back( f );
     CallbackInfo cb;
     cb.m_pFuncPtr = pFuncPtr;
     cb.m_pUserData = pUserData;
-    m_vPreRenderCallbacks.push_back( cb );
+    m_vPostRenderCallbacks.push_back( cb );
 }
 
 ////////////////////////////////////////////////////////////////////////////

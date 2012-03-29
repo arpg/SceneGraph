@@ -151,7 +151,7 @@ inline bool LoadShaders(
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 inline bool InitShaders( 
-        const std::string& sVertShaderSource, //< Input:
+        const std::string& sVertShaderSource, //<  Input:
         const std::string& sFragShaderSource, //< Input:
         GLuint& nShaderProgram //< Output:
         )

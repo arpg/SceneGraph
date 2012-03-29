@@ -49,8 +49,8 @@ int main( int argc, char** argv )
     mesh.Init( pScene );
 
     // register objects
-    pWin->AddChildToRoot( &mesh );
+    pWin->AddChildToRoot( &mesh );    
     pWin->AddChildToRoot( &grid );
-
+    
     return( pWin->Run() );
 }

@@ -23,8 +23,6 @@ class GLSceneGraph : public GLObject
     private:
         void _RecursiveDraw( GLObject* pObj );
         void _RecursiveVisit( void(*pVisitorFunc)(GLObject*), GLObject* pObj );
-
-    private:
 };
 
 #endif
