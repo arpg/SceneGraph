@@ -128,8 +128,8 @@ inline bool LoadShaders(
 
     nShaderProgram = glCreateProgram();
 
-    glAttachShader(nShaderProgram,f);
-    glAttachShader(nShaderProgram,v);
+    glAttachShader( nShaderProgram,f );
+    glAttachShader( nShaderProgram,v );
     CheckForGLErrors();
 
     glLinkProgram(nShaderProgram);
@@ -144,6 +144,57 @@ inline bool LoadShaders(
     CheckForGLErrors();
 //    glUseProgram(nShaderProgram);
 //    ListUniforms(nShaderProgram);
+
+    return true;
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+inline bool InitShaders( 
+        const std::string& sVertShaderSource, //< Input:
+        const std::string& sFragShaderSource, //< Input:
+        GLuint& nShaderProgram //< Output:
+        )
+{
+    int nResult;
+
+    GLuint v = glCreateShader( GL_VERTEX_SHADER );
+    const char* vv = sVertShaderSource.c_str();
+    glShaderSource( v, 1, &vv, NULL );
+    glCompileShader( v );
+    glGetShaderiv( v, GL_COMPILE_STATUS, &nResult );
+    if( nResult == GL_FALSE ){
+        printf( "ERROR compiling shader.\n");
+        return false;
+    }
+
+    GLuint f = glCreateShader( GL_FRAGMENT_SHADER );
+    const char* ff = sFragShaderSource.c_str();
+    glShaderSource( f, 1, &ff, NULL );
+    glCompileShader( f );
+    glGetShaderiv( f, GL_COMPILE_STATUS, &nResult );
+    if( nResult == GL_FALSE ){
+        printf( "ERROR compiling shader.\n");
+        return false;
+    }
+    CheckForGLErrors();
+
+
+    nShaderProgram = glCreateProgram();
+
+    glAttachShader( nShaderProgram,f );
+    glAttachShader( nShaderProgram,v );
+    CheckForGLErrors();
+
+    glLinkProgram(nShaderProgram);
+    glGetProgramiv( nShaderProgram, GL_LINK_STATUS, &nResult );
+    if( nResult == GL_FALSE ){
+        PrintProgramInfoLog( nShaderProgram );
+        printf( "ERROR linking shader.\n");
+        return false;
+    }
+
+    CheckForGLErrors();
 
     return true;
 }

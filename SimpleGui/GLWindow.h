@@ -13,7 +13,7 @@
 
 #undef Success
 
-#include <Eigen/Eigen>
+#include <Eigen/Core>
 
 #include <boost/thread.hpp>
 
@@ -151,8 +151,8 @@ class GLWindow : public Fl_Gl_Window, public boost::mutex
 
     GLSceneGraph& SceneGraph();
 
-    void AddPreRenderCallback( void(*f)(GLWindow*) );
-    void AddPostRenderCallback( void(*f)(GLWindow*) );
+    void AddPreRenderCallback( void(*pUserFunc)(GLWindow*,void*), void* pUserData = NULL );
+    void AddPostRenderCallback( void(*pUserFunc)(GLWindow*,void*), void* pUserData = NULL );
 
     // event handlers -- these can serve as examples
     virtual int handle( int e ); // inherit and override if you want
@@ -196,8 +196,15 @@ class GLWindow : public Fl_Gl_Window, public boost::mutex
 
     GLSceneGraph                    m_SceneGraph;
 
-    std::vector<void(*)(GLWindow*)>      m_vPreRenderCallbacks;
-    std::vector<void(*)(GLWindow*)>      m_vPostRenderCallbacks;
+    /// little struct to hold user callback funciton and user data
+    struct CallbackInfo
+    {
+        void(*m_pFuncPtr)(GLWindow*,void*);
+        void*                      m_pUserData;
+    };
+
+    std::vector<CallbackInfo>      m_vPreRenderCallbacks;
+    std::vector<CallbackInfo>      m_vPostRenderCallbacks;
 
 };
 

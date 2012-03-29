@@ -32,7 +32,7 @@ int main( int argc, char** argv )
     glutInit(&argc, argv);
     GetPot cl(argc,argv);
 
-    std::string sMesh = cl.follow( "Ramp.STL", 1, "-mesh" );
+    std::string sMesh = cl.follow( "Terrain.ac", 1, "-mesh" );
 
 	// init window
     GuiWindow* pWin = new GuiWindow( 0, 0, 1024, 768, "Simple Gui Demo" );
@@ -49,12 +49,8 @@ int main( int argc, char** argv )
     mesh.Init( pScene );
 
     // register objects
-    pWin->AddChildToRoot( &grid );
     pWin->AddChildToRoot( &mesh );
-  
-    // This causes the window to create a context, which lets glewInit() work.
-    // glewInit is needed for the fltk stuff.
-    pWin->make_current();
+    pWin->AddChildToRoot( &grid );
 
     return( pWin->Run() );
 }

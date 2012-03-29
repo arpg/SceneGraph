@@ -4,8 +4,6 @@
 #include <SimpleGui/GLObject.h>
 #include <map>
 
-#include <SimpleGui/SceneGraphListener.h>
-
 class GLSceneGraph : public GLObject
 {
     public:
@@ -22,14 +20,11 @@ class GLSceneGraph : public GLObject
 
         void ApplyDfsVisitor( void(*pVisitorFunc)(GLObject*) );
 
-        void RegisterSceneGraphListener( SceneGraphListener *pSceneGraphListener );
-
     private:
         void _RecursiveDraw( GLObject* pObj );
         void _RecursiveVisit( void(*pVisitorFunc)(GLObject*), GLObject* pObj );
 
     private:
-        std::vector<SceneGraphListener*> m_sceneGraphListeners;
 };
 
 #endif

@@ -1,6 +1,7 @@
 
 #include <SimpleGui/GLWindow.h>
 #include <SimpleGui/GLCVars.h>
+#include <SimpleGui/SimCam.h>
 
 GLWindowConfig gConfig;
 
@@ -235,7 +236,8 @@ void GLWindow::draw() {
 
     // call reistered Pre-draw frame listeners
     for( size_t ii = 0; ii < m_vPreRenderCallbacks.size(); ii++ ){
-        (*m_vPreRenderCallbacks[ii])(this);
+        CallbackInfo& cb = m_vPreRenderCallbacks[ii];
+        (*cb.m_pFuncPtr)(this,cb.m_pUserData);
     }
 
     // Clear
@@ -257,13 +259,11 @@ void GLWindow::draw() {
     //DrawSceneGraph();
     m_SceneGraph.draw();
 
-
-    /*
-    glTranslatef( 10, 0, 0 );
-    glFrontFace(GL_CW); // wow, glutSolidTeapot has bugs!!!
-    glutSolidTeapot(10);
-    glFrontFace(GL_CCW);
-    */
+    // call all the Post-draw frame listners
+    for( size_t ii = 0; ii < m_vPostRenderCallbacks.size(); ii++ ){
+        CallbackInfo& cb = m_vPostRenderCallbacks[ii];
+        (*cb.m_pFuncPtr)(this,cb.m_pUserData);
+    }
 
     // Draw console last
     glDisable(GL_CULL_FACE);
@@ -277,12 +277,6 @@ void GLWindow::draw() {
     _DoPicking();
 
     CheckForGLErrors();
-
-    // call all the Post-draw frame listners
-    for( size_t ii = 0; ii < m_vPostRenderCallbacks.size(); ii++ ){
-        (*m_vPostRenderCallbacks[ii])(this); 
-    }
-
 }
 
 
@@ -476,15 +470,21 @@ GLSceneGraph& GLWindow::SceneGraph()
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
-void GLWindow::AddPreRenderCallback( void(*f)(GLWindow*) )
+void GLWindow::AddPreRenderCallback( void(*pFuncPtr)(GLWindow*,void*), void* pUserData )
 {
-    m_vPreRenderCallbacks.push_back( f );
+    CallbackInfo cb;
+    cb.m_pFuncPtr = pFuncPtr;
+    cb.m_pUserData = pUserData;
+    m_vPreRenderCallbacks.push_back( cb );
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
-void GLWindow::AddPostRenderCallback( void(*f)(GLWindow*) )
+void GLWindow::AddPostRenderCallback( void(*pFuncPtr)(GLWindow*,void*), void* pUserData )
 {
-    m_vPostRenderCallbacks.push_back( f );
+    CallbackInfo cb;
+    cb.m_pFuncPtr = pFuncPtr;
+    cb.m_pUserData = pUserData;
+    m_vPreRenderCallbacks.push_back( cb );
 }
 
 ////////////////////////////////////////////////////////////////////////////

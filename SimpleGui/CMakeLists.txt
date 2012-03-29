@@ -17,6 +17,7 @@ find_package( GLEW REQUIRED )
 #find_package( GLUT REQUIRED )
 
 set( SimpleGui_SOURCES
+        GLHelpers.cpp
         GLWindow.cpp
         GLObject.cpp
         GLSceneGraph.cpp
@@ -29,7 +30,6 @@ set( SimpleGui_HEADERS
         GLMesh.h
         GLText.h
         GLGrid.h
-        SceneGraphListener.h
    )
 
 # set for "export_library", below 
