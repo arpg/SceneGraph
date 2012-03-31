@@ -7,18 +7,29 @@ using namespace Eigen;
 
 
 GLSimCam cam;
+GLSimCam RightCam;
 
 /////////////////////////////////////////////////////////////////////////////////////////
 void ProcessPreRenderShaders (GLWindow* pWin, void*) 
 {
     static float f;
-    f += 0.1;
-    Eigen::Matrix4d dPose = GLCart2T( 1, 1,-4,0,0, sin(f)+0.5 ); // initial camera pose
+    static float t = 1; t+=0.1;
+    int w = 500*sin(t)+1024; 
+
+    f += 0.0;
+    Eigen::Matrix4d dPose = GLCart2T( 1, 1,-4,0,-0.5, sin(f)+0.5 ); // initial camera pose
     cam.SetPose( dPose );
+//    cam.SetSensorSize( w, w );
+    Eigen::Matrix3d dK;// = Eigen::Matrix3d::Identity();    // computer vision K matrix
+    dK << w,0,50,0,w,50,0,0,1;
+    cam.SetIntrinsics( dK );
+
     glEnable( GL_LIGHTING );
     glEnable( GL_LIGHT0 );
     glClearColor(0.0, 0.0, 0.0, 1);
     cam.Render();
+
+//    RightCam.Render();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -71,6 +82,11 @@ int main( int argc, char** argv )
     Eigen::Matrix3d dK;// = Eigen::Matrix3d::Identity();    // computer vision K matrix
     dK << w,0,50,0,h,50,0,0,1;
     cam.Init( &pWin->SceneGraph(), dPose, dK, w,h );
+    CheckForGLErrors();
+
+    Eigen::Matrix4d dRightPose = GLCart2T( 1, 2,-4,0,0,M_PI/4 ); // initial camera pose
+    RightCam.Init( &pWin->SceneGraph(), dRightPose, dK, w,h );
+    CheckForGLErrors();
 
     // Funcation callbacks
     pWin->AddPreRenderCallback( ProcessPreRenderShaders, NULL );

@@ -14,7 +14,7 @@ class FBO
         ///////////////////////////////////////////////////////////////////////////////
         FBO()
         {
-            m_vColorTextureIds.resize(8);
+            m_vColorTextureIds.resize(8); // should lookup max number...
         }
 
         ///////////////////////////////////////////////////////////////////////////////
@@ -28,14 +28,14 @@ class FBO
         ///////////////////////////////////////////////////////////////////////////////
         void BindTexture( unsigned int nIndex )
         {
-            glEnable(GL_TEXTURE_RECTANGLE_ARB);
+            glEnable( GL_TEXTURE_RECTANGLE_ARB );
             glBindTexture( GL_TEXTURE_RECTANGLE_ARB, m_vColorTextureIds[nIndex] );
         }
 
         ///////////////////////////////////////////////////////////////////////////////
         void BindDepthTexture()
         {
-            glEnable(GL_TEXTURE_RECTANGLE_ARB);
+            glEnable( GL_TEXTURE_RECTANGLE_ARB );
             glBindTexture( GL_TEXTURE_RECTANGLE_ARB, m_nDepthTextureId  );
         }
 
@@ -58,6 +58,34 @@ class FBO
         }
 
         ///////////////////////////////////////////////////////////////////////////////
+        /// Change rtt texture widh -- will not re-allocate mem if possible
+        void SetTexWidth(
+                unsigned int nTexWidth
+                )
+        {
+            if( nTexWidth > 0 && nTexWidth*m_nTexHeight <  m_nInitialTexWidth*m_nInitialTexHeight ){
+                m_nTexWidth = nTexWidth;
+            }
+            else{
+                printf("DEBUG: not applying texture width %d -- too big!\n", nTexWidth );
+            }
+        }
+
+        ///////////////////////////////////////////////////////////////////////////////
+        /// Change rtt texture height -- will not re-allocate mem if possible
+        void SetTexHeight(
+                unsigned int nTexHeight
+                )
+        {
+            if( nTexHeight > 0 && m_nTexWidth*nTexHeight <  m_nInitialTexWidth*m_nInitialTexHeight ){
+                m_nTexHeight = nTexHeight;
+            }
+            else{
+                printf("DEBUG: not applying texture height %d -- too big!\n", nTexHeight );
+            }
+         }
+
+        ///////////////////////////////////////////////////////////////////////////////
         // User should alread have called glDrawBuffer so select the fbo attachment...
         void Begin()
         {
@@ -66,6 +94,8 @@ class FBO
             glViewport( 0, 0, m_nTexWidth, m_nTexHeight );
             // set the rendering destination to FBO
             glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, m_nFrameBufferId );
+            glBindRenderbufferEXT( GL_RENDERBUFFER_EXT, m_nRenderBufferId );
+            CheckForGLErrors();
         }
 
         ///////////////////////////////////////////////////////////////////////////////
@@ -73,6 +103,7 @@ class FBO
         {
             // back to normal window-system-provided framebuffer
             glBindFramebufferEXT( GL_FRAMEBUFFER_EXT, 0 ); // unbind
+            glBindRenderbufferEXT( GL_RENDERBUFFER_EXT, 0 );
 
             // trigger mipmaps generation explicitly
             // NOTE: If GL_GENERATE_MIPMAP is set to GL_TRUE, then glCopyTexSubImage2D()
@@ -92,6 +123,9 @@ class FBO
         {
             m_nTexWidth  = nTexWidth;
             m_nTexHeight = nTexHeight;
+            m_nInitialTexWidth  = 2*nTexWidth;
+            m_nInitialTexHeight = 2*nTexHeight;
+
 
             glGetIntegerv( GL_VIEWPORT,  &m_vViewport[0] );
 
@@ -128,9 +162,6 @@ class FBO
                    glTexParameterf( GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
                    glTexParameteri( GL_TEXTURE_RECTANGLE_ARB, GL_DEPTH_TEXTURE_MODE, GL_LUMINANCE );
 
-                // Create a standard texture with the width and height of our window  
-                glTexImage2D( GL_TEXTURE_RECTANGLE_ARB, 0, GL_DEPTH_COMPONENT24, m_nTexWidth, 
-                m_nTexHeight, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, NULL );
                  */
                 glTexImage2D( GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGBA, m_nTexWidth, 
                         m_nTexHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL );
@@ -167,31 +198,28 @@ class FBO
             // disable color buffer if you don't attach any color buffer image,
             // for example, rendering depth buffer only to a texture.
             // Otherwise, glCheckFramebufferStatusEXT will not be complete.
-            //glDrawBuffer(GL_NONE);
-            //glReadBuffer(GL_NONE);
+            // glDrawBuffer(GL_NONE);
+            // glReadBuffer(GL_NONE);
 
             // check FBO status
             CheckFBOStatus();
             glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
             CheckForGLErrors();
-
-        }  
+        }
 
 //    private:
 
-        GLuint        m_nFrameBufferId;   // ID of FBO
-        GLuint        m_nRenderBufferId;  // ID of Renderbuffer object
-
-        GLuint        m_nDepthRenderBufferId;
-
+        GLuint                     m_nFrameBufferId;   // ID of FBO
+        GLuint                     m_nRenderBufferId;  // ID of Renderbuffer object
+        GLuint                     m_nDepthRenderBufferId;
         GLuint                     m_nDepthTextureId;
         std::vector<GLuint>        m_vColorTextureIds;
-
         GLint                      m_vViewport[4];
-
         unsigned int               m_nTexWidth;
         unsigned int               m_nTexHeight;
-
+        unsigned int               m_nInitialTexWidth;
+        unsigned int               m_nInitialTexHeight;
         };
 
 #endif
+

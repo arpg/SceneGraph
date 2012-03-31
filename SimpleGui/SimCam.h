@@ -26,6 +26,12 @@ class GLSimCam
             m_dPose = dPose;
         }
 
+        ///////////////////////////////////////////////////////////////////////////////
+        void SetIntrinsics( const Eigen::Matrix3d& dK )
+        {
+            m_dK = dK;
+        }
+
         /////////////////////////////////////////////////////////////////////////////////////////
         /// Init shaders. Given K matrix, compute the corresponding GL_PROJECTION_MATRIX.
         void Init( 
@@ -297,7 +303,6 @@ class GLSimCam
             m_fbo.End();
         }
 
-
         /////////////////////////////////////////////////////////////////////////////////////////
         /// For registering our PreRender callback
         static void RenderCallBack( GLWindow*, void* pUserData )
@@ -313,6 +318,16 @@ class GLSimCam
             if( pObj->IsPerceptable() ) {
                 pObj->draw();
             }
+        }
+
+        /////////////////////////////////////////////////////////////////////////////////////////
+        /// Change the nuber of pixels in the sensor
+        void SetSensorSize( unsigned int nWidth, unsigned int nHeight )
+        {
+            m_nSensorWidth = nWidth;
+            m_nSensorHeight = nHeight;
+            m_fbo.SetTexWidth( nWidth );
+            m_fbo.SetTexHeight( nHeight );
         }
 
     private:
