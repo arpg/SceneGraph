@@ -171,6 +171,7 @@ class GLMesh : public GLObject
                 }
                 if( mesh->mNormals != NULL ){
                     glNormal3fv( &mesh->mNormals[index].x );
+//                    glNormal3f( -mesh->mNormals[index].x, -mesh->mNormals[index].y, -mesh->mNormals[index].z );
                 }
                 glVertex3fv( &mesh->mVertices[index].x );
             }

@@ -490,8 +490,6 @@ void DrawCamera(
     glBindTexture( GL_TEXTURE_RECTANGLE_ARB, nTexId );
 
     glEnable( GL_DEPTH_TEST );
-    //    glEnable( GL_LIGHTING );
-    //    glEnable( GL_LIGHT0 );
     glDisable( GL_LIGHTING );
     glDisable( GL_LIGHT0 );
     glDisable( GL_CULL_FACE );
@@ -607,6 +605,3 @@ void DrawCamera(
 
 }
 
-
-
-#

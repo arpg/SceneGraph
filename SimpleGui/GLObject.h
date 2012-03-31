@@ -68,6 +68,24 @@ class GLObject
 
         std::vector< GLObject* >  m_vpChildren;
 
+        /// such as an image
+        bool Is2dLayer()
+        {
+            return m_bIs2dLayer;
+        }
+
+        /// can be measured (e.g., not a virtual thing)
+        bool IsPerceptable()
+        {
+            return m_bPerceptable;
+        } 
+
+        void SetPerceptable( bool bPerceptable )
+        {
+            m_bPerceptable = bPerceptable;
+        }
+
+
     private:
         void  _RecursivelyInitObjects( GLObject* pObj, GLWindow* pWin );
 
@@ -79,9 +97,9 @@ class GLObject
         unsigned int              m_nId;      //< Object handle
         GLWindow*                 m_pWin;     //< The window the object belongs to
         bool                      m_bVisible;
-
+        bool                      m_bIs2dLayer; //< such as an image 
+        bool                      m_bPerceptable; //< can be measured (e.g., not a virtual thing)
 };
-
 
 
 #endif

@@ -1,6 +1,7 @@
 
 #include <SimpleGui/GLWindow.h>
 #include <SimpleGui/GLCVars.h>
+//#include <SimpleGui/SimCam.h>
 
 GLWindowConfig gConfig;
 
@@ -24,12 +25,11 @@ GLWindow::GLWindow(int x,int y,int w,int h,const char *l ) : Fl_Gl_Window(x,y,w,
     end();
     resizable( this );
     show();
-
     make_current();
     // glew has to be initialized before we use extensions...
     GLenum err = glewInit();
     if( GLEW_OK != err ){
-      fprintf(stderr, "Error: %s\n", glewGetErrorString(err) );
+        fprintf(stderr, "Error: %s\n", glewGetErrorString(err) );
     }
 }
 
@@ -80,39 +80,28 @@ void GLWindow::Reset()
 void GLWindow::Init()
 {
     // OpenGL settings
+//    glShadeModel( GL_SMOOTH );
     glShadeModel( GL_FLAT );
-    // glShadeModel( GL_SMOOTH );
-    glEnable( GL_DEPTH_TEST );
-    glDepthFunc( GL_LEQUAL );
-    glEnable(GL_LINE_SMOOTH);
-    glClearColor( 0.0, 0.0, 0.0, 1.0 );
-
-    // this works here and not in main on Ubunto 11.4?
-    glClearColor( 0.1f,0.1f,0.1f,1.f );
+    glEnable( GL_LINE_SMOOTH );
     glEnable( GL_LIGHTING );
     glEnable( GL_LIGHT0 );    // Uses default lighting parameters
-    glEnable( GL_DEPTH_TEST );
     glLightModeli( GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE );
     glEnable( GL_NORMALIZE );
     glColorMaterial( GL_FRONT_AND_BACK, GL_DIFFUSE );
-
-    // enable /disable features
-    glHint( GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST );
-    glHint( GL_LINE_SMOOTH_HINT, GL_NICEST );
-    glHint( GL_POLYGON_SMOOTH_HINT, GL_NICEST );
-    glEnable( GL_DEPTH_TEST );
-    glEnable( GL_LIGHTING );
-    glEnable( GL_TEXTURE_RECTANGLE_ARB );
-
     // track material ambient and diffuse from surface color, 
     // call it before glEnable(GL_COLOR_MATERIAL)
     glColorMaterial( GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE );
     glEnable( GL_COLOR_MATERIAL );
 
-    glClearColor( 0, 0, 0, 0 );    // background color
+    glHint( GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST );
+    glHint( GL_LINE_SMOOTH_HINT, GL_NICEST );
+    glHint( GL_POLYGON_SMOOTH_HINT, GL_NICEST );
+    glEnable( GL_TEXTURE_RECTANGLE_ARB );
+
     glClearStencil (0 );           // clear stencil buffer
     glClearDepth( 1.0f );          // 0 is near, 1 is far
     glDepthFunc( GL_LEQUAL );
+    glEnable( GL_DEPTH_TEST );
 
     AddChildToRoot(&m_SphereGrid);
 }
@@ -198,12 +187,12 @@ void _SetupLighting()
     glColorMaterial(GL_FRONT,GL_AMBIENT_AND_DIFFUSE);
     glEnable(GL_NORMALIZE);                                     // normalize normal vectors
 
-
 }
 
 /////////////////////////////////////////////////////////////////////////////////
 /// Main function called by FLTK to draw the scene.
-void GLWindow::draw() {
+void GLWindow::draw() 
+{
 
     if( !context() ) {
         return;
@@ -224,15 +213,11 @@ void GLWindow::draw() {
         return;
     }
 
-    // FIX ME!
+    // call reistered Pre-draw frame listeners
     for( size_t ii = 0; ii < m_vPreRenderCallbacks.size(); ii++ ){
         CallbackInfo& cb = m_vPreRenderCallbacks[ii];
         (*cb.m_pFuncPtr)(this,cb.m_pUserData);
     }
-    // call reistered Pre-draw frame listeners    
-    //for( size_t ii = 0; ii < m_vPreRenderCallbacks.size(); ii++ ){
-      //(*m_vPreRenderCallbacks[ii])(this);
-	//}
 
     // Clear
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
@@ -253,17 +238,11 @@ void GLWindow::draw() {
     //DrawSceneGraph();
     m_SceneGraph.draw();
 
-    
-    // FIX ME!
+    // call all the Post-draw frame listners
     for( size_t ii = 0; ii < m_vPostRenderCallbacks.size(); ii++ ){
         CallbackInfo& cb = m_vPostRenderCallbacks[ii];
-       (*cb.m_pFuncPtr)(this,cb.m_pUserData);
+        (*cb.m_pFuncPtr)(this,cb.m_pUserData);
     }
-    
-    // call all the Post-draw frame listners
-    //for( size_t ii = 0; ii < m_vPostRenderCallbacks.size(); ii++ ){
-    //    (*m_vPostRenderCallbacks[ii])(this); 
-    //}
 
     // Draw console last
     glDisable(GL_CULL_FACE);
@@ -470,7 +449,6 @@ GLSceneGraph& GLWindow::SceneGraph()
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
-// FIX ME!
 void GLWindow::AddPreRenderCallback( void(*pFuncPtr)(GLWindow*,void*), void* pUserData )
 {
     CallbackInfo cb;
@@ -480,10 +458,8 @@ void GLWindow::AddPreRenderCallback( void(*pFuncPtr)(GLWindow*,void*), void* pUs
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
-// FIX ME!
 void GLWindow::AddPostRenderCallback( void(*pFuncPtr)(GLWindow*,void*), void* pUserData )
 {
-  //    m_vPostRenderCallbacks.push_back( f );
     CallbackInfo cb;
     cb.m_pFuncPtr = pFuncPtr;
     cb.m_pUserData = pUserData;

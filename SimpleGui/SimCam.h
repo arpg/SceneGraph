@@ -21,9 +21,9 @@ class GLSimCam
 
         /////////////////////////////////////////////////////////////////////////////////////////
         /// Store pose as a roboitcs frame pose
-        void SetPose( const Eigen::Matrix4d& dT )
+        void SetPose( const Eigen::Matrix4d& dPose )
         {
-            m_dT = dT;
+            m_dPose = dPose;
         }
 
         /////////////////////////////////////////////////////////////////////////////////////////
@@ -46,6 +46,7 @@ class GLSimCam
             m_dK = dK;
             m_dPose = dPose;
 
+            /*
             std::string sDepthVertShader = 
                 "// see http://olivers.posterous.com/linear-depth-in-glsl-for-real\n"
                 "varying float depth;\n"
@@ -77,10 +78,21 @@ class GLSimCam
 
             InitShaders( sNormalVertShader, sNormalFragShader, m_nNormalShaderProgram );
 
+            */
+
+            if ( LoadShaders( "Depth.vert", "Depth.frag", m_nDepthShaderProgram ) == false) {
+                fprintf(stderr, "Failed to load the Depth shader.");
+            }
+
+            // Load shader
+            if ( LoadShaders( "Normals.vert", "Normals.frag", m_nNormalShaderProgram ) == false) {
+                fprintf(stderr, "Failed to load the Normal shader.");
+            }
+
             // fixed order...
+            m_nRGBAAttachment = GL_COLOR_ATTACHMENT0_EXT;
             m_nDepthAttachment = GL_COLOR_ATTACHMENT1_EXT;
-            m_nNormalAttachment = GL_COLOR_ATTACHMENT0_EXT;
-            m_nRGBAAttachment = GL_COLOR_ATTACHMENT2_EXT;
+            m_nNormalAttachment = GL_COLOR_ATTACHMENT2_EXT;
 
 #if 0
             // Ok, now compute the corresponding GL_PROJECTION_MATRIX:
@@ -159,12 +171,25 @@ class GLSimCam
             return m_nSensorHeight;
         }
 
+        GLuint RGBTexture()
+        {
+            return m_fbo.m_vColorTextureIds[0]; // texture associated with GL_COLOR_ATTACHMENT0_EXT
+        }
+
+        GLuint DepthTexture()
+        {
+            return m_fbo.m_vColorTextureIds[1]; // texture associated with GL_COLOR_ATTACHMENT0_EXT
+        }
+
+        GLuint NormalTexture()
+        {
+            return m_fbo.m_vColorTextureIds[2]; // texture associated with GL_COLOR_ATTACHMENT0_EXT
+        }
+
+
         /////////////////////////////////////////////////////////////////////////////////////////
         void Begin()
         {
-//            GLint vViewport[4];
-//            glGetIntegerv( GL_VIEWPORT, vViewport );
-
             // 0) push some attribs 
             glPushAttrib( GL_COLOR_BUFFER_BIT );
 
@@ -243,9 +268,7 @@ class GLSimCam
         {
             m_fbo.Begin();
             glDrawBuffer( m_nRGBAAttachment ); // select fbo attachment...
-       //     glClearColor(0, 0, 0, 1);
             glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT );
-            glColor4f( 1, 1, 1, 1 );
             m_pSceneGraph->ApplyDfsVisitor( _ShaderVisitor );
             m_fbo.End();
         }
@@ -256,9 +279,7 @@ class GLSimCam
             m_fbo.Begin();
             glDrawBuffer( m_nNormalAttachment ); // select fbo attachment...
             glUseProgram( m_nNormalShaderProgram );
-//            glClearColor(0, 0, 0.5, 1);
             glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT );
-            glColor4f( 1, 1, 1, 1 );
             m_pSceneGraph->ApplyDfsVisitor( _ShaderVisitor );
             glUseProgram(0);
             m_fbo.End();
@@ -270,9 +291,7 @@ class GLSimCam
             m_fbo.Begin();
             glDrawBuffer( m_nDepthAttachment ); // select fbo attachment...
             glUseProgram( m_nDepthShaderProgram );
-//            glClearColor(0, 0, 0, 1);
             glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT );
-            glColor4f( 1, 1, 1, 1 );
             m_pSceneGraph->ApplyDfsVisitor( _ShaderVisitor );
             glUseProgram(0);
             m_fbo.End();
@@ -291,10 +310,9 @@ class GLSimCam
         /// used to traverse scene graph
         static void _ShaderVisitor( GLObject* pObj )
         {
-            //    printf("Visiting %s\n", pObj->ObjectName() );
-            //    if( pObj->ObjectName() == "Mesh" ){
-            pObj->draw();
-            //    }
+            if( pObj->IsPerceptable() ) {
+                pObj->draw();
+            }
         }
 
     private:
