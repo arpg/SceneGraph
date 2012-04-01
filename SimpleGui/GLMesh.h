@@ -2,6 +2,7 @@
 #define _GL_MESH_H_
 
 #include <SimpleGui/GLObject.h>
+#include <SimpleGui/GLCVars.h>
 
 #include <assimp/assimp.h>
 #include <assimp/aiPostProcess.h>
@@ -47,25 +48,9 @@ class GLMesh : public GLObject
         ////////////////////////////////////////////////////////////////////////////
         void apply_material(const struct aiMaterial *mtl)
         {
-            /*
-            GLfloat no_mat[] = { 0.0, 0.0, 0.0, 1.0 };
-            GLfloat mat_ambient[] = { 0.7, 0.7, 0.7, 1.0 };
-            GLfloat mat_ambient_color[] = { 0.8, 0.8, 0.2, 1.0 };
-            GLfloat mat_diffuse[] = { 0.1, 0.5, 0.8, 1.0 };
-            GLfloat mat_specular[] = { 1.0, 1.0, 1.0, 1.0 };
-            GLfloat no_shininess[] = { 0.0 };
-            GLfloat low_shininess[] = { 5.0 };
-            GLfloat high_shininess[] = { 100.0 };
-            GLfloat mat_emission[] = {0.3, 0.2, 0.2, 0.0};
 
-            glMaterialfv(GL_FRONT, GL_AMBIENT, no_mat);
-            glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_diffuse);
-            glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
-            glMaterialfv(GL_FRONT, GL_SHININESS, high_shininess);
-            glMaterialfv(GL_FRONT, GL_EMISSION, no_mat);
-            return;
-            */
-
+            glShadeModel( GL_FLAT );
+            glDisable( GL_COLOR_MATERIAL );                                 // activate material
 
             float c[4];
 
@@ -83,30 +68,30 @@ class GLMesh : public GLObject
             set_float4( c, 0.8f, 0.8f, 0.8f, 1.0f );
             if(AI_SUCCESS == aiGetMaterialColor(mtl, AI_MATKEY_COLOR_DIFFUSE, &diffuse)){
                 color4_to_float4( &diffuse, c);
-//                printf("Applying GL_DIFFUSE %f, %f, %f, %f\n", c[0], c[1], c[2], c[3] );
+            //    printf("Applying GL_DIFFUSE %f, %f, %f, %f\n", c[0], c[1], c[2], c[3] );
             }
             glMaterialfv( GL_FRONT_AND_BACK, GL_DIFFUSE, c );
 
             set_float4( c, 0.0f, 0.0f, 0.0f, 1.0f );
             if(AI_SUCCESS == aiGetMaterialColor(mtl, AI_MATKEY_COLOR_SPECULAR, &specular)){
                 color4_to_float4(&specular, c);
-//                printf("Applying GL_SPECULAR %f, %f, %f, %f\n", c[0], c[1], c[2], c[3] );
+            //    printf("Applying GL_SPECULAR %f, %f, %f, %f\n", c[0], c[1], c[2], c[3] );
             }
             glMaterialfv( GL_FRONT_AND_BACK, GL_SPECULAR, c );
 
             set_float4( c, 0.2f, 0.2f, 0.2f, 1.0f );
             if(AI_SUCCESS == aiGetMaterialColor(mtl, AI_MATKEY_COLOR_AMBIENT, &ambient)){
                 color4_to_float4( &ambient, c );
- //               printf("Applying GL_AMBIENT %f, %f, %f, %f\n", c[0], c[1], c[2], c[3] );
+            //   printf("Applying GL_AMBIENT %f, %f, %f, %f\n", c[0], c[1], c[2], c[3] );
             }
             glMaterialfv( GL_FRONT_AND_BACK, GL_AMBIENT, c );
 
             set_float4( c, 0.0f, 0.0f, 0.0f, 1.0f );
             if(AI_SUCCESS == aiGetMaterialColor(mtl, AI_MATKEY_COLOR_EMISSIVE, &emission)){
                 color4_to_float4(&emission, c);
-//                printf("Applying GL_EMISSION %f, %f, %f, %f\n", c[0], c[1], c[2], c[3] );
+            //    printf("Applying GL_EMISSION %f, %f, %f, %f\n", c[0], c[1], c[2], c[3] );
             }
-            glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, c);
+            glMaterialfv( GL_FRONT_AND_BACK, GL_EMISSION, c );
 
     
             CheckForGLErrors();
@@ -143,7 +128,7 @@ class GLMesh : public GLObject
             else{
                 fill_mode = GL_FILL;
             }
-            glPolygonMode(GL_FRONT_AND_BACK, fill_mode);
+            glPolygonMode( GL_FRONT_AND_BACK, fill_mode );
             CheckForGLErrors();
 
             max = 1;
@@ -171,11 +156,29 @@ class GLMesh : public GLObject
                 }
                 if( mesh->mNormals != NULL ){
                     glNormal3fv( &mesh->mNormals[index].x );
+             //       printf( "Normal %f, %f, %f\n", mesh->mNormals[index].x,
+              //            mesh->mNormals[index].y, mesh->mNormals[index].z );
 //                    glNormal3f( -mesh->mNormals[index].x, -mesh->mNormals[index].y, -mesh->mNormals[index].z );
                 }
                 glVertex3fv( &mesh->mVertices[index].x );
             }
             glEnd();
+
+            // show normals for debugging
+            if( gConfig.m_bShowMeshNormals ){
+                float s = 10;
+//                glLineWidth( 5 );
+                glBegin( GL_LINES );
+                for( unsigned int ii = 0; ii < face->mNumIndices; ii++ ) {
+                    int index = face->mIndices[ii];
+                    float* p = &mesh->mVertices[index].x;
+                    float* n = &mesh->mNormals[index].x;
+                    glVertex3f( p[0], p[1], p[2] );
+                    glVertex3f( p[0]+s*n[0], p[1]+s*n[1], p[2]+s*n[2] );
+                }
+                glEnd();
+//                glLineWidth( 1 );
+            }
 
         }
 
@@ -260,8 +263,6 @@ class GLMesh : public GLObject
         ////////////////////////////////////////////////////////////////////////////
         void  draw()
         {
-//            glRotatef( 90, 1,0,0 );
-            glColor4f( 1,1,1,1);
             if( m_pScene ){
                 glEnable( GL_DEPTH_TEST );
                 recursive_render( m_pScene, m_pScene->mRootNode );

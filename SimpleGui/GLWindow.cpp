@@ -160,7 +160,7 @@ void GLWindow::UnSelect( unsigned int nId )
 {
     m_mSelected[ nId ] = false;
 }
-
+/*
 /////////////////////////////////////////////////////////////////////////////////
 void _SetupLighting()
 {
@@ -188,7 +188,7 @@ void _SetupLighting()
     glEnable(GL_NORMALIZE);                                     // normalize normal vectors
 
 }
-
+*/
 /////////////////////////////////////////////////////////////////////////////////
 /// Main function called by FLTK to draw the scene.
 void GLWindow::draw() 
@@ -232,8 +232,28 @@ void GLWindow::draw()
     gluLookAt( dPos[0], dPos[1], dPos[2],
             dTarget[0], dTarget[1], dTarget[2], dUp[0], dUp[1], dUp[2] );
 
-    _SetupLighting();
+//    _SetupLighting();
+    {
+        /////
+        GLfloat ambientLight[]  ={ 0.1, 0.1, 0.1, 1.0 };             // set ambient light parameters
+        glLightfv( GL_LIGHT0, GL_AMBIENT, ambientLight );
 
+        GLfloat diffuseLight[] = { 0.8, 0.8, 0.8, 1.0 };             // set diffuse light parameters
+        glLightfv( GL_LIGHT0, GL_DIFFUSE, diffuseLight );
+
+        GLfloat specularLight[] = { 0.5, 0.5, 0.5, 1.0 };                   // set specular light parameters
+        glLightfv(GL_LIGHT0,GL_SPECULAR,specularLight);
+
+        GLfloat lightPos[] = { 0.0, 0.0, -100.0, 0.0};                 // set light position
+        glLightfv( GL_LIGHT0, GL_POSITION, lightPos );
+
+        GLfloat specularReflection[] = { 1.0, 1.0, 1.0, 1.0 };              // set specularity
+        glMaterialfv( GL_FRONT_AND_BACK, GL_SPECULAR, specularReflection );
+        glMateriali( GL_FRONT_AND_BACK, GL_SHININESS, 128 );
+        glEnable( GL_LIGHT0 );                                         // activate light0
+        glEnable( GL_LIGHTING );                                       // enable lighting
+        glLightModelfv( GL_LIGHT_MODEL_AMBIENT, ambientLight );        // set light model
+    }
 
     //DrawSceneGraph();
     m_SceneGraph.draw();
