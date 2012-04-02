@@ -4,6 +4,7 @@
 #include <SimpleGui/FBO.h>
 #include <SimpleGui/GLSceneGraph.h>
 #include <SimpleGui/GLSLHelpers.h>
+#include <SimpleGui/GLCVars.h>
 
 #include <string>
 
@@ -17,7 +18,7 @@ class GLSimCam
         {
             m_bInitDone = false;
             m_pSceneGraph = NULL;
-	    m_pFbo = FBO::Instance();
+            m_pFbo = FBO::Instance();
         }
 
         /////////////////////////////////////////////////////////////////////////////////////////
@@ -25,6 +26,12 @@ class GLSimCam
         void SetPose( const Eigen::Matrix4d& dPose )
         {
             m_dPose = dPose;
+        }
+
+        ///////////////////////////////////////////////////////////////////////////////
+        Eigen::Matrix4d& GetPoseRef()
+        {
+            return m_dPose;
         }
 
         ///////////////////////////////////////////////////////////////////////////////
@@ -41,8 +48,8 @@ class GLSimCam
                 const Eigen::Matrix3d dK,        //< Input: computer vision K matrix
                 const unsigned int nSensorWidth, //< Input: sensor width in pixels
                 const unsigned int nSensorHeight,//< Input: sensor height in pixels
-                double dNear = 1,                //< Input: opengl near clipping plane
-                double dFar = 300                //< Input: opengl far clipping plane
+                double dNear = 10,                //< Input: opengl near clipping plane
+                double dFar = 40                //< Input: opengl far clipping plane
                 )
         {
             m_pSceneGraph = pSceneGraph;
@@ -261,9 +268,6 @@ class GLSimCam
             RenderNormals();
             End();
 
-            // copy from depth buffer
-            ReadDepthPixels( m_vDepthData, m_nSensorWidth, m_nSensorHeight );
-
             // copy from RGBA buffer
 	    // !!! Using ReadPixels with a vector of unsigned ints causes crashes for me,
 	    // I think it has something to do with resizing the vector. - James Marshall
@@ -292,8 +296,57 @@ class GLSimCam
             glUseProgram( m_nNormalShaderProgram );
             glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT );
             m_pSceneGraph->ApplyDfsVisitor( _ShaderVisitor );
+
             glUseProgram(0);
             m_pFbo->End();
+        }
+
+
+        ///////////////////////////////////////////////////////////////////////////////
+        void _ReadDepthPixels()
+        {
+            // ok, now, copy the pixels out of the depth texture, and render it as a point cloud:
+            glReadBuffer( m_nDepthAttachment );
+            glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
+//            std::vector<float> vPixels;
+            unsigned int nBpp = 4;
+            if( m_vDepthData.size() < m_pFbo->TexWidth()*nBpp*m_pFbo->TexHeight() ){
+                m_vDepthData.resize( m_pFbo->TexWidth()*nBpp*m_pFbo->TexHeight() );
+            }
+            char* pPixelData = (char*)&m_vDepthData[0];
+
+            glReadPixels( 0, 0, m_pFbo->TexWidth(), m_pFbo->TexHeight(), GL_DEPTH_COMPONENT, GL_FLOAT, pPixelData );
+
+            bool bFlip = 1;
+            if( bFlip ){
+                int inc = nBpp*m_pFbo->TexWidth();
+                char* pSwap = (char*)malloc( inc );
+                char* pTopDown = pPixelData;
+                char* pBottomUp = &pPixelData[ m_pFbo->TexWidth()*nBpp*m_pFbo->TexHeight() ];
+                for( ; pTopDown < pBottomUp; pTopDown += inc, pBottomUp -= inc ){
+                    memcpy( pSwap, pTopDown, inc );
+                    memcpy( pTopDown, pBottomUp, inc );
+                    memcpy( pBottomUp, pSwap, inc );
+                }
+                free( pSwap );
+            }
+
+            char sName[1024];
+            static int ii = 0;
+            snprintf( sName, 1024, "FBO_%04d.m", ii++ );
+            FILE* f = fopen( sName, "w" );
+            for( unsigned int nRow = 0; nRow < m_pFbo->TexHeight(); nRow++ ){
+                for( unsigned int nCol = 0; nCol < m_pFbo->TexWidth(); nCol++ ){
+                    fprintf( f, "M(%d,%d) = %f;\n", nRow+1, nCol+1, m_vDepthData[nRow*m_pFbo->TexWidth()+nCol] );
+                }
+            }
+            fclose(f);
+
+            Eigen::Matrix3d K = GLGetProjectionMatrix();
+            Eigen::Matrix4d T = GLGetCameraPose();
+            std::cout << "T = \n" << T << std::endl << std::endl;
+            std::cout << "K = \n" << K << std::endl << std::endl;
+
         }
 
         /////////////////////////////////////////////////////////////////////////////////////////
@@ -304,6 +357,12 @@ class GLSimCam
             glUseProgram( m_nDepthShaderProgram );
             glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT );
             m_pSceneGraph->ApplyDfsVisitor( _ShaderVisitor );
+
+            if( gConfig.m_bDebugSimCam ){
+                // copy from depth buffer
+                _ReadDepthPixels();
+            }
+
             glUseProgram(0);
             m_pFbo->End();
         }
@@ -352,6 +411,8 @@ class GLSimCam
             Eigen::Matrix4d M = m_dM.inverse();
             Eigen::Matrix4d T = m_dT.inverse();
 
+            // Map the normalized device coordinates back through the modelview
+            // and projection matrices to find the viewing volume:
             Eigen::Vector4d lbn = T*M*Vec4( -1,-1,-1, 1 );  lbn/=lbn[3];
             Eigen::Vector4d rbn = T*M*Vec4(  1,-1,-1, 1 );  rbn/=rbn[3];
             Eigen::Vector4d ltn = T*M*Vec4( -1, 1,-1, 1 );  ltn/=ltn[3];
@@ -468,11 +529,6 @@ class GLSimCam
             glVertex3d( c[0], c[1], c[2] );
             glVertex3d( c[0]+d[0], c[1]+d[1], c[2]+d[2] );
 
-           // z axis
-//            glColor4f( 1,0.8,0.8,0.1 );
-//            glVertex3dv( c.data() );
-//            glVertex3dv( lbn.data() );
-
             // outline the image
             glColor4f( 1,1,1,1 );
             glVertex3dv( lbn.data() );
@@ -509,7 +565,7 @@ class GLSimCam
         Eigen::Matrix<double,4,4,Eigen::ColMajor>   m_dM; // to save projection matrix
         Eigen::Matrix<double,4,4,Eigen::ColMajor>   m_dT; // to save modelview matrix
         //std::vector<unsigned char>                  m_vImageData;
-	std::vector<float>                          m_vImageData;
+        std::vector<float>                          m_vImageData;
         std::vector<float>                          m_vDepthData;
 };
 

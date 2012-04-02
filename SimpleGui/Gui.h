@@ -6,6 +6,10 @@
 #include <SimpleGui/GLGrid.h>
 #include <SimpleGui/GLText.h>
 #include <SimpleGui/GLMesh.h>
+#include <SimpleGui/GLCVars.h>
+#include <SimpleGui/GetPot> // for friendy command line parsing
+#include <SimpleGui/FBO.h>
+#include <SimpleGui/SimCam.h>
 
 #endif
 

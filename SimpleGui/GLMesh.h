@@ -167,7 +167,6 @@ class GLMesh : public GLObject
             // show normals for debugging
             if( gConfig.m_bShowMeshNormals ){
                 float s = 10;
-//                glLineWidth( 5 );
                 glBegin( GL_LINES );
                 for( unsigned int ii = 0; ii < face->mNumIndices; ii++ ) {
                     int index = face->mIndices[ii];
@@ -177,7 +176,6 @@ class GLMesh : public GLObject
                     glVertex3f( p[0]+s*n[0], p[1]+s*n[1], p[2]+s*n[2] );
                 }
                 glEnd();
-//                glLineWidth( 1 );
             }
 
         }
