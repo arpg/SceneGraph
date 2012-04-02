@@ -148,7 +148,8 @@ class GLSimCam
 
         /////////////////////////////////////////////////////////////////////////////////////////
         /// return pointer to internal RGB buffer
-        unsigned char* RGBDataPtr()
+        //unsigned char* RGBDataPtr()
+	float* RGBDataPtr()
         {
             return &m_vImageData[0];
         }
@@ -264,8 +265,11 @@ class GLSimCam
             ReadDepthPixels( m_vDepthData, m_nSensorWidth, m_nSensorHeight );
 
             // copy from RGBA buffer
-            ReadPixels( m_vImageData, m_nSensorWidth, m_nSensorHeight );
-
+	    // !!! Using ReadPixels with a vector of unsigned ints causes crashes for me,
+	    // I think it has something to do with resizing the vector. - James Marshall
+            //ReadPixels( m_vImageData, m_nSensorWidth, m_nSensorHeight );
+	    ReadDepthPixels( m_vImageData, m_nSensorWidth, m_nSensorHeight);
+	    
             // copy from surface normal buffer (also RGBA)
 //            ReadPixels( m_vNormalData, m_nSensorWidth, m_nSensorHeight );
         }
@@ -504,7 +508,8 @@ class GLSimCam
         Eigen::Matrix4d                             m_dPose; // desired camera pose
         Eigen::Matrix<double,4,4,Eigen::ColMajor>   m_dM; // to save projection matrix
         Eigen::Matrix<double,4,4,Eigen::ColMajor>   m_dT; // to save modelview matrix
-        std::vector<unsigned char>                  m_vImageData;
+        //std::vector<unsigned char>                  m_vImageData;
+	std::vector<float>                          m_vImageData;
         std::vector<float>                          m_vDepthData;
 };
 

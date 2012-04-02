@@ -136,9 +136,7 @@ int main( int argc, char** argv )
     pWin->AddChildToRoot( &mesh );
     pWin->AddChildToRoot( &grid );
 
-    printf("About to seg fault on getting FBO instance!\n");
     pFbo->Init( 256, 256 );
-    printf("I stand corrected, FBO instance retrieved.\n");
     
     // Load shader
     if ( LoadShaders( "Depth.vert", "Depth.frag", g_nDepthShaderProgram) == false) {
