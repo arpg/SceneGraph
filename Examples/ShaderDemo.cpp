@@ -5,7 +5,7 @@
 
 using namespace Eigen;
 
-FBO fbo;
+FBO* pFbo;
 GLuint g_nDepthShaderProgram;
 GLuint g_nNormalShaderProgram;
 const int g_nDepthAttachment = GL_COLOR_ATTACHMENT0_EXT;
@@ -26,17 +26,17 @@ void ShaderVisitor (GLObject* pObj)
 ////////////////////////////////////////////////////////////////////////////////////////////
 void ShowFBOTextures (GLWindow*, void*)
 {
-  DrawCamera(fbo.TexWidth(), fbo.TexHeight(), fbo.m_vColorTextureIds[2], T, M);
+  DrawCamera(pFbo->TexWidth(), pFbo->TexHeight(), pFbo->m_vColorTextureIds[2], T, M);
 
-  DrawTextureAsWindowPercentage(fbo.m_vColorTextureIds[0], fbo.TexWidth(), fbo.TexHeight(),
+  DrawTextureAsWindowPercentage(pFbo->m_vColorTextureIds[0], pFbo->TexWidth(), pFbo->TexHeight(),
 				0, 0.66, 0.33, 1 );
   DrawBorderAsWindowPercentage( 0, 0.66, 0.33, 1 );
 
-  DrawTextureAsWindowPercentage(fbo.m_vColorTextureIds[1], fbo.TexWidth(), fbo.TexHeight(),
+  DrawTextureAsWindowPercentage(pFbo->m_vColorTextureIds[1], pFbo->TexWidth(), pFbo->TexHeight(),
 				0.33, 0.66, 0.66, 1);
   DrawBorderAsWindowPercentage(0.33, 0.66, 0.66, 1);
 
-  DrawTextureAsWindowPercentage(fbo.m_vColorTextureIds[2], fbo.TexWidth(), fbo.TexHeight(),
+  DrawTextureAsWindowPercentage(pFbo->m_vColorTextureIds[2], pFbo->TexWidth(), pFbo->TexHeight(),
           0.66, 0.66, 1, 1);
   DrawBorderAsWindowPercentage(0.66, 0.66, 1, 1);
 
@@ -74,30 +74,30 @@ void ProcessPreRenderShaders (GLWindow* pWin, void*)
   glEnable( GL_LIGHT0 );
 
   // render with shaders
-  fbo.Begin();
+  pFbo->Begin();
   glDrawBuffer(g_nDepthAttachment);
   glUseProgram(g_nDepthShaderProgram);
   glClearColor(0.0, 0.0, 0.0, 1); // I like red
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
   sg.ApplyDfsVisitor(ShaderVisitor);
   glUseProgram(0);
-  fbo.End();
+  pFbo->End();
 
   // Render the RGBA view
-  fbo.Begin();
+  pFbo->Begin();
   glDrawBuffer(g_nRGBAAttachment);
   glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
   sg.ApplyDfsVisitor(ShaderVisitor);
-  fbo.End();
+  pFbo->End();
 
   // Render the Normal view
-  fbo.Begin();
+  pFbo->Begin();
   glDrawBuffer(g_nNormalAttachment);
   glUseProgram(g_nNormalShaderProgram);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
   sg.ApplyDfsVisitor(ShaderVisitor);
   glUseProgram(0);
-  fbo.End();
+  pFbo->End();
 
 
   glMatrixMode(GL_PROJECTION);
@@ -112,6 +112,8 @@ void ProcessPreRenderShaders (GLWindow* pWin, void*)
 int main( int argc, char** argv )
 {
     GetPot cl( argc, argv );
+
+    pFbo = FBO::Instance();
 
     std::string sMesh = cl.follow( "Terrain.ac", 1, "-mesh" );
 
@@ -134,7 +136,9 @@ int main( int argc, char** argv )
     pWin->AddChildToRoot( &mesh );
     pWin->AddChildToRoot( &grid );
 
-    fbo.Init( 256, 256 );
+    printf("About to seg fault on getting FBO instance!\n");
+    pFbo->Init( 256, 256 );
+    printf("I stand corrected, FBO instance retrieved.\n");
     
     // Load shader
     if ( LoadShaders( "Depth.vert", "Depth.frag", g_nDepthShaderProgram) == false) {

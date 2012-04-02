@@ -21,6 +21,7 @@ set( SimpleGui_SOURCES
         GLWindow.cpp
         GLObject.cpp
         GLSceneGraph.cpp
+	FBO.cpp
    )
 
 set( SimpleGui_HEADERS

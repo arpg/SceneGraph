@@ -7,7 +7,7 @@ struct GLWindowConfig
 {
     GLWindowConfig() : 
         m_bDebugLighting( CVarUtils::CreateCVar<>( "debug.Lighting", false, "Turn lighting debugging on") ),
-        m_bShowMeshNormals( CVarUtils::CreateCVar<>( "debug.ShowMeshNormals", true, "Show mesh normals") ) 
+        m_bShowMeshNormals( CVarUtils::CreateCVar<>( "debug.ShowMeshNormals", false, "Show mesh normals") ) 
     {}
 
     bool&  m_bDebugLighting;

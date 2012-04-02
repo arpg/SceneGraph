@@ -8,15 +8,10 @@
 
 class FBO
 {
-
     public:
-
         ///////////////////////////////////////////////////////////////////////////////
-        FBO()
-        {
-            m_vColorTextureIds.resize(8); // should lookup max number...
-        }
-
+        static FBO* Instance();
+	    
         ///////////////////////////////////////////////////////////////////////////////
         ~FBO()
         {
@@ -207,8 +202,6 @@ class FBO
             CheckForGLErrors();
         }
 
-//    private:
-
         GLuint                     m_nFrameBufferId;   // ID of FBO
         GLuint                     m_nRenderBufferId;  // ID of Renderbuffer object
         GLuint                     m_nDepthRenderBufferId;
@@ -219,7 +212,15 @@ class FBO
         unsigned int               m_nTexHeight;
         unsigned int               m_nInitialTexWidth;
         unsigned int               m_nInitialTexHeight;
-        };
+
+    private:
+
+        ///////////////////////////////////////////////////////////////////////////////
+	FBO(){
+	    m_vColorTextureIds.resize(8); // should lookup max number...
+	}        
+	static FBO*                m_pInstance;
+};
 
 #endif
 

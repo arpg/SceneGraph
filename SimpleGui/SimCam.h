@@ -17,6 +17,7 @@ class GLSimCam
         {
             m_bInitDone = false;
             m_pSceneGraph = NULL;
+	    m_pFbo = FBO::Instance();
         }
 
         /////////////////////////////////////////////////////////////////////////////////////////
@@ -134,8 +135,9 @@ class GLSimCam
             m_M(3,2) = -1;
 #endif
 
+	    // May have change this for multiple SimCams (since there is only one FBO)
             // setup our frame buffer object for off screen rendering
-            m_fbo.Init( nSensorWidth, nSensorHeight );
+            m_pFbo->Init( nSensorWidth, nSensorHeight );
 
             // reserve memory buffers
             m_vImageData.resize( nSensorWidth*nSensorHeight );
@@ -179,17 +181,17 @@ class GLSimCam
 
         GLuint RGBTexture()
         {
-            return m_fbo.m_vColorTextureIds[0]; // texture associated with GL_COLOR_ATTACHMENT0_EXT
+            return m_pFbo->m_vColorTextureIds[0]; // texture associated with GL_COLOR_ATTACHMENT0_EXT
         }
 
         GLuint DepthTexture()
         {
-            return m_fbo.m_vColorTextureIds[1]; // texture associated with GL_COLOR_ATTACHMENT0_EXT
+            return m_pFbo->m_vColorTextureIds[1]; // texture associated with GL_COLOR_ATTACHMENT0_EXT
         }
 
         GLuint NormalTexture()
         {
-            return m_fbo.m_vColorTextureIds[2]; // texture associated with GL_COLOR_ATTACHMENT0_EXT
+            return m_pFbo->m_vColorTextureIds[2]; // texture associated with GL_COLOR_ATTACHMENT0_EXT
         }
 
 
@@ -271,35 +273,35 @@ class GLSimCam
         /////////////////////////////////////////////////////////////////////////////////////////
         void RenderRGB()
         {
-            m_fbo.Begin();
+            m_pFbo->Begin();
             glDrawBuffer( m_nRGBAAttachment ); // select fbo attachment...
             glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT );
             m_pSceneGraph->ApplyDfsVisitor( _ShaderVisitor );
-            m_fbo.End();
+            m_pFbo->End();
         }
 
         /////////////////////////////////////////////////////////////////////////////////////////
         void RenderNormals()
         {
-            m_fbo.Begin();
+            m_pFbo->Begin();
             glDrawBuffer( m_nNormalAttachment ); // select fbo attachment...
             glUseProgram( m_nNormalShaderProgram );
             glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT );
             m_pSceneGraph->ApplyDfsVisitor( _ShaderVisitor );
             glUseProgram(0);
-            m_fbo.End();
+            m_pFbo->End();
         }
 
         /////////////////////////////////////////////////////////////////////////////////////////
         void RenderDepth()
         {
-            m_fbo.Begin();
+            m_pFbo->Begin();
             glDrawBuffer( m_nDepthAttachment ); // select fbo attachment...
             glUseProgram( m_nDepthShaderProgram );
             glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT );
             m_pSceneGraph->ApplyDfsVisitor( _ShaderVisitor );
             glUseProgram(0);
-            m_fbo.End();
+            m_pFbo->End();
         }
 
         /////////////////////////////////////////////////////////////////////////////////////////
@@ -325,8 +327,8 @@ class GLSimCam
         {
             m_nSensorWidth = nWidth;
             m_nSensorHeight = nHeight;
-            m_fbo.SetTexWidth( nWidth );
-            m_fbo.SetTexHeight( nHeight );
+            m_pFbo->SetTexWidth( nWidth );
+            m_pFbo->SetTexHeight( nHeight );
         }
 
         /////////////////////////////////////////////////////////////////////////////////////////
@@ -364,9 +366,9 @@ class GLSimCam
             glBegin( GL_QUADS );
             glNormal3f( -1,0,0 );
             glTexCoord2f(               0.0,               0.0  ); glVertex3dv( lbn.data() );
-            glTexCoord2f( m_fbo.m_nTexWidth,               0.0  ); glVertex3dv( rbn.data() );
-            glTexCoord2f( m_fbo.m_nTexWidth, m_fbo.m_nTexHeight ); glVertex3dv( rtn.data() );
-            glTexCoord2f(               0.0, m_fbo.m_nTexHeight ); glVertex3dv( ltn.data() );
+            glTexCoord2f( m_pFbo->m_nTexWidth,               0.0  ); glVertex3dv( rbn.data() );
+            glTexCoord2f( m_pFbo->m_nTexWidth, m_pFbo->m_nTexHeight ); glVertex3dv( rtn.data() );
+            glTexCoord2f(               0.0, m_pFbo->m_nTexHeight ); glVertex3dv( ltn.data() );
             glEnd();
 
             glBindTexture( GL_TEXTURE_RECTANGLE_ARB, 0 );
@@ -487,8 +489,7 @@ class GLSimCam
 
     private:
         GLSceneGraph*                               m_pSceneGraph;
-        FBO                                         m_fbo; // yes, one fbo per cam for now
-
+        FBO*                                        m_pFbo;
         bool                                        m_bInitDone;
         GLuint                                      m_nDepthShaderProgram;
         GLuint                                      m_nNormalShaderProgram;
