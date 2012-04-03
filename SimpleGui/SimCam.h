@@ -549,6 +549,38 @@ class GLSimCam
             glEnd();
         }
 
+        /////////////////////////////////////////////////////////////////////////////////////////
+        Eigen::Matrix3d GetKMatrix()
+        {
+
+            Eigen::Matrix4d M = m_dM.inverse();
+            Eigen::Matrix4d T = m_dT.inverse();
+
+            // Map the normalized device coordinates back through the modelview
+            // and projection matrices to find the viewing volume:
+            Eigen::Vector4d lbn = T*M*Vec4( -1,-1,-1, 1 );  lbn/=lbn[3];
+            Eigen::Vector4d rbn = T*M*Vec4(  1,-1,-1, 1 );  rbn/=rbn[3];
+            Eigen::Vector4d ltn = T*M*Vec4( -1, 1,-1, 1 );  ltn/=ltn[3];
+
+            double dSensorHeightInMeters = (lbn-ltn).norm();
+            double dSensorWidthInMeters = (rbn-lbn).norm();
+            double dFocalLengthInMeters = M(0,0);
+            double fx = dFocalLengthInMeters * m_nSensorWidth / dSensorWidthInMeters;
+            double fy = dFocalLengthInMeters * m_nSensorHeight / dSensorHeightInMeters;
+
+            Eigen::Matrix3d K;
+            K(0,0) = fx;
+            K(0,1) = 0.0; // sx
+            K(0,2) = m_nSensorWidth/2.0; // cx
+            K(1,0) = 0.0;
+            K(1,1) = fy; // fy
+            K(1,2) = m_nSensorHeight/2.0; // cy
+            K(2,0) = 0.0;
+            K(2,1) = 0.0;
+            K(2,2) = 1.0;
+
+            return K;
+        }
 
     private:
 
