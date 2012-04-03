@@ -3,6 +3,7 @@
 using namespace Eigen;
 
 GLSimCam cam;
+GLSimCam cam2;
 
 /////////////////////////////////////////////////////////////////////////////////////////
 void ProcessPreRenderShaders (GLWindow* pWin, void*) 
@@ -16,21 +17,23 @@ void ProcessPreRenderShaders (GLWindow* pWin, void*)
 //   cam.SetIntrinsics( dK );
  
     static float f;
-//    Eigen::Matrix4d dPose = GLCart2T( 0, 0,-20,0,-0.5, 0.1*sin(f+=0.1)+0.5 ); // initial camera pose
     Eigen::Matrix4d dPose = GLCart2T( 0, 0,-20,0, -M_PI/2.0 , 0*sin(f+=0.1) ); // initial camera pose
     cam.SetPose( dPose );
+    Eigen::Matrix4d dPose2 = GLCart2T( 0, 0,-20,0,-0.5, 0.1*sin(f+=0.1)+0.5 ); // initial camera pose
+    cam2.SetPose( dPose2 );
 
     glEnable( GL_LIGHTING );
     glEnable( GL_LIGHT0 );
     glClearColor( 0.0, 0.0, 0.0, 1 );
     cam.Render(); // will render to texture, then copy texture to CPU memory
-
+    cam2.Render();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
 void ShowCameraAndTextures (GLWindow*, void*)
 {
-//    cam.DrawCamera();
+    cam.DrawCamera();
+    cam2.DrawCamera();
 
     /// show textures
     DrawTextureAsWindowPercentage( cam.RGBTexture(), cam.ImageWidth(),
@@ -41,8 +44,8 @@ void ShowCameraAndTextures (GLWindow*, void*)
             cam.ImageHeight(), 0.33, 0.66, 0.66, 1 );
     DrawBorderAsWindowPercentage(0.33, 0.66, 0.66, 1);
 
-    DrawTextureAsWindowPercentage( cam.NormalTexture(), cam.ImageWidth(),
-            cam.ImageHeight(), 0.66, 0.66, 1, 1 );
+    DrawTextureAsWindowPercentage( cam2.DepthTexture(), cam2.ImageWidth(),
+            cam2.ImageHeight(), 0.66, 0.66, 1, 1 );
     DrawBorderAsWindowPercentage(0.66, 0.66, 1, 1);
 
     if( gConfig.m_bDebugSimCam ){ // fi debugging SimCam
@@ -182,6 +185,8 @@ int main( int argc, char** argv )
     Eigen::Matrix3d dK;// = Eigen::Matrix3d::Identity();    // computer vision K matrix
     dK << w,0,50,0,h,50,0,0,1;
     cam.Init( &pWin->SceneGraph(), dPose, dK, w,h );
+    cam2.Init( &pWin->SceneGraph(), dPose, dK, w,h );
+
     CheckForGLErrors();
 
     _SetupLighting();

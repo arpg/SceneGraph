@@ -103,10 +103,13 @@ class GLSimCam
                 fprintf(stderr, "Failed to load the Normal shader.");
             }
 
-            // fixed order...
-            m_nRGBAAttachment = GL_COLOR_ATTACHMENT0_EXT;
-            m_nDepthAttachment = GL_COLOR_ATTACHMENT1_EXT;
-            m_nNormalAttachment = GL_COLOR_ATTACHMENT2_EXT;
+            // fixed order...GL
+            m_nRGBAAttachment = getNextAttachment();
+	    m_nRGBIndex = getNextIndex();
+            m_nDepthAttachment = getNextAttachment();
+	    m_nDepthIndex = getNextIndex();
+            m_nNormalAttachment = getNextAttachment();
+	    m_nNormalIndex = getNextIndex();
 
 #if 0
             // Ok, now compute the corresponding GL_PROJECTION_MATRIX:
@@ -189,17 +192,17 @@ class GLSimCam
 
         GLuint RGBTexture()
         {
-            return m_pFbo->m_vColorTextureIds[0]; // texture associated with GL_COLOR_ATTACHMENT0_EXT
+            return m_pFbo->m_vColorTextureIds[m_nRGBIndex]; // texture associated with GL_COLOR_ATTACHMENT0_EXT
         }
 
         GLuint DepthTexture()
         {
-            return m_pFbo->m_vColorTextureIds[1]; // texture associated with GL_COLOR_ATTACHMENT0_EXT
+            return m_pFbo->m_vColorTextureIds[m_nDepthIndex]; // texture associated with GL_COLOR_ATTACHMENT1_EXT
         }
 
         GLuint NormalTexture()
         {
-            return m_pFbo->m_vColorTextureIds[2]; // texture associated with GL_COLOR_ATTACHMENT0_EXT
+            return m_pFbo->m_vColorTextureIds[m_nNormalIndex]; // texture associated with GL_COLOR_ATTACHMENT2_EXT
         }
 
 
@@ -548,14 +551,21 @@ class GLSimCam
 
 
     private:
+
+	int getNextAttachment();
+	int getNextIndex();
+
         GLSceneGraph*                               m_pSceneGraph;
         FBO*                                        m_pFbo;
         bool                                        m_bInitDone;
         GLuint                                      m_nDepthShaderProgram;
         GLuint                                      m_nNormalShaderProgram;
         int                                         m_nDepthAttachment;
+	int                                         m_nDepthIndex;
         int                                         m_nNormalAttachment;
+	int                                         m_nNormalIndex;
         int                                         m_nRGBAAttachment;
+	int                                         m_nRGBIndex;
         unsigned int                                m_nSensorWidth;
         unsigned int                                m_nSensorHeight;
         double                                      m_dNear;

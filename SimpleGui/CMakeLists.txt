@@ -22,6 +22,7 @@ set( SimpleGui_SOURCES
         GLObject.cpp
         GLSceneGraph.cpp
 	FBO.cpp
+	SimCam.cpp
    )
 
 set( SimpleGui_HEADERS
