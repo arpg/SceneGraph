@@ -153,6 +153,8 @@ class GLSimCam
             m_vImageData.resize( nSensorWidth*nSensorHeight );
             m_vDepthData.resize( nSensorWidth*nSensorHeight );
 
+	    PboInit();
+
             m_bInitDone = true;
         }
 
@@ -267,7 +269,7 @@ class GLSimCam
         {
             Begin();
             RenderRGB();
-            RenderDepth();
+	    RenderDepth();
             RenderNormals();
             End();
 
@@ -275,11 +277,27 @@ class GLSimCam
 	    // !!! Using ReadPixels with a vector of unsigned ints causes crashes for me,
 	    // I think it has something to do with resizing the vector. - James Marshall
             //ReadPixels( m_vImageData, m_nSensorWidth, m_nSensorHeight );
-	    ReadDepthPixels( m_vImageData, m_nSensorWidth, m_nSensorHeight);
-	    
+	    //ReadDepthPixels( m_vImageData, m_nSensorWidth, m_nSensorHeight);
+
             // copy from surface normal buffer (also RGBA)
 //            ReadPixels( m_vNormalData, m_nSensorWidth, m_nSensorHeight );
         }
+
+        /////////////////////////////////////////////////////////////////////////////////////////
+	GLubyte* CaptureRGB() {
+	  return rgbBuffer;
+	}
+
+        /////////////////////////////////////////////////////////////////////////////////////////
+	float* CaptureDepth() {
+	  return depthBuffer;
+	}
+
+        /////////////////////////////////////////////////////////////////////////////////////////
+	void PboReadRGB(unsigned char* buff);
+
+        /////////////////////////////////////////////////////////////////////////////////////////
+	void PboReadDepth(unsigned char* buff);
 
         /////////////////////////////////////////////////////////////////////////////////////////
         void RenderRGB()
@@ -288,6 +306,9 @@ class GLSimCam
             glDrawBuffer( m_nRGBAAttachment ); // select fbo attachment...
             glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT );
             m_pSceneGraph->ApplyDfsVisitor( _ShaderVisitor );
+	    
+	    PboReadRGB();
+
             m_pFbo->End();
         }
 
@@ -367,6 +388,9 @@ class GLSimCam
             }
 
             glUseProgram(0);
+
+	    PboReadDepth();
+
             m_pFbo->End();
         }
 
@@ -583,10 +607,15 @@ class GLSimCam
         }
 
     private:
-
+        void PboInit();
+	void PboReadRGB();
+	void PboReadDepth();
+	void copyBytes(unsigned char* src, int width, int height, unsigned char* dst);
 	int getNextAttachment();
 	int getNextIndex();
 
+	GLubyte*                                    rgbBuffer;
+	GLfloat*                                    depthBuffer;      
         GLSceneGraph*                               m_pSceneGraph;
         FBO*                                        m_pFbo;
         bool                                        m_bInitDone;
