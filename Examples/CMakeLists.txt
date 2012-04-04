@@ -23,4 +23,9 @@ add_executable( SimCamDemo SimCamDemo.cpp )
 target_link_libraries( SimCamDemo ${SimpleGui_LIBRARIES} )
 add_dependencies( SimCamDemo SimpleGui )
 
+include_directories( ${SimpleGui_INCLUDE_DIRS} )
+add_executable( Axis_Demo RenderAxis.cpp )
+target_link_libraries( Axis_Demo ${SimpleGui_LIBRARIES} )
+add_dependencies( Axis_Demo SimpleGui )
+
 

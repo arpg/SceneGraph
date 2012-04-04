@@ -32,6 +32,7 @@ set( SimpleGui_HEADERS
         GLMesh.h
         GLText.h
         GLGrid.h
+        GLAxis.h
    )
 
 # set for "export_library", below 
