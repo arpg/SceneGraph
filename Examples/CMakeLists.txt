@@ -33,5 +33,9 @@ add_executable( Axis_Demo RenderAxis.cpp )
 target_link_libraries( Axis_Demo ${SimpleGui_LIBRARIES} )
 add_dependencies( Axis_Demo SimpleGui )
 
+include_directories( ${SimpleGui_INCLUDE_DIRS} )
+add_executable( HELLo HELLo.cpp )
+target_link_libraries( HELLo ${SimpleGui_LIBRARIES} )
+add_dependencies( HELLo SimpleGui )
 
 
