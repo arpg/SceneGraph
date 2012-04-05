@@ -270,7 +270,7 @@ class GLSimCam
             Begin();
             RenderRGB();
 	    RenderDepth();
-            RenderNormals();
+            //RenderNormals();
             End();
         }
 
@@ -279,16 +279,9 @@ class GLSimCam
 	  return rgbBuffer;
 	}
 
-        /////////////////////////////////////////////////////////////////////////////////////////
-	GLfloat* CaptureDepth() {
+	GLubyte* CaptureDepth() {
 	  return depthBuffer;
 	}
-
-        /////////////////////////////////////////////////////////////////////////////////////////
-	void PboReadRGB(unsigned char* buff);
-
-        /////////////////////////////////////////////////////////////////////////////////////////
-	void PboReadDepth(unsigned char* buff);
 
         /////////////////////////////////////////////////////////////////////////////////////////
         void RenderRGB()
@@ -296,9 +289,8 @@ class GLSimCam
             m_pFbo->Begin();
             glDrawBuffer( m_nRGBAttachment ); // select fbo attachment...
             glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT );
-            m_pSceneGraph->ApplyDfsVisitor( _ShaderVisitor );
-	    
-	    PboReadRGB();
+	    m_pSceneGraph->ApplyDfsVisitor( _ShaderVisitor );
+	    PboRead(RGB, m_nRGBAttachment);	    
 
             m_pFbo->End();
         }
@@ -366,23 +358,23 @@ class GLSimCam
 
         /////////////////////////////////////////////////////////////////////////////////////////
         void RenderDepth()
-        {
-            m_pFbo->Begin();
+        {        
+	    m_pFbo->Begin();
             glDrawBuffer( m_nDepthAttachment ); // select fbo attachment...
-            glUseProgram( m_nDepthShaderProgram );
+   	    glUseProgram( m_nDepthShaderProgram );
             glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT );
             m_pSceneGraph->ApplyDfsVisitor( _ShaderVisitor );
 
-            if( gConfig.m_bDebugSimCam ){
+            PboRead(DEPTH, m_nDepthAttachment);
+
+	    if( gConfig.m_bDebugSimCam ){
                 // copy from depth buffer
                 _ReadDepthPixels();
             }
-
+	    	 
             glUseProgram(0);
 
-	    PboReadDepth();
-
-            m_pFbo->End();
+	    m_pFbo->End();
         }
 
         /////////////////////////////////////////////////////////////////////////////////////////
@@ -599,13 +591,17 @@ class GLSimCam
 
     private:
         void PboInit();
-	void PboReadRGB();
-	void PboReadDepth();
+	void PboRead(int offset, GLenum bufferToRead);
 	int getNextAttachment();
 	int getNextIndex();
 
+	static int                                  RGB;
+	static int                                  DEPTH;
+	GLuint*                                     pboIds;
+	int                                         index0;
+	int                                         index2;
 	GLubyte*                                    rgbBuffer;
-	GLfloat*                                    depthBuffer;      
+	GLubyte*                                    depthBuffer;      
         GLSceneGraph*                               m_pSceneGraph;
         FBO*                                        m_pFbo;
         bool                                        m_bInitDone;

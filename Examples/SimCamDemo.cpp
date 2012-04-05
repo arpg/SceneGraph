@@ -25,6 +25,7 @@ void ProcessPreRenderShaders (GLWindow* pWin, void*)
     glEnable( GL_LIGHTING );
     glEnable( GL_LIGHT0 );
     glClearColor( 0.0, 0.0, 0.0, 1 );
+
     cam.Render(); // will render to texture, then copy texture to CPU memory
     cam2.Render();
 }
@@ -37,22 +38,22 @@ void ShowCameraAndTextures (GLWindow*, void*)
 
     /// show textures
     DrawTextureAsWindowPercentage( cam.RGBTexture(), cam.ImageWidth(),
-            cam.ImageHeight(), 0, 0.66, 0.33, 1 );
+				   cam.ImageHeight(), 0, 0.66, 0.33, 1 );
     DrawBorderAsWindowPercentage( 0, 0.66, 0.33, 1 );
 
     DrawTextureAsWindowPercentage( cam.DepthTexture(), cam.ImageWidth(),
-            cam.ImageHeight(), 0.33, 0.66, 0.66, 1 );
+				   cam.ImageHeight(), 0.33, 0.66, 0.66, 1 );
     DrawBorderAsWindowPercentage(0.33, 0.66, 0.66, 1);
-
+     
     DrawTextureAsWindowPercentage( cam2.DepthTexture(), cam2.ImageWidth(),
-            cam2.ImageHeight(), 0.66, 0.66, 1, 1 );
+				   cam2.ImageHeight(), 0.66, 0.66, 1, 1 );
     DrawBorderAsWindowPercentage(0.66, 0.66, 1, 1);
 
-
-    if( gConfig.m_bDebugCaptureRGB ) {
-        unsigned char* buff = cam.CaptureRGB();
-	glDrawPixels(200, 200, GL_RGBA, GL_UNSIGNED_BYTE, buff);
-    }
+    PushOrtho(200, 200);
+    unsigned char* buff = cam2.CaptureDepth();
+     
+    glDrawPixels(200, 200, GL_RGB, GL_UNSIGNED_BYTE, buff);
+    PopOrtho();
 
     if( gConfig.m_bDebugSimCam ){ // fi debugging SimCam
         float* pDepth = cam.DepthDataPtr();
