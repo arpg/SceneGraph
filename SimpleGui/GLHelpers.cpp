@@ -27,7 +27,7 @@ void _CheckForGLErrors( const char *sFile, const int nLine )
         //FIXME: On my box, glError is not totally free of error.
         // there's probably something wrong with one of the glEnable(...) in GLWindow.cpp
         // so I temporarily comment out the exit() call here. 
-        // exit( -1 );
+        exit( -1 );
     }
 }
 

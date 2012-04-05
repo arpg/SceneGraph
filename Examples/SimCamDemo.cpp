@@ -193,8 +193,6 @@ int main( int argc, char** argv )
     cam.Init( &pWin->SceneGraph(), dPose, dK, w,h );
     cam2.Init( &pWin->SceneGraph(), dPose, dK, w,h );
 
-    CheckForGLErrors();
-
     _SetupLighting();
 
     // Funcation callbacks

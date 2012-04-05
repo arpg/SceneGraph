@@ -7,6 +7,10 @@ GLSimCam cam;
 zmq::context_t g_Context(1);
 zmq::socket_t g_Socket( g_Context, ZMQ_PUB );
 
+const int RGB_CHAN = 3;
+const int WIDTH = 200;
+const int HEIGHT = 200;
+
 /////////////////////////////////////////////////////////////////////////////////////////
 void ProcessPreRenderShaders (GLWindow* pWin, void*) 
 {
@@ -32,11 +36,11 @@ void ShowCameraAndTextures (GLWindow*, void*)
     
     GLubyte* buff = cam.CaptureRGB();
     
-    PushOrtho(300, 300);
-    glDrawPixels(200, 200, GL_RGBA, GL_UNSIGNED_BYTE, buff);
+    PushOrtho(WIDTH, HEIGHT);
+    glDrawPixels(WIDTH, HEIGHT, GL_RGB, GL_UNSIGNED_BYTE, buff);
     PopOrtho();
 
-    zmq::message_t Msg(200 * 200 * 4 + 12);
+    zmq::message_t Msg(WIDTH * HEIGHT * RGB_CHAN + 12);
     int numImages = 1;
     char* MsgPtr = (char*)Msg.data();
 
@@ -44,23 +48,19 @@ void ShowCameraAndTextures (GLWindow*, void*)
     memcpy( MsgPtr, &numImages, sizeof(numImages) );
     MsgPtr += sizeof(numImages);
 
-    int ImgWidth = 200;
-    int ImgHeight = 200;
-    int ImgType = 24;
-    int ImgSize = ImgWidth * ImgHeight * 4;
+    int ImgType = 16; // Or 24?
+    int ImgSize = WIDTH * HEIGHT * RGB_CHAN;
 
-    memcpy( MsgPtr, &ImgWidth, sizeof(ImgWidth) );
-    MsgPtr += sizeof(ImgWidth);
-    memcpy( MsgPtr, &ImgHeight, sizeof(ImgHeight) );
-    MsgPtr += sizeof(ImgHeight);
+    memcpy( MsgPtr, &WIDTH, sizeof(WIDTH) );
+    MsgPtr += sizeof(WIDTH);
+    memcpy( MsgPtr, &HEIGHT, sizeof(HEIGHT) );
+    MsgPtr += sizeof(HEIGHT);
     memcpy( MsgPtr, &ImgType, sizeof(ImgType) );
     MsgPtr += sizeof(ImgType);
 
     memcpy( MsgPtr, buff, ImgSize );
     
     g_Socket.send(Msg);
-
-    PopOrtho();
 }
 
 
@@ -98,7 +98,6 @@ void _SetupLighting()
 
 }
 
-
 /////////////////////////////////////////////////////////////////////////////////////////
 int main( int argc, char** argv )
 {
@@ -128,14 +127,12 @@ int main( int argc, char** argv )
     // register objects
     pWin->AddChildToRoot( &mesh );
 
-    int w=200;
-    int h=200;
+    int w = WIDTH;
+    int h = HEIGHT;
     Eigen::Matrix4d dPose = GLCart2T( 1, 1,-4,0,0,M_PI/4 ); // initial camera pose
     Eigen::Matrix3d dK;// = Eigen::Matrix3d::Identity();    // computer vision K matrix
     dK << w,0,50,0,h,50,0,0,1;
     cam.Init( &pWin->SceneGraph(), dPose, dK, w,h );
-
-    CheckForGLErrors();
 
     _SetupLighting();
 

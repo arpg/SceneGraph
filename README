@@ -22,4 +22,4 @@ CVARS (svn co https://glconsole.svn.sourceforge.net/svnroot/glconsole glconsole)
 OpenGL
 ASSIMP
 Eigen3
-
+ZeroMQ

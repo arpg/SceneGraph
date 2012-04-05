@@ -104,7 +104,7 @@ class GLSimCam
             }
 
             // fixed order...GL
-            m_nRGBAAttachment = getNextAttachment();
+            m_nRGBAttachment = getNextAttachment();
 	    m_nRGBIndex = getNextIndex();
             m_nDepthAttachment = getNextAttachment();
 	    m_nDepthIndex = getNextIndex();
@@ -272,15 +272,6 @@ class GLSimCam
 	    RenderDepth();
             RenderNormals();
             End();
-
-            // copy from RGBA buffer
-	    // !!! Using ReadPixels with a vector of unsigned ints causes crashes for me,
-	    // I think it has something to do with resizing the vector. - James Marshall
-            //ReadPixels( m_vImageData, m_nSensorWidth, m_nSensorHeight );
-	    //ReadDepthPixels( m_vImageData, m_nSensorWidth, m_nSensorHeight);
-
-            // copy from surface normal buffer (also RGBA)
-//            ReadPixels( m_vNormalData, m_nSensorWidth, m_nSensorHeight );
         }
 
         /////////////////////////////////////////////////////////////////////////////////////////
@@ -289,7 +280,7 @@ class GLSimCam
 	}
 
         /////////////////////////////////////////////////////////////////////////////////////////
-	float* CaptureDepth() {
+	GLfloat* CaptureDepth() {
 	  return depthBuffer;
 	}
 
@@ -303,7 +294,7 @@ class GLSimCam
         void RenderRGB()
         {
             m_pFbo->Begin();
-            glDrawBuffer( m_nRGBAAttachment ); // select fbo attachment...
+            glDrawBuffer( m_nRGBAttachment ); // select fbo attachment...
             glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT );
             m_pSceneGraph->ApplyDfsVisitor( _ShaderVisitor );
 	    
@@ -610,7 +601,6 @@ class GLSimCam
         void PboInit();
 	void PboReadRGB();
 	void PboReadDepth();
-	void copyBytes(unsigned char* src, int width, int height, unsigned char* dst);
 	int getNextAttachment();
 	int getNextIndex();
 
@@ -625,7 +615,7 @@ class GLSimCam
 	int                                         m_nDepthIndex;
         int                                         m_nNormalAttachment;
 	int                                         m_nNormalIndex;
-        int                                         m_nRGBAAttachment;
+        int                                         m_nRGBAttachment;
 	int                                         m_nRGBIndex;
         unsigned int                                m_nSensorWidth;
         unsigned int                                m_nSensorHeight;

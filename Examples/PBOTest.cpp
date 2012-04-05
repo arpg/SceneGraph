@@ -27,10 +27,12 @@ void ShowCameraAndTextures (GLWindow*, void*)
             cam.ImageHeight(), 0, 0.66, 0.33, 1 );
     DrawBorderAsWindowPercentage( 0, 0.66, 0.33, 1 );
     
-    GLubyte* buff = cam.CaptureRGB();
-    PushOrtho(300, 300);
+    //    GLubyte* buff = cam.CaptureRGB();
+    GLfloat* buff = cam.CaptureDepth();
+    PushOrtho(200, 200);
     //if( gConfig.m_bDebugCaptureRGB ) {
-        glDrawPixels(200, 200, GL_RGBA, GL_UNSIGNED_BYTE, buff);
+    //        glDrawPixels(200, 200, GL_RGB, GL_UNSIGNED_BYTE, buff);
+        glDrawPixels(200, 200, GL_DEPTH_COMPONENT, GL_FLOAT, buff);
 	//}
     PopOrtho();
 }

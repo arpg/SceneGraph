@@ -53,7 +53,7 @@ class FBO
         }
 
         ///////////////////////////////////////////////////////////////////////////////
-        /// Change rtt texture widh -- will not re-allocate mem if possible
+        /// Change rtt texture width -- will not re-allocate mem if possible
         void SetTexWidth(
                 unsigned int nTexWidth
                 )
@@ -81,7 +81,7 @@ class FBO
          }
 
         ///////////////////////////////////////////////////////////////////////////////
-        // User should alread have called glDrawBuffer so select the fbo attachment...
+        // User should already have called glDrawBuffer so select the fbo attachment...
         void Begin()
         {
             // adjust viewport and projection matrix to texture dimension
@@ -124,17 +124,17 @@ class FBO
 
             glGetIntegerv( GL_VIEWPORT,  &m_vViewport[0] );
 
-            // Generate color textures  
+            // Generate color textures 
+	     
             glGenTextures( m_vColorTextureIds.size(), &m_vColorTextureIds[0] ); 
             for( size_t ii = 0; ii < m_vColorTextureIds.size(); ii++ ){
                 // Bind the texture 
                 glBindTexture( GL_TEXTURE_RECTANGLE_ARB, m_vColorTextureIds[ii] ); 
 
                 // Create a standard texture with the width and height of our window  
-                glTexImage2D( GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGBA, m_nTexWidth, 
-                        m_nTexHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL );
-                CheckForGLErrors();
-
+                glTexImage2D( GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB, m_nTexWidth, 
+                        m_nTexHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL );
+  
                 // Setup the basic texture parameters  
 //                glTexParameterf( GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
                 glTexParameterf( GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
@@ -150,22 +150,20 @@ class FBO
                 // Bind the texture
                 glBindTexture( GL_TEXTURE_RECTANGLE_ARB, m_nDepthTextureId );
 
-                /*
-                   glTexParameterf( GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-                   glTexParameterf( GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-                   glTexParameterf( GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
-                   glTexParameterf( GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
-                   glTexParameteri( GL_TEXTURE_RECTANGLE_ARB, GL_DEPTH_TEXTURE_MODE, GL_LUMINANCE );
+                
+                //   glTexParameterf( GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+                //   glTexParameterf( GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+                //   glTexParameterf( GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+                //   glTexParameterf( GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+                //   glTexParameteri( GL_TEXTURE_RECTANGLE_ARB, GL_DEPTH_TEXTURE_MODE, GL_LUMINANCE );
 
-                 */
-                glTexImage2D( GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGBA, m_nTexWidth, 
-                        m_nTexHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL );
+                glTexImage2D( GL_TEXTURE_RECTANGLE_ARB, 0, GL_DEPTH_COMPONENT, m_nTexWidth, 
+                        m_nTexHeight, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, NULL );
 
                 //  Unbind the texture  
                 glBindTexture(GL_TEXTURE_RECTANGLE_ARB, 0);  
             }
             CheckForGLErrors();
-
 
             // create a framebuffer object, you need to delete them when program exits.
             glGenFramebuffersEXT( 1, &m_nFrameBufferId );
