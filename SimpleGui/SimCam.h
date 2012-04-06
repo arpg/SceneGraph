@@ -467,29 +467,6 @@ class GLSimCam
             return K;
         }
 
-        /////////////////////////////////////////////////////////////////////////////////////////
-        void DrawRangeData()
-        {
-        }
-
-        /////////////////////////////////////////////////////////////////////////////////////////
-        void RangeData( std::vector<float>& vRangeData )
-        {
-            // transform depth to 3d
-            Eigen::Matrix3d invK = GetKMatrix().inverse();
-            Eigen::Vector3d p;
-            Eigen::Vector3d ray;
-            for( int jj = 0; jj <  m_nSensorHeight; jj++ ){
-                for( int ii = 0; ii <  m_nSensorWidth; ii++ ){
-                    float d = 
-                    p << ii,jj,1; // homogeneous image point
-                    ray = invK*p;
-                    ray = ray/ray.norm();
-                }
-            }
-        }
-
-
         FBO*                                        m_pFbo;
         GLSceneGraph*                               m_pSceneGraph;
         unsigned int                                m_nSensorWidth;

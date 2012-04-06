@@ -43,7 +43,7 @@ void SimCamMode::PboRead()
 
     // map the PBO that contains the framebuffer pixels
     // Read from the next buffer since the other is likely being written to still
-    glBindBufferARB(GL_PIXEL_PACK_BUFFER_ARB, pboIds[pboIndex]);
+    glBindBufferARB(GL_PIXEL_PACK_BUFFER_ARB, pboIds[nextIndex]);
     GLubyte* src = (GLubyte*)glMapBufferARB(GL_PIXEL_PACK_BUFFER_ARB, GL_READ_ONLY_ARB);
 
     memcpy(buffer, src, data_size);
