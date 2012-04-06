@@ -4,6 +4,8 @@
 using namespace Eigen;
 
 GLSimCam cam;
+SimCamMode rgbMode;
+
 zmq::context_t g_Context(1);
 zmq::socket_t g_Socket( g_Context, ZMQ_PUB );
 
@@ -30,11 +32,11 @@ void ShowCameraAndTextures (GLWindow*, void*)
     cam.DrawCamera();
     
     /// show textures
-    DrawTextureAsWindowPercentage( cam.RGBTexture(), cam.ImageWidth(),
+    DrawTextureAsWindowPercentage( rgbMode.Texture(), cam.ImageWidth(),
             cam.ImageHeight(), 0, 0.66, 0.33, 1 );
     DrawBorderAsWindowPercentage( 0, 0.66, 0.33, 1 );
     
-    GLubyte* buff = cam.CaptureRGB();
+    GLubyte* buff = rgbMode.Capture();
     
     PushOrtho(WIDTH, HEIGHT);
     glDrawPixels(WIDTH, HEIGHT, GL_RGB, GL_UNSIGNED_BYTE, buff);
@@ -133,6 +135,8 @@ int main( int argc, char** argv )
     Eigen::Matrix3d dK;// = Eigen::Matrix3d::Identity();    // computer vision K matrix
     dK << w,0,50,0,h,50,0,0,1;
     cam.Init( &pWin->SceneGraph(), dPose, dK, w,h );
+
+    rgbMode.Init(&cam, false, 0);
 
     _SetupLighting();
 

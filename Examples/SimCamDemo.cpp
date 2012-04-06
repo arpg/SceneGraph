@@ -3,7 +3,12 @@
 using namespace Eigen;
 
 GLSimCam cam;
+SimCamMode camRGBMode;
+SimCamMode camNormalMode;
+SimCamMode camDepthMode;
+
 GLSimCam cam2;
+SimCamMode cam2DepthMode;
 
 /////////////////////////////////////////////////////////////////////////////////////////
 void ProcessPreRenderShaders (GLWindow* pWin, void*) 
@@ -37,70 +42,22 @@ void ShowCameraAndTextures (GLWindow*, void*)
     cam2.DrawCamera();
 
     /// show textures
-    DrawTextureAsWindowPercentage( cam.RGBTexture(), cam.ImageWidth(),
+    DrawTextureAsWindowPercentage( camRGBMode.Texture(), cam.ImageWidth(),
 				   cam.ImageHeight(), 0, 0.66, 0.33, 1 );
     DrawBorderAsWindowPercentage( 0, 0.66, 0.33, 1 );
 
-    DrawTextureAsWindowPercentage( cam.DepthTexture(), cam.ImageWidth(),
+    DrawTextureAsWindowPercentage( camNormalMode.Texture(), cam.ImageWidth(),
 				   cam.ImageHeight(), 0.33, 0.66, 0.66, 1 );
     DrawBorderAsWindowPercentage(0.33, 0.66, 0.66, 1);
      
-    DrawTextureAsWindowPercentage( cam2.DepthTexture(), cam2.ImageWidth(),
-				   cam2.ImageHeight(), 0.66, 0.66, 1, 1 );
+    DrawTextureAsWindowPercentage( camDepthMode.Texture(), cam.ImageWidth(),
+				   cam.ImageHeight(), 0.66, 0.66, 1, 1 );
     DrawBorderAsWindowPercentage(0.66, 0.66, 1, 1);
 
+    unsigned char* buff = cam2DepthMode.Capture();
     PushOrtho(200, 200);
-    unsigned char* buff = cam2.CaptureDepth();
-     
     glDrawPixels(200, 200, GL_RGB, GL_UNSIGNED_BYTE, buff);
     PopOrtho();
-
-    if( gConfig.m_bDebugSimCam ){ // fi debugging SimCam
-        float* pDepth = cam.DepthDataPtr();
-
-        glPointSize( 3 );
-        glColor4f( 1,0,1,1 );
-        glBegin( GL_POINTS );
-        int h = cam.ImageHeight();
-        int w = cam.ImageWidth();
-        for( int v = 0; v < h; v++ ){
-            for( int u = 0; u < w; u++ ){
-
-                Eigen::Matrix4d M = cam.GetProjectionMatrixRef();
-
-                Eigen::Matrix3d K;
-                K(0,0) = M(0,0); // P00 = 1/tan(fov/2) ==> fx = P00
-                K(0,1) = 0.0; // sx
-                K(0,2) = w/2.0; // cx
-                K(1,0) = 0.0;
-                K(1,1) = M(1,1); // fy
-                K(1,2) = h/2.0; // cy
-                K(2,0) = 0.0;
-                K(2,1) = 0.0;
-                K(2,2) = 1.0;
-
-
-                /*
-                double near = 10;
-                double far = 40; 
-                double d = pDepth[v*cam.ImageWidth()+u];
-                double z = 2.0*far*near / (far + near - (far - near)*(2.0*d -1));
-
-                // now how to convet to xyz? x/z = u/f
-                double x = z*u/200.0;
-                double y = z*v/200.0;
-
-                Eigen::Vector4d p;
-                p << x,y,z-22,1;
-                //            p = cam.GetPoseRef() * p;
-
-                glVertex3dv( p.data() );
-                */
-            }
-        }
-        glEnd();
-        glPointSize( 1 );
-    }
 }
 
 
@@ -191,8 +148,23 @@ int main( int argc, char** argv )
     Eigen::Matrix4d dPose = GLCart2T( 1, 1,-4,0,0,M_PI/4 ); // initial camera pose
     Eigen::Matrix3d dK;// = Eigen::Matrix3d::Identity();    // computer vision K matrix
     dK << w,0,50,0,h,50,0,0,1;
+
+    GLuint depthShaderProgram;
+    if ( LoadShaders( "Depth.vert", "Depth.frag", depthShaderProgram ) == false) {
+        fprintf(stderr, "Failed to load the Depth shader.");
+    }
+    GLuint normalShaderProgram;
+    if ( LoadShaders( "Normals.vert", "Normals.frag", normalShaderProgram ) == false) {
+        fprintf(stderr, "Failed to load the Normal shader.");
+    }
+
     cam.Init( &pWin->SceneGraph(), dPose, dK, w,h );
+    camRGBMode.Init(&cam, false, 0);
+    camDepthMode.Init(&cam, true, depthShaderProgram);
+    camNormalMode.Init(&cam, true, normalShaderProgram);
+
     cam2.Init( &pWin->SceneGraph(), dPose, dK, w,h );
+    cam2DepthMode.Init(&cam2, true, depthShaderProgram);
 
     _SetupLighting();
 

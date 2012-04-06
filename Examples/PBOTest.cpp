@@ -3,6 +3,7 @@
 using namespace Eigen;
 
 GLSimCam cam;
+SimCamMode depthMode;
 
 /////////////////////////////////////////////////////////////////////////////////////////
 void ProcessPreRenderShaders (GLWindow* pWin, void*) 
@@ -23,11 +24,11 @@ void ShowCameraAndTextures (GLWindow*, void*)
     cam.DrawCamera();
     
     /// show textures
-    DrawTextureAsWindowPercentage( cam.RGBTexture(), cam.ImageWidth(),
+    DrawTextureAsWindowPercentage( depthMode.Texture(), cam.ImageWidth(),
             cam.ImageHeight(), 0, 0.66, 0.33, 1 );
     DrawBorderAsWindowPercentage( 0, 0.66, 0.33, 1 );
     
-    GLubyte* buff = cam.CaptureDepth();
+    GLubyte* buff = depthMode.Capture();
     PushOrtho(200, 200);
 
     glDrawPixels(200, 200, GL_RGB, GL_UNSIGNED_BYTE, buff);
@@ -107,6 +108,11 @@ int main( int argc, char** argv )
     dK << w,0,50,0,h,50,0,0,1;
     cam.Init( &pWin->SceneGraph(), dPose, dK, w,h );
 
+    GLuint depthShaderProgram;
+    if ( LoadShaders( "Depth.vert", "Depth.frag", depthShaderProgram ) == false) {
+      fprintf(stderr, "Failed to load the Depth shader.");
+    }
+    depthMode.Init(&cam, true, depthShaderProgram);
     CheckForGLErrors();
 
     _SetupLighting();

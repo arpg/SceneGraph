@@ -1,80 +1,108 @@
 #include "SimCam.h"
 
-static const int PBO_COUNT = 4; // 2 for Depth, 2 for RGB
+static const int PBO_COUNT = 2;
 static int m_nUsedAttachments = 0;
 static int m_nIndex = 0;
 
-
-int GLSimCam::RGB = 0;
-int GLSimCam::DEPTH = 2;
-
-void GLSimCam::PboInit() {
+void SimCamMode::PboInit() {
     pboIds = new GLuint[PBO_COUNT];
-    index0 = 0;
-    index2 = 0;
-
-    static int DATA_SIZE = m_nSensorWidth * m_nSensorHeight * 3;
+    pboIndex = 0;
+ 
+    data_size = simCam->m_nSensorWidth * simCam->m_nSensorHeight * numberOfChannels;
     // Create pixel buffer objects
     glGenBuffersARB(PBO_COUNT, pboIds);
     // TODO: cleanup when done and support resizing
 
-    // 2 buffers for RGB, 2 for depth
+    // 2 buffers, so that one can be read while the other is being written.
     for (int i = 0; i < PBO_COUNT; i++) {
         glBindBufferARB(GL_PIXEL_PACK_BUFFER_ARB, pboIds[i]);
-	glBufferDataARB(GL_PIXEL_PACK_BUFFER_ARB, DATA_SIZE, 0, GL_STREAM_READ_ARB); // 3 bytes
+	glBufferDataARB(GL_PIXEL_PACK_BUFFER_ARB, data_size, 0, GL_STREAM_READ_ARB);
     }
     glBindBufferARB(GL_PIXEL_PACK_BUFFER_ARB, 0);
   
     // allocate buffer to store frame
-    rgbBuffer = new GLubyte[DATA_SIZE];
-    depthBuffer = new GLubyte[DATA_SIZE];
+    buffer = new GLubyte[data_size];
 }
 
-void GLSimCam::PboRead(int offset, GLenum bufferToRead) {
+void SimCamMode::PboRead() {
     int nextIndex = 0;
-    int currIndex = 0;
 
-    if (offset == RGB) {
-        index0 = (index0 + 1) % 2;
-	nextIndex = (index0 + 1) % 2;
-	currIndex = index0;
-    } else {    
-        index2 = (index2 + 1) % 2;
-	nextIndex = (index2 + 1) % 2;
-	currIndex = index2;
-    }
+    pboIndex = (pboIndex + 1) % 2;
+    nextIndex = (pboIndex + 1) % 2;
 
-    glReadBuffer(bufferToRead);
+    glReadBuffer(attachmentIndex);
 
     // Copy pixels from framebuffer to PBO
-    glBindBufferARB(GL_PIXEL_PACK_BUFFER_ARB, pboIds[offset + currIndex]);
-    glReadPixels(0, 0, m_nSensorWidth, m_nSensorHeight, GL_RGB, GL_UNSIGNED_BYTE, 0);
+    glBindBufferARB(GL_PIXEL_PACK_BUFFER_ARB, pboIds[pboIndex]);
+    // TODO: Specify type? maybe as part of the Init function
+    glReadPixels(0, 0, simCam->m_nSensorWidth, simCam->m_nSensorHeight, GL_RGB, GL_UNSIGNED_BYTE, 0);
 
     // map the PBO that contains the framebuffer pixels
     // Read from the next buffer since the other is likely being written to still
-    glBindBufferARB(GL_PIXEL_PACK_BUFFER_ARB, pboIds[offset + nextIndex]);
+    glBindBufferARB(GL_PIXEL_PACK_BUFFER_ARB, pboIds[pboIndex]);
     GLubyte* src = (GLubyte*)glMapBufferARB(GL_PIXEL_PACK_BUFFER_ARB, GL_READ_ONLY_ARB);
 
-    if (src) {
-        if (offset == RGB) {
-	    memcpy(rgbBuffer, src, m_nSensorWidth * m_nSensorHeight * 3);
-	} else {
-	    memcpy(depthBuffer, src, m_nSensorWidth * m_nSensorHeight * 3);
-	}
-	glUnmapBufferARB(GL_PIXEL_PACK_BUFFER_ARB);
-    }
+    memcpy(buffer, src, data_size);
+    glUnmapBufferARB(GL_PIXEL_PACK_BUFFER_ARB);
 
     glBindBufferARB(GL_PIXEL_PACK_BUFFER_ARB, 0);
 }
 
-int GLSimCam::getNextIndex() {
+SimCamMode::SimCamMode() { }
+
+SimCamMode::~SimCamMode() { }
+
+void SimCamMode::Init(GLSimCam* sc, bool shader, GLuint sp) {
+    simCam = sc;
+    hasShader = shader;
+    shaderProgram = sp;
+    numberOfChannels = 3;
+
+    attachmentIndex = getNextAttachmentIndex();
+    colorTextureId = getNextCTId();
+    PboInit();
+    simCam->AddMode(this);
+}
+
+void SimCamMode::Render() {
+    simCam->m_pFbo->Begin();
+    glDrawBuffer(attachmentIndex);
+
+    if (hasShader) { glUseProgram(shaderProgram); }
+    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT );
+    simCam->m_pSceneGraph->ApplyDfsVisitor( _ShaderVisitor );
+
+    PboRead();
+
+    if (hasShader) { glUseProgram(0); }
+    simCam->m_pFbo->End();
+}
+
+GLubyte* SimCamMode::Capture() {
+    return buffer;
+}
+
+GLuint SimCamMode::Texture() {
+  return simCam->m_pFbo->m_vColorTextureIds[colorTextureId];
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////
+/// used to traverse scene graph
+void SimCamMode::_ShaderVisitor( GLObject* pObj )
+{
+    if( pObj->IsPerceptable() ) {
+        pObj->draw();
+    }
+}
+
+int SimCamMode::getNextCTId() {
     int nextIndex = m_nIndex;
     m_nIndex++;
     return nextIndex;
 }
 
 // Looks like the limit is 16.
-int GLSimCam::getNextAttachment()  {
+GLenum SimCamMode::getNextAttachmentIndex()  {
     unsigned int nextAttachment = -1;
     if (m_nUsedAttachments < GL_MAX_COLOR_ATTACHMENTS) { // Not sure if this check works
         switch (m_nUsedAttachments) {
@@ -134,4 +162,3 @@ int GLSimCam::getNextAttachment()  {
   
     return nextAttachment;
 }
-

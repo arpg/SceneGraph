@@ -8,6 +8,39 @@
 
 #include <string>
 
+class GLSimCam;
+
+class SimCamMode
+{
+ public:
+  SimCamMode();
+  ~SimCamMode();
+  void Init(GLSimCam* sc, bool shader, GLuint sp);
+  void Render();
+  GLubyte* Capture();
+  GLuint Texture();
+  
+ private:
+  static GLenum getNextAttachmentIndex();
+  static int getNextCTId();
+  static void _ShaderVisitor( GLObject* pObj );
+
+  void PboRead();
+  void PboInit();
+
+  GLSimCam* simCam;
+  bool hasShader;
+  
+  int numberOfChannels;
+  //  GLint format;
+  GLuint shaderProgram;
+  int pboIndex;
+  int colorTextureId;
+  GLenum attachmentIndex;
+  GLubyte* buffer;
+  GLuint* pboIds;
+  int data_size;
+};
 
 class GLSimCam
 {
@@ -94,6 +127,7 @@ class GLSimCam
 
             */
 
+	    // TODO: Move elsewhere
             if ( LoadShaders( "Depth.vert", "Depth.frag", m_nDepthShaderProgram ) == false) {
                 fprintf(stderr, "Failed to load the Depth shader.");
             }
@@ -102,14 +136,6 @@ class GLSimCam
             if ( LoadShaders( "Normals.vert", "Normals.frag", m_nNormalShaderProgram ) == false) {
                 fprintf(stderr, "Failed to load the Normal shader.");
             }
-
-            // fixed order...GL
-            m_nRGBAttachment = getNextAttachment();
-	    m_nRGBIndex = getNextIndex();
-            m_nDepthAttachment = getNextAttachment();
-	    m_nDepthIndex = getNextIndex();
-            m_nNormalAttachment = getNextAttachment();
-	    m_nNormalIndex = getNextIndex();
 
 #if 0
             // Ok, now compute the corresponding GL_PROJECTION_MATRIX:
@@ -149,35 +175,7 @@ class GLSimCam
             // setup our frame buffer object for off screen rendering
             m_pFbo->Init( nSensorWidth, nSensorHeight );
 
-            // reserve memory buffers
-            m_vImageData.resize( nSensorWidth*nSensorHeight );
-            m_vDepthData.resize( nSensorWidth*nSensorHeight );
-
-	    PboInit();
-
             m_bInitDone = true;
-        }
-
-        /////////////////////////////////////////////////////////////////////////////////////////
-        /// return pointer to internal RGB buffer
-        //unsigned char* RGBDataPtr()
-	float* RGBDataPtr()
-        {
-            return &m_vImageData[0];
-        }
-
-        /////////////////////////////////////////////////////////////////////////////////////////
-        /// Convert internal RGB data to greyscale
-        char* GreyScaleDataPtr()
-        {
-            return NULL;
-            // TODO
-        }
-
-        /////////////////////////////////////////////////////////////////////////////////////////
-        float* DepthDataPtr()
-        {
-            return &m_vDepthData[0];
         }
 
         /////////////////////////////////////////////////////////////////////////////////////////
@@ -192,21 +190,9 @@ class GLSimCam
             return m_nSensorHeight;
         }
 
-        GLuint RGBTexture()
-        {
-            return m_pFbo->m_vColorTextureIds[m_nRGBIndex]; // texture associated with GL_COLOR_ATTACHMENT0_EXT
-        }
-
-        GLuint DepthTexture()
-        {
-            return m_pFbo->m_vColorTextureIds[m_nDepthIndex]; // texture associated with GL_COLOR_ATTACHMENT1_EXT
-        }
-
-        GLuint NormalTexture()
-        {
-            return m_pFbo->m_vColorTextureIds[m_nNormalIndex]; // texture associated with GL_COLOR_ATTACHMENT2_EXT
-        }
-
+	void AddMode(SimCamMode* mode) {
+	    m_vModes.push_back(*mode);
+	}
 
         /////////////////////////////////////////////////////////////////////////////////////////
         void Begin()
@@ -264,117 +250,13 @@ class GLSimCam
         }
 
         /////////////////////////////////////////////////////////////////////////////////////////
-        /// 
-        void Render()
+	void Render()
         {
             Begin();
-            RenderRGB();
-	    RenderDepth();
-            //RenderNormals();
+	    for (unsigned int i = 0; i < m_vModes.size(); i++) {
+	      m_vModes.at(i).Render();
+	    }
             End();
-        }
-
-        /////////////////////////////////////////////////////////////////////////////////////////
-	GLubyte* CaptureRGB() {
-	  return rgbBuffer;
-	}
-
-	GLubyte* CaptureDepth() {
-	  return depthBuffer;
-	}
-
-        /////////////////////////////////////////////////////////////////////////////////////////
-        void RenderRGB()
-        {
-            m_pFbo->Begin();
-            glDrawBuffer( m_nRGBAttachment ); // select fbo attachment...
-            glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT );
-	    m_pSceneGraph->ApplyDfsVisitor( _ShaderVisitor );
-	    PboRead(RGB, m_nRGBAttachment);	    
-
-            m_pFbo->End();
-        }
-
-        /////////////////////////////////////////////////////////////////////////////////////////
-        void RenderNormals()
-        {
-            m_pFbo->Begin();
-            glDrawBuffer( m_nNormalAttachment ); // select fbo attachment...
-            glUseProgram( m_nNormalShaderProgram );
-            glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT );
-            m_pSceneGraph->ApplyDfsVisitor( _ShaderVisitor );
-
-            glUseProgram(0);
-            m_pFbo->End();
-        }
-
-
-        ///////////////////////////////////////////////////////////////////////////////
-        void _ReadDepthPixels()
-        {
-            // ok, now, copy the pixels out of the depth texture, and render it as a point cloud:
-            glReadBuffer( m_nDepthAttachment );
-            glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
-//            std::vector<float> vPixels;
-            unsigned int nBpp = 4;
-            if( m_vDepthData.size() < m_pFbo->TexWidth()*nBpp*m_pFbo->TexHeight() ){
-                m_vDepthData.resize( m_pFbo->TexWidth()*nBpp*m_pFbo->TexHeight() );
-            }
-            char* pPixelData = (char*)&m_vDepthData[0];
-
-            glReadPixels( 0, 0, m_pFbo->TexWidth(), m_pFbo->TexHeight(), GL_DEPTH_COMPONENT, GL_FLOAT, pPixelData );
-
-            bool bFlip = 1;
-            if( bFlip ){
-                int inc = nBpp*m_pFbo->TexWidth();
-                char* pSwap = (char*)malloc( inc );
-                char* pTopDown = pPixelData;
-                char* pBottomUp = &pPixelData[ m_pFbo->TexWidth()*nBpp*m_pFbo->TexHeight() ];
-                for( ; pTopDown < pBottomUp; pTopDown += inc, pBottomUp -= inc ){
-                    memcpy( pSwap, pTopDown, inc );
-                    memcpy( pTopDown, pBottomUp, inc );
-                    memcpy( pBottomUp, pSwap, inc );
-                }
-                free( pSwap );
-            }
-
-            char sName[1024];
-            static int ii = 0;
-            snprintf( sName, 1024, "FBO_%04d.m", ii++ );
-            FILE* f = fopen( sName, "w" );
-            for( unsigned int nRow = 0; nRow < m_pFbo->TexHeight(); nRow++ ){
-                for( unsigned int nCol = 0; nCol < m_pFbo->TexWidth(); nCol++ ){
-                    fprintf( f, "M(%d,%d) = %f;\n", nRow+1, nCol+1, m_vDepthData[nRow*m_pFbo->TexWidth()+nCol] );
-                }
-            }
-            fclose(f);
-
-            Eigen::Matrix3d K = GLGetProjectionMatrix();
-            Eigen::Matrix4d T = GLGetCameraPose();
-            std::cout << "T = \n" << T << std::endl << std::endl;
-            std::cout << "K = \n" << K << std::endl << std::endl;
-
-        }
-
-        /////////////////////////////////////////////////////////////////////////////////////////
-        void RenderDepth()
-        {        
-	    m_pFbo->Begin();
-            glDrawBuffer( m_nDepthAttachment ); // select fbo attachment...
-   	    glUseProgram( m_nDepthShaderProgram );
-            glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT );
-            m_pSceneGraph->ApplyDfsVisitor( _ShaderVisitor );
-
-            PboRead(DEPTH, m_nDepthAttachment);
-
-	    if( gConfig.m_bDebugSimCam ){
-                // copy from depth buffer
-                _ReadDepthPixels();
-            }
-	    	 
-            glUseProgram(0);
-
-	    m_pFbo->End();
         }
 
         /////////////////////////////////////////////////////////////////////////////////////////
@@ -383,15 +265,6 @@ class GLSimCam
         {
             GLSimCam* pThis = (GLSimCam*)pUserData;
             pThis->Render();
-        }
-
-        /////////////////////////////////////////////////////////////////////////////////////////
-        /// used to traverse scene graph
-        static void _ShaderVisitor( GLObject* pObj )
-        {
-            if( pObj->IsPerceptable() ) {
-                pObj->draw();
-            }
         }
 
         /////////////////////////////////////////////////////////////////////////////////////////
@@ -436,7 +309,10 @@ class GLSimCam
             /// Draw texture
             glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL );
             glEnable( GL_TEXTURE_RECTANGLE_ARB );
-            glBindTexture( GL_TEXTURE_RECTANGLE_ARB, RGBTexture() );
+            // TODO: replace with first mode?
+	    if (m_vModes.size() > 0) {
+  	        glBindTexture( GL_TEXTURE_RECTANGLE_ARB, m_vModes.at(0).Texture() );
+	    }
 
             glBegin( GL_QUADS );
             glNormal3f( -1,0,0 );
@@ -589,41 +465,22 @@ class GLSimCam
             return K;
         }
 
-    private:
-        void PboInit();
-	void PboRead(int offset, GLenum bufferToRead);
-	int getNextAttachment();
-	int getNextIndex();
-
-	static int                                  RGB;
-	static int                                  DEPTH;
-	GLuint*                                     pboIds;
-	int                                         index0;
-	int                                         index2;
-	GLubyte*                                    rgbBuffer;
-	GLubyte*                                    depthBuffer;      
+	FBO*                                        m_pFbo;
         GLSceneGraph*                               m_pSceneGraph;
-        FBO*                                        m_pFbo;
+	unsigned int                                m_nSensorWidth;
+        unsigned int                                m_nSensorHeight;
+
+    private:
         bool                                        m_bInitDone;
         GLuint                                      m_nDepthShaderProgram;
         GLuint                                      m_nNormalShaderProgram;
-        int                                         m_nDepthAttachment;
-	int                                         m_nDepthIndex;
-        int                                         m_nNormalAttachment;
-	int                                         m_nNormalIndex;
-        int                                         m_nRGBAttachment;
-	int                                         m_nRGBIndex;
-        unsigned int                                m_nSensorWidth;
-        unsigned int                                m_nSensorHeight;
         double                                      m_dNear;
         double                                      m_dFar;
         Eigen::Matrix3d                             m_dK; // computer vision K matrix 
         Eigen::Matrix4d                             m_dPose; // desired camera pose
         Eigen::Matrix<double,4,4,Eigen::ColMajor>   m_dM; // to save projection matrix
         Eigen::Matrix<double,4,4,Eigen::ColMajor>   m_dT; // to save modelview matrix
-        //std::vector<unsigned char>                  m_vImageData;
-        std::vector<float>                          m_vImageData;
-        std::vector<float>                          m_vDepthData;
+	std::vector<SimCamMode>                     m_vModes;
 };
 
 #endif
