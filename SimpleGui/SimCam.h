@@ -12,34 +12,36 @@ class GLSimCam;
 
 class SimCamMode
 {
- public:
-  SimCamMode();
-  ~SimCamMode();
-  void Init(GLSimCam* sc, bool shader, GLuint sp);
-  void Render();
-  GLubyte* Capture();
-  GLuint Texture();
-  
- private:
-  static GLenum getNextAttachmentIndex();
-  static int getNextCTId();
-  static void _ShaderVisitor( GLObject* pObj );
+    public:
+        SimCamMode();
+        ~SimCamMode();
+        void Init( GLSimCam* sc, bool shader, GLuint sp );
+        void Render();
+        GLubyte* Capture();
+        GLuint Texture();
 
-  void PboRead();
-  void PboInit();
+    private:
+        static GLenum getNextAttachmentIndex();
+        static int getNextCTId();
+        static void _ShaderVisitor( GLObject* pObj );
 
-  GLSimCam* simCam;
-  bool hasShader;
-  
-  int numberOfChannels;
-  //  GLint format;
-  GLuint shaderProgram;
-  int pboIndex;
-  int colorTextureId;
-  GLenum attachmentIndex;
-  GLubyte* buffer;
-  GLuint* pboIds;
-  int data_size;
+        void PboRead();
+        void PboInit();
+
+    private:
+
+        GLSimCam*       simCam;
+        bool            hasShader;
+
+        int             numberOfChannels;
+        //  GLint format;
+        GLuint          shaderProgram;
+        int             pboIndex;
+        int             colorTextureId;
+        GLenum          attachmentIndex;
+        GLubyte*        buffer;
+        GLuint*         pboIds;
+        int             data_size;
 };
 
 class GLSimCam
@@ -94,40 +96,40 @@ class GLSimCam
             m_dPose = dPose;
 
             /*
-            std::string sDepthVertShader = 
-                "// see http://olivers.posterous.com/linear-depth-in-glsl-for-real\n"
-                "varying float depth;\n"
-                "void main(void)\n"
-                "{\n"
-                "    gl_Position = gl_ProjectionMatrix * gl_ModelViewMatrix * gl_Vertex;\n"
-                "    depth = -(gl_ModelViewMatrix * gl_Vertex).z;\n"
-                "}\n";
+               std::string sDepthVertShader = 
+               "// see http://olivers.posterous.com/linear-depth-in-glsl-for-real\n"
+               "varying float depth;\n"
+               "void main(void)\n"
+               "{\n"
+               "    gl_Position = gl_ProjectionMatrix * gl_ModelViewMatrix * gl_Vertex;\n"
+               "    depth = -(gl_ModelViewMatrix * gl_Vertex).z;\n"
+               "}\n";
 
 
-            std::string sDepthFragShader = 
-                "// see http://olivers.posterous.com/linear-depth-in-glsl-for-real\n"
-                "varying float depth;\n"
-                "void main(void)\n"
-                "{\n"
-                "    float A = gl_ProjectionMatrix[2].z;\n"
-                "    float B = gl_ProjectionMatrix[3].z;\n"
-                "    float zNear = - B / (1.0 - A);\n"
-                "    float zFar  =   B / (1.0 + A);\n"
-                "    float d = 0.5*(-A*depth + B) / depth + 0.5;\n"
-                "    //    gl_FragDepth  = d;\n"
-                "    gl_FragColor = vec4( vec3(d), 1.0);\n"
-                "}\n";
+               std::string sDepthFragShader = 
+               "// see http://olivers.posterous.com/linear-depth-in-glsl-for-real\n"
+               "varying float depth;\n"
+               "void main(void)\n"
+               "{\n"
+               "    float A = gl_ProjectionMatrix[2].z;\n"
+               "    float B = gl_ProjectionMatrix[3].z;\n"
+               "    float zNear = - B / (1.0 - A);\n"
+               "    float zFar  =   B / (1.0 + A);\n"
+               "    float d = 0.5*(-A*depth + B) / depth + 0.5;\n"
+               "    //    gl_FragDepth  = d;\n"
+               "    gl_FragColor = vec4( vec3(d), 1.0);\n"
+               "}\n";
 
-            InitShaders( sDepthVertShader, sDepthFragShader, m_nDepthShaderProgram );
+               InitShaders( sDepthVertShader, sDepthFragShader, m_nDepthShaderProgram );
 
-            std::string sNormalVertShader = "";
-            std::string sNormalFragShader = "";
+               std::string sNormalVertShader = "";
+               std::string sNormalFragShader = "";
 
-            InitShaders( sNormalVertShader, sNormalFragShader, m_nNormalShaderProgram );
+               InitShaders( sNormalVertShader, sNormalFragShader, m_nNormalShaderProgram );
 
-            */
+             */
 
-	    // TODO: Move elsewhere
+            // TODO: Move elsewhere
             if ( LoadShaders( "Depth.vert", "Depth.frag", m_nDepthShaderProgram ) == false) {
                 fprintf(stderr, "Failed to load the Depth shader.");
             }
@@ -145,17 +147,17 @@ class GLSimCam
             /*
                from www.terathon.com/gdc07_lengyel.pdf:
 
-           M = [ e           0              0            0
-                 0         e/a              0            0
-                 0           0   -(f+n)/(f-n)   -2fn/(f-n)
-                 0           0             -1            0 ]
+               M = [ e           0              0            0
+               0         e/a              0            0
+               0           0   -(f+n)/(f-n)   -2fn/(f-n)
+               0           0             -1            0 ]
 
-                 where
-                 e = focal length
-                 a = width/height of sensor (viewport)
-                 n,f = near and far clipping planes
+               where
+               e = focal length
+               a = width/height of sensor (viewport)
+               n,f = near and far clipping planes
 
-            */
+             */
 
             // why use fovx over fovy?
             double e = 1.0/(tan(dfovx/2.0)); // focal length
@@ -171,7 +173,7 @@ class GLSimCam
             m_M(3,2) = -1;
 #endif
 
-	    // May have change this for multiple SimCams (since there is only one FBO)
+            // May have change this for multiple SimCams (since there is only one FBO)
             // setup our frame buffer object for off screen rendering
             m_pFbo->Init( nSensorWidth, nSensorHeight );
 
@@ -190,9 +192,9 @@ class GLSimCam
             return m_nSensorHeight;
         }
 
-	void AddMode(SimCamMode* mode) {
-	    m_vModes.push_back(*mode);
-	}
+        void AddMode(SimCamMode* mode) {
+            m_vModes.push_back(*mode);
+        }
 
         /////////////////////////////////////////////////////////////////////////////////////////
         void Begin()
@@ -250,12 +252,12 @@ class GLSimCam
         }
 
         /////////////////////////////////////////////////////////////////////////////////////////
-	void Render()
+        void Render()
         {
             Begin();
-	    for (unsigned int i = 0; i < m_vModes.size(); i++) {
-	      m_vModes.at(i).Render();
-	    }
+            for (unsigned int i = 0; i < m_vModes.size(); i++) {
+                m_vModes.at(i).Render();
+            }
             End();
         }
 
@@ -310,9 +312,9 @@ class GLSimCam
             glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL );
             glEnable( GL_TEXTURE_RECTANGLE_ARB );
             // TODO: replace with first mode?
-	    if (m_vModes.size() > 0) {
-  	        glBindTexture( GL_TEXTURE_RECTANGLE_ARB, m_vModes.at(0).Texture() );
-	    }
+            if (m_vModes.size() > 0) {
+                glBindTexture( GL_TEXTURE_RECTANGLE_ARB, m_vModes.at(0).Texture() );
+            }
 
             glBegin( GL_QUADS );
             glNormal3f( -1,0,0 );
@@ -465,9 +467,32 @@ class GLSimCam
             return K;
         }
 
-	FBO*                                        m_pFbo;
+        /////////////////////////////////////////////////////////////////////////////////////////
+        void DrawRangeData()
+        {
+        }
+
+        /////////////////////////////////////////////////////////////////////////////////////////
+        void RangeData( std::vector<float>& vRangeData )
+        {
+            // transform depth to 3d
+            Eigen::Matrix3d invK = GetKMatrix().inverse();
+            Eigen::Vector3d p;
+            Eigen::Vector3d ray;
+            for( int jj = 0; jj <  m_nSensorHeight; jj++ ){
+                for( int ii = 0; ii <  m_nSensorWidth; ii++ ){
+                    float d = 
+                    p << ii,jj,1; // homogeneous image point
+                    ray = invK*p;
+                    ray = ray/ray.norm();
+                }
+            }
+        }
+
+
+        FBO*                                        m_pFbo;
         GLSceneGraph*                               m_pSceneGraph;
-	unsigned int                                m_nSensorWidth;
+        unsigned int                                m_nSensorWidth;
         unsigned int                                m_nSensorHeight;
 
     private:
@@ -480,7 +505,7 @@ class GLSimCam
         Eigen::Matrix4d                             m_dPose; // desired camera pose
         Eigen::Matrix<double,4,4,Eigen::ColMajor>   m_dM; // to save projection matrix
         Eigen::Matrix<double,4,4,Eigen::ColMajor>   m_dT; // to save modelview matrix
-	std::vector<SimCamMode>                     m_vModes;
+        std::vector<SimCamMode>                     m_vModes;
 };
 
 #endif

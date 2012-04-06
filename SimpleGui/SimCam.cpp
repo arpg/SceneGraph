@@ -4,7 +4,9 @@ static const int PBO_COUNT = 2;
 static int m_nUsedAttachments = 0;
 static int m_nIndex = 0;
 
-void SimCamMode::PboInit() {
+/////////////////////////////////////////////////////////////////////////////////////////
+void SimCamMode::PboInit() 
+{
     pboIds = new GLuint[PBO_COUNT];
     pboIndex = 0;
  
@@ -24,7 +26,9 @@ void SimCamMode::PboInit() {
     buffer = new GLubyte[data_size];
 }
 
-void SimCamMode::PboRead() {
+/////////////////////////////////////////////////////////////////////////////////////////
+void SimCamMode::PboRead()
+{
     int nextIndex = 0;
 
     pboIndex = (pboIndex + 1) % 2;
@@ -48,11 +52,19 @@ void SimCamMode::PboRead() {
     glBindBufferARB(GL_PIXEL_PACK_BUFFER_ARB, 0);
 }
 
-SimCamMode::SimCamMode() { }
+/////////////////////////////////////////////////////////////////////////////////////////
+SimCamMode::SimCamMode() 
+{
+}
 
-SimCamMode::~SimCamMode() { }
+/////////////////////////////////////////////////////////////////////////////////////////
+SimCamMode::~SimCamMode()
+{
+}
 
-void SimCamMode::Init(GLSimCam* sc, bool shader, GLuint sp) {
+/////////////////////////////////////////////////////////////////////////////////////////
+void SimCamMode::Init(GLSimCam* sc, bool shader, GLuint sp)
+{
     simCam = sc;
     hasShader = shader;
     shaderProgram = sp;
@@ -64,7 +76,9 @@ void SimCamMode::Init(GLSimCam* sc, bool shader, GLuint sp) {
     simCam->AddMode(this);
 }
 
-void SimCamMode::Render() {
+/////////////////////////////////////////////////////////////////////////////////////////
+void SimCamMode::Render()
+{
     simCam->m_pFbo->Begin();
     glDrawBuffer(attachmentIndex);
 
@@ -78,11 +92,15 @@ void SimCamMode::Render() {
     simCam->m_pFbo->End();
 }
 
-GLubyte* SimCamMode::Capture() {
+/////////////////////////////////////////////////////////////////////////////////////////
+GLubyte* SimCamMode::Capture()
+{
     return buffer;
 }
 
-GLuint SimCamMode::Texture() {
+/////////////////////////////////////////////////////////////////////////////////////////
+GLuint SimCamMode::Texture()
+{
   return simCam->m_pFbo->m_vColorTextureIds[colorTextureId];
 }
 
@@ -95,14 +113,18 @@ void SimCamMode::_ShaderVisitor( GLObject* pObj )
     }
 }
 
-int SimCamMode::getNextCTId() {
+/////////////////////////////////////////////////////////////////////////////////////////
+int SimCamMode::getNextCTId()
+{
     int nextIndex = m_nIndex;
     m_nIndex++;
     return nextIndex;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////
 // Looks like the limit is 16.
-GLenum SimCamMode::getNextAttachmentIndex()  {
+GLenum SimCamMode::getNextAttachmentIndex() 
+{
     unsigned int nextAttachment = -1;
     if (m_nUsedAttachments < GL_MAX_COLOR_ATTACHMENTS) { // Not sure if this check works
         switch (m_nUsedAttachments) {
@@ -162,3 +184,4 @@ GLenum SimCamMode::getNextAttachmentIndex()  {
   
     return nextAttachment;
 }
+
