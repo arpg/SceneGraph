@@ -10,12 +10,22 @@
 
 class GLSimCam;
 
+/// type of rendering modes we support
+enum SimCamModes{
+    eSimCamLuminance = 1,
+    eSimCamRGB = 2,
+    eSimCamDepth = 4,
+    eSimCamNormals = 8
+};
+
+
 class SimCamMode
 {
-    public:
-        SimCamMode();
+    friend class GLSimCam; // only SimCam can have a "SimCamMode"
+    private:
+        SimCamMode( GLSimCam& sc ); // private, only SimCam can make one...
         ~SimCamMode();
-        void Init( GLSimCam* sc, bool shader, GLuint sp );
+        void Init( bool shader, GLuint sp );
         void Render();
         GLubyte* Capture();
         GLuint Texture();
@@ -30,9 +40,10 @@ class SimCamMode
 
     private:
 
-        GLSimCam*       simCam;
+        GLSimCam&       m_SimCam; // required -- can not construct a SimCamMode wo a SimCam...
         bool            hasShader;
 
+        // James, please fix the variable naming convention here:
         int             numberOfChannels;
         //  GLint format;
         GLuint          shaderProgram;
@@ -54,6 +65,9 @@ class GLSimCam
             m_bInitDone = false;
             m_pSceneGraph = NULL;
             m_pFbo = FBO::Instance();
+            m_pRGBMode = NULL;
+            m_pDepthMode = NULL;
+            m_pNormalsMode = NULL;
         }
 
         /////////////////////////////////////////////////////////////////////////////////////////
@@ -83,8 +97,9 @@ class GLSimCam
                 const Eigen::Matrix3d dK,        //< Input: computer vision K matrix
                 const unsigned int nSensorWidth, //< Input: sensor width in pixels
                 const unsigned int nSensorHeight,//< Input: sensor height in pixels
-                double dNear = 10,                //< Input: opengl near clipping plane
-                double dFar = 40                //< Input: opengl far clipping plane
+                int nModes = eSimCamRGB,         //< Input:
+                double dNear = 10,               //< Input: opengl near clipping plane
+                double dFar = 40                 //< Input: opengl far clipping plane
                 )
         {
             m_pSceneGraph = pSceneGraph;
@@ -139,6 +154,24 @@ class GLSimCam
                 fprintf(stderr, "Failed to load the Normal shader.");
             }
 
+            if( nModes |= eSimCamRGB ){
+//                m_vModes.push_back( SimCamMode(*this) );
+//                SimCamMode& c = m_vModes.back();
+//                c.Init( false, 0 );
+                m_pRGBMode = new SimCamMode( *this );
+                m_pRGBMode->Init( false, 0 );
+            }
+            if( nModes |= eSimCamDepth ){
+//                m_vModes.push_back( SimCamMode(*this) );
+//                SimCamMode& c = m_vModes.back();
+                m_pDepthMode = new SimCamMode( *this );
+                m_pDepthMode->Init( true, m_nDepthShaderProgram );
+            }
+            if( nModes |= eSimCamNormals ){
+                m_pNormalsMode = new SimCamMode( *this );
+                m_pNormalsMode->Init( true, m_nNormalShaderProgram );
+            }
+
 #if 0
             // Ok, now compute the corresponding GL_PROJECTION_MATRIX:
             double dfovx = 360.0*atan2( nSensorWidth/2.0, K(0,0) )/M_PI;
@@ -181,6 +214,96 @@ class GLSimCam
         }
 
         /////////////////////////////////////////////////////////////////////////////////////////
+        GLint RGBTexture()
+        {
+            if( m_pRGBMode ){
+                return m_pRGBMode->Texture();
+            }
+            return -1;
+        }
+
+        /////////////////////////////////////////////////////////////////////////////////////////
+        GLint DepthTexture()
+        {
+            if( m_pDepthMode ){
+                return m_pDepthMode->Texture();
+            }
+            return -1;
+        }
+
+        /////////////////////////////////////////////////////////////////////////////////////////
+        GLint NormalsTexture()
+        {
+            if( m_pNormalsMode ){
+                return m_pNormalsMode->Texture();
+            }
+            return -1;
+        }
+
+        /////////////////////////////////////////////////////////////////////////////////////////
+        bool CaptureRGB( std::vector<unsigned char>& vPixelData )
+        {
+            if( m_pRGBMode ){
+                if( vPixelData.size() < ImageWidth()*ImageHeight()*3 ){
+                    vPixelData.resize( ImageWidth()*ImageHeight()*3 );
+                }
+                // TODO Capture here should do the PboRead and fill vPixelData...
+                memcpy( &vPixelData[0], m_pRGBMode->Capture(), ImageWidth()*ImageHeight()*3);
+                return true;
+            }
+            return false;
+        }
+
+        /////////////////////////////////////////////////////////////////////////////////////////
+        bool CaptureDepth( std::vector<unsigned char>& vPixelData )
+        {
+            if( m_pDepthMode ){
+                if( vPixelData.size() < ImageWidth()*ImageHeight()*sizeof(float) ){
+                    vPixelData.resize( ImageWidth()*ImageHeight()*sizeof(float) );
+                }
+                // TODO Capture here should do the PboRead and fill vPixelData...
+                memcpy( &vPixelData[0], m_pDepthMode->Capture(), 
+                        ImageWidth()*ImageHeight()*sizeof(float));
+                return true;
+            }
+            return false;
+        }
+
+        /////////////////////////////////////////////////////////////////////////////////////////
+        bool CaptureNormals( std::vector<unsigned char>& vPixelData )
+        {
+            if( m_pNormalsMode ){
+                if( vPixelData.size() < ImageWidth()*ImageHeight()*3 ){
+                    vPixelData.resize( ImageWidth()*ImageHeight()*3 );
+                }
+                // TODO Capture here should do the PboRead and fill vPixelData...
+                memcpy( &vPixelData[0], m_pNormalsMode->Capture(), 
+                        ImageWidth()*ImageHeight()*3 );
+                return true;
+            }
+            return false;
+        }
+
+
+        /////////////////////////////////////////////////////////////////////////////////////////
+        bool HasRGB()
+        {
+            return m_pRGBMode;
+        }
+
+        /////////////////////////////////////////////////////////////////////////////////////////
+        bool HasDepth()
+        {
+            return m_pDepthMode;
+        }
+
+        /////////////////////////////////////////////////////////////////////////////////////////
+        bool HasNormals()
+        {
+            return m_pNormalsMode;
+        }
+
+        /////////////////////////////////////////////////////////////////////////////////////////
         unsigned ImageWidth()
         {
             return m_nSensorWidth;
@@ -192,9 +315,13 @@ class GLSimCam
             return m_nSensorHeight;
         }
 
-        void AddMode(SimCamMode* mode) {
-            m_vModes.push_back(*mode);
+        /* 
+        /////////////////////////////////////////////////////////////////////////////////////////
+        void AddMode( SimCamMode* mode ) 
+        {
+            m_vModes.push_back( *mode );
         }
+        */
 
         /////////////////////////////////////////////////////////////////////////////////////////
         void Begin()
@@ -255,9 +382,21 @@ class GLSimCam
         void Render()
         {
             Begin();
+            /*
             for (unsigned int i = 0; i < m_vModes.size(); i++) {
                 m_vModes.at(i).Render();
             }
+            */
+            if( m_pRGBMode ){
+                m_pRGBMode->Render();
+            }
+            if( m_pDepthMode ){
+                m_pDepthMode->Render();
+            }
+            if( m_pNormalsMode ){
+                m_pNormalsMode->Render();
+            }
+
             End();
         }
 
@@ -312,16 +451,19 @@ class GLSimCam
             glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL );
             glEnable( GL_TEXTURE_RECTANGLE_ARB );
             // TODO: replace with first mode?
-            if (m_vModes.size() > 0) {
-                glBindTexture( GL_TEXTURE_RECTANGLE_ARB, m_vModes.at(0).Texture() );
+//            if( m_vModes.size() > 0 ){
+//                glBindTexture( GL_TEXTURE_RECTANGLE_ARB, m_vModes.at(0).Texture() );
+//            }
+            if( m_pRGBMode ){
+                glBindTexture( GL_TEXTURE_RECTANGLE_ARB, m_pRGBMode->Texture() );
             }
 
             glBegin( GL_QUADS );
             glNormal3f( -1,0,0 );
-            glTexCoord2f(               0.0,               0.0  ); glVertex3dv( lbn.data() );
-            glTexCoord2f( m_pFbo->m_nTexWidth,               0.0  ); glVertex3dv( rbn.data() );
+            glTexCoord2f(                 0.0,                 0.0  ); glVertex3dv( lbn.data() );
+            glTexCoord2f( m_pFbo->m_nTexWidth,                 0.0  ); glVertex3dv( rbn.data() );
             glTexCoord2f( m_pFbo->m_nTexWidth, m_pFbo->m_nTexHeight ); glVertex3dv( rtn.data() );
-            glTexCoord2f(               0.0, m_pFbo->m_nTexHeight ); glVertex3dv( ltn.data() );
+            glTexCoord2f(                 0.0, m_pFbo->m_nTexHeight ); glVertex3dv( ltn.data() );
             glEnd();
 
             glBindTexture( GL_TEXTURE_RECTANGLE_ARB, 0 );
@@ -467,12 +609,77 @@ class GLSimCam
             return K;
         }
 
+        /////////////////////////////////////////////////////////////////////////////////////////
+        void DrawRangeData()
+        {
+            /*
+            std::vector<float> vRangeData;
+            RangeData( vRangeData);
+            glPointSize( 3 );
+            glColor3f( 1,0,1 );
+            glBegin( GL_POINTS );
+            for( size_t ii = 0; ii < vRangeData.size(); ii+=3 ){
+                glVertex3fv( &vRangeData[ii] );
+            }
+            glEnd();
+            glPointSize( 1 );
+            */
+        }
+
+        /////////////////////////////////////////////////////////////////////////////////////////
+        /// use depth image and camera model to compute 3D range data
+        void RangeData( std::vector<float>& )
+        {
+#if 0 
+            std::vector<unsigned char> vPixels;
+            CaptureDepth( vPixels );
+            //m_vDepthData.resize( m_nSensorHeight*m_nSensorWidth );
+
+            // transform depth to 3d
+//            Eigen::Matrix3d invK = GetKMatrix().inverse();
+            Eigen::Matrix3d K = GetKMatrix();
+//            Eigen::Vector3d p;
+//            Eigen::Vector3d ray;
+            vRangeData.resize(  m_nSensorHeight*m_nSensorWidth*3 );
+            int n = 0;
+            for( unsigned int jj = 0; jj <  m_nSensorHeight; jj++ ){
+                for( unsigned int ii = 0; ii <  m_nSensorWidth; ii++ ){
+                    // from http://olivers.posterous.com/linear-depth-in-glsl-for-real
+                    unsigned char data[4];
+                    float& f = *(float*)data;
+                    data[0] = vDepthPixels[ m_nSensorWidth*jj+ ii ];
+                    data[1] = vDepthPixels[ m_nSensorWidth*jj+ ii + 1 ];
+                    data[2] = vDepthPixels[ m_nSensorWidth*jj+ ii + 2 ];
+                    data[3] = 0;
+
+                    float d = ;
+                    float z = 2.0*m_dFar*m_dNear / 
+                        (m_dFar + m_dNear - (m_dFar - m_dNear)*(2.0*d-1.0));
+                    // convet to xyz: x/z = u/f
+                    float x = z*(ii+100)/K(0,0);
+                    float y = z*(jj+100)/K(1,1);
+                    
+                    /*
+                    float d = m_vDepthData[  m_nSensorWidth*jj + ii ];
+                    p << ii,jj,1; // homogeneous image point
+                    ray = invK*p;
+                    ray = ray/ray.norm();
+                    vRangeData[ n++ ] = d*ray[0];
+                    vRangeData[ n++ ] = d*ray[1];
+                    vRangeData[ n++ ] = d*ray[2];
+                    */
+                }
+            }
+           #endif
+        }
+
+        /////////////////////////////////////////////////////////////////////////////////////////
         FBO*                                        m_pFbo;
         GLSceneGraph*                               m_pSceneGraph;
+    private:
+
         unsigned int                                m_nSensorWidth;
         unsigned int                                m_nSensorHeight;
-
-    private:
         bool                                        m_bInitDone;
         GLuint                                      m_nDepthShaderProgram;
         GLuint                                      m_nNormalShaderProgram;
@@ -482,7 +689,9 @@ class GLSimCam
         Eigen::Matrix4d                             m_dPose; // desired camera pose
         Eigen::Matrix<double,4,4,Eigen::ColMajor>   m_dM; // to save projection matrix
         Eigen::Matrix<double,4,4,Eigen::ColMajor>   m_dT; // to save modelview matrix
-        std::vector<SimCamMode>                     m_vModes;
+        SimCamMode*                                 m_pRGBMode;
+        SimCamMode*                                 m_pDepthMode;
+        SimCamMode*                                 m_pNormalsMode;
 };
 
 #endif

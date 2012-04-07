@@ -459,6 +459,7 @@ GLObject* GLWindow::GetObject( unsigned int nId )
 ///////////////////////////////////////////////////////////////////////////////////////////////
 int GLWindow::Run()
 {
+    CheckForGLErrors();
     return( Fl::run() );
 }
 

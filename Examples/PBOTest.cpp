@@ -3,7 +3,6 @@
 using namespace Eigen;
 
 GLSimCam cam;
-SimCamMode depthMode;
 
 /////////////////////////////////////////////////////////////////////////////////////////
 void ProcessPreRenderShaders (GLWindow* pWin, void*) 
@@ -24,14 +23,14 @@ void ShowCameraAndTextures (GLWindow*, void*)
     cam.DrawCamera();
     
     /// show textures
-    DrawTextureAsWindowPercentage( depthMode.Texture(), cam.ImageWidth(),
+    DrawTextureAsWindowPercentage( cam.DepthTexture(), cam.ImageWidth(),
             cam.ImageHeight(), 0, 0.66, 0.33, 1 );
     DrawBorderAsWindowPercentage( 0, 0.66, 0.33, 1 );
-    
-    GLubyte* buff = depthMode.Capture();
-    PushOrtho(200, 200);
-
-    glDrawPixels(200, 200, GL_RGB, GL_UNSIGNED_BYTE, buff);
+   
+    std::vector<unsigned char> vPixels; // will be filled/written by CaptureRGB
+    cam.CaptureRGB( vPixels );
+    PushOrtho( 200, 200 );
+    glDrawPixels( 200, 200, GL_RGB, GL_UNSIGNED_BYTE, &vPixels[0] );
 
     PopOrtho();
     CheckForGLErrors();
@@ -85,8 +84,6 @@ int main( int argc, char** argv )
 
     // load mesh
     const struct aiScene* pScene;
-//    struct aiLogStream stream = aiGetPredefinedLogStream( aiDefaultLogStream_STDOUT, NULL );
-//    aiAttachLogStream( &stream );
      pScene = aiImportFile( sMesh.c_str(),
              aiProcess_Triangulate |
              aiProcess_GenNormals 
@@ -106,14 +103,7 @@ int main( int argc, char** argv )
     Eigen::Matrix4d dPose = GLCart2T( 1, 1,-4,0,0,M_PI/4 ); // initial camera pose
     Eigen::Matrix3d dK;// = Eigen::Matrix3d::Identity();    // computer vision K matrix
     dK << w,0,50,0,h,50,0,0,1;
-    cam.Init( &pWin->SceneGraph(), dPose, dK, w,h );
-
-    GLuint depthShaderProgram;
-    if ( LoadShaders( "Depth.vert", "Depth.frag", depthShaderProgram ) == false) {
-      fprintf(stderr, "Failed to load the Depth shader.");
-    }
-    depthMode.Init(&cam, true, depthShaderProgram);
-    CheckForGLErrors();
+    cam.Init( &pWin->SceneGraph(), dPose, dK, w,h, eSimCamDepth );
 
     _SetupLighting();
 

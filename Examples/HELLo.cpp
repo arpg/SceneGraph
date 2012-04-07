@@ -4,7 +4,6 @@
 using namespace Eigen;
 
 GLSimCam cam;
-SimCamMode rgbMode;
 
 zmq::context_t g_Context(1);
 zmq::socket_t g_Socket( g_Context, ZMQ_PUB );
@@ -27,19 +26,21 @@ void ProcessPreRenderShaders (GLWindow* pWin, void*)
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
-void ShowCameraAndTextures (GLWindow*, void*)
+void ShowCameraAndTextures( GLWindow*, void* )
 {    
     cam.DrawCamera();
     
     /// show textures
-    DrawTextureAsWindowPercentage( rgbMode.Texture(), cam.ImageWidth(),
+    DrawTextureAsWindowPercentage( cam.RGBTexture(), cam.ImageWidth(),
             cam.ImageHeight(), 0, 0.66, 0.33, 1 );
     DrawBorderAsWindowPercentage( 0, 0.66, 0.33, 1 );
     
-    GLubyte* buff = rgbMode.Capture();
-    
+   // GLubyte* buff = rgbMode.Capture();
+    std::vector<unsigned char> vPixels; // will be filled/written by CaptureRGB
+    cam.CaptureRGB( vPixels );
+
     PushOrtho(WIDTH, HEIGHT);
-    glDrawPixels(WIDTH, HEIGHT, GL_RGB, GL_UNSIGNED_BYTE, buff);
+    glDrawPixels(WIDTH, HEIGHT, GL_RGB, GL_UNSIGNED_BYTE, &vPixels[0] );
     PopOrtho();
 
     zmq::message_t Msg(WIDTH * HEIGHT * RGB_CHAN + 12);
@@ -60,7 +61,8 @@ void ShowCameraAndTextures (GLWindow*, void*)
     memcpy( MsgPtr, &ImgType, sizeof(ImgType) );
     MsgPtr += sizeof(ImgType);
 
-    memcpy( MsgPtr, buff, ImgSize );
+//    memcpy( MsgPtr, buff, ImgSize );
+    memcpy( MsgPtr, &vPixels[0], ImgSize );
     
     g_Socket.send(Msg);
 }
@@ -134,9 +136,7 @@ int main( int argc, char** argv )
     Eigen::Matrix4d dPose = GLCart2T( 1, 1,-4,0,0,M_PI/4 ); // initial camera pose
     Eigen::Matrix3d dK;// = Eigen::Matrix3d::Identity();    // computer vision K matrix
     dK << w,0,50,0,h,50,0,0,1;
-    cam.Init( &pWin->SceneGraph(), dPose, dK, w,h );
-
-    rgbMode.Init(&cam, false, 0);
+    cam.Init( &pWin->SceneGraph(), dPose, dK, w,h ); // default is RGB camera
 
     _SetupLighting();
 

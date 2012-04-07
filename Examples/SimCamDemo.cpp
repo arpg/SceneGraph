@@ -3,12 +3,7 @@
 using namespace Eigen;
 
 GLSimCam cam;
-SimCamMode camRGBMode;
-SimCamMode camNormalMode;
-SimCamMode camDepthMode;
-
 GLSimCam cam2;
-SimCamMode cam2DepthMode;
 
 /////////////////////////////////////////////////////////////////////////////////////////
 void ProcessPreRenderShaders (GLWindow* pWin, void*) 
@@ -36,28 +31,41 @@ void ProcessPreRenderShaders (GLWindow* pWin, void*)
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
-void ShowCameraAndTextures (GLWindow*, void*)
+void ShowCameraAndTextures( GLWindow*, void* )
 {
     cam.DrawCamera();
     cam2.DrawCamera();
 
     /// show textures
-    DrawTextureAsWindowPercentage( camRGBMode.Texture(), cam.ImageWidth(),
-				   cam.ImageHeight(), 0, 0.66, 0.33, 1 );
-    DrawBorderAsWindowPercentage( 0, 0.66, 0.33, 1 );
+    if( cam.HasRGB() ){
+        DrawTextureAsWindowPercentage( cam.RGBTexture(), cam.ImageWidth(),
+                cam.ImageHeight(), 0, 0.66, 0.33, 1 );
+        DrawBorderAsWindowPercentage( 0, 0.66, 0.33, 1 );
+    }
 
-    DrawTextureAsWindowPercentage( camNormalMode.Texture(), cam.ImageWidth(),
-				   cam.ImageHeight(), 0.33, 0.66, 0.66, 1 );
-    DrawBorderAsWindowPercentage(0.33, 0.66, 0.66, 1);
-     
-    DrawTextureAsWindowPercentage( camDepthMode.Texture(), cam.ImageWidth(),
-				   cam.ImageHeight(), 0.66, 0.66, 1, 1 );
-    DrawBorderAsWindowPercentage(0.66, 0.66, 1, 1);
+    if( cam.HasNormals() ){
+        DrawTextureAsWindowPercentage( cam.NormalsTexture(), cam.ImageWidth(),
+                cam.ImageHeight(), 0.33, 0.66, 0.66, 1 );
+        DrawBorderAsWindowPercentage(0.33, 0.66, 0.66, 1);
+    }
+    
+    if( cam.HasDepth() ){ 
+        DrawTextureAsWindowPercentage( cam.DepthTexture(), cam.ImageWidth(),
+                cam.ImageHeight(), 0.66, 0.66, 1, 1 );
+        DrawBorderAsWindowPercentage(0.66, 0.66, 1, 1);
+    }
 
-    unsigned char* buff = cam2DepthMode.Capture();
-    PushOrtho(200, 200);
-    glDrawPixels(200, 200, GL_RGB, GL_UNSIGNED_BYTE, buff);
-    PopOrtho();
+    if( gConfig.m_bDebugSimCam ){
+        cam.DrawRangeData();
+    }
+
+    if( cam2.HasRGB() ){
+        std::vector<unsigned char> vPixels; // will be filled/written by CaptureRGB
+        cam.CaptureRGB( vPixels );
+        PushOrtho( cam2.ImageWidth(), cam2.ImageHeight() );
+        glDrawPixels( cam2.ImageWidth(), cam2.ImageHeight(), GL_RGB, GL_UNSIGNED_BYTE, &vPixels[0] );
+        PopOrtho();
+    }
 }
 
 
@@ -123,8 +131,6 @@ int main( int argc, char** argv )
 
     // load mesh
     const struct aiScene* pScene;
-//    struct aiLogStream stream = aiGetPredefinedLogStream( aiDefaultLogStream_STDOUT, NULL );
-//    aiAttachLogStream( &stream );
      pScene = aiImportFile( sMesh.c_str(),
              aiProcess_Triangulate |
              aiProcess_GenNormals 
@@ -149,22 +155,9 @@ int main( int argc, char** argv )
     Eigen::Matrix3d dK;// = Eigen::Matrix3d::Identity();    // computer vision K matrix
     dK << w,0,50,0,h,50,0,0,1;
 
-    GLuint depthShaderProgram;
-    if ( LoadShaders( "Depth.vert", "Depth.frag", depthShaderProgram ) == false) {
-        fprintf(stderr, "Failed to load the Depth shader.");
-    }
-    GLuint normalShaderProgram;
-    if ( LoadShaders( "Normals.vert", "Normals.frag", normalShaderProgram ) == false) {
-        fprintf(stderr, "Failed to load the Normal shader.");
-    }
 
-    cam.Init( &pWin->SceneGraph(), dPose, dK, w,h );
-    camRGBMode.Init(&cam, false, 0);
-    camDepthMode.Init(&cam, true, depthShaderProgram);
-    camNormalMode.Init(&cam, true, normalShaderProgram);
-
-    cam2.Init( &pWin->SceneGraph(), dPose, dK, w,h );
-    cam2DepthMode.Init(&cam2, true, depthShaderProgram);
+    cam.Init( &pWin->SceneGraph(), dPose, dK, w,h, eSimCamRGB | eSimCamDepth | eSimCamNormals );
+    cam2.Init( &pWin->SceneGraph(), dPose, dK, w,h, eSimCamDepth );
 
     _SetupLighting();
 
