@@ -30,8 +30,8 @@ add_executable( Axis_Demo RenderAxis.cpp )
 target_link_libraries( Axis_Demo ${SimpleGui_LIBRARIES} )
 add_dependencies( Axis_Demo SimpleGui )
 
-add_executable( HELLo HELLo.cpp )
-target_link_libraries( HELLo ${SimpleGui_LIBRARIES} )
-add_dependencies( HELLo SimpleGui )
+add_executable( Hello Hello.cpp )
+target_link_libraries( Hello ${SimpleGui_LIBRARIES} )
+add_dependencies( Hello SimpleGui )
 
 
