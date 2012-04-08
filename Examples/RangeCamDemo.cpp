@@ -4,6 +4,7 @@
 using namespace Eigen;
 
 GLSimCam cam;
+GLSimCam OrthoCam;
 GLPointCloud pc;
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -134,14 +135,13 @@ int main( int argc, char** argv )
     Eigen::Matrix3d dK;   // computer vision K matrix
     dK << w,0,50,0,h,50,0,0,1;
 
-
-    cam.Init( &pWin->SceneGraph(), dPose, dK, w,h, eSimCamRGB | eSimCamDepth | eSimCamNormals );
+    cam.Init( &pWin->SceneGraph(), dPose, dK, w,h, eSimCamRGB | eSimCamDepth );
 
     _SetupLighting();
 
     pWin->LookAt( -30, -10, -10, 0,0,0, 0,0,-1 );
 
-    // Funcation callbacks
+    // add our callbacks
     pWin->AddPreRenderCallback( ProcessPreRenderShaders, NULL );
     pWin->AddPostRenderCallback( ShowCameraAndTextures, NULL );
 

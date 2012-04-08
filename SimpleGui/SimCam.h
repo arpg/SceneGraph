@@ -71,8 +71,21 @@ class GLSimCam
             m_pRGBMode = NULL;
             m_pDepthMode = NULL;
             m_pNormalsMode = NULL;
+            m_bOrthoCam = false;
         }
 
+        /////////////////////////////////////////////////////////////////////////////////////////
+        void SetOrtho()
+        {
+            m_bOrthoCam = true;
+        } 
+
+        /////////////////////////////////////////////////////////////////////////////////////////
+        void UnSetOrtho()
+        {
+            m_bOrthoCam = false;
+        }
+                
         /////////////////////////////////////////////////////////////////////////////////////////
         /// Store pose as a roboitcs frame pose
         void SetPose( const Eigen::Matrix4d& dPose )
@@ -101,8 +114,8 @@ class GLSimCam
                 const unsigned int nSensorWidth, //< Input: sensor width in pixels
                 const unsigned int nSensorHeight,//< Input: sensor height in pixels
                 int nModes = eSimCamRGB,         //< Input:
-                double dNear = 10,               //< Input: opengl near clipping plane
-                double dFar = 40                 //< Input: opengl far clipping plane
+                double dNear = 1,                //< Input: opengl near clipping plane
+                double dFar = 100                //< Input: opengl far clipping plane
                 )
         {
             m_pSceneGraph = pSceneGraph;
@@ -114,6 +127,9 @@ class GLSimCam
             m_dPose = dPose;
 
             /*
+
+                TODO: defien there here inline so we don't have to move shaders around
+
                std::string sDepthVertShader = 
                "// see http://olivers.posterous.com/linear-depth-in-glsl-for-real\n"
                "varying float depth;\n"
@@ -156,52 +172,18 @@ class GLSimCam
                 fprintf(stderr, "Failed to load the Normal shader.");
             }
 
-            if( nModes |= eSimCamRGB ){
+            if( nModes & eSimCamRGB ){
                 m_pRGBMode = new SimCamMode( *this, eSimCamRGB );
                 m_pRGBMode->Init( false, 0 );
             }
-            if( nModes |= eSimCamDepth ){
+            if( nModes & eSimCamDepth ){
                 m_pDepthMode = new SimCamMode( *this, eSimCamDepth );
                 m_pDepthMode->Init( true, m_nDepthShaderProgram );
             }
-            if( nModes |= eSimCamNormals ){
+            if( nModes & eSimCamNormals ){
                 m_pNormalsMode = new SimCamMode( *this, eSimCamNormals );
                 m_pNormalsMode->Init( true, m_nNormalShaderProgram );
             }
-
-#if 0
-            // Ok, now compute the corresponding GL_PROJECTION_MATRIX:
-            double dfovx = 360.0*atan2( nSensorWidth/2.0, K(0,0) )/M_PI;
-            double dfovy = 360.0*atan2( nSensorHeight/2.0, K(1,1) )/M_PI;
-
-            /*
-               from www.terathon.com/gdc07_lengyel.pdf:
-
-               M = [ e           0              0            0
-               0         e/a              0            0
-               0           0   -(f+n)/(f-n)   -2fn/(f-n)
-               0           0             -1            0 ]
-
-               where
-               e = focal length
-               a = width/height of sensor (viewport)
-               n,f = near and far clipping planes
-
-             */
-
-            // why use fovx over fovy?
-            double e = 1.0/(tan(dfovx/2.0)); // focal length
-            double n = m_dNear;
-            double f = m_dFar;
-            double a = (double)nSensorWidth/(double)nSensorHeight;
-
-            m_M = Eigeh::Matrix4d::Zero();
-            m_M(0,0) = e;
-            m_M(1,1) = e/a;
-            m_M(2,2) = -(f+n)/(f-n);
-            m_M(2,3) = -2.0*fn/(f-n);
-            m_M(3,2) = -1;
-#endif
 
             // May have change this for multiple SimCams (since there is only one FBO)
             // setup our frame buffer object for off screen rendering
@@ -311,14 +293,6 @@ class GLSimCam
         {
             return m_nSensorHeight;
         }
-
-        /* 
-        /////////////////////////////////////////////////////////////////////////////////////////
-        void AddMode( SimCamMode* mode ) 
-        {
-            m_vModes.push_back( *mode );
-        }
-        */
 
         /////////////////////////////////////////////////////////////////////////////////////////
         void Begin()
@@ -627,6 +601,9 @@ class GLSimCam
         // nb we flip the image here
         void DepthTo3D(  std::vector<float>& vRangeData  )
         {
+            if( !HasDepth() ){
+                return;
+            }
             // transform depth to 3d
             Eigen::Matrix3d K = GetKMatrix();
             vRangeData.resize(  m_nSensorHeight*m_nSensorWidth*3 );
@@ -667,6 +644,7 @@ class GLSimCam
         GLuint                                      m_nNormalShaderProgram;
         double                                      m_dNear;
         double                                      m_dFar;
+        bool                                        m_bOrthoCam; // if ortho, we will ignore K below
         Eigen::Matrix3d                             m_dK; // computer vision K matrix 
         Eigen::Matrix4d                             m_dPose; // desired camera pose
         Eigen::Matrix<double,4,4,Eigen::ColMajor>   m_dM; // to save projection matrix
