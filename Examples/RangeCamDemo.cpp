@@ -127,7 +127,7 @@ int main( int argc, char** argv )
     // register objects
     pWin->AddChildToRoot( &mesh );
     pWin->AddChildToRoot( &teapot );
-//    pWin->AddChildToRoot( &grid );
+    pWin->AddChildToRoot( &grid );
 
     int w = 128;
     int h = 128;

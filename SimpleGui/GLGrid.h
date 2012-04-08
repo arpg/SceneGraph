@@ -20,7 +20,7 @@ class GLGrid : public GLObject
 
             int i;
 #define NLINES 50
-#define LDELTA 1
+#define LDELTA 5
 
             glPushMatrix();
             glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
@@ -78,8 +78,8 @@ class GLGrid : public GLObject
             glEnd();
             */
 
-            glDisable( GL_BLEND );
-
+//            glDisable( GL_BLEND );
+//            glEnable( GL_LIGHTING );
         }
 
 };
