@@ -1,45 +1,33 @@
 #include <SimpleGui/Gui.h> // simple OpenGL scene graph using FLTK 
 
+
 using namespace Eigen;
 
 GLSimCam cam;
-GLSimCam cam2;
+GLPointCloud pc;
 
 /////////////////////////////////////////////////////////////////////////////////////////
 void ProcessPreRenderShaders (GLWindow* pWin, void*) 
 {
-    // experiment with changing camera parameters:
-//    static float t = 1; t+=0.1;
-//    int w = 500*sin(t)+1024; 
-//    Eigen::Matrix3d dK;// = Eigen::Matrix3d::Identity();    // computer vision K matrix
-//    dK << w,0,50,0,w,50,0,0,1;
-//    cam.SetSensorSize( w, w );
-//   cam.SetIntrinsics( dK );
- 
-    static float f;
     Eigen::Matrix4d dPose = GLCart2T( -30,0,0,0,0,0 ); // initial camera pose
     cam.SetPose( dPose );
-//    Eigen::Matrix4d dPose2 = GLCart2T( 0, 0,-20,0,-0.5, 0.1*sin(f+=0.1)+0.5 ); // initial camera pose
-//    cam2.SetPose( dPose2 );
 
     glEnable( GL_LIGHTING );
     glEnable( GL_LIGHT0 );
     glClearColor( 0.0, 0.0, 0.0, 1 );
 
-    cam.Render(); // will render to texture, then copy texture to CPU memory
-//    cam2.Render();
+    cam.RenderToTexture(); // will render to texture, then copy texture to CPU memory
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
 void ShowCameraAndTextures( GLWindow*, void* )
 {
     
-    if( gConfig.m_bDebugSimCam ){
-        cam.DrawRangeData();
-    }
+    // copy range data into point cloud
+    cam.DepthTo3D( pc.RangeDataRef() ); 
+    pc.draw();
 
     cam.DrawCamera();
-    cam2.DrawCamera();
 
     /// show textures
     if( cam.HasRGB() ){
@@ -58,14 +46,6 @@ void ShowCameraAndTextures( GLWindow*, void* )
         DrawTextureAsWindowPercentage( cam.DepthTexture(), cam.ImageWidth(),
                 cam.ImageHeight(), 0.66, 0.66, 1, 1 );
         DrawBorderAsWindowPercentage(0.66, 0.66, 1, 1);
-    }
-
-    if( cam2.HasRGB() ){
-        std::vector<unsigned char> vPixels; // will be filled/written by CaptureRGB
-        cam.CaptureRGB( vPixels );
-        PushOrtho( cam2.ImageWidth(), cam2.ImageHeight() );
-        glDrawPixels( cam2.ImageWidth(), cam2.ImageHeight(), GL_RGB, GL_UNSIGNED_BYTE, &vPixels[0] );
-        PopOrtho();
     }
 }
 
@@ -112,11 +92,9 @@ class GLTeapot : public GLObject
 
     void draw()
     {
-        if( gConfig.m_bDebugSimCam ){
-            glFrontFace(GL_CW);
-            glutSolidTeapot( 8 );
-            glFrontFace(GL_CCW);
-        }
+        glFrontFace(GL_CW);
+        glutSolidTeapot( 8 );
+        glFrontFace(GL_CCW);
     }
 };
 
@@ -150,18 +128,18 @@ int main( int argc, char** argv )
     pWin->AddChildToRoot( &teapot );
 //    pWin->AddChildToRoot( &grid );
 
-    int w=32;
-    int h=32;
-//    Eigen::Matrix4d dPose = GLCart2T( 1, 1,-4,0,0,M_PI/4 ); // initial camera pose
+    int w = 128;
+    int h = 128;
     Eigen::Matrix4d dPose = GLCart2T( -20, 0,0,0,0,0 ); // initial camera pose
-    Eigen::Matrix3d dK;// = Eigen::Matrix3d::Identity();    // computer vision K matrix
+    Eigen::Matrix3d dK;   // computer vision K matrix
     dK << w,0,50,0,h,50,0,0,1;
 
 
     cam.Init( &pWin->SceneGraph(), dPose, dK, w,h, eSimCamRGB | eSimCamDepth | eSimCamNormals );
-    cam2.Init( &pWin->SceneGraph(), dPose, dK, w,h, eSimCamDepth );
 
     _SetupLighting();
+
+    pWin->LookAt( -30, -10, -10, 0,0,0, 0,0,-1 );
 
     // Funcation callbacks
     pWin->AddPreRenderCallback( ProcessPreRenderShaders, NULL );

@@ -494,6 +494,18 @@ int GLWindow::handle( int e )
 }
 
 ////////////////////////////////////////////////////////////////////////////
+void GLWindow::LookAt(
+        float eyex, float eyey, float eyez, 
+        float targetx, float targety, float targetz,
+        float upx, float upy, float upz )
+{
+   m_dCamPosition << eyex, eyey, eyez;
+   m_dCamTarget << targetx, targety, targetz;
+   m_dCamUp << upx, upy, upz;
+}
+
+
+////////////////////////////////////////////////////////////////////////////
 int GLWindow::SimpleDefaultEventHandler( int e )
 {
     GLObject* pSelect = SelectedObject();

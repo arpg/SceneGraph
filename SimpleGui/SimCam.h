@@ -26,7 +26,7 @@ class SimCamMode
         SimCamMode( GLSimCam& sc, eSimCamType eCamType ); // private, only SimCam can make one...
         ~SimCamMode();
         void Init( bool shader, GLuint sp );
-        void Render();
+        void RenderToTexture();
         GLubyte* Capture();
         GLuint Texture();
 
@@ -376,22 +376,17 @@ class GLSimCam
         }
 
         /////////////////////////////////////////////////////////////////////////////////////////
-        void Render()
+        void RenderToTexture()
         {
             Begin();
-            /*
-            for (unsigned int i = 0; i < m_vModes.size(); i++) {
-                m_vModes.at(i).Render();
-            }
-            */
             if( m_pRGBMode ){
-                m_pRGBMode->Render();
+                m_pRGBMode->RenderToTexture();
             }
             if( m_pDepthMode ){
-                m_pDepthMode->Render();
+                m_pDepthMode->RenderToTexture();
             }
             if( m_pNormalsMode ){
-                m_pNormalsMode->Render();
+                m_pNormalsMode->RenderToTexture();
             }
 
             End();
@@ -402,7 +397,7 @@ class GLSimCam
         static void RenderCallBack( GLWindow*, void* pUserData )
         {
             GLSimCam* pThis = (GLSimCam*)pUserData;
-            pThis->Render();
+            pThis->RenderToTexture();
         }
 
         /////////////////////////////////////////////////////////////////////////////////////////
@@ -614,7 +609,7 @@ class GLSimCam
         void DrawRangeData()
         {
             std::vector<float> vRangeData;
-            DepthTo3D( m_pDepthMode->m_vDepthPixels,  vRangeData ); 
+            DepthTo3D( vRangeData ); 
             glPointSize( 2 );
             glEnable( GL_COLOR_MATERIAL );
             glColor3f( 1,0,1 );
@@ -624,17 +619,19 @@ class GLSimCam
             }
             glEnd();
             glPointSize( 1 );
+
         }
 
         /////////////////////////////////////////////////////////////////////////////////////////
         /// use depth image and camera model to compute 3D range data
-        void DepthTo3D( std::vector<float>& vDepthPixels,  std::vector<float>& vRangeData  )
+        // nb we flip the image here
+        void DepthTo3D(  std::vector<float>& vRangeData  )
         {
             // transform depth to 3d
             Eigen::Matrix3d K = GetKMatrix();
             vRangeData.resize(  m_nSensorHeight*m_nSensorWidth*3 );
             int n = 0;
-            for( unsigned int jj = 0; jj <  m_nSensorHeight; jj++ ){
+            for( int jj = m_nSensorHeight-1; jj >=0  ; jj-- ){
                 for( unsigned int ii = 0; ii <  m_nSensorWidth; ii++ ){
                     // NB to convet to xyz use fact that x/z = u/f
                     float fx = K(0,0); // focal length in pixels
@@ -642,8 +639,8 @@ class GLSimCam
                     float fy = K(1,1); // focal length in pixels
                     float cy = K(1,2);
                     float u  = ii-cx;
-                    float v  = jj-cy;
-                    float z  = vDepthPixels[  m_nSensorWidth*jj + ii ];
+                    float v  = (m_nSensorWidth-jj-1)-cy;
+                    float z  = m_pDepthMode->m_vDepthPixels[  m_nSensorWidth*jj + ii ];
                     float x  = z*u/fx;
                     float y  = z*v/fy;
 

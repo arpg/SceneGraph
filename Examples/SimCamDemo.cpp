@@ -150,8 +150,8 @@ int main( int argc, char** argv )
     pWin->AddChildToRoot( &teapot );
 //    pWin->AddChildToRoot( &grid );
 
-    int w=32;
-    int h=32;
+    int w=320;
+    int h=100;
 //    Eigen::Matrix4d dPose = GLCart2T( 1, 1,-4,0,0,M_PI/4 ); // initial camera pose
     Eigen::Matrix4d dPose = GLCart2T( -20, 0,0,0,0,0 ); // initial camera pose
     Eigen::Matrix3d dK;// = Eigen::Matrix3d::Identity();    // computer vision K matrix

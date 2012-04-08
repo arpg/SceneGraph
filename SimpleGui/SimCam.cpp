@@ -123,7 +123,7 @@ void SimCamMode::Init( bool shader, GLuint sp )
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
-void SimCamMode::Render()
+void SimCamMode::RenderToTexture()
 {
     m_SimCam.m_pFbo->Begin();
     glDrawBuffer(attachmentIndex);

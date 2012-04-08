@@ -116,13 +116,10 @@ class GLWindow : public Fl_Gl_Window, public boost::mutex
     /// Constructor.
     GLWindow(int x,int y,int w,int h,const char *l=0);
 
-    // allow users to register frame listeners
-    void AddFrameListner( void(*f)(void) );
-
     // position the camera at "origin"
     void ResetCamera();
 
-    // bird's eye view
+    // bird's eye view -- bad bad bad, this isn't orhto at all
     void CameraOrtho();
 
     // Reset clear all registered objects
@@ -139,6 +136,8 @@ class GLWindow : public Fl_Gl_Window, public boost::mutex
 
     /// Main function called by FLTK to draw the scene.
     void draw();
+
+    // for mouse interaction
     Eigen::Vector2i GetCursorPos();
     Eigen::Vector3d GetPosUnderCursor();
     Eigen::Vector3d GetNormalUnderCursor();
@@ -161,6 +160,9 @@ class GLWindow : public Fl_Gl_Window, public boost::mutex
     int HandleNavInput( int e );
     int HandleSelectionInput( int e );
 
+    void LookAt( float eyex, float eyey, float eyez, 
+            float targetx, float targety, float targetx,
+            float upx, float upy, float upz );
 
     private:
     int                             m_nMouseX;
