@@ -6,7 +6,7 @@ from "GLObject".  These objects must have a "draw()" funciton.
 
 A GLObject, o, is registred with a GLWindow, g, via g.AddChild( &o ).
 
-See Test/Test.cpp to see how easy it is to create a simple opengl scene with a
+See Example/Demo.cpp to see how easy it is to create a simple opengl scene with a
 mesh and a "grid" GLObject.
 
 The code in the SimpleGui directory is stand-alone and exported so other cmake

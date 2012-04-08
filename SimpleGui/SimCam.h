@@ -11,7 +11,7 @@
 class GLSimCam;
 
 /// type of rendering modes we support
-enum SimCamModes{
+enum eSimCamType{
     eSimCamLuminance = 1,
     eSimCamRGB = 2,
     eSimCamDepth = 4,
@@ -23,7 +23,7 @@ class SimCamMode
 {
     friend class GLSimCam; // only SimCam can have a "SimCamMode"
     private:
-        SimCamMode( GLSimCam& sc ); // private, only SimCam can make one...
+        SimCamMode( GLSimCam& sc, eSimCamType eCamType ); // private, only SimCam can make one...
         ~SimCamMode();
         void Init( bool shader, GLuint sp );
         void Render();
@@ -36,6 +36,7 @@ class SimCamMode
         static void _ShaderVisitor( GLObject* pObj );
 
         void PboRead();
+        void PboReadDepth();
         void PboInit();
 
     private:
@@ -46,13 +47,15 @@ class SimCamMode
         // James, please fix the variable naming convention here:
         int             numberOfChannels;
         //  GLint format;
-        GLuint          shaderProgram;
-        int             pboIndex;
-        int             colorTextureId;
-        GLenum          attachmentIndex;
-        GLubyte*        buffer;
-        GLuint*         pboIds;
-        int             data_size;
+        eSimCamType        m_eCamType;
+        GLuint             shaderProgram;
+        int                pboIndex;
+        int                colorTextureId;
+        GLenum             attachmentIndex;
+        GLubyte*           buffer; // James, consider using std::vector to automate memory management
+        GLuint*            pboIds;
+        int                data_size;
+        std::vector<float> m_vDepthPixels;
 };
 
 class GLSimCam
@@ -144,31 +147,25 @@ class GLSimCam
 
              */
 
-            // TODO: Move elsewhere
+            // Load shader
             if ( LoadShaders( "Depth.vert", "Depth.frag", m_nDepthShaderProgram ) == false) {
                 fprintf(stderr, "Failed to load the Depth shader.");
             }
 
-            // Load shader
             if ( LoadShaders( "Normals.vert", "Normals.frag", m_nNormalShaderProgram ) == false) {
                 fprintf(stderr, "Failed to load the Normal shader.");
             }
 
             if( nModes |= eSimCamRGB ){
-//                m_vModes.push_back( SimCamMode(*this) );
-//                SimCamMode& c = m_vModes.back();
-//                c.Init( false, 0 );
-                m_pRGBMode = new SimCamMode( *this );
+                m_pRGBMode = new SimCamMode( *this, eSimCamRGB );
                 m_pRGBMode->Init( false, 0 );
             }
             if( nModes |= eSimCamDepth ){
-//                m_vModes.push_back( SimCamMode(*this) );
-//                SimCamMode& c = m_vModes.back();
-                m_pDepthMode = new SimCamMode( *this );
+                m_pDepthMode = new SimCamMode( *this, eSimCamDepth );
                 m_pDepthMode->Init( true, m_nDepthShaderProgram );
             }
             if( nModes |= eSimCamNormals ){
-                m_pNormalsMode = new SimCamMode( *this );
+                m_pNormalsMode = new SimCamMode( *this, eSimCamNormals );
                 m_pNormalsMode->Init( true, m_nNormalShaderProgram );
             }
 
@@ -255,7 +252,7 @@ class GLSimCam
         }
 
         /////////////////////////////////////////////////////////////////////////////////////////
-        bool CaptureDepth( std::vector<unsigned char>& vPixelData )
+        bool CaptureDepth( std::vector<float>& vPixelData )
         {
             if( m_pDepthMode ){
                 if( vPixelData.size() < ImageWidth()*ImageHeight()*sizeof(float) ){
@@ -589,9 +586,13 @@ class GLSimCam
             Eigen::Vector4d rbn = T*M*Vec4(  1,-1,-1, 1 );  rbn/=rbn[3];
             Eigen::Vector4d ltn = T*M*Vec4( -1, 1,-1, 1 );  ltn/=ltn[3];
 
-            double dSensorHeightInMeters = (lbn-ltn).norm();
-            double dSensorWidthInMeters = (rbn-lbn).norm();
             double dFocalLengthInMeters = M(0,0);
+            // sensor_width/focal_length = near_width/near_dist, thus:
+            double dNearPlaneWidth = (rbn-lbn).norm();
+            double dNearPlaneHeight = (lbn-ltn).norm();
+            double dSensorHeightInMeters = dFocalLengthInMeters*dNearPlaneHeight/m_dNear;
+            double dSensorWidthInMeters = dFocalLengthInMeters*dNearPlaneWidth/m_dNear;
+            // and in pixels:
             double fx = dFocalLengthInMeters * m_nSensorWidth / dSensorWidthInMeters;
             double fy = dFocalLengthInMeters * m_nSensorHeight / dSensorHeightInMeters;
 
@@ -612,10 +613,10 @@ class GLSimCam
         /////////////////////////////////////////////////////////////////////////////////////////
         void DrawRangeData()
         {
-            /*
             std::vector<float> vRangeData;
-            RangeData( vRangeData);
-            glPointSize( 3 );
+            DepthTo3D( m_pDepthMode->m_vDepthPixels,  vRangeData ); 
+            glPointSize( 2 );
+            glEnable( GL_COLOR_MATERIAL );
             glColor3f( 1,0,1 );
             glBegin( GL_POINTS );
             for( size_t ii = 0; ii < vRangeData.size(); ii+=3 ){
@@ -623,54 +624,38 @@ class GLSimCam
             }
             glEnd();
             glPointSize( 1 );
-            */
         }
 
         /////////////////////////////////////////////////////////////////////////////////////////
         /// use depth image and camera model to compute 3D range data
-        void RangeData( std::vector<float>& )
+        void DepthTo3D( std::vector<float>& vDepthPixels,  std::vector<float>& vRangeData  )
         {
-#if 0 
-            std::vector<unsigned char> vPixels;
-            CaptureDepth( vPixels );
-            //m_vDepthData.resize( m_nSensorHeight*m_nSensorWidth );
-
             // transform depth to 3d
-//            Eigen::Matrix3d invK = GetKMatrix().inverse();
             Eigen::Matrix3d K = GetKMatrix();
-//            Eigen::Vector3d p;
-//            Eigen::Vector3d ray;
             vRangeData.resize(  m_nSensorHeight*m_nSensorWidth*3 );
             int n = 0;
             for( unsigned int jj = 0; jj <  m_nSensorHeight; jj++ ){
                 for( unsigned int ii = 0; ii <  m_nSensorWidth; ii++ ){
-                    // from http://olivers.posterous.com/linear-depth-in-glsl-for-real
-                    unsigned char data[4];
-                    float& f = *(float*)data;
-                    data[0] = vDepthPixels[ m_nSensorWidth*jj+ ii ];
-                    data[1] = vDepthPixels[ m_nSensorWidth*jj+ ii + 1 ];
-                    data[2] = vDepthPixels[ m_nSensorWidth*jj+ ii + 2 ];
-                    data[3] = 0;
+                    // NB to convet to xyz use fact that x/z = u/f
+                    float fx = K(0,0); // focal length in pixels
+                    float cx = K(0,2);
+                    float fy = K(1,1); // focal length in pixels
+                    float cy = K(1,2);
+                    float u  = ii-cx;
+                    float v  = jj-cy;
+                    float z  = vDepthPixels[  m_nSensorWidth*jj + ii ];
+                    float x  = z*u/fx;
+                    float y  = z*v/fy;
 
-                    float d = ;
-                    float z = 2.0*m_dFar*m_dNear / 
-                        (m_dFar + m_dNear - (m_dFar - m_dNear)*(2.0*d-1.0));
-                    // convet to xyz: x/z = u/f
-                    float x = z*(ii+100)/K(0,0);
-                    float y = z*(jj+100)/K(1,1);
-                    
-                    /*
-                    float d = m_vDepthData[  m_nSensorWidth*jj + ii ];
-                    p << ii,jj,1; // homogeneous image point
-                    ray = invK*p;
-                    ray = ray/ray.norm();
-                    vRangeData[ n++ ] = d*ray[0];
-                    vRangeData[ n++ ] = d*ray[1];
-                    vRangeData[ n++ ] = d*ray[2];
-                    */
+                    Eigen::Vector4d p;
+                    p << z,x,y,1;  // setup p using robot convention
+                    p = m_dPose*p; // and put p in the world frame
+
+                    vRangeData[n++] = p[0];
+                    vRangeData[n++] = p[1];
+                    vRangeData[n++] = p[2];
                 }
             }
-           #endif
         }
 
         /////////////////////////////////////////////////////////////////////////////////////////

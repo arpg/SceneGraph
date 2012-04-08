@@ -80,8 +80,8 @@ void GLWindow::Reset()
 void GLWindow::Init()
 {
     // OpenGL settings
-//    glShadeModel( GL_SMOOTH );
-    glShadeModel( GL_FLAT );
+    glShadeModel( GL_SMOOTH );
+//    glShadeModel( GL_FLAT );
     glEnable( GL_LINE_SMOOTH );
     glEnable( GL_LIGHTING );
     glEnable( GL_LIGHT0 );    // Uses default lighting parameters

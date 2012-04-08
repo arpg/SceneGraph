@@ -49,7 +49,7 @@ class GLMesh : public GLObject
         void apply_material(const struct aiMaterial *mtl)
         {
 
-            glShadeModel( GL_FLAT );
+//            glShadeModel( GL_FLAT );
             glDisable( GL_COLOR_MATERIAL );                                 // activate material
 
             float c[4];

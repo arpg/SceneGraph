@@ -125,15 +125,19 @@ class FBO
             glGetIntegerv( GL_VIEWPORT,  &m_vViewport[0] );
 
             // Generate color textures 
-	     
             glGenTextures( m_vColorTextureIds.size(), &m_vColorTextureIds[0] ); 
             for( size_t ii = 0; ii < m_vColorTextureIds.size(); ii++ ){
                 // Bind the texture 
                 glBindTexture( GL_TEXTURE_RECTANGLE_ARB, m_vColorTextureIds[ii] ); 
 
+                // setup a non-clamped floating-point texture (GL_RGBA32F dies this...)
+                // NB, this combo is great because it works for rgb and float images (it seems)
+                glTexImage2D( GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGBA32F, m_nTexWidth, 
+                        m_nTexHeight, 0, GL_RGBA, GL_FLOAT, NULL );
+ 
                 // Create a standard texture with the width and height of our window  
-                glTexImage2D( GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB, m_nTexWidth, 
-                        m_nTexHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL );
+//                glTexImage2D( GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB, m_nTexWidth, 
+//                        m_nTexHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL );
   
                 // Setup the basic texture parameters  
 //                glTexParameterf( GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
@@ -156,9 +160,11 @@ class FBO
                 //   glTexParameterf( GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
                 //   glTexParameterf( GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
                 //   glTexParameteri( GL_TEXTURE_RECTANGLE_ARB, GL_DEPTH_TEXTURE_MODE, GL_LUMINANCE );
-
-                glTexImage2D( GL_TEXTURE_RECTANGLE_ARB, 0, GL_DEPTH_COMPONENT, m_nTexWidth, 
-                        m_nTexHeight, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, NULL );
+                glTexImage2D( GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGBA32F, m_nTexWidth, 
+                        m_nTexHeight, 0, GL_RGBA, GL_FLOAT, NULL );
+ 
+//                glTexImage2D( GL_TEXTURE_RECTANGLE_ARB, 0, GL_DEPTH_COMPONENT, m_nTexWidth, 
+//                        m_nTexHeight, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, NULL );
 
                 //  Unbind the texture  
                 glBindTexture(GL_TEXTURE_RECTANGLE_ARB, 0);  
