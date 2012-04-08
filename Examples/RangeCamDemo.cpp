@@ -2,13 +2,16 @@
 
 
 using namespace Eigen;
+using namespace CVarUtils;
 
 GLSimCam cam;
 GLSimCam OrthoCam;
 GLPointCloud pc;
+ 
+float& fOrthoSize = CreateCVar( "cam.OthroSize", 20.0f, "Size of ortho cam" );
 
 /////////////////////////////////////////////////////////////////////////////////////////
-void ProcessPreRenderShaders (GLWindow* pWin, void*) 
+void ProcessPreRenderShaders( GLWindow* pWin, void* ) 
 {
     Eigen::Matrix4d dPose = GLCart2T( -30,0,0,0,0,0 ); // initial camera pose
     cam.SetPose( dPose );
@@ -23,11 +26,12 @@ void ProcessPreRenderShaders (GLWindow* pWin, void*)
 /////////////////////////////////////////////////////////////////////////////////////////
 void ShowCameraAndTextures( GLWindow*, void* )
 {
-    
     // copy range data into point cloud
+    cam.SetOrtho( fOrthoSize, fOrthoSize ); // force camera to be orhto, 20m by 20m viewing volume 
     cam.DepthTo3D( pc.RangeDataRef() ); 
     pc.draw();
 
+    // show the camera
     cam.DrawCamera();
 
     /// show textures
@@ -48,41 +52,6 @@ void ShowCameraAndTextures( GLWindow*, void* )
                 cam.ImageHeight(), 0.66, 0.66, 1, 1 );
         DrawBorderAsWindowPercentage(0.66, 0.66, 1, 1);
     }
-}
-
-
-/////////////////////////////////////////////////////////////////////////////////
-void _SetupLighting()
-{
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-    gluLookAt( 10,10,-10, 0,0,0, 0,0,-1 );
-
-    /////
-    GLfloat ambientLight[]  ={ 0.1, 0.1, 0.1, 1.0 };             // set ambient light parameters
-    glLightfv( GL_LIGHT0, GL_AMBIENT, ambientLight );
-
-    GLfloat diffuseLight[] = { 0.8, 0.8, 0.8, 1.0 };             // set diffuse light parameters
-    glLightfv( GL_LIGHT0, GL_DIFFUSE, diffuseLight );
-
-    GLfloat specularLight[] = { 0.5, 0.5, 0.5, 1.0 };                   // set specular light parameters
-    glLightfv(GL_LIGHT0,GL_SPECULAR,specularLight);
-
-    GLfloat lightPos[] = { 10.0, 10.0, -100.0, 1.0};                 // set light position
-    glLightfv( GL_LIGHT0, GL_POSITION, lightPos );
-
-    GLfloat specularReflection[] = { 1.0, 1.0, 1.0, 1.0 };              // set specularity
-    glMaterialfv( GL_FRONT_AND_BACK, GL_SPECULAR, specularReflection );
-    glMateriali( GL_FRONT_AND_BACK, GL_SHININESS, 128 );
-    glEnable( GL_LIGHT0 );                                         // activate light0
-    glEnable( GL_LIGHTING );                                       // enable lighting
-    glLightModelfv( GL_LIGHT_MODEL_AMBIENT, ambientLight );        // set light model
-    glEnable( GL_COLOR_MATERIAL );                                 // activate material
-    glColorMaterial( GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE );
-//    glEnable( GL_NORMALIZE );                                   // normalize normal vectors
-
-//    glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
-
 }
 
 
@@ -133,13 +102,16 @@ int main( int argc, char** argv )
     int h = 128;
     Eigen::Matrix4d dPose = GLCart2T( -20, 0,0,0,0,0 ); // initial camera pose
     Eigen::Matrix3d dK;   // computer vision K matrix
-    dK << w,0,50,0,h,50,0,0,1;
+    dK << w,0,w/2,0,h,h/2,0,0,1;
 
+//    cam.Init( &pWin->SceneGraph(), dPose, dK, w,h, eSimCamRGB | eSimCamDepth );
     cam.Init( &pWin->SceneGraph(), dPose, dK, w,h, eSimCamRGB | eSimCamDepth );
+    cam.SetOrtho( fOrthoSize, fOrthoSize ); // force camera to be orhto, 20m by 20m viewing volume 
 
-    _SetupLighting();
+    glEnable( GL_LIGHT0 );                                         // activate light0
+    glEnable( GL_LIGHTING );                                       // enable lighting
 
-    pWin->LookAt( -30, -10, -10, 0,0,0, 0,0,-1 );
+    pWin->LookAt( -70, -70, -50, 0,0,0, 0,0,-1 );
 
     // add our callbacks
     pWin->AddPreRenderCallback( ProcessPreRenderShaders, NULL );

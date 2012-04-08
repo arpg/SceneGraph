@@ -75,9 +75,13 @@ class GLSimCam
         }
 
         /////////////////////////////////////////////////////////////////////////////////////////
-        void SetOrtho()
+        void SetOrtho( float dWidth, float dHeight )
         {
-            m_bOrthoCam = true;
+            m_fOrthoTop    = -dHeight / 2.0; // -z dir
+            m_fOrthoBottom = dHeight / 2.0; // +z dir
+            m_fOrthoLeft   = -dWidth / 2.0; // -y dir
+            m_fOrthoRight  = dWidth / 2.0; // +y dir
+            m_bOrthoCam    = true;
         } 
 
         /////////////////////////////////////////////////////////////////////////////////////////
@@ -114,15 +118,15 @@ class GLSimCam
                 const unsigned int nSensorWidth, //< Input: sensor width in pixels
                 const unsigned int nSensorHeight,//< Input: sensor height in pixels
                 int nModes = eSimCamRGB,         //< Input:
-                double dNear = 1,                //< Input: opengl near clipping plane
-                double dFar = 100                //< Input: opengl far clipping plane
+                float fNear = 1,                //< Input: opengl near clipping plane
+                float fFar = 100                //< Input: opengl far clipping plane
                 )
         {
             m_pSceneGraph = pSceneGraph;
             m_nSensorWidth = nSensorWidth;
             m_nSensorHeight = nSensorHeight;
-            m_dNear = dNear;
-            m_dFar = dFar;
+            m_fNear = fNear;
+            m_fFar = fFar;
             m_dK = dK;
             m_dPose = dPose;
 
@@ -305,9 +309,17 @@ class GLSimCam
             glPushMatrix(); // push proj mat
             glLoadIdentity(); // now setup our own proj mat
 
-            //  double dfovx = 360.0*atan2( nSensorWidth/2.0, K(0,0) )/M_PI;
-            double dfovy = 360.0*atan2( m_nSensorHeight/2.0, m_dK(1,1) )/M_PI;
-            gluPerspective( dfovy, (float)m_nSensorWidth/(float)m_nSensorHeight, m_dNear, m_dFar );
+            if( m_bOrthoCam ){
+                glOrtho( m_fOrthoLeft, m_fOrthoRight,
+                        m_fOrthoTop, // top and bottom are flipped
+                        m_fOrthoBottom,
+                        m_fNear, m_fFar );
+            }
+            else{
+                //  double dfovx = 360.0*atan2( nSensorWidth/2.0, K(0,0) )/M_PI;
+                double dfovy = 360.0*atan2( m_nSensorHeight/2.0, m_dK(1,1) )/M_PI;
+                gluPerspective( dfovy, (float)m_nSensorWidth/(float)m_nSensorHeight, m_fNear, m_fFar );
+            }
 
             // save OpenGL perspective projection parameters (from which we will pull focal lenght)
             glGetDoublev( GL_PROJECTION_MATRIX, m_dM.data() );
@@ -504,11 +516,18 @@ class GLSimCam
 
             glColor4f( 1, 1, 1, 0.8 );
 
-            // center to far clipping plane
-            glVertex3dv( c.data() ); glVertex3dv( lbf.data() );
-            glVertex3dv( c.data() ); glVertex3dv( rbf.data() );
-            glVertex3dv( c.data() ); glVertex3dv( rtf.data() );
-            glVertex3dv( c.data() ); glVertex3dv( ltf.data() );
+            // center to near clipping plane
+            glVertex3dv( c.data() ); glVertex3dv( lbn.data() );
+            glVertex3dv( c.data() ); glVertex3dv( rbn.data() );
+            glVertex3dv( c.data() ); glVertex3dv( rtn.data() );
+            glVertex3dv( c.data() ); glVertex3dv( ltn.data() );
+
+            // near clipping plane to far clipping plane
+            glVertex3dv( lbn.data() ); glVertex3dv( lbf.data() );
+            glVertex3dv( rbn.data() ); glVertex3dv( rbf.data() );
+            glVertex3dv( rtn.data() ); glVertex3dv( rtf.data() );
+            glVertex3dv( ltn.data() ); glVertex3dv( ltf.data() );
+
 
             // x axis
             glColor4f( 1,0,0,1 );
@@ -559,8 +578,8 @@ class GLSimCam
             // sensor_width/focal_length = near_width/near_dist, thus:
             double dNearPlaneWidth = (rbn-lbn).norm();
             double dNearPlaneHeight = (lbn-ltn).norm();
-            double dSensorHeightInMeters = dFocalLengthInMeters*dNearPlaneHeight/m_dNear;
-            double dSensorWidthInMeters = dFocalLengthInMeters*dNearPlaneWidth/m_dNear;
+            double dSensorHeightInMeters = dFocalLengthInMeters*dNearPlaneHeight/m_fNear;
+            double dSensorWidthInMeters = dFocalLengthInMeters*dNearPlaneWidth/m_fNear;
             // and in pixels:
             double fx = dFocalLengthInMeters * m_nSensorWidth / dSensorWidthInMeters;
             double fy = dFocalLengthInMeters * m_nSensorHeight / dSensorHeightInMeters;
@@ -606,28 +625,47 @@ class GLSimCam
             }
             // transform depth to 3d
             Eigen::Matrix3d K = GetKMatrix();
-            vRangeData.resize(  m_nSensorHeight*m_nSensorWidth*3 );
-            int n = 0;
+            vRangeData.clear();
+            /*
+            if( vRangeData.size() !=  m_nSensorHeight*m_nSensorWidth*3 ){
+                vRangeData.resize(  m_nSensorHeight*m_nSensorWidth*3 );
+            }
+            */
+            float dx = (m_fOrthoRight-m_fOrthoLeft)/m_nSensorWidth;
+            float dy = (m_fOrthoBottom-m_fOrthoTop)/m_nSensorHeight;
+            float fx = K(0,0); // focal length in pixels
+            float cx = K(0,2);
+            float fy = K(1,1); // focal length in pixels
+            float cy = K(1,2);
+            //int n = 0;
             for( int jj = m_nSensorHeight-1; jj >=0  ; jj-- ){
                 for( unsigned int ii = 0; ii <  m_nSensorWidth; ii++ ){
                     // NB to convet to xyz use fact that x/z = u/f
-                    float fx = K(0,0); // focal length in pixels
-                    float cx = K(0,2);
-                    float fy = K(1,1); // focal length in pixels
-                    float cy = K(1,2);
-                    float u  = ii-cx;
-                    float v  = (m_nSensorWidth-jj-1)-cy;
-                    float z  = m_pDepthMode->m_vDepthPixels[  m_nSensorWidth*jj + ii ];
-                    float x  = z*u/fx;
-                    float y  = z*v/fy;
-
+                    float x, y, z, u, v;
+                    u  = ii-cx;
+                    v  = (m_nSensorWidth-jj-1)-cy;
+                    z  = m_pDepthMode->m_vDepthPixels[m_nSensorWidth*jj + ii ];
+                    if( m_bOrthoCam ){
+                        x  = dx*u;
+                        y  = dy*v;
+                    }
+                    else{
+                        x  = z*u/fx;
+                        y  = z*v/fy;
+                    }
                     Eigen::Vector4d p;
                     p << z,x,y,1;  // setup p using robot convention
                     p = m_dPose*p; // and put p in the world frame
 
-                    vRangeData[n++] = p[0];
-                    vRangeData[n++] = p[1];
-                    vRangeData[n++] = p[2];
+                    // don't add points at 0
+                    if( z > 1e-6 ){
+//                        vRangeData[n++] = p[0];
+//                        vRangeData[n++] = p[1];
+//                        vRangeData[n++] = p[2];
+                        vRangeData.push_back( p[0] );
+                        vRangeData.push_back( p[1] );
+                        vRangeData.push_back( p[2] );
+                    }
                 }
             }
         }
@@ -642,9 +680,13 @@ class GLSimCam
         bool                                        m_bInitDone;
         GLuint                                      m_nDepthShaderProgram;
         GLuint                                      m_nNormalShaderProgram;
-        double                                      m_dNear;
-        double                                      m_dFar;
+        float                                       m_fNear;
+        float                                       m_fFar;
         bool                                        m_bOrthoCam; // if ortho, we will ignore K below
+        float                                       m_fOrthoTop; 
+        float                                       m_fOrthoBottom;
+        float                                       m_fOrthoLeft;
+        float                                       m_fOrthoRight; 
         Eigen::Matrix3d                             m_dK; // computer vision K matrix 
         Eigen::Matrix4d                             m_dPose; // desired camera pose
         Eigen::Matrix<double,4,4,Eigen::ColMajor>   m_dM; // to save projection matrix
