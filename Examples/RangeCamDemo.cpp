@@ -7,14 +7,54 @@ using namespace CVarUtils;
 GLSimCam cam;
 GLSimCam OrthoCam;
 GLPointCloud pc;
- 
+
+Eigen::Matrix4d g_dPose = GLCart2T( -40,0,0,0,0,0 ); // initial camera pose
+float g_fTurnrate = 0;
+float g_fSpeed = 0;
+
+
 float& fOrthoSize = CreateCVar( "cam.OthroSize", 20.0f, "Size of ortho cam" );
+bool&  bOrtho = CreateCVar( "cam.OthroOn", false, "Use orthographic projection" );
+
+/////////////////////////////////////////////////////////////////////////////////////////
+/// example of how to handle fltk events in a sub-class
+class GuiWindow: public GLWindow
+{
+    public:
+        GuiWindow(int x,int y,int w,int h,const char *l=0 ) : GLWindow(x,y,w,h,l) {}
+
+        virtual int handle( int e )
+        {
+            if( e == FL_KEYBOARD ){
+                switch( Fl::event_key() ) {
+                    case 'a': case 'A': 
+                        g_fTurnrate -= 0.01;
+                        break;
+                    case 's': case 'S':
+                        g_fSpeed -= 0.2;
+                        break;
+                    case 'd': case 'D': 
+                        g_fTurnrate += 0.01;
+                        break;
+                    case 'w': case 'W':
+                        g_fSpeed += 0.2;
+                        break;
+                    case ' ':
+                        g_fSpeed = 0;
+                        g_fTurnrate = 0;
+                        break;
+                }
+            }
+            return SimpleDefaultEventHandler( e ); 
+        }
+};
 
 /////////////////////////////////////////////////////////////////////////////////////////
 void ProcessPreRenderShaders( GLWindow* pWin, void* ) 
 {
-    Eigen::Matrix4d dPose = GLCart2T( -30,0,0,0,0,0 ); // initial camera pose
-    cam.SetPose( dPose );
+//    static Eigen::Matrix4d dMotion = GLCart2T( 0.1,0,0,0,0,0.01 ); // initial camera pose
+    g_dPose = g_dPose* GLCart2T( g_fSpeed,0,0,0,0,g_fTurnrate );
+    cam.SetPose( g_dPose );
 
     glEnable( GL_LIGHTING );
     glEnable( GL_LIGHT0 );
@@ -27,7 +67,9 @@ void ProcessPreRenderShaders( GLWindow* pWin, void* )
 void ShowCameraAndTextures( GLWindow*, void* )
 {
     // copy range data into point cloud
-    cam.SetOrtho( fOrthoSize, fOrthoSize ); // force camera to be orhto, 20m by 20m viewing volume 
+    if( bOrtho ){
+        cam.SetOrtho( fOrthoSize, fOrthoSize ); // force camera to be orhto, 20m by 20m viewing volume 
+    }
     cam.DepthTo3D( pc.RangeDataRef() ); 
     pc.draw();
 
@@ -76,7 +118,7 @@ int main( int argc, char** argv )
     std::string sMesh = cl.follow( "Terrain.ac", 1, "-mesh" );
 
     // init window
-    GLWindow* pWin = new GLWindow( 0, 0, 1024, 768, "Simple Gui Demo" );
+    GuiWindow* pWin = new GuiWindow( 0, 0, 1024, 768, "Simple Gui Demo" );
 
     // load mesh
     const struct aiScene* pScene;
@@ -106,7 +148,9 @@ int main( int argc, char** argv )
 
 //    cam.Init( &pWin->SceneGraph(), dPose, dK, w,h, eSimCamRGB | eSimCamDepth );
     cam.Init( &pWin->SceneGraph(), dPose, dK, w,h, eSimCamRGB | eSimCamDepth );
-    cam.SetOrtho( fOrthoSize, fOrthoSize ); // force camera to be orhto, 20m by 20m viewing volume 
+    if( bOrtho ){
+        cam.SetOrtho( fOrthoSize, fOrthoSize ); // force camera to be orhto, 20m by 20m viewing volume 
+    }
 
     glEnable( GL_LIGHT0 );                                         // activate light0
     glEnable( GL_LIGHTING );                                       // enable lighting

@@ -7,10 +7,11 @@ GLWindowConfig gConfig;
 
 /////////////////////////////////////////////////////////////////////////////////
 /// timer callback drives animation and forces drawing at 20 hz
-void GLWindow::_Timer(void *userdata) {
+void GLWindow::_Timer(void *userdata) 
+{
     GLWindow *pWin = (GLWindow*)userdata;
-    pWin->redraw();
     Fl::repeat_timeout( g_dFPS, _Timer, userdata );
+    pWin->redraw();
 }
 
 /////////////////////////////////////////////////////////////////////////////////
