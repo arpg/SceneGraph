@@ -161,7 +161,7 @@ class GLWindow : public Fl_Gl_Window, public boost::mutex
     int HandleSelectionInput( int e );
 
     void LookAt( float eyex, float eyey, float eyez, 
-            float targetx, float targety, float targetx,
+            float targetx, float targety, float targetz,
             float upx, float upy, float upz );
 
     private:

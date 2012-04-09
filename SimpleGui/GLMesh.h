@@ -4,7 +4,7 @@
 #include <SimpleGui/GLObject.h>
 #include <SimpleGui/GLCVars.h>
 
-#include "GLHeightMap.h"
+//#include "GLHeightMap.h"
 
 #include <assimp/assimp.h>
 #include <assimp/aiPostProcess.h>
