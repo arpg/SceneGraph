@@ -130,51 +130,45 @@ class GLSimCam
             m_dK = dK;
             m_dPose = dPose;
 
-            /*
+            std::string sDepthVertShader = 
+                "varying float depth;\n"
+                "void main(void)\n"
+                "{\n"
+                "    gl_Position = gl_ProjectionMatrix * gl_ModelViewMatrix * gl_Vertex;\n"
+                "    depth = -(gl_ModelViewMatrix * gl_Vertex).z;\n"
+                "}\n";
 
-                TODO: defien there here inline so we don't have to move shaders around
+            std::string sDepthFragShader = 
+                "varying float depth;\n"
+                "void main(void)\n"
+                "{\n"
+                "    float A = gl_ProjectionMatrix[2].z;\n"
+                "    float B = gl_ProjectionMatrix[3].z;\n"
+                "    float zNear = - B / (1.0 - A);\n"
+                "    float zFar  =   B / (1.0 + A);\n"
+                "    float d = 0.5*(-A*depth + B) / depth + 0.5;\n"
+                "    gl_FragColor = vec4( vec3(depth), 1.0 );\n"
+                "    gl_FragColor[0] = depth;\n"
+                "}\n";
 
-               std::string sDepthVertShader = 
-               "// see http://olivers.posterous.com/linear-depth-in-glsl-for-real\n"
-               "varying float depth;\n"
-               "void main(void)\n"
-               "{\n"
-               "    gl_Position = gl_ProjectionMatrix * gl_ModelViewMatrix * gl_Vertex;\n"
-               "    depth = -(gl_ModelViewMatrix * gl_Vertex).z;\n"
-               "}\n";
+            InitShaders( sDepthVertShader, sDepthFragShader, m_nDepthShaderProgram );
 
+            std::string sNormalVertShader =
+                "varying vec3 normal;\n"
+                "void main()\n"
+                "{\n"
+                "    gl_Position = ftransform();\n"
+                "    normal = gl_NormalMatrix * gl_Normal;\n"
+                "}\n";
 
-               std::string sDepthFragShader = 
-               "// see http://olivers.posterous.com/linear-depth-in-glsl-for-real\n"
-               "varying float depth;\n"
-               "void main(void)\n"
-               "{\n"
-               "    float A = gl_ProjectionMatrix[2].z;\n"
-               "    float B = gl_ProjectionMatrix[3].z;\n"
-               "    float zNear = - B / (1.0 - A);\n"
-               "    float zFar  =   B / (1.0 + A);\n"
-               "    float d = 0.5*(-A*depth + B) / depth + 0.5;\n"
-               "    //    gl_FragDepth  = d;\n"
-               "    gl_FragColor = vec4( vec3(d), 1.0);\n"
-               "}\n";
+            std::string sNormalFragShader = 
+                "varying vec3 normal;\n"
+                "void main()\n"
+                "{\n"
+                "   gl_FragColor.rgba = vec4( normal, 1.0 );\n"
+                "}\n";
 
-               InitShaders( sDepthVertShader, sDepthFragShader, m_nDepthShaderProgram );
-
-               std::string sNormalVertShader = "";
-               std::string sNormalFragShader = "";
-
-               InitShaders( sNormalVertShader, sNormalFragShader, m_nNormalShaderProgram );
-
-             */
-
-            // Load shader
-            if ( LoadShaders( "Depth.vert", "Depth.frag", m_nDepthShaderProgram ) == false) {
-                fprintf(stderr, "Failed to load the Depth shader.");
-            }
-
-            if ( LoadShaders( "Normals.vert", "Normals.frag", m_nNormalShaderProgram ) == false) {
-                fprintf(stderr, "Failed to load the Normal shader.");
-            }
+            InitShaders( sNormalVertShader, sNormalFragShader, m_nNormalShaderProgram );
 
             if( nModes & eSimCamRGB ){
                 m_pRGBMode = new SimCamMode( *this, eSimCamRGB );
@@ -625,12 +619,7 @@ class GLSimCam
             }
             // transform depth to 3d
             Eigen::Matrix3d K = GetKMatrix();
-            vRangeData.clear();
-            /*
-            if( vRangeData.size() !=  m_nSensorHeight*m_nSensorWidth*3 ){
-                vRangeData.resize(  m_nSensorHeight*m_nSensorWidth*3 );
-            }
-            */
+            vRangeData.clear(); 
             float dx = (m_fOrthoRight-m_fOrthoLeft)/m_nSensorWidth;
             float dy = (m_fOrthoBottom-m_fOrthoTop)/m_nSensorHeight;
             float fx = K(0,0); // focal length in pixels
@@ -655,13 +644,10 @@ class GLSimCam
                     }
                     Eigen::Vector4d p;
                     p << z,x,y,1;  // setup p using robot convention
-                    p = m_dPose*p; // and put p in the world frame
+//                    p = m_dPose*p; // and put p in the world frame
 
                     // don't add points at 0
                     if( z > 1e-6 ){
-//                        vRangeData[n++] = p[0];
-//                        vRangeData[n++] = p[1];
-//                        vRangeData[n++] = p[2];
                         vRangeData.push_back( p[0] );
                         vRangeData.push_back( p[1] );
                         vRangeData.push_back( p[2] );
@@ -671,6 +657,7 @@ class GLSimCam
         }
 
         /////////////////////////////////////////////////////////////////////////////////////////
+        /// should be private....
         FBO*                                        m_pFbo;
         GLSceneGraph*                               m_pSceneGraph;
     private:

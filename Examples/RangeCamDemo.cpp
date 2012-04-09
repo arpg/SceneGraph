@@ -6,7 +6,7 @@ using namespace CVarUtils;
 
 GLSimCam cam;
 GLSimCam OrthoCam;
-GLPointCloud pc;
+GLPointCloud PointCloud;
 
 Eigen::Matrix4d g_dPose = GLCart2T( -40,0,0,0,0,0 ); // initial camera pose
 float g_fTurnrate = 0;
@@ -25,7 +25,7 @@ class GuiWindow: public GLWindow
 
         virtual int handle( int e )
         {
-            if( e == FL_KEYBOARD ){
+            if( e == FL_KEYBOARD && !m_Console.IsOpen()  ){
                 switch( Fl::event_key() ) {
                     case 'a': case 'A': 
                         g_fTurnrate -= 0.01;
@@ -52,7 +52,6 @@ class GuiWindow: public GLWindow
 /////////////////////////////////////////////////////////////////////////////////////////
 void ProcessPreRenderShaders( GLWindow* pWin, void* ) 
 {
-//    static Eigen::Matrix4d dMotion = GLCart2T( 0.1,0,0,0,0,0.01 ); // initial camera pose
     g_dPose = g_dPose* GLCart2T( g_fSpeed,0,0,0,0,g_fTurnrate );
     cam.SetPose( g_dPose );
 
@@ -68,10 +67,14 @@ void ShowCameraAndTextures( GLWindow*, void* )
 {
     // copy range data into point cloud
     if( bOrtho ){
-        cam.SetOrtho( fOrthoSize, fOrthoSize ); // force camera to be orhto, 20m by 20m viewing volume 
+        cam.SetOrtho( fOrthoSize, fOrthoSize );
     }
-    cam.DepthTo3D( pc.RangeDataRef() ); 
-    pc.draw();
+    else{
+        cam.UnSetOrtho();
+    }
+    cam.DepthTo3D( PointCloud.RangeDataRef() ); 
+    PointCloud.SetPose( cam.GetPoseRef() );
+    PointCloud.draw();
 
     // show the camera
     cam.DrawCamera();
@@ -122,10 +125,7 @@ int main( int argc, char** argv )
 
     // load mesh
     const struct aiScene* pScene;
-     pScene = aiImportFile( sMesh.c_str(),
-             aiProcess_Triangulate |
-             aiProcess_GenNormals 
-             );
+    pScene = aiImportFile( sMesh.c_str(), aiProcess_Triangulate | aiProcess_GenNormals );
 
     GLGrid grid;
     grid.SetPerceptable( false );
@@ -142,18 +142,13 @@ int main( int argc, char** argv )
 
     int w = 128;
     int h = 128;
-    Eigen::Matrix4d dPose = GLCart2T( -20, 0,0,0,0,0 ); // initial camera pose
     Eigen::Matrix3d dK;   // computer vision K matrix
     dK << w,0,w/2,0,h,h/2,0,0,1;
 
-//    cam.Init( &pWin->SceneGraph(), dPose, dK, w,h, eSimCamRGB | eSimCamDepth );
-    cam.Init( &pWin->SceneGraph(), dPose, dK, w,h, eSimCamRGB | eSimCamDepth );
-    if( bOrtho ){
-        cam.SetOrtho( fOrthoSize, fOrthoSize ); // force camera to be orhto, 20m by 20m viewing volume 
-    }
+    cam.Init( &pWin->SceneGraph(), g_dPose, dK, w,h, eSimCamRGB | eSimCamDepth | eSimCamNormals );
 
-    glEnable( GL_LIGHT0 );                                         // activate light0
-    glEnable( GL_LIGHTING );                                       // enable lighting
+    glEnable( GL_LIGHT0 );    // activate light0
+    glEnable( GL_LIGHTING );  // enable lighting
 
     pWin->LookAt( -70, -70, -50, 0,0,0, 0,0,-1 );
 

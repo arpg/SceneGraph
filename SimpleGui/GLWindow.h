@@ -186,20 +186,17 @@ class GLWindow : public Fl_Gl_Window, public boost::mutex
     std::map<int,bool>              m_mSelected;
     unsigned int                    m_nSelectionId;
 
-    FLConsoleInstance 	   			m_Console;
+    FLConsole                       m_Console;
 
     Eigen::Vector3d                 m_dPosUnderCursor;
     Eigen::Vector3d                 m_dNormalUnderCursor;
 
-    eGuiMode                        m_eGuiMode;
-
-    std::vector<float>              m_vDepthBuffer;
+    eGuiMode                        m_eGuiMode; // FPS nav, console or picking
 
     GLObject*                       m_pSelectedObject;
 
     GLSceneGraph                    m_SceneGraph;
    
-    // DELETE ME
     // little struct to hold user callback funciton and user data
     struct CallbackInfo
     {
@@ -207,9 +204,11 @@ class GLWindow : public Fl_Gl_Window, public boost::mutex
         void*                      m_pUserData;
     };
    
-    std::vector<CallbackInfo>      m_vPreRenderCallbacks;
-    std::vector<CallbackInfo>      m_vPostRenderCallbacks;
-    GLSphereGrid                         m_SphereGrid;
+    std::vector<CallbackInfo>        m_vPreRenderCallbacks;
+    std::vector<CallbackInfo>        m_vPostRenderCallbacks;
+
+    // for debugging...
+    GLSphereGrid                     m_SphereGrid;
 };
 
 #endif

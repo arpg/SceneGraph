@@ -27,9 +27,18 @@ class GLPointCloud : public GLObject
             // TODO re-compile only when data changes
             CompileDisplyList();
 
+            glPushMatrix();
+            glMultMatrixd( m_dPose.data() );
             glCallList(m_nDisplayList);
+            glPopMatrix();
         }
-       
+
+        // change the "pose" of the point cloud
+        void SetPose( const Eigen::Matrix4d& dPose )
+        {
+            m_dPose = dPose;
+        }
+ 
         // will compile new drawlist
         void CompileDisplyList()
         {
