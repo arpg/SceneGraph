@@ -15,6 +15,7 @@ class GLText : public GLObject
         {
 			InitReset();
             m_sObjectName = "Text";
+            m_bPerceptable = false;
         }
 
 		void InitReset()

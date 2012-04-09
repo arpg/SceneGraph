@@ -92,13 +92,11 @@ class GLObject
     protected:
         std::string               m_sObjectName;
         GLObject*                 m_pParent;
-
-    private:
+        bool                      m_bPerceptable; //< can be measured (e.g., not a virtual thing)
         unsigned int              m_nId;      //< Object handle
         GLWindow*                 m_pWin;     //< The window the object belongs to
         bool                      m_bVisible;
         bool                      m_bIs2dLayer; //< such as an image 
-        bool                      m_bPerceptable; //< can be measured (e.g., not a virtual thing)
 };
 
 
