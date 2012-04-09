@@ -10,7 +10,7 @@ int main (int argc, char** argv){
     GetPot cl( argc, argv );
 
     //init window
-    GLWindow* pWin = new GLWindow(0, 0, 1024, 768, "Render Axis Demo");
+    GLWindow* pWin = new GLWindow(0, 0, 1024, 768, "Axis Render Demo");
 
     //generate grid
     GLGrid grid;

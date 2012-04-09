@@ -14,39 +14,16 @@ public:
         m_sObjectName = "Axis";
     }
 
-    void drawCircle(float r, char axis)
+    void m_gldrawCircle(float r)
     {
         const float d2r = 3.14159/180; //must be in radians
         glBegin(GL_LINE_LOOP);
 
-        if (axis == 'x')
+//      glColor3f(0.0, 1.0, 0.0); //green
+        for(int i = 0; i < 360; i++)
         {
-            glColor3f(0.0, 1.0, 0.0); //green
-            for(int i = 0; i < 360; i++)
-            {
-                float theta = i * d2r;
-                glVertex3f(0.0, cos(theta)*r, sin(theta)*r);
-            }
-        }
-        else if (axis == 'y')
-        {
-            glColor3f(1.0, 0.0, 0.0); //red
-            for(int i = 0; i < 360; i++)
-            {
-                float theta = i * d2r;
-                glVertex3f(sin(theta)*r, 0.0, cos(theta)*r);
-            }
-        }
-
-        else //axis = z
-        {
-
-            glColor3f(0.0, 0.0, 1.0); //blue
-            for(int i = 0; i < 360; i++)
-            {
-                float theta = i * d2r;
-                glVertex3f(cos(theta)*r, sin(theta)*r, 0.0);
-            }
+            float theta = i * d2r;
+            glVertex3f(0.0, cos(theta)*r, sin(theta)*r);
         }
 
         glEnd();
@@ -67,29 +44,41 @@ public:
 
         //draw lines
         glLineWidth(5.0); //for some reason this freaks things out
-        glBegin(GL_LINES);
 
     //x-axis
+        glBegin(GL_LINES);
         glColor3f(0.0, 1.0, 0.0); //green
         glVertex3f(0.0, 0.0, 0.0);
-        glVertex3f(-1.2, 0.0, 0.0);
-
+        glVertex3f(-1.3, 0.0, 0.0);
+        glEnd();
+        glPushMatrix();
+        glPushName(13);
+        m_gldrawCircle(1.0);
+        glPopMatrix();
     //y-axis
+        glBegin(GL_LINES);
         glColor3f(1.0, 0.0, 0.0); //red
         glVertex3f(0.0, 0.0, 0.0);
-        glVertex3f(0.0, -1.2, 0.0);
+        glVertex3f(0.0, -1.3, 0.0);
+        glEnd();
 
+        glPushMatrix();
+        glPushName(23);
+        glRotatef(90.0, 0.0, 0.0, 1.0);
+        m_gldrawCircle(1.0);
+        glPopMatrix();
     //z-axis
+        glBegin(GL_LINES);
         glColor3f(0.0, 0.0, 1.0);//blue
         glVertex3f(0.0, 0.0, 0.0);//origin
-        glVertex3f(0.0, 0.0, -1.2);
+        glVertex3f(0.0, 0.0, -1.3);
+        glEnd();
 
-        glEnd(); //end draw lines
-
-        //draw rings
-        drawCircle(1.0, 'x');
-        drawCircle(1.0, 'y');
-        drawCircle(1.0, 'z');
+        glPushMatrix();
+        glPushName(33);
+        glRotatef(90.0, 0.0, 1.0, 0.0);
+        m_gldrawCircle(1.0);
+        glPopMatrix();
 
         glLineWidth(1.0);
 
@@ -98,6 +87,16 @@ public:
         glDisable( GL_BLEND );
 
     }
+
+private:
+    unsigned int m_nWayPointId;
+    unsigned int m_nFrontId;
+    unsigned int m_nBaseId;
+    unsigned int m_nSelectedId;
+
+    std::string m_sLabel;
+    Eigen::Vector2i m_nLabelPos;
+    Eigen::Vector6d m_dPose;
 };
 
 #endif // GLAXIS_H
