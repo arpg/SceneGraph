@@ -12,6 +12,7 @@ class GLGrid : public GLObject
         GLGrid()
         {
             m_sObjectName = "Grid";
+            m_bPerceptable = false;
         }
 
         // from mvl dispview
