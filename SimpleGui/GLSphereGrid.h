@@ -10,16 +10,17 @@ class GLSphereGrid : public GLObject
 {
 
     public:
-        GLSphereGrid() {
+        GLSphereGrid() 
+        {
             m_nDisplayList = -1;
         }
 
         void draw() 
         {
             glEnable( GL_COLOR_MATERIAL );
-            if(m_nDisplayList == -1) {
+            if( m_nDisplayList == -1 ) {
                 m_nDisplayList = glGenLists(1);
-                glNewList(m_nDisplayList, GL_COMPILE);
+                glNewList( m_nDisplayList, GL_COMPILE );
 
                 // to check lighting
                 glColor4f( 1, 1, 1, 1 );
@@ -31,12 +32,11 @@ class GLSphereGrid : public GLObject
                         glPopMatrix();
                     }
                 }
-
                 glEndList();
             }
             else {
                 if( gConfig.m_bDebugLighting ){
-                    glCallList(m_nDisplayList);
+                    glCallList( m_nDisplayList );
                 }
             }
         }

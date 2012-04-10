@@ -61,6 +61,8 @@ void ProcessPreRenderShaders( GLWindow*, void* )
     glEnable( GL_LIGHT0 );
     glClearColor( 0.0, 0.0, 0.0, 1 );
 
+    //_SetupLighting();
+
     cam.RenderToTexture(); // will render to texture, then copy texture to CPU memory
 }
 
@@ -106,48 +108,74 @@ void ShowCameraAndTextures( GLWindow*, void* )
 class GLTeapot : public GLObject
 {
     public:
+        GLTeapot()
+        {
+            SetName("Teapot"); 
+            m_nSelectionId = -1;
+        }
 
-    void draw()
-    {
-        glFrontFace(GL_CW);
-        glutSolidTeapot( 8 );
-        glFrontFace(GL_CCW);
-    }
+        void MouseOver( int nId )
+        {
+            printf("mouse over %d\n", nId );
+        }
+
+        void select( int nId )
+        {
+            printf("select %d\n", nId );
+        }
+
+
+        void draw()
+        {
+            if( m_nSelectionId == -1 ){
+                m_nSelectionId = AllocSelectionId();
+            }
+
+//            glPushName( m_nSelectionId );
+            glFrontFace(GL_CW);
+            glutSolidTeapot( 8 );
+            glFrontFace(GL_CCW);
+//            glPopName();
+        }
+
+        GLint m_nSelectionId;
 };
 
+/*
 /////////////////////////////////////////////////////////////////////////////////
 void _SetupLighting()
 {
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-    gluLookAt( 10,10,-10, 0,0,0, 0,0,-1 );
+glMatrixMode(GL_MODELVIEW);
+glLoadIdentity();
+gluLookAt( 10,10,-10, 0,0,0, 0,0,-1 );
 
-    /////
-    GLfloat ambientLight[]  ={ 0.1, 0.1, 0.1, 1.0 };             // set ambient light parameters
-    glLightfv( GL_LIGHT0, GL_AMBIENT, ambientLight );
+/////
+GLfloat ambientLight[]  ={ 0.1, 0.1, 0.1, 1.0 };             // set ambient light parameters
+glLightfv( GL_LIGHT0, GL_AMBIENT, ambientLight );
 
-    GLfloat diffuseLight[] = { 0.8, 0.8, 0.8, 1.0 };             // set diffuse light parameters
-    glLightfv( GL_LIGHT0, GL_DIFFUSE, diffuseLight );
+GLfloat diffuseLight[] = { 0.8, 0.8, 0.8, 1.0 };             // set diffuse light parameters
+glLightfv( GL_LIGHT0, GL_DIFFUSE, diffuseLight );
 
-    GLfloat specularLight[] = { 0.5, 0.5, 0.5, 1.0 };                   // set specular light parameters
-    glLightfv(GL_LIGHT0,GL_SPECULAR,specularLight);
+GLfloat specularLight[] = { 0.5, 0.5, 0.5, 1.0 };                   // set specular light parameters
+glLightfv(GL_LIGHT0,GL_SPECULAR,specularLight);
 
-    GLfloat lightPos[] = { 10.0, 10.0, -100.0, 1.0};                 // set light position
-    glLightfv( GL_LIGHT0, GL_POSITION, lightPos );
+GLfloat lightPos[] = { 10.0, 10.0, -100.0, 1.0};                 // set light position
+glLightfv( GL_LIGHT0, GL_POSITION, lightPos );
 
-    GLfloat specularReflection[] = { 1.0, 1.0, 1.0, 1.0 };              // set specularity
-    glMaterialfv( GL_FRONT_AND_BACK, GL_SPECULAR, specularReflection );
-    glMateriali( GL_FRONT_AND_BACK, GL_SHININESS, 128 );
-    glEnable( GL_LIGHT0 );                                         // activate light0
-    glEnable( GL_LIGHTING );                                       // enable lighting
-    glLightModelfv( GL_LIGHT_MODEL_AMBIENT, ambientLight );        // set light model
-    glEnable( GL_COLOR_MATERIAL );                                 // activate material
-    glColorMaterial( GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE );
+GLfloat specularReflection[] = { 1.0, 1.0, 1.0, 1.0 };              // set specularity
+glMaterialfv( GL_FRONT_AND_BACK, GL_SPECULAR, specularReflection );
+glMateriali( GL_FRONT_AND_BACK, GL_SHININESS, 128 );
+glEnable( GL_LIGHT0 );                                         // activate light0
+glEnable( GL_LIGHTING );                                       // enable lighting
+glLightModelfv( GL_LIGHT_MODEL_AMBIENT, ambientLight );        // set light model
+glEnable( GL_COLOR_MATERIAL );                                 // activate material
+glColorMaterial( GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE );
 //    glEnable( GL_NORMALIZE );                                   // normalize normal vectors
 
 //    glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
 
 }
+ */
 
 /////////////////////////////////////////////////////////////////////////////////////////
 int main( int argc, char** argv )
@@ -176,7 +204,7 @@ int main( int argc, char** argv )
 
     // register objects
     pWin->AddChildToRoot( &hm );
-//    pWin->AddChildToRoot( &mesh );
+    //    pWin->AddChildToRoot( &mesh );
     pWin->AddChildToRoot( &teapot );
     pWin->AddChildToRoot( &grid );
 
@@ -192,7 +220,7 @@ int main( int argc, char** argv )
 
     pWin->LookAt( -70, -70, -50, 0,0,0, 0,0,-1 );
 
-    _SetupLighting();
+    //    _SetupLighting();
 
     // add our callbacks
     pWin->AddPreRenderCallback( ProcessPreRenderShaders, NULL );

@@ -42,20 +42,20 @@ void SimCamMode::PboRead()
     pboIndex = (pboIndex + 1) % 2;
     nextIndex = (pboIndex + 1) % 2;
 
-    glReadBuffer(attachmentIndex);
+    glReadBuffer( attachmentIndex );
 
     // Copy pixels from framebuffer to PBO
-    glBindBufferARB(GL_PIXEL_PACK_BUFFER_ARB, pboIds[pboIndex]);
+    glBindBufferARB( GL_PIXEL_PACK_BUFFER_ARB, pboIds[pboIndex] );
     // TODO: Specify type? maybe as part of the Init function
-    glReadPixels(0, 0, m_SimCam.ImageWidth(), m_SimCam.ImageHeight(), GL_RGB, GL_UNSIGNED_BYTE, 0);
+    glReadPixels( 0, 0, m_SimCam.ImageWidth(), m_SimCam.ImageHeight(), GL_RGB, GL_UNSIGNED_BYTE, 0 );
 
     // map the PBO that contains the framebuffer pixels
     // Read from the next buffer since the other is likely being written to still
-    glBindBufferARB(GL_PIXEL_PACK_BUFFER_ARB, pboIds[nextIndex]);
-    GLubyte* src = (GLubyte*)glMapBufferARB(GL_PIXEL_PACK_BUFFER_ARB, GL_READ_ONLY_ARB);
+    glBindBufferARB( GL_PIXEL_PACK_BUFFER_ARB, pboIds[nextIndex] );
+    GLubyte* src = (GLubyte*)glMapBufferARB( GL_PIXEL_PACK_BUFFER_ARB, GL_READ_ONLY_ARB );
 
     memcpy( buffer, src, data_size );
-    glUnmapBufferARB(GL_PIXEL_PACK_BUFFER_ARB);
+    glUnmapBufferARB( GL_PIXEL_PACK_BUFFER_ARB );
 
     glBindBufferARB(GL_PIXEL_PACK_BUFFER_ARB, 0);
 }

@@ -10,6 +10,7 @@ GLObject::GLObject()
     m_bVisible = true;
     m_bIs2dLayer = false; //< such as an image 
     m_bPerceptable = true; //< can be measured (e.g., not a virtual thing)
+    m_sObjectName = "unnamed-object";
 }
 
 /////////////////////////////////////////////////////////////////////////////////

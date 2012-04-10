@@ -19,6 +19,8 @@ class GLObject
 		virtual void draw() = 0;
 
         virtual void select( unsigned int ) {};
+ 
+        virtual void MouseOver( unsigned int ) {};
 
         virtual void drag() {}
 
