@@ -148,6 +148,7 @@ class GLMesh : public GLObject
         ////////////////////////////////////////////////////////////////////////////
         void RenderMesh( GLenum face_mode, GLenum fill_mode, float fAlpha, const struct aiFace* face,  const struct aiMesh* mesh )
         {
+
             glPolygonMode( GL_FRONT_AND_BACK, fill_mode );
             glBegin( face_mode );
             for( unsigned int ii = 0; ii < face->mNumIndices; ii++ ) {
@@ -165,6 +166,7 @@ class GLMesh : public GLObject
                 glVertex3fv( &mesh->mVertices[index].x );
             }
             glEnd();
+
 
             // show normals for debugging
             if( gConfig.m_bShowMeshNormals ){
@@ -198,6 +200,7 @@ class GLMesh : public GLObject
                 const struct aiMesh* mesh = m_pScene->mMeshes[nd->mMeshes[n]];
 
                 apply_material( sc->mMaterials[mesh->mMaterialIndex] );
+
 
                 if( mesh->mNormals == NULL ) {
                     glDisable(GL_LIGHTING);
