@@ -191,7 +191,7 @@ class GLWindow : public Fl_Gl_Window, public boost::mutex
     Eigen::Vector3d                 m_dPosUnderCursor;
     Eigen::Vector3d                 m_dNormalUnderCursor;
 
-    eGuiMode                        m_eGuiMode; // FPS nav, console or picking
+    eGuiMode                        m_eGuiMode; // FPS nav, console or
 
     GLObject*                       m_pSelectedObject;
 

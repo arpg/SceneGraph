@@ -330,9 +330,9 @@ void GLWindow::_ProcessHits( unsigned int hits, GLuint buffer[] )
             int nId = *ptr;
             SetSelected( nId );
 
-            //            GLObject* pObj = SelectedObject();
-            //                printf("set %s as selected\n", pObj->ObjectName() );
-
+            GLObject* pObj = SelectedObject();
+            //printf("set %s as selected\n", pObj->ObjectName() );
+            //UnSelect(nId); //a desperate fix
             ptr++;
         }
     }
@@ -511,7 +511,7 @@ int GLWindow::SimpleDefaultEventHandler( int e )
 {
     GLObject* pSelect = SelectedObject();
     if( pSelect && e == FL_PUSH ){
-        //        printf("%s selected\n", pSelect->ObjectName() );
+  //              printf("%s selected\n", pSelect->ObjectName() );
         m_eGuiMode = eSelect;
     }
 

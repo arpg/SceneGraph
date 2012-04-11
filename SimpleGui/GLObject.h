@@ -8,6 +8,7 @@ class GLWindow;
 
 #include <string>
 #include <vector>
+#include <stdio.h>
 
 class GLObject
 {
