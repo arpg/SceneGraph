@@ -27,7 +27,7 @@ class SimCamMode
         ~SimCamMode();
         void Init( bool shader, GLuint sp, GLenum format, GLenum type );
         void RenderToTexture();
-        GLubyte* Capture();
+        void* Capture();
         GLuint Texture();
 
     private:
@@ -49,12 +49,11 @@ class SimCamMode
         int                m_nPboIndex;
         int                m_nColorTextureId;
         GLenum             m_eAttachmentIndex;
-        GLubyte*           m_pBuffer; // James, consider using std::vector to automate memory management
+        void*           m_pBuffer; // James, consider using std::vector to automate memory management
         GLuint*            m_pPboIds;
 	GLenum             m_eFormat;
 	GLenum             m_eType;
         int                m_nDataSize;
-        std::vector<float> m_vDepthPixels;
 };
 
 class GLSimCam
@@ -603,6 +602,7 @@ class GLSimCam
             glEnable( GL_COLOR_MATERIAL );
             glColor3f( 1,0,1 );
             glBegin( GL_POINTS );
+	    // vRangeData is a vector of 3d points
             for( size_t ii = 0; ii < vRangeData.size(); ii+=3 ){
                 glVertex3fv( &vRangeData[ii] );
             }
@@ -636,7 +636,8 @@ class GLSimCam
                     u  = ii-cx;
                     v  = (m_nSensorWidth-jj-1)-cy;
 		    // Should work with the buffer already in the mode.
-                    z  = m_pDepthMode->m_pBuffer[m_nSensorWidth*jj + ii ];
+		    GLfloat* buff = (GLfloat*)m_pDepthMode->m_pBuffer;
+                    z  = buff[m_nSensorWidth*jj + ii];
                     if( m_bOrthoCam ){
                         x  = dx*u;
                         y  = dy*v;

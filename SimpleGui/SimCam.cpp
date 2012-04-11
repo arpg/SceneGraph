@@ -18,34 +18,9 @@ void SimCamMode::PboInit( int format, int type )
     m_pPboIds = new GLuint[0];
     m_nPboIndex = 0;
 
-    // TODO: I beleive there is a 
     int numberOfChannels = NumChannels( m_eFormat );
-    /*
-    switch ( m_eFormat ) {
-        case GL_RGB:
-   	    numberOfChannels = 3;
-	    break;
-        case GL_LUMINANCE:
-  	    numberOfChannels = 1;
-	    break;
-        default:
- 	    numberOfChannels = 4;
-	    break;
-	    } */
 
     int bytesPerChannel = BitsPerChannel( m_eType) / 8;
-    /*
-    switch ( m_eType ) {
-        case GL_UNSIGNED_BYTE:
-  	    bytesPerChannel = 1;
-	    break;
-        case GL_FLOAT:
-  	    bytesPerChannel = 4;
-	    break;
-        default:
- 	    bytesPerChannel = 1;
-	    break;
-	    } */
 
     m_nDataSize = m_SimCam.ImageWidth() * m_SimCam.ImageHeight() * (numberOfChannels * bytesPerChannel); 
 
@@ -59,7 +34,18 @@ void SimCamMode::PboInit( int format, int type )
     glBindBufferARB( GL_PIXEL_PACK_BUFFER_ARB, 0 );
 
     // allocate buffer to store frame
-    m_pBuffer = new GLubyte[m_nDataSize];
+    switch (m_eType) {
+        case GL_UNSIGNED_BYTE:
+	    m_pBuffer = new GLubyte[m_nDataSize / bytesPerChannel];
+	    break;
+        case GL_FLOAT:
+	    m_pBuffer = new GLfloat[m_nDataSize / bytesPerChannel];
+	    break; 
+        default:
+	    m_pBuffer = new GLubyte[m_nDataSize / bytesPerChannel];
+	    break;
+    }
+   
     CheckForGLErrors();
 }
 
@@ -135,7 +121,7 @@ void SimCamMode::RenderToTexture()
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
-GLubyte* SimCamMode::Capture()
+void* SimCamMode::Capture()
 {
     return m_pBuffer;
 }
