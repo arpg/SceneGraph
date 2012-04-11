@@ -57,32 +57,26 @@ public:
         if (nId == m_nXLineId)
         {
             printf("XLine Selected\n");
-//            UnSelect(m_nXLineId);
         }
         else if (nId == m_nXRingId)
         {
             printf("XRing Selected\n");
-//            UnSelect(m_nXRingId);
         }
         else if (nId == m_nYLineId)
         {
-            printf("yLine Selected\n");
- //           UnSelect(m_nYLineId);
+            printf("YLine Selected\n");
         }
-        else if (nId == m_nXRingId)
+        else if (nId == m_nYRingId)
         {
-            printf("yRing Selected\n");
-//            UnSelect(m_nYRingId);
+            printf("YRing Selected\n");
         }
         else if (nId == m_nZLineId)
         {
             printf("ZLine Selected\n");
-//            UnSelect(m_nZLineId);
         }
         else if (nId == m_nZRingId)
         {
             printf("ZRing Selected\n");
-//            UnSelect(m_nZRingId);
         }
 
     }
@@ -136,7 +130,7 @@ public:
         glBegin(GL_LINES);
 
         glVertex3f(0.0, 0.0, 0.0);
-        glVertex3f(-1.3, 0.0, 0.0);
+        glVertex3f(-1.5, 0.0, 0.0);
         glEnd();
         glPopName();
         glColor4f(0.0, 1.0, 0.0, 0.3); //green
@@ -146,7 +140,6 @@ public:
             glColor4f(0.0, 1.0, 0.0, 1.0); //green
         }
         glPushName(m_nXRingId);
-        glColor4f(0.0, 1.0, 0.0, 1.0);
         m_gldrawCircle(1.0);
         glPopName();
 
@@ -160,7 +153,7 @@ public:
         glPushName(m_nYLineId);
         glBegin(GL_LINES);
         glVertex3f(0.0, 0.0, 0.0);
-        glVertex3f(0.0, -1.3, 0.0);
+        glVertex3f(0.0, -1.5, 0.0);
         glEnd();
         glPopName();
         glPushMatrix();
@@ -187,7 +180,7 @@ public:
         glBegin(GL_LINES);
 
         glVertex3f(0.0, 0.0, 0.0);//origin
-        glVertex3f(0.0, 0.0, -1.3);
+        glVertex3f(0.0, 0.0, -1.5);
         glEnd();
         glPopName();
         glPushMatrix();
