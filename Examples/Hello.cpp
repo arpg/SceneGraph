@@ -13,7 +13,7 @@ const int WIDTH = 200;
 const int HEIGHT = 200;
 
 /////////////////////////////////////////////////////////////////////////////////////////
-void ProcessPreRenderShaders (GLWindow* pWin, void*) 
+void ProcessPreRenderShaders (GLWindow*, void*) 
 {
     static float f;
     Eigen::Matrix4d dPose = GLCart2T( 0, 0,-20,0, -M_PI/2.0 , 0*sin(f+=0.1) ); // initial camera pose
@@ -22,7 +22,7 @@ void ProcessPreRenderShaders (GLWindow* pWin, void*)
     glEnable( GL_LIGHTING );
     glEnable( GL_LIGHT0 );
     glClearColor( 0.0, 0.0, 0.0, 1 );
-    cam.Render(); // will render to texture, then copy texture to CPU memory
+    cam.RenderToTexture(); // will render to texture, then copy texture to CPU memory
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////

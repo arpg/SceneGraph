@@ -1,6 +1,5 @@
 #include "SimCam.h"
 
-static const int PBO_COUNT = 2;
 static int m_nUsedAttachments = 0;
 static int m_nIndex = 0;
         
@@ -11,57 +10,84 @@ SimCamMode::SimCamMode( GLSimCam& sc, eSimCamType eCamType ) : m_SimCam( sc ), m
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
-void SimCamMode::PboInit() 
+void SimCamMode::PboInit( int format, int type ) 
 {
-    pboIds = new GLuint[PBO_COUNT];
-    pboIndex = 0;
+    m_eFormat = format;
+    m_eType = type;
 
-    // alloc 4 bytes per pixel so float images work in PboReadDepth...
-    data_size = m_SimCam.ImageWidth() * m_SimCam.ImageHeight() * (numberOfChannels+1); 
+    m_pPboIds = new GLuint[0];
+    m_nPboIndex = 0;
 
-    // Create pixel buffer objects
-    glGenBuffersARB( PBO_COUNT, pboIds );
+    // TODO: I beleive there is a 
+    int numberOfChannels = NumChannels( m_eFormat );
+    /*
+    switch ( m_eFormat ) {
+        case GL_RGB:
+   	    numberOfChannels = 3;
+	    break;
+        case GL_LUMINANCE:
+  	    numberOfChannels = 1;
+	    break;
+        default:
+ 	    numberOfChannels = 4;
+	    break;
+	    } */
+
+    int bytesPerChannel = BitsPerChannel( m_eType) / 8;
+    /*
+    switch ( m_eType ) {
+        case GL_UNSIGNED_BYTE:
+  	    bytesPerChannel = 1;
+	    break;
+        case GL_FLOAT:
+  	    bytesPerChannel = 4;
+	    break;
+        default:
+ 	    bytesPerChannel = 1;
+	    break;
+	    } */
+
+    m_nDataSize = m_SimCam.ImageWidth() * m_SimCam.ImageHeight() * (numberOfChannels * bytesPerChannel); 
+
+    // Create pixel buffer object
+    glGenBuffersARB( 1, m_pPboIds );
     // TODO: cleanup when done and support resizing
 
-    // 2 buffers, so that one can be read while the other is being written.
-    for( int i = 0; i < PBO_COUNT; i++ ){
-        glBindBufferARB( GL_PIXEL_PACK_BUFFER_ARB, pboIds[i] );
-        glBufferDataARB( GL_PIXEL_PACK_BUFFER_ARB, data_size, 0, GL_STREAM_READ_ARB );
-    }
+    glBindBufferARB( GL_PIXEL_PACK_BUFFER_ARB, m_pPboIds[0] );
+    glBufferDataARB( GL_PIXEL_PACK_BUFFER_ARB, m_nDataSize, 0, GL_STREAM_READ_ARB );
+
     glBindBufferARB( GL_PIXEL_PACK_BUFFER_ARB, 0 );
 
     // allocate buffer to store frame
-    buffer = new GLubyte[data_size];
+    m_pBuffer = new GLubyte[m_nDataSize];
+    CheckForGLErrors();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
 void SimCamMode::PboRead()
 {
-    int nextIndex = 0;
-
-    pboIndex = (pboIndex + 1) % 2;
-    nextIndex = (pboIndex + 1) % 2;
-
-    glReadBuffer( attachmentIndex );
+    glReadBuffer( m_eAttachmentIndex );
 
     // Copy pixels from framebuffer to PBO
-    glBindBufferARB( GL_PIXEL_PACK_BUFFER_ARB, pboIds[pboIndex] );
-    // TODO: Specify type? maybe as part of the Init function
-    glReadPixels( 0, 0, m_SimCam.ImageWidth(), m_SimCam.ImageHeight(), GL_RGB, GL_UNSIGNED_BYTE, 0 );
+    glBindBufferARB( GL_PIXEL_PACK_BUFFER_ARB, m_pPboIds[0] );
+
+    //    glReadPixels( 0, 0, m_SimCam.ImageWidth(), m_SimCam.ImageHeight(), GL_RGB, GL_UNSIGNED_BYTE, 0 );
+    glReadPixels( 0, 0, m_SimCam.ImageWidth(), m_SimCam.ImageHeight(), m_eFormat, m_eType, 0 );
 
     // map the PBO that contains the framebuffer pixels
-    // Read from the next buffer since the other is likely being written to still
-    glBindBufferARB( GL_PIXEL_PACK_BUFFER_ARB, pboIds[nextIndex] );
+    glBindBufferARB( GL_PIXEL_PACK_BUFFER_ARB, m_pPboIds[0] );
     GLubyte* src = (GLubyte*)glMapBufferARB( GL_PIXEL_PACK_BUFFER_ARB, GL_READ_ONLY_ARB );
 
-    memcpy( buffer, src, data_size );
+    memcpy( m_pBuffer, src, m_nDataSize );
     glUnmapBufferARB( GL_PIXEL_PACK_BUFFER_ARB );
 
     glBindBufferARB(GL_PIXEL_PACK_BUFFER_ARB, 0);
+    CheckForGLErrors();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
 /// quick so we can check in matlab
+/// TODO: Shouldn't this be done elsewhere?  - JamesII
 void _WriteDepthDataToFile( float* vPixels, unsigned int w, unsigned int h )
 {
     char sName[1024];
@@ -77,87 +103,47 @@ void _WriteDepthDataToFile( float* vPixels, unsigned int w, unsigned int h )
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
-void SimCamMode::PboReadDepth()
+void SimCamMode::Init( bool shader, GLuint sp, GLenum format, GLenum type )
 {
-    int nextIndex = 0;
-
-    pboIndex = (pboIndex + 1) % 2;
-    nextIndex = (pboIndex + 1) % 2;
-
-    glReadBuffer( attachmentIndex );
-
-    // Copy pixels from framebuffer to PBO
-    glBindBufferARB(GL_PIXEL_PACK_BUFFER_ARB, pboIds[pboIndex]);
-    // TODO: Specify type? maybe as part of the Init function
-    glReadPixels( 0, 0, m_SimCam.ImageWidth(), m_SimCam.ImageHeight(), GL_LUMINANCE, GL_FLOAT, 0 );
-
-    // map the PBO that contains the framebuffer pixels
-    // Read from the next buffer since the other is likely being written to still
-    glBindBufferARB( GL_PIXEL_PACK_BUFFER_ARB, pboIds[nextIndex] );
-    GLubyte* src = (GLubyte*)glMapBufferARB( GL_PIXEL_PACK_BUFFER_ARB, GL_READ_ONLY_ARB );
-
-    unsigned int nNeededSize = m_SimCam.ImageWidth() * m_SimCam.ImageHeight() * sizeof(float);
-    if( m_vDepthPixels.size() < nNeededSize ){
-        m_vDepthPixels.resize( nNeededSize );
-    }
-    memcpy( &m_vDepthPixels[0], src, nNeededSize );
-
-    glUnmapBufferARB( GL_PIXEL_PACK_BUFFER_ARB );
-
-    glBindBufferARB( GL_PIXEL_PACK_BUFFER_ARB, 0 );
-
-//    _WriteDepthDataToFile( (float*)buffer, m_SimCam.ImageWidth(), m_SimCam.ImageHeight() );
-}
-
-
-/////////////////////////////////////////////////////////////////////////////////////////
-void SimCamMode::Init( bool shader, GLuint sp )
-{
-    hasShader = shader;
-    shaderProgram = sp;
-    numberOfChannels = 3;
-
-    attachmentIndex = getNextAttachmentIndex();
-    colorTextureId = getNextCTId();
-    PboInit();
+    m_bHasShader = shader;
+    m_nShaderProgram = sp;
+ 
+    m_eAttachmentIndex = getNextAttachmentIndex();
+    m_nColorTextureId = getNextCTId();
+    PboInit(format, type);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
 void SimCamMode::RenderToTexture()
 {
     m_SimCam.m_pFbo->Begin();
-    glDrawBuffer(attachmentIndex);
+    glDrawBuffer(m_eAttachmentIndex);
 
-    if( hasShader ){ 
-        glUseProgram(shaderProgram);
+    if( m_bHasShader ){ 
+        glUseProgram(m_nShaderProgram);
     }
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT );
     m_SimCam.m_pSceneGraph->ApplyDfsVisitor( _ShaderVisitor );
 
-    if( m_eCamType == eSimCamDepth ){
-        PboReadDepth();
-    }
-    else{
-        PboRead();
-    }
+    PboRead();
 
-    if( hasShader ){
+    if( m_bHasShader ){
         glUseProgram(0);
     }
     m_SimCam.m_pFbo->End();
-
+    CheckForGLErrors();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
 GLubyte* SimCamMode::Capture()
 {
-    return buffer;
+    return m_pBuffer;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
 GLuint SimCamMode::Texture()
 {
-    return m_SimCam.m_pFbo->m_vColorTextureIds[colorTextureId];
+    return m_SimCam.m_pFbo->m_vColorTextureIds[m_nColorTextureId];
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////

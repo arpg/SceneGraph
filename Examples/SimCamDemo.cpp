@@ -6,7 +6,7 @@ GLSimCam cam;
 GLSimCam cam2;
 
 /////////////////////////////////////////////////////////////////////////////////////////
-void ProcessPreRenderShaders (GLWindow* pWin, void*) 
+void ProcessPreRenderShaders (GLWindow*, void*) 
 {
     // experiment with changing camera parameters:
 //    static float t = 1; t+=0.1;
@@ -16,7 +16,6 @@ void ProcessPreRenderShaders (GLWindow* pWin, void*)
 //    cam.SetSensorSize( w, w );
 //   cam.SetIntrinsics( dK );
  
-    static float f;
     Eigen::Matrix4d dPose = GLCart2T( -30,0,0,0,0,0 ); // initial camera pose
     cam.SetPose( dPose );
 //    Eigen::Matrix4d dPose2 = GLCart2T( 0, 0,-20,0,-0.5, 0.1*sin(f+=0.1)+0.5 ); // initial camera pose
@@ -26,7 +25,7 @@ void ProcessPreRenderShaders (GLWindow* pWin, void*)
     glEnable( GL_LIGHT0 );
     glClearColor( 0.0, 0.0, 0.0, 1 );
 
-    cam.Render(); // will render to texture, then copy texture to CPU memory
+    cam.RenderToTexture(); // will render to texture, then copy texture to CPU memory
 //    cam2.Render();
 }
 

@@ -25,7 +25,7 @@ class SimCamMode
     private:
         SimCamMode( GLSimCam& sc, eSimCamType eCamType ); // private, only SimCam can make one...
         ~SimCamMode();
-        void Init( bool shader, GLuint sp );
+        void Init( bool shader, GLuint sp, GLenum format, GLenum type );
         void RenderToTexture();
         GLubyte* Capture();
         GLuint Texture();
@@ -36,25 +36,24 @@ class SimCamMode
         static void _ShaderVisitor( GLObject* pObj );
 
         void PboRead();
-        void PboReadDepth();
-        void PboInit();
+	// void PboReadDepth();
+        void PboInit( int format, int type );
 
     private:
 
         GLSimCam&       m_SimCam; // required -- can not construct a SimCamMode wo a SimCam...
-        bool            hasShader;
+        bool            m_bHasShader;
 
-        // James, please fix the variable naming convention here:
-        int             numberOfChannels;
-        //  GLint format;
         eSimCamType        m_eCamType;
-        GLuint             shaderProgram;
-        int                pboIndex;
-        int                colorTextureId;
-        GLenum             attachmentIndex;
-        GLubyte*           buffer; // James, consider using std::vector to automate memory management
-        GLuint*            pboIds;
-        int                data_size;
+        GLuint             m_nShaderProgram;
+        int                m_nPboIndex;
+        int                m_nColorTextureId;
+        GLenum             m_eAttachmentIndex;
+        GLubyte*           m_pBuffer; // James, consider using std::vector to automate memory management
+        GLuint*            m_pPboIds;
+	GLenum             m_eFormat;
+	GLenum             m_eType;
+        int                m_nDataSize;
         std::vector<float> m_vDepthPixels;
 };
 
@@ -172,15 +171,15 @@ class GLSimCam
 
             if( nModes & eSimCamRGB ){
                 m_pRGBMode = new SimCamMode( *this, eSimCamRGB );
-                m_pRGBMode->Init( false, 0 );
+                m_pRGBMode->Init( false, 0, GL_RGB, GL_UNSIGNED_BYTE );
             }
             if( nModes & eSimCamDepth ){
                 m_pDepthMode = new SimCamMode( *this, eSimCamDepth );
-                m_pDepthMode->Init( true, m_nDepthShaderProgram );
+                m_pDepthMode->Init( true, m_nDepthShaderProgram, GL_LUMINANCE, GL_FLOAT );
             }
             if( nModes & eSimCamNormals ){
                 m_pNormalsMode = new SimCamMode( *this, eSimCamNormals );
-                m_pNormalsMode->Init( true, m_nNormalShaderProgram );
+                m_pNormalsMode->Init( true, m_nNormalShaderProgram, GL_RGB, GL_UNSIGNED_BYTE );
             }
 
             // May have change this for multiple SimCams (since there is only one FBO)
@@ -225,6 +224,9 @@ class GLSimCam
                     vPixelData.resize( ImageWidth()*ImageHeight()*3 );
                 }
                 // TODO Capture here should do the PboRead and fill vPixelData...
+		// NB: Having Capture do a PboRead may cause probelems if the render state is not
+		// set correctly. Right now, PboRead is only called while in middle of the regular
+		// render loop. - JamesII
                 memcpy( &vPixelData[0], m_pRGBMode->Capture(), ImageWidth()*ImageHeight()*3);
                 return true;
             }
@@ -633,7 +635,8 @@ class GLSimCam
                     float x, y, z, u, v;
                     u  = ii-cx;
                     v  = (m_nSensorWidth-jj-1)-cy;
-                    z  = m_pDepthMode->m_vDepthPixels[m_nSensorWidth*jj + ii ];
+		    // Should work with the buffer already in the mode.
+                    z  = m_pDepthMode->m_pBuffer[m_nSensorWidth*jj + ii ];
                     if( m_bOrthoCam ){
                         x  = dx*u;
                         y  = dy*v;

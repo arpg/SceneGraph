@@ -14,8 +14,6 @@ projects can just call find_package( SimpleGui ) to set SimpleGui_INCLUDE_DIRS
 and SimpleGui_LIBRARIES (which includes all of SimpleGui's dependencies as 
 well).
 
-NOTE: YOU MUST HAVE THE SHADERS COPIED INTO THE DIRECTORY THAT THE DEMOS ARE BUILT IN FOR THEM TO RUN! Sorry for the caps.
-
 Dependencies:
 FLTK
 CVARS (svn co https://glconsole.svn.sourceforge.net/svnroot/glconsole glconsole)
