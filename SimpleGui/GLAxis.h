@@ -5,8 +5,7 @@
 #include <math.h>
 
 namespace Eigen{
-    typedef Matrix<double,6,1> Vector6d;
-    typedef Matrix<double,5,1> Vector5d;
+    typedef Matrix<double,3,1> Vector3d;
 }
 #define X_AXIS  1
 #define Y_AXIS  2
@@ -24,7 +23,8 @@ public:
         m_sObjectName = "gizmo";
         m_nBaseId = -1, m_nXLineId = -1, m_nXRingId = -1, m_nYLineId = -1, m_nYRingId = -1, m_nZLineId = -1, m_nZRingId = -1;
         m_bInitDone = false;
-        m_dPose = Eigen::Vector6d::Zero();
+        m_dPose = Eigen::Vector3d::Zero();
+        translate = Eigen::Vector3d::Zero();
     }
 
 
@@ -43,47 +43,100 @@ public:
 
     void select( unsigned int nId )
     {
-        Eigen::Vector3d v = Window()->GetPosUnderCursor();
+        Eigen::Vector3d v;
         m_nSelectedId = nId;
 
-        if(nId == m_nBaseId)
-        {
-            printf("gizmo selected\n");
-            m_dPose[0] = v[0];
-            m_dPose[1] = v[1];
-            m_dPose[2] = v[2];
-            UnSelect(m_nBaseId);
-        }
+        //working model
+//        if(nId == m_nBaseId)
+//        {
+//            printf("gizmo selected\n");
+//            m_dPose[0] = v[0];
+//            m_dPose[1] = v[1];
+//            m_dPose[2] = v[2];
+//        }
         if (nId == m_nXLineId)
         {
             printf("XLine Selected\n");
+            v = Window()->GetPosUnderCursor();
+            m_dPose[0] = v[0];
+            m_dPose[1] = v[1];
+            m_dPose[2] = v[2];
         }
         else if (nId == m_nXRingId)
         {
             printf("XRing Selected\n");
+//            m_dPose[0] = v[0];
+//            m_dPose[1] = v[1];
+//            m_dPose[2] = v[2];
         }
         else if (nId == m_nYLineId)
         {
             printf("YLine Selected\n");
+            v = Window()->GetPosUnderCursor();
+            m_dPose[0] = v[0];
+            m_dPose[1] = v[1];
+            m_dPose[2] = v[2];
         }
         else if (nId == m_nYRingId)
         {
             printf("YRing Selected\n");
+//            m_dPose[0] = v[0];
+//            m_dPose[1] = v[1];
+//            m_dPose[2] = v[2];
         }
         else if (nId == m_nZLineId)
         {
             printf("ZLine Selected\n");
+            v = Window()->GetPosUnderCursor();
+            m_dPose[0] = v[0];
+            m_dPose[1] = v[1];
+            m_dPose[2] = v[2];
         }
         else if (nId == m_nZRingId)
         {
             printf("ZRing Selected\n");
+//            m_dPose[0] = v[0];
+//            m_dPose[1] = v[1];
+//            m_dPose[2] = v[2];
         }
 
     }
 
     void drag ()
     {
-
+        if (m_nSelectedId == m_nXLineId)
+        {
+            Eigen::Vector3d v = Window()->GetPosUnderCursor();
+            translate[0] += v[0]-m_dPose[0];
+            m_dPose[0] = v[0];
+            printf("XLine Dragged dx: %f\n", v[0]-m_dPose[0]);
+        }
+        else if (m_nSelectedId == m_nXRingId)
+        {
+            printf("XRing Dragged\n");
+        }
+        else if (m_nSelectedId == m_nYLineId)
+        {
+            Eigen::Vector3d v = Window()->GetPosUnderCursor();
+            translate[1] += v[1]-m_dPose[1];
+            m_dPose[1] = v[1];
+            printf("YLine Dragged\n");
+        }
+        else if (m_nSelectedId == m_nYRingId)
+        {
+            printf("YRing Dragged\n");
+        }
+        else if (m_nSelectedId == m_nZLineId)
+        {
+            Eigen::Vector3d v = Window()->GetPosUnderCursor();
+            translate[2] += v[2]-m_dPose[2];
+            m_dPose[2] = v[2];
+            printf("ZLine Dragged\n");
+        }
+        else if (m_nSelectedId == m_nZRingId)
+        {
+            printf("ZRing Dragged\n");
+        }
     }
 
     void release()
@@ -105,10 +158,11 @@ public:
         {
             Init();
         }
+
         glPushMatrix();
 
         //translate position
-        glTranslatef(0.0, 0.0, -1.0); //this will be centered at object's centroid
+        glTranslated(translate[0], translate[1], translate[2]); //will be centered at object's centroid
 
         //general rendering settings
         glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
@@ -232,7 +286,8 @@ private:
 
     bool m_bInitDone;
 
-    Eigen::Vector6d m_dPose;
+    Eigen::Vector3d m_dPose;
+    Eigen::Vector3d translate;
 };
 
 #endif // GLAXIS_H
