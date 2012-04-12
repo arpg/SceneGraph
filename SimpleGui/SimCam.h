@@ -144,12 +144,15 @@ class GLSimCam
                 "    float B = gl_ProjectionMatrix[3].z;\n"
                 "    float zNear = - B / (1.0 - A);\n"
                 "    float zFar  =   B / (1.0 + A);\n"
-                "    float d = 0.5*(-A*depth + B) / depth + 0.5;\n"
-                "    gl_FragColor = vec4( vec3(depth), 1.0 );\n"
-                "    gl_FragColor[0] = depth;\n"
-                "}\n";
-
-            InitShaders( sDepthVertShader, sDepthFragShader, m_nDepthShaderProgram );
+	        "    float depthN = (depth - zNear)/(zFar - zNear);  // scale to a value in [0, 1]\n"
+                "    gl_FragColor[0] = depthN;\n"
+                "}\n"; 
+	    InitShaders( sDepthVertShader, sDepthFragShader, m_nDepthShaderProgram );
+	    
+	    /* Helpful for quick testing of shaders, don't need to recompile if loaded from file
+	    if ( LoadShaders( "Depth.vert", "Depth.frag", m_nDepthShaderProgram ) == false) {
+	        fprintf(stderr, "Failed to load the Depth shader.");
+		} */	    
 
             std::string sNormalVertShader =
                 "varying vec3 normal;\n"
@@ -174,7 +177,9 @@ class GLSimCam
             }
             if( nModes & eSimCamDepth ){
                 m_pDepthMode = new SimCamMode( *this, eSimCamDepth );
-                m_pDepthMode->Init( true, m_nDepthShaderProgram, GL_LUMINANCE, GL_FLOAT );
+		                m_pDepthMode->Init( true, m_nDepthShaderProgram, GL_LUMINANCE, GL_FLOAT );
+                //m_pDepthMode->Init( true, m_nDepthShaderProgram, GL_RGB, GL_UNSIGNED_BYTE );
+		
             }
             if( nModes & eSimCamNormals ){
                 m_pNormalsMode = new SimCamMode( *this, eSimCamNormals );
@@ -638,6 +643,12 @@ class GLSimCam
 		    // Should work with the buffer already in the mode.
 		    GLfloat* buff = (GLfloat*)m_pDepthMode->m_pBuffer;
                     z  = buff[m_nSensorWidth*jj + ii];
+		    // z is normalized... undo
+		    //float depthN = (depth - zNear)/(zFar - zNear); <-- from shader
+		    // depthN * (zFar - zNear) = depth - zNear
+		    // depth = (depthN * (zFar - zNear)) + zNear
+		    z = (z * (m_fFar - m_fNear)) + m_fNear;
+
                     if( m_bOrthoCam ){
                         x  = dx*u;
                         y  = dy*v;
