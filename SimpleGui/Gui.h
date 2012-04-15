@@ -7,6 +7,7 @@
 #include <SimpleGui/GLPointCloud.h>
 #include <SimpleGui/GLText.h>
 #include <SimpleGui/GLMesh.h>
+#include <SimpleGui/GLImage.h>
 #include <SimpleGui/GLCVars.h>
 #include <SimpleGui/GetPot> // for friendy command line parsing
 #include <SimpleGui/FBO.h>

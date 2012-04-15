@@ -19,7 +19,9 @@ void GLWindow::_Timer(void *userdata)
 GLWindow::GLWindow(int x,int y,int w,int h,const char *l ) : Fl_Gl_Window(x,y,w,h,l)
 {
     m_SceneGraph.InitWindowPtr(  this );
+    m_LayerSceneGraph.InitWindowPtr(  this );
     m_pSelectedObject = NULL;
+    m_bFullscreen = false;
     m_eGuiMode = eFPSNav;
     ResetCamera();
     Fl::add_timeout( g_dFPS, _Timer, (void*)this );
@@ -27,6 +29,8 @@ GLWindow::GLWindow(int x,int y,int w,int h,const char *l ) : Fl_Gl_Window(x,y,w,
     resizable( this );
     show();
     make_current();
+    glClearColor( 0,0,0,0 );
+    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
     // glew has to be initialized before we use extensions...
     GLenum err = glewInit();
     if( GLEW_OK != err ){
@@ -256,8 +260,8 @@ void GLWindow::draw()
         glLightModelfv( GL_LIGHT_MODEL_AMBIENT, ambientLight );        // set light model
     }
 
-    //DrawSceneGraph();
     m_SceneGraph.draw();
+    m_LayerSceneGraph.draw();
 
     // call all the Post-draw frame listners
     for( size_t ii = 0; ii < m_vPostRenderCallbacks.size(); ii++ ){
@@ -330,7 +334,7 @@ void GLWindow::_ProcessHits( unsigned int hits, GLuint buffer[] )
             int nId = *ptr;
             SetSelected( nId );
 
-            GLObject* pObj = SelectedObject();
+            //GLObject* pObj = SelectedObject();
             //printf("set %s as selected\n", pObj->ObjectName() );
             //UnSelect(nId); //a desperate fix
             ptr++;
@@ -436,7 +440,15 @@ void GLWindow::_UpdatePosUnderCursor()
     m_dNormalUnderCursor = m_dNormalUnderCursor/m_dNormalUnderCursor.norm();
 
     gluUnProject( winX, winY, vPatch[vM][uM], modelview, projection, viewport, &m_dPosUnderCursor[0], &m_dPosUnderCursor[1], &m_dPosUnderCursor[2] );
+}
 
+///////////////////////////////////////////////////////////////////////////////////////////////
+void GLWindow::Add2DLayerToRoot( GLObject* pObj )
+{
+    lock(); // lock scene graph
+    pObj->InitWindowPtr( this );
+    m_LayerSceneGraph.AddChild( pObj );
+    unlock(); // unlock scene graph
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -607,6 +619,16 @@ int GLWindow::HandleNavInput( int e )
                 case FL_F+2:
                     CameraOrtho();
                     break;
+                case FL_F+12:
+                    if( m_bFullscreen ){
+                        fullscreen_off( 0, 0, m_nOldWidth, m_nOldHeight );
+                    }
+                    else{
+                        m_nOldWidth = w();
+                        m_nOldHeight = h();
+//                        fullscreen();
+                        resize( 0, 0, 1280, 800 );
+                    }
             }
             return 1;
             break;

@@ -150,4 +150,90 @@ void DrawCamera(
         Eigen::Matrix4d dProjectionMatrix
         );
 
+/// 1) Generate a texutre ID
+//  2) Bind texture to memory
+//  3) Load texture into memory
+inline unsigned int GenerateAndBindRectTextureID(
+        const unsigned int nWidth,
+        const unsigned int nHeight,
+        const unsigned int nFormat,
+        const unsigned int nType,
+        const unsigned char* pData
+        )
+{
+    GLuint texId;
+    glGenTextures( 1, &texId );
+    glBindTexture( GL_TEXTURE_RECTANGLE_ARB, texId );
+    glTexImage2D( GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB, nWidth, nHeight, 0, nFormat, nType, pData );
+    return texId;
+}
+
+
+/// 1) Generate a texutre ID 
+//  2) Bind texture to memory
+//  3) Load texture into memory
+inline unsigned int GenerateAndBindTextureID(
+        const unsigned int nWidth,
+        const unsigned int nHeight,
+        const unsigned int nFormat,
+        const unsigned int nType, 
+        const unsigned char* pData 
+        )
+{
+    GLuint texId;
+
+    /// Ask for an ID 
+    glGenTextures( 1, &texId );
+
+    /// Associate that ID with the next thing we upload.
+    glBindTexture( GL_TEXTURE_2D, texId );
+
+    /// Texture Mapping Mode:
+    // GL_DECAL: use actual texture colors
+    // GL_MODULATE: texture colors affected by poly's color (this is the default).
+//    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL );
+
+    // GL_UNPACK_ALIGNMENT Specifies the alignment requirements for the start of each
+    //  pixel row in memory.  1 specifies byte-alignment. 
+    glPixelStorei( GL_UNPACK_ALIGNMENT, 1);
+
+    // Actually copy the texture into opengl
+    glTexImage2D( 
+            GL_TEXTURE_2D,  // texture target
+            0,              // mipmap level 
+            GL_RGB,         // internal format
+            nWidth,         // texture widht
+            nHeight,        // texture height
+            0,              // width of the border (0 or 1)
+            nFormat,        // pixel data format
+            nType,          // pixel data type
+            pData           // pixel data
+            );
+
+    glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+    glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+
+    /*
+    // 
+    glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
+
+    // 
+    glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP );
+
+    // 
+    glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP );
+
+    // 
+    glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+
+    //  
+    glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+    //    glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE );
+     */  
+
+    return texId;
+}   
+
+
+
 #endif

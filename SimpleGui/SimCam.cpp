@@ -15,7 +15,7 @@ void SimCamMode::PboInit( int format, int type )
     m_eFormat = format;
     m_eType = type;
 
-    m_pPboIds = new GLuint[0];
+    m_pPboIds = new GLuint[1];
     m_nPboIndex = 0;
 
     int numberOfChannels = NumChannels( m_eFormat );

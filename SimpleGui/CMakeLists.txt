@@ -30,6 +30,7 @@ set( SimpleGui_HEADERS
         GLWindow.h
         GLHelpers.h
         GLColor.h
+        GLImage.h
         GLMesh.h
         GLText.h
         GLGrid.h

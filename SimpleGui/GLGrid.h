@@ -37,11 +37,11 @@ class GLGrid : public GLObject
             glBegin(GL_LINES);
 
             for(i = -NLINES; i < NLINES; i++){
-                glColor4ub(32, 32, 32, 155);
+                glColor4ub(132, 132, 132, 195);
                 glVertex3f( LDELTA*NLINES, i*LDELTA, 0.0);
                 glVertex3f(-LDELTA*NLINES, i*LDELTA, 0.0);
 
-                glColor4ub(32, 32, 32, 155);
+                glColor4ub(132, 132, 132, 195);
                 glVertex3f(i*LDELTA,  LDELTA*NLINES, 0.0);
                 glVertex3f(i*LDELTA, -LDELTA*NLINES, 0.0);
             }

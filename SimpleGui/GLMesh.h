@@ -20,6 +20,7 @@ class GLMesh : public GLObject
         GLMesh()
         {
             m_sObjectName = "Mesh";
+            m_nDisplayList = -1;
         }
 
         ////////////////////////////////////////////////////////////////////////////
@@ -268,7 +269,13 @@ class GLMesh : public GLObject
         {
             if( m_pScene ){
                 glEnable( GL_DEPTH_TEST );
-                recursive_render( m_pScene, m_pScene->mRootNode );
+                if( m_nDisplayList == -1 ){
+                    m_nDisplayList = glGenLists(1);
+                    glNewList( m_nDisplayList, GL_COMPILE );
+                    recursive_render( m_pScene, m_pScene->mRootNode );
+                    glEndList();
+                }
+                glCallList( m_nDisplayList );
             }
         }
 
@@ -277,6 +284,7 @@ class GLMesh : public GLObject
 
     private:
         const struct aiScene*   m_pScene;
+        GLint m_nDisplayList;
 };
 
 

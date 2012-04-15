@@ -142,6 +142,9 @@ class GLWindow : public Fl_Gl_Window, public boost::mutex
     Eigen::Vector3d GetPosUnderCursor();
     Eigen::Vector3d GetNormalUnderCursor();
 
+    // Add new object to 2D layer scene graph 
+    void Add2DLayerToRoot( GLObject* pObj );
+
    // Add new object to scene graph
     void AddChildToRoot( GLObject* pObj );
 
@@ -196,6 +199,8 @@ class GLWindow : public Fl_Gl_Window, public boost::mutex
     GLObject*                       m_pSelectedObject;
 
     GLSceneGraph                    m_SceneGraph;
+
+    GLSceneGraph                    m_LayerSceneGraph;
    
     // little struct to hold user callback funciton and user data
     struct CallbackInfo
@@ -209,6 +214,9 @@ class GLWindow : public Fl_Gl_Window, public boost::mutex
 
     // for debugging...
     GLSphereGrid                     m_SphereGrid;
+    bool                             m_bFullscreen;
+    int                              m_nOldWidth;
+    int                              m_nOldHeight;
 };
 
 #endif
