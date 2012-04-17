@@ -88,6 +88,8 @@ class GLObject
             m_bPerceptable = bPerceptable;
         }
 
+        Eigen::Vector3d GetPosition();
+
 
     private:
         void  _RecursivelyInitObjects( GLObject* pObj, GLWindow* pWin );
@@ -99,7 +101,8 @@ class GLObject
         unsigned int              m_nId;      //< Object handle
         GLWindow*                 m_pWin;     //< The window the object belongs to
         bool                      m_bVisible;
-        bool                      m_bIs2dLayer; //< such as an image 
+        bool                      m_bIs2dLayer; //< such as an image
+        Eigen::Vector3d           m_dPosition; //< Object position
 };
 
 

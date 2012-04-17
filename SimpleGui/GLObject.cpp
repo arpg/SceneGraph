@@ -142,3 +142,9 @@ void  GLObject::_RecursivelyInitObjects( GLObject* pObj, GLWindow* pWin )
 }
 
 
+///////////////////////////////////////////////////////////////////////////////
+Eigen::Vector3d GLObject::GetPosition()
+{
+    return m_dPosition;
+}
+
