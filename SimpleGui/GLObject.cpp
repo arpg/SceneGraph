@@ -142,9 +142,27 @@ void  GLObject::_RecursivelyInitObjects( GLObject* pObj, GLWindow* pWin )
 }
 
 
-///////////////////////////////////////////////////////////////////////////////
-Eigen::Vector3d GLObject::GetPosition()
+///////////////////////////////////////////////////////////////////////////////////////////
+Eigen::Vector6d GLObject::GetPose()
 {
     return m_dPosition;
 }
 
+
+////////////////////////////////////////////////////////////////////////////////////////////
+void GLObject::SetPose(Eigen::Vector6d v)
+{
+    m_dPosition = v;
+}
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////
+void GLObject::SetPose(double x, double y, double z, double roll, double pitch, double yaw)
+{
+    m_dPosition[0] = x;
+    m_dPosition[1] = y;
+    m_dPosition[2] = z;
+    m_dPosition[3] = roll;
+    m_dPosition[4] = pitch;
+    m_dPosition[5] = yaw;
+}

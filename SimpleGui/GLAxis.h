@@ -7,7 +7,9 @@
 namespace Eigen{
     typedef Matrix<double,3,1> Vector3d;
     typedef Matrix<int,2,1> Vector2i;
+    typedef Matrix<double,6,1> Vector6d;
 }
+
 #define X_AXIS  1
 #define Y_AXIS  2
 #define Z_AXIS  3
@@ -39,6 +41,7 @@ public:
         m_nYRingId = AllocSelectionId();
         m_nZLineId = AllocSelectionId();
         m_nZRingId = AllocSelectionId();
+        m_nPlaneId = AllocSelectionId();
         m_bInitDone = true;
         scale = -0.1;
     }
@@ -48,20 +51,14 @@ public:
         Eigen::Vector2i v;
         m_nSelectedId = nId;
 
-        //working model
-//        if(nId == m_nBaseId)
-//        {
-//            printf("gizmo selected\n");
-//            m_dPose[0] = v[0];
-//            m_dPose[1] = v[1];
-//            m_dPose[2] = v[2];
-//        }
         if (nId == m_nXLineId)
         {
             printf("XLine Selected\n");
             v = Window()->GetCursorPos();
             m_iMousePos[0] = v[0];
             m_iMousePos[1] = v[1];
+            //draw our invisible back plane
+
         }
         else if (nId == m_nXRingId)
         {
@@ -110,6 +107,19 @@ public:
             translate[0] += (double)(v[1]-m_iMousePos[1])*scale;
             m_iMousePos[1] = v[1];
             printf("X Dragged to: %f\n", translate[0]);
+
+            glPushMatrix();
+            glTranslated(translate[0], translate[1], translate[2]);
+            glPushName(99);
+            glBegin(GL_QUADS);
+            glColor4f(0.0, 1.0, 0.0, 0.0); //green
+            glVertex3f(-2.0, 0, -2.0);
+            glVertex3f(-2.0, 0, 2.0);
+            glVertex3f(2.0, 0.0, 2.0);
+            glVertex3f(2.0, 0.0, -2.0);
+            glEnd();
+            glPopMatrix();
+            glPopName();
         }
         else if (m_nSelectedId == m_nXRingId)
         {
@@ -169,6 +179,10 @@ public:
         glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
         glEnable( GL_BLEND );
         glDisable( GL_LIGHTING );
+
+
+
+
 
         //thick lines
         glLineWidth(5.0);
@@ -284,6 +298,7 @@ private:
     unsigned int m_nYRingId;
     unsigned int m_nZLineId;
     unsigned int m_nZRingId;
+    unsigned int m_nPlaneId;
 
     bool m_bInitDone;
 

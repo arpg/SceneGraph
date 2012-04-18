@@ -10,11 +10,15 @@ class GLWindow;
 #include <vector>
 #include <stdio.h>
 
+namespace Eigen{
+    typedef Matrix<double, 6, 1> Vector6d;
+}
 class GLObject
 {
     public:
 
         GLObject();
+
 
         // User supplied gl drawing routine
 		virtual void draw() = 0;
@@ -88,7 +92,11 @@ class GLObject
             m_bPerceptable = bPerceptable;
         }
 
-        Eigen::Vector3d GetPosition();
+        Eigen::Vector6d GetPose();
+
+        void SetPose(Eigen::Vector6d v);
+
+        void SetPose(double x, double y, double z, double roll, double pitch, double yaw);
 
 
     private:
@@ -102,7 +110,7 @@ class GLObject
         GLWindow*                 m_pWin;     //< The window the object belongs to
         bool                      m_bVisible;
         bool                      m_bIs2dLayer; //< such as an image
-        Eigen::Vector3d           m_dPosition; //< Object position
+        Eigen::Vector6d           m_dPosition; //< Object position
 };
 
 

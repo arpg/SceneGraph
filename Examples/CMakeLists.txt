@@ -48,7 +48,9 @@ if( BuildPBOTest )
     add_dependencies( PBOTest SimpleGui )
 endif()
 
-set( BuildAxis_Demo false CACHE "" force )
+
+
+set( BuildAxis_Demo true CACHE "" force )
 if( BuildAxis_Demo )
     add_executable( Axis_Demo RenderAxis.cpp )
     target_link_libraries( Axis_Demo ${SimpleGui_LIBRARIES} )
