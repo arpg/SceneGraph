@@ -19,6 +19,10 @@ class GLObject
 
         GLObject();
 
+        GLObject( const GLObject& rhs )
+        {
+            *this = rhs;
+        }
 
         // User supplied gl drawing routine
 		virtual void draw() = 0;
@@ -98,8 +102,7 @@ class GLObject
 
         void SetPose(double x, double y, double z, double roll, double pitch, double yaw);
 
-
-    private:
+//    private:
         void  _RecursivelyInitObjects( GLObject* pObj, GLWindow* pWin );
 
     protected:

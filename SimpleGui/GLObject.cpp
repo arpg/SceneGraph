@@ -127,6 +127,7 @@ void GLObject::AddChild( GLObject* pChild )
     pChild->m_pParent = this;
     g_mObjects[ g_nHandleCounter ] = pChild;
     pChild->SetId( g_nHandleCounter ); 
+    //printf("adding %s in slot %d\n", pChild->m_sObjectName.c_str(), g_nHandleCounter );
     g_nHandleCounter++;
 
 }

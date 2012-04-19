@@ -10,8 +10,8 @@ GLSceneGraph::GLSceneGraph()
     m_pWin = NULL;
     m_vpChildren.clear();
 }
-/////////////////////////////////////////////////////////////////////////////////
 
+/////////////////////////////////////////////////////////////////////////////////
 GLObject* GLSceneGraph::Root()
 {
     return this;
@@ -27,6 +27,17 @@ void GLSceneGraph::Reset()
 /////////////////////////////////////////////////////////////////////////////////
 void GLSceneGraph::draw() 
 {
+
+    // try to draw all children
+    for( size_t ii = 0; ii < m_vpChildren.size(); ii++ ){
+        GLObject* pObj = m_vpChildren[ii];
+        //printf("%p : ", pObj );
+        //fflush(stdout);
+        //printf("m_vpChildren[%d], %s, has %d children\n", (int)ii, pObj->m_sObjectName.c_str(), (int)pObj->m_vpChildren.size() );
+        _RecursiveDraw( pObj  );
+    }
+
+
     // try to draw all children
     for( size_t ii = 0; ii < m_vpChildren.size(); ii++ ){
         _RecursiveDraw( m_vpChildren[ii] );
@@ -46,6 +57,7 @@ GLObject* GLSceneGraph::GetObject( unsigned int nId )
 /////////////////////////////////////////////////////////////////////////////////
 void GLSceneGraph::_RecursiveDraw( GLObject* pObj )
 {
+    //printf("Drawing %p %s\n", pObj, pObj->ObjectName() );
     if( pObj->IsVisible() ){
         Window()->lock();
         CheckForGLErrors();
