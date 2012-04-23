@@ -15,6 +15,7 @@ find_package( ASSIMP REQUIRED )
 find_package( Eigen3 REQUIRED )
 find_package( GLEW REQUIRED )
 find_package( ZeroMQ REQUIRED )
+find_package( DevIL REQUIRED )
 #find_package( GLUT REQUIRED )
 
 set( SimpleGui_SOURCES
@@ -49,6 +50,7 @@ set( SimpleGui_INCLUDE_DIRS
         ${ASSIMP_INCLUDE_DIR}
         ${EIGEN3_INCLUDE_DIR}
 	${ZeroMQ_INCLUDE_DIR}
+        ${IL_INCLUDE_DIR}
    )
 
 # set for "export_library", below 
@@ -61,6 +63,9 @@ set( SimpleGui_LIBRARIES
 #        ${GLUT_LIBRARIES}
         ${ASSIMP_LIBRARIES}
 	${ZeroMQ_LIBRARIES}
+        ${IL_LIBRARIES}
+        ${ILU_LIBRARIES}
+        ${ILUT_LIBRARIES}
    )
 
 include_directories( ${SimpleGui_INCLUDE_DIRS} )
