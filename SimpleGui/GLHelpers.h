@@ -153,6 +153,22 @@ void DrawCamera(
 /// 1) Generate a texutre ID
 //  2) Bind texture to memory
 //  3) Load texture into memory
+inline void BindRectTextureID(
+        const unsigned int texId,
+        const unsigned int nWidth,
+        const unsigned int nHeight,
+        const unsigned int nFormat,
+        const unsigned int nType,
+        const unsigned char* pData
+        )
+{
+    glBindTexture( GL_TEXTURE_RECTANGLE_ARB, texId );
+    glTexImage2D( GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB, nWidth, nHeight, 0, nFormat, nType, pData );
+}
+
+/// 1) Generate a texutre ID
+//  2) Bind texture to memory
+//  3) Load texture into memory
 inline unsigned int GenerateAndBindRectTextureID(
         const unsigned int nWidth,
         const unsigned int nHeight,

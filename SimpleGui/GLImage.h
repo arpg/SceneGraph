@@ -10,7 +10,10 @@ class GLImage : public GLObject
 		// Construct GLImage from OpenCV image.
         GLImage()
 		{
+            m_nTex = 0;
             m_pImageData = 0;
+            m_bTextureDataChanged = false;
+            m_bTextureInitialized = false;
             InitReset();
             m_bIs2dLayer = true; // this is crucial, as it causes this layer to be rendered after all the 3d info.
             m_fPercentTop    = 0;
@@ -55,6 +58,7 @@ class GLImage : public GLObject
     
 	private:
         bool           	m_bTextureInitialized;
+        bool            m_bTextureDataChanged;
         unsigned char*  m_pImageData;
         int             m_nType;    // gl
         int             m_nFormat; // gl
@@ -75,8 +79,12 @@ inline void GLImage::InitTexture()
         return;
     }
     if( m_bTextureInitialized ) {
+        if( m_bTextureDataChanged == true ) {
+            BindRectTextureID( m_nTex, m_nImageWidth, m_nImageHeight, GL_LUMINANCE, GL_UNSIGNED_BYTE, m_pImageData );
+        }
         return;
     }
+    
     if( !m_pImageData ) {
 	    return;
     }
@@ -217,6 +225,11 @@ inline void GLImage::SetImage( unsigned char* pImageData, int w, int h, int nFor
             free( m_pImageData );
         }
         m_pImageData = (unsigned char*)malloc( nMemSize );
+        m_bTextureInitialized = false;
+        m_bTextureDataChanged = false;
+    }else {
+        m_bTextureInitialized = true;
+        m_bTextureDataChanged = true;
     }
 
     memcpy( m_pImageData, pImageData, nMemSize );
@@ -226,7 +239,7 @@ inline void GLImage::SetImage( unsigned char* pImageData, int w, int h, int nFor
     m_nFormat = nFormat;
     m_nType = nType;
 
-    m_bTextureInitialized = false;
+    
 }
 
 inline void GLImage::SetSizeAsPercentageOfWindow( 
