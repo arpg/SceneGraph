@@ -80,14 +80,14 @@ class GLSimCam
             m_fOrthoLeft   = -dWidth / 2.0; // -y dir
             m_fOrthoRight  = dWidth / 2.0; // +y dir
             m_bOrthoCam    = true;
-        } 
+        }
 
         /////////////////////////////////////////////////////////////////////////////////////////
         void UnSetOrtho()
         {
             m_bOrthoCam = false;
         }
-                
+
         /////////////////////////////////////////////////////////////////////////////////////////
         /// Store pose as a roboitcs frame pose
         void SetPose( const Eigen::Matrix4d& dPose )
@@ -109,7 +109,7 @@ class GLSimCam
 
         /////////////////////////////////////////////////////////////////////////////////////////
         /// Init shaders. Given K matrix, compute the corresponding GL_PROJECTION_MATRIX.
-        void Init( 
+        void Init(
                 GLSceneGraph* pSceneGraph,       //< Input: pointer to scene graph we should render
                 const Eigen::Matrix4d dPose,     //< Input: initial camera pose
                 const Eigen::Matrix3d dK,        //< Input: computer vision K matrix
@@ -128,7 +128,7 @@ class GLSimCam
             m_dK = dK;
             m_dPose = dPose;
 
-            std::string sDepthVertShader = 
+            std::string sDepthVertShader =
                 "varying float depth;\n"
                 "void main(void)\n"
                 "{\n"
@@ -136,7 +136,7 @@ class GLSimCam
                 "    depth = -(gl_ModelViewMatrix * gl_Vertex).z;\n"
                 "}\n";
 
-            std::string sDepthFragShader = 
+            std::string sDepthFragShader =
                 "varying float depth;\n"
                 "void main(void)\n"
                 "{\n"
@@ -146,13 +146,13 @@ class GLSimCam
                 "    float zFar  =   B / (1.0 + A);\n"
 	        "    float depthN = (depth - zNear)/(zFar - zNear);  // scale to a value in [0, 1]\n"
                 "    gl_FragColor[0] = depthN;\n"
-                "}\n"; 
+                "}\n";
 	    InitShaders( sDepthVertShader, sDepthFragShader, m_nDepthShaderProgram );
-	    
+
 	    /* Helpful for quick testing of shaders, don't need to recompile if loaded from file
 	    if ( LoadShaders( "Depth.vert", "Depth.frag", m_nDepthShaderProgram ) == false) {
 	        fprintf(stderr, "Failed to load the Depth shader.");
-		} */	    
+		} */
 
             std::string sNormalVertShader =
                 "varying vec3 normal;\n"
@@ -162,7 +162,7 @@ class GLSimCam
                 "    normal = gl_NormalMatrix * gl_Normal;\n"
                 "}\n";
 
-            std::string sNormalFragShader = 
+            std::string sNormalFragShader =
                 "varying vec3 normal;\n"
                 "void main()\n"
                 "{\n"
@@ -179,7 +179,7 @@ class GLSimCam
                 m_pDepthMode = new SimCamMode( *this, eSimCamDepth );
 		                m_pDepthMode->Init( true, m_nDepthShaderProgram, GL_LUMINANCE, GL_FLOAT );
                 //m_pDepthMode->Init( true, m_nDepthShaderProgram, GL_RGB, GL_UNSIGNED_BYTE );
-		
+
             }
             if( nModes & eSimCamNormals ){
                 m_pNormalsMode = new SimCamMode( *this, eSimCamNormals );
@@ -238,6 +238,20 @@ class GLSimCam
         }
 
         /////////////////////////////////////////////////////////////////////////////////////////
+        bool CaptureRGB( void* DataPtr )
+        {
+            if( m_pRGBMode ){
+                // TODO Capture here should do the PboRead and fill vPixelData...
+		// NB: Having Capture do a PboRead may cause probelems if the render state is not
+		// set correctly. Right now, PboRead is only called while in middle of the regular
+		// render loop. - JamesII
+                memcpy( DataPtr, m_pRGBMode->Capture(), ImageWidth()*ImageHeight()*3);
+                return true;
+            }
+            return false;
+        }
+
+        /////////////////////////////////////////////////////////////////////////////////////////
         bool CaptureDepth( std::vector<float>& vPixelData )
         {
             if( m_pDepthMode ){
@@ -245,7 +259,7 @@ class GLSimCam
                     vPixelData.resize( ImageWidth()*ImageHeight()*sizeof(float) );
                 }
                 // TODO Capture here should do the PboRead and fill vPixelData...
-                memcpy( &vPixelData[0], m_pDepthMode->Capture(), 
+                memcpy( &vPixelData[0], m_pDepthMode->Capture(),
                         ImageWidth()*ImageHeight()*sizeof(float));
                 return true;
             }
@@ -260,7 +274,7 @@ class GLSimCam
                     vPixelData.resize( ImageWidth()*ImageHeight()*3 );
                 }
                 // TODO Capture here should do the PboRead and fill vPixelData...
-                memcpy( &vPixelData[0], m_pNormalsMode->Capture(), 
+                memcpy( &vPixelData[0], m_pNormalsMode->Capture(),
                         ImageWidth()*ImageHeight()*3 );
                 return true;
             }
@@ -301,7 +315,7 @@ class GLSimCam
         /////////////////////////////////////////////////////////////////////////////////////////
         void Begin()
         {
-            // 0) push some attribs 
+            // 0) push some attribs
             glPushAttrib( GL_COLOR_BUFFER_BIT );
 
             // 1) setup off-screen "camera" we will render to:
@@ -409,7 +423,7 @@ class GLSimCam
         /////////////////////////////////////////////////////////////////////////////////////////
         void DrawCamera()
         {
-            // OK 
+            // OK
             Eigen::Matrix4d M = m_dM.inverse();
             Eigen::Matrix4d T = m_dT.inverse();
 
@@ -602,7 +616,7 @@ class GLSimCam
         void DrawRangeData()
         {
             std::vector<float> vRangeData;
-            DepthTo3D( vRangeData ); 
+            DepthTo3D( vRangeData );
             glPointSize( 2 );
             glEnable( GL_COLOR_MATERIAL );
             glColor3f( 1,0,1 );
@@ -626,7 +640,7 @@ class GLSimCam
             }
             // transform depth to 3d
             Eigen::Matrix3d K = GetKMatrix();
-            vRangeData.clear(); 
+            vRangeData.clear();
             float dx = (m_fOrthoRight-m_fOrthoLeft)/m_nSensorWidth;
             float dy = (m_fOrthoBottom-m_fOrthoTop)/m_nSensorHeight;
             float fx = K(0,0); // focal length in pixels
@@ -685,11 +699,11 @@ class GLSimCam
         float                                       m_fNear;
         float                                       m_fFar;
         bool                                        m_bOrthoCam; // if ortho, we will ignore K below
-        float                                       m_fOrthoTop; 
+        float                                       m_fOrthoTop;
         float                                       m_fOrthoBottom;
         float                                       m_fOrthoLeft;
-        float                                       m_fOrthoRight; 
-        Eigen::Matrix3d                             m_dK; // computer vision K matrix 
+        float                                       m_fOrthoRight;
+        Eigen::Matrix3d                             m_dK; // computer vision K matrix
         Eigen::Matrix4d                             m_dPose; // desired camera pose
         Eigen::Matrix<double,4,4,Eigen::ColMajor>   m_dM; // to save projection matrix
         Eigen::Matrix<double,4,4,Eigen::ColMajor>   m_dT; // to save modelview matrix
