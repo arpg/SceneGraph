@@ -189,19 +189,7 @@ public:
 //        glPushName(m_nBaseId);
 
     //x-axis
-        glColor4f(0.0, 1.0, 0.0, 0.3); //green
-        if (IsSelected(m_nXLineId))
-        {
-            UnSelect(m_nXLineId);
-            glColor4f(0.0, 1.0, 0.0, 1.0); //green
-        }
-        glPushName(m_nXLineId);
-        glBegin(GL_LINES);
 
-        glVertex3f(0.0, 0.0, 0.0);
-        glVertex3f(1.5, 0.0, 0.0);
-        glEnd();
-        glPopName();
         glColor4f(0.0, 1.0, 0.0, 0.3); //green
         if (IsSelected(m_nXRingId))
         {
@@ -213,18 +201,7 @@ public:
         glPopName();
 
     //y-axis
-        glColor4f(1.0, 0.0, 0.0, 0.3); //red
-        if (IsSelected(m_nYLineId))
-        {
-            UnSelect(m_nYLineId);
-            glColor4f(1.0, 0.0, 0.0, 1.0); //red
-        }
-        glPushName(m_nYLineId);
-        glBegin(GL_LINES);
-        glVertex3f(0.0, 0.0, 0.0);
-        glVertex3f(0.0, 1.5, 0.0);
-        glEnd();
-        glPopName();
+
         glPushMatrix();
         glRotatef(90.0, 0.0, 0.0, 1.0);
         glColor4f(1.0, 0.0, 0.0, 0.3); //red
@@ -239,19 +216,7 @@ public:
         glPopMatrix();
 
     //z-axis
-        glColor4f(0.0, 0.0, 1.0, 0.3);//blue
-        if (IsSelected(m_nZLineId))
-        {
-            UnSelect(m_nZLineId);
-            glColor4f(0.0, 0.0, 1.0, 1.0);//blue
-        }
-        glPushName(m_nZLineId);
-        glBegin(GL_LINES);
 
-        glVertex3f(0.0, 0.0, 0.0);//origin
-        glVertex3f(0.0, 0.0, 1.5);
-        glEnd();
-        glPopName();
         glPushMatrix();
         glRotatef(90.0, 0.0, 1.0, 0.0);
         glColor4f(0.0, 0.0, 1.0, 0.3);//blue
@@ -266,6 +231,49 @@ public:
         glPopMatrix();
 //        glPopName(); //end of axis naming
 
+        //x-line
+        glColor4f(0.0, 1.0, 0.0, 0.3); //green
+        if (IsSelected(m_nXLineId))
+        {
+            UnSelect(m_nXLineId);
+            glColor4f(0.0, 1.0, 0.0, 1.0); //green
+        }
+        glPushName(m_nXLineId);
+        glBegin(GL_LINES);
+        glVertex3f(0.0, 0.0, 0.0);
+        glVertex3f(1.5, 0.0, 0.0);
+        glEnd();
+        glPopName();
+
+        //y-line
+        glColor4f(1.0, 0.0, 0.0, 0.3); //red
+        if (IsSelected(m_nYLineId))
+        {
+            UnSelect(m_nYLineId);
+            glColor4f(1.0, 0.0, 0.0, 1.0); //red
+        }
+        glPushName(m_nYLineId);
+        glBegin(GL_LINES);
+        glVertex3f(0.0, 0.0, 0.0);
+        glVertex3f(0.0, 1.5, 0.0);
+        glEnd();
+        glPopName();
+
+        //z-line
+        glColor4f(0.0, 0.0, 1.0, 0.3);//blue
+        if (IsSelected(m_nZLineId))
+        {
+            UnSelect(m_nZLineId);
+            glColor4f(0.0, 0.0, 1.0, 1.0);//blue
+        }
+        glPushName(m_nZLineId);
+        glBegin(GL_LINES);
+
+        glVertex3f(0.0, 0.0, 0.0);//origin
+        glVertex3f(0.0, 0.0, 1.5);
+        glEnd();
+        glPopName();
+
         glLineWidth(1.0);
 
        glPopMatrix(); //pop back to origin
@@ -277,7 +285,9 @@ public:
     void m_gldrawCircle(float r)
     {
         const float d2r = 3.14159/180; //must be in radians
-        glBegin(GL_LINE_LOOP);
+        glBegin(GL_TRIANGLE_FAN);
+
+        glVertex3f(0.0, 0.0, 0.0);
 
         for(int i = 0; i < 360; i++)
         {

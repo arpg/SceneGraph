@@ -100,7 +100,7 @@ class GLObject
 
         void SetPose(Eigen::Vector6d v);
 
-        void SetPose(double x, double y, double z, double roll, double pitch, double yaw);
+        void SetPose(double x, double y, double z, double p, double q, double r);
 
 //    private:
         void  _RecursivelyInitObjects( GLObject* pObj, GLWindow* pWin );

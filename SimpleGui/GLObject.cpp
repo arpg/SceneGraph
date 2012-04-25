@@ -158,12 +158,12 @@ void GLObject::SetPose(Eigen::Vector6d v)
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
-void GLObject::SetPose(double x, double y, double z, double roll, double pitch, double yaw)
+void GLObject::SetPose(double x, double y, double z, double p, double q, double r)
 {
     m_dPosition[0] = x;
     m_dPosition[1] = y;
     m_dPosition[2] = z;
-    m_dPosition[3] = roll;
-    m_dPosition[4] = pitch;
-    m_dPosition[5] = yaw;
+    m_dPosition[3] = p;
+    m_dPosition[4] = q;
+    m_dPosition[5] = r;
 }
