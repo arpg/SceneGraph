@@ -75,12 +75,14 @@ bool Import3DFromFile( const std::string& pFile)
 		return false;
 	}
 
+	
 	pScene = aiImportFile( pFile.c_str(), aiProcessPreset_TargetRealtime_MaxQuality );
+	//pScene = aiImportFile( pFile.c_str(), 0 );
 
 	// If the import failed, report it
 	if( !pScene)
 	{
-		std::cout << "Problem importing objects\n";
+		std::cout << "Problem importing objects "<< aiGetErrorString() << std::endl;
 		return false;
 	}
 
@@ -95,6 +97,24 @@ bool Import3DFromFile( const std::string& pFile)
 	tmp = scene_max.z - scene_min.z > tmp?scene_max.z - scene_min.z:tmp;
 	scaleFactor = 1.f / tmp;
 
+	//rotate the object
+	aiMatrix3x3 rot, rotX;
+	aiIdentityMatrix3( &rotX );
+    aiMatrix3x3::Rotation( -AI_MATH_PI/2, aiVector3D( 1, 0, 0 ), rotX );
+    aiIdentityMatrix3( &rot );
+    aiMultiplyMatrix3( &rot, &rotX );
+    
+    // Process each vertex and alter it so that it is compatible with our world coordinate system
+    unsigned int meshes = pScene->mNumMeshes;
+    for( unsigned int meshidx = 0; meshidx < meshes; meshidx++ ) {
+        aiMesh* mesh = pScene->mMeshes[meshidx];
+        unsigned int vertices = mesh->mNumVertices;
+        for( unsigned int vertexidx = 0; vertexidx < vertices; vertexidx++ ) {
+            aiVector3D* vertex = &mesh->mVertices[vertexidx];
+            aiTransformVecByMatrix3( vertex, &rot );
+        }
+    }
+    
 	// We're done. Everything will be cleaned up by the importer destructor
 	return true;
 }
