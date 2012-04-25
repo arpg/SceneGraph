@@ -167,6 +167,8 @@ class GLWindow : public Fl_Gl_Window, public boost::mutex
             float targetx, float targety, float targetz,
             float upx, float upy, float upz );
 
+    Eigen::Vector3d GetCamPosition() { return m_dCamPosition; }
+
     private:
     int                             m_nMouseX;
     int                             m_nMouseY;
