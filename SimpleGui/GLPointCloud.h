@@ -10,6 +10,7 @@ class GLPointCloud : public GLObject
         {
             m_nDisplayList = -1;
             m_nOldRangeDataSize = 0;
+            m_dPose = Eigen::Matrix4d::Identity();
         }
 
         /// will recompile list if users add more data
@@ -38,7 +39,7 @@ class GLPointCloud : public GLObject
         {
             m_dPose = dPose;
         }
- 
+
         // will compile new drawlist
         void CompileDisplyList()
         {
@@ -56,14 +57,30 @@ class GLPointCloud : public GLObject
         }
 
         // return ref to our range data
-        std::vector<float>& RangeDataRef()
+        std::deque<float>& RangeDataRef()
         {
             return m_vRangeData;
         }
 
+        void PushPoint( float X, float Y, float Z ) {
+            m_vRangeData.push_back(X);
+            m_vRangeData.push_back(Y);
+            m_vRangeData.push_back(Z);
+        }
+
+        void PopPoint() {
+            m_vRangeData.pop_front();
+            m_vRangeData.pop_front();
+            m_vRangeData.pop_front();
+        }
+
+        void Clear() {
+            m_vRangeData.clear();
+        }
+
     private:
         GLint                  m_nDisplayList;
-        std::vector<float>     m_vRangeData;
+        std::deque<float>      m_vRangeData;
         unsigned int           m_nOldRangeDataSize;
         Eigen::Matrix4d        m_dPose;
 };

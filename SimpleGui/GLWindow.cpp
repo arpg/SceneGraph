@@ -7,7 +7,7 @@ GLWindowConfig gConfig;
 
 /////////////////////////////////////////////////////////////////////////////////
 /// timer callback drives animation and forces drawing at 20 hz
-void GLWindow::_Timer(void *userdata) 
+void GLWindow::_Timer(void *userdata)
 {
     GLWindow *pWin = (GLWindow*)userdata;
     Fl::repeat_timeout( g_dFPS, _Timer, userdata );
@@ -57,11 +57,11 @@ void GLWindow::ResetCamera()
 
 /////////////////////////////////////////////////////////////////////////////////
 // bird's eye view -- not really ortho!
-void GLWindow::CameraOrtho()
+void GLWindow::CameraOrtho( double dHeight )
 {
     m_dCamPosition[0] = 0;
     m_dCamPosition[1] = 0;
-    m_dCamPosition[2] = -50;
+    m_dCamPosition[2] = dHeight;
 
     m_dCamTarget[0] = 0;
     m_dCamTarget[1] = 0;
@@ -93,7 +93,7 @@ void GLWindow::Init()
     glLightModeli( GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE );
     glEnable( GL_NORMALIZE );
     glColorMaterial( GL_FRONT_AND_BACK, GL_DIFFUSE );
-    // track material ambient and diffuse from surface color, 
+    // track material ambient and diffuse from surface color,
     // call it before glEnable(GL_COLOR_MATERIAL)
     glColorMaterial( GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE );
     glEnable( GL_COLOR_MATERIAL );
@@ -196,7 +196,7 @@ void _SetupLighting()
 */
 /////////////////////////////////////////////////////////////////////////////////
 /// Main function called by FLTK to draw the scene.
-void GLWindow::draw() 
+void GLWindow::draw()
 {
 
     if( !context() ) {
@@ -508,7 +508,7 @@ int GLWindow::handle( int e )
 
 ////////////////////////////////////////////////////////////////////////////
 void GLWindow::LookAt(
-        float eyex, float eyey, float eyez, 
+        float eyex, float eyey, float eyez,
         float targetx, float targety, float targetz,
         float upx, float upy, float upz )
 {

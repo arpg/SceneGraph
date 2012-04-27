@@ -120,7 +120,7 @@ class GLWindow : public Fl_Gl_Window, public boost::mutex
     void ResetCamera();
 
     // bird's eye view -- bad bad bad, this isn't orhto at all
-    void CameraOrtho();
+    void CameraOrtho( double dHeight = -50 );
 
     // Reset clear all registered objects
     void Reset();
@@ -142,7 +142,7 @@ class GLWindow : public Fl_Gl_Window, public boost::mutex
     Eigen::Vector3d GetPosUnderCursor();
     Eigen::Vector3d GetNormalUnderCursor();
 
-    // Add new object to 2D layer scene graph 
+    // Add new object to 2D layer scene graph
     void Add2DLayerToRoot( GLObject* pObj );
 
    // Add new object to scene graph
@@ -153,17 +153,17 @@ class GLWindow : public Fl_Gl_Window, public boost::mutex
     int Run();
 
     GLSceneGraph& SceneGraph();
-    
+
     void AddPreRenderCallback( void(*pUserFunc)(GLWindow*,void*), void* pUserData = NULL );
     void AddPostRenderCallback( void(*pUserFunc)(GLWindow*,void*), void* pUserData = NULL );
-    
+
     // event handlers -- these can serve as examples
     virtual int handle( int e ); // inherit and override if you want
     int SimpleDefaultEventHandler( int e ); // simple example handler
     int HandleNavInput( int e );
     int HandleSelectionInput( int e );
 
-    void LookAt( float eyex, float eyey, float eyez, 
+    void LookAt( float eyex, float eyey, float eyez,
             float targetx, float targety, float targetz,
             float upx, float upy, float upz );
 
@@ -203,14 +203,14 @@ class GLWindow : public Fl_Gl_Window, public boost::mutex
     GLSceneGraph                    m_SceneGraph;
 
     GLSceneGraph                    m_LayerSceneGraph;
-   
+
     // little struct to hold user callback funciton and user data
     struct CallbackInfo
     {
         void(*m_pFuncPtr)(GLWindow*,void*);
         void*                      m_pUserData;
     };
-   
+
     std::vector<CallbackInfo>        m_vPreRenderCallbacks;
     std::vector<CallbackInfo>        m_vPostRenderCallbacks;
 
