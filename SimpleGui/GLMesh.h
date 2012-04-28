@@ -21,12 +21,25 @@ class GLMesh : public GLObject
         {
             m_sObjectName = "Mesh";
             m_nDisplayList = -1;
+
+            m_iMeshID = -1;
+            m_bSelectionIDAllocated = false;
         }
 
         ////////////////////////////////////////////////////////////////////////////
         void Init( const struct aiScene* pScene )
         {
             m_pScene = pScene;
+        }
+
+        void AllocateSelectionID()
+        {
+            if ( m_bSelectionIDAllocated )
+                return; // selection ID has already been allocated; abort
+
+            m_iMeshID = AllocSelectionId();
+
+            m_bSelectionIDAllocated = true;
         }
 
         ////////////////////////////////////////////////////////////////////////////
@@ -261,6 +274,7 @@ class GLMesh : public GLObject
             for( n = 0; n < nd->mNumChildren; ++n ) {
                 recursive_render( sc, nd->mChildren[n] );
             }
+
             glPopMatrix();
         }
 
@@ -275,16 +289,39 @@ class GLMesh : public GLObject
                     recursive_render( m_pScene, m_pScene->mRootNode );
                     glEndList();
                 }
+
+                AllocateSelectionID();
+
+                glPushMatrix();
+                glPushName( m_iMeshID );
+
+                glTranslated( m_dPosition[0], m_dPosition[1], m_dPosition[2] );
+                glRotated( m_dPosition[3], 1.0f, 0.0f, 0.0f );
+                glRotated( m_dPosition[4], 0.0f, 1.0f, 0.0f );
+                glRotated( m_dPosition[5], 0.0f, 0.0f, 1.0f );
+
                 glCallList( m_nDisplayList );
+
+                glPopName();
+                glPopMatrix();
             }
         }
 
         // Getters and setters
         const struct aiScene *GetScene( void ) { return m_pScene; }
 
-    private:
+        virtual void select( unsigned int )
+        {
+            // WARNING: When an instance of GLMesh is selected, it appears that it remains selected forever
+            // One way to resolve this is to call 'UnSelect( m_iMeshID )' after doing anything pertaining to selection
+            // Hopefully we find a better, more permanent solution soon...
+        }
+
+    protected:
         const struct aiScene*   m_pScene;
         GLint m_nDisplayList;
+        unsigned int m_iMeshID;
+        bool m_bSelectionIDAllocated;
 };
 
 
