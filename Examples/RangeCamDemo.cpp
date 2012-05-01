@@ -17,6 +17,8 @@ float g_fSpeed = 0;
 
 float& fOrthoSize = CreateCVar( "cam.OthroSize", 20.0f, "Size of ortho cam" );
 bool&  bOrtho = CreateCVar( "cam.OthroOn", false, "Use orthographic projection" );
+bool&  g_bShowDepthData = CreateCVar( "cam.ShowDepthData", false, "Show camera depth data" );
+bool&  g_bShowFrustum = CreateCVar( "cam.ShowFrustum", true, "Show camera viewing frustum" );
 
 /////////////////////////////////////////////////////////////////////////////////////////
 /// example of how to handle fltk events in a sub-class
@@ -76,12 +78,17 @@ void ShowCameraAndTextures( GLWindow*, void* )
     else{
         cam.UnSetOrtho();
     }
-    cam.DepthTo3D( PointCloud.RangeDataRef() ); 
-    PointCloud.SetPose( cam.GetPoseRef() );
-    PointCloud.draw();
 
-    // show the camera
-    cam.DrawCamera();
+    if( g_bShowDepthData ){
+        cam.DepthTo3D( PointCloud.RangeDataRef() ); 
+        PointCloud.SetPose( cam.GetPoseRef() );
+        PointCloud.draw();
+    }
+
+    if( g_bShowFrustum ){
+        // show the camera
+        cam.DrawCamera();
+    }
 
     /// show textures
     if( cam.HasRGB() ){
