@@ -144,8 +144,10 @@ class GLSimCam
                 "    float B = gl_ProjectionMatrix[3].z;\n"
                 "    float zNear = - B / (1.0 - A);\n"
                 "    float zFar  =   B / (1.0 + A);\n"
-                "    float depthN = (depth - zNear)/(zFar - zNear);  // scale to a value in [0, 1]\n"
-                "    gl_FragColor[0] = depthN;\n"
+//                "    float depthN = (depth - zNear)/(zFar - zNear);  // scale to a value in [0, 1]\n"
+//                "    gl_FragColor[0] = depthN;\n"
+                "    gl_FragColor = vec4( vec3(depth), 1.0 );\n"
+                "    gl_FragColor[0] = depth;\n"
                 "}\n";
 	    InitShaders( sDepthVertShader, sDepthFragShader, m_nDepthShaderProgram );
 
@@ -177,9 +179,7 @@ class GLSimCam
             }
             if( nModes & eSimCamDepth ){
                 m_pDepthMode = new SimCamMode( *this, eSimCamDepth );
-		                m_pDepthMode->Init( true, m_nDepthShaderProgram, GL_LUMINANCE, GL_FLOAT );
-                //m_pDepthMode->Init( true, m_nDepthShaderProgram, GL_RGB, GL_UNSIGNED_BYTE );
-
+                m_pDepthMode->Init( true, m_nDepthShaderProgram, GL_LUMINANCE, GL_FLOAT );
             }
             if( nModes & eSimCamNormals ){
                 m_pNormalsMode = new SimCamMode( *this, eSimCamNormals );
@@ -649,21 +649,29 @@ class GLSimCam
             float cx = K(0,2);
             float fy = K(1,1); // focal length in pixels
             float cy = K(1,2);
-            //int n = 0;
             for( int jj = m_nSensorHeight-1; jj >=0  ; jj-- ){
                 for( unsigned int ii = 0; ii <  m_nSensorWidth; ii++ ){
                     // NB to convet to xyz use fact that x/z = u/f
                     float x, y, z, u, v;
                     u  = ii-cx;
                     v  = (m_nSensorWidth-jj-1)-cy;
-		    // Should work with the buffer already in the mode.
-		    GLfloat* buff = (GLfloat*)m_pDepthMode->m_pBuffer;
+                    // Should work with the buffer already in the mode.
+                    GLfloat* buff = (GLfloat*)m_pDepthMode->m_pBuffer;
                     z  = buff[m_nSensorWidth*jj + ii];
-		    // z is normalized... undo
-		    //float depthN = (depth - zNear)/(zFar - zNear); <-- from shader
-		    // depthN * (zFar - zNear) = depth - zNear
-		    // depth = (depthN * (zFar - zNear)) + zNear
-		    z = (z * (m_fFar - m_fNear)) + m_fNear;
+
+                    /*
+
+                    GTS: disabled for now (also some code in the depth fragment shader above).
+                         We can fix this when we figure out out to get ATI to give unnormalized
+                         depth texture values...
+
+                    // z is normalized... undo
+                    //float depthN = (depth - zNear)/(zFar - zNear); <-- from shader
+                    // depthN * (zFar - zNear) = depth - zNear
+                    // depth = (depthN * (zFar - zNear)) + zNear
+                    z = (z * (m_fFar - m_fNear)) + m_fNear;
+
+                    */
 
                     if( m_bOrthoCam ){
                         x  = dx*u;
