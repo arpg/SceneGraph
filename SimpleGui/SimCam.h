@@ -144,7 +144,7 @@ class GLSimCam
                 "    float B = gl_ProjectionMatrix[3].z;\n"
                 "    float zNear = - B / (1.0 - A);\n"
                 "    float zFar  =   B / (1.0 + A);\n"
-	        "    float depthN = (depth - zNear)/(zFar - zNear);  // scale to a value in [0, 1]\n"
+                "    float depthN = (depth - zNear)/(zFar - zNear);  // scale to a value in [0, 1]\n"
                 "    gl_FragColor[0] = depthN;\n"
                 "}\n";
 	    InitShaders( sDepthVertShader, sDepthFragShader, m_nDepthShaderProgram );
@@ -440,6 +440,8 @@ class GLSimCam
             Eigen::Vector4d rtf = T*M*Vec4(  1, 1, 1, 1 );  rtf/=rtf[3];
 
             /// Draw texture
+            //glDisable( GL_BLEND );
+            glColor4f( 1,1,1,1 );
             glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL );
             glEnable( GL_TEXTURE_RECTANGLE_ARB );
             // TODO: replace with first mode?

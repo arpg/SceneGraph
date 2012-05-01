@@ -57,21 +57,9 @@ class GLPointCloud : public GLObject
         }
 
         // return ref to our range data
-        std::deque<float>& RangeDataRef()
+        std::vector<float>& RangeDataRef()
         {
             return m_vRangeData;
-        }
-
-        void PushPoint( float X, float Y, float Z ) {
-            m_vRangeData.push_back(X);
-            m_vRangeData.push_back(Y);
-            m_vRangeData.push_back(Z);
-        }
-
-        void PopPoint() {
-            m_vRangeData.pop_front();
-            m_vRangeData.pop_front();
-            m_vRangeData.pop_front();
         }
 
         void Clear() {
@@ -80,7 +68,7 @@ class GLPointCloud : public GLObject
 
     private:
         GLint                  m_nDisplayList;
-        std::deque<float>      m_vRangeData;
+        std::vector<float>     m_vRangeData;
         unsigned int           m_nOldRangeDataSize;
         Eigen::Matrix4d        m_dPose;
 };
