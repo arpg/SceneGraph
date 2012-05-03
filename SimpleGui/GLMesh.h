@@ -24,6 +24,7 @@ class GLMesh : public GLObject
 
             m_iMeshID = -1;
             m_bSelectionIDAllocated = false;
+            m_flScale = 1.0f;
         }
 
         ////////////////////////////////////////////////////////////////////////////
@@ -279,32 +280,78 @@ class GLMesh : public GLObject
         }
 
         ////////////////////////////////////////////////////////////////////////////
-        void  draw()
+        virtual void  draw()
         {
             if( m_pScene ){
                 glEnable( GL_DEPTH_TEST );
                 if( m_nDisplayList == -1 ){
                     m_nDisplayList = glGenLists(1);
                     glNewList( m_nDisplayList, GL_COMPILE );
+                    glScalef( m_flScale, m_flScale, m_flScale );
                     recursive_render( m_pScene, m_pScene->mRootNode );
+                    glScalef( 1.0f, 1.0f, 1.0f );
                     glEndList();
                 }
 
                 AllocateSelectionID();
 
                 glPushMatrix();
-                glPushName( m_iMeshID );
 
                 glTranslated( m_dPosition[0], m_dPosition[1], m_dPosition[2] );
+
+                // TODO: Rotations over the world axis instead of local axis
+                // Doing these rotations one after another results in incremental rotations whose results are dependent on each other
+                // I spent several days trying various different methods to come up with a solution, but eventually I just gave up
+                // I am hoping to tackle this again sometime, but I need a break from it for now...
                 glRotated( m_dPosition[3], 1.0f, 0.0f, 0.0f );
                 glRotated( m_dPosition[4], 0.0f, 1.0f, 0.0f );
                 glRotated( m_dPosition[5], 0.0f, 0.0f, 1.0f );
 
+                glPushName( m_iMeshID );
                 glCallList( m_nDisplayList );
-
                 glPopName();
+
                 glPopMatrix();
             }
+        }
+
+        virtual void ComputeDimensions()
+        {
+            Eigen::Vector3d min, max;
+            aiMesh *pAIMesh;
+            aiVector3D *pAIVector;
+
+            for ( int x = 0; x < this->GetScene()->mNumMeshes; x++ )
+            {
+                pAIMesh = this->GetScene()->mMeshes[x];
+                if ( pAIMesh == NULL )
+                    continue;
+
+                for ( int y = 0; y < pAIMesh->mNumVertices; y++ )
+                {
+                    pAIVector = &pAIMesh->mVertices[y];
+                    if ( pAIVector == NULL )
+                        continue;
+
+                    if ( ((pAIVector->x * this->GetScale()) < min[0]) && ((pAIVector->y * this->GetScale()) < min[1]) && ((pAIVector->z * this->GetScale()) < min[2]) )
+                    {
+                        min[0] = pAIVector->x * this->GetScale();
+                        min[1] = pAIVector->y * this->GetScale();
+                        min[2] = pAIVector->z * this->GetScale();
+                    }
+
+                    if ( ((pAIVector->x * this->GetScale()) > max[0]) && ((pAIVector->y * this->GetScale()) > max[1]) && ((pAIVector->z * this->GetScale()) > max[2]) )
+                    {
+                        max[0] = pAIVector->x * this->GetScale();
+                        max[1] = pAIVector->y * this->GetScale();
+                        max[2] = pAIVector->z * this->GetScale();
+                    }
+                }
+            }
+
+            m_Dimensions[0] = max[0] - min[0];
+            m_Dimensions[1] = max[1] - min[1];
+            m_Dimensions[2] = max[2] - min[2];
         }
 
         // Getters and setters
@@ -315,13 +362,22 @@ class GLMesh : public GLObject
             // WARNING: When an instance of GLMesh is selected, it appears that it remains selected forever
             // One way to resolve this is to call 'UnSelect( m_iMeshID )' after doing anything pertaining to selection
             // Hopefully we find a better, more permanent solution soon...
+
+            // UPDATE: Don't know if what's above is still a valid statement...
         }
+
+        Eigen::Vector3d GetDimensions() { return m_Dimensions; }
+
+        float GetScale() { return m_flScale; }
+        void SetScale( float flScale ) { m_flScale = flScale; }
 
     protected:
         const struct aiScene*   m_pScene;
         GLint m_nDisplayList;
         unsigned int m_iMeshID;
         bool m_bSelectionIDAllocated;
+        Eigen::Vector3d m_Dimensions;
+        float m_flScale;
 };
 
 

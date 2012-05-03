@@ -11,6 +11,7 @@ GLObject::GLObject()
     m_bIs2dLayer = false; //< such as an image 
     m_bPerceptable = true; //< can be measured (e.g., not a virtual thing)
     m_sObjectName = "unnamed-object";
+    m_dPosition << 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f;
 }
 
 /////////////////////////////////////////////////////////////////////////////////

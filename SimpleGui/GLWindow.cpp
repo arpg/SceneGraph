@@ -36,6 +36,7 @@ GLWindow::GLWindow(int x,int y,int w,int h,const char *l ) : Fl_Gl_Window(x,y,w,
     if( GLEW_OK != err ){
         fprintf(stderr, "Error: %s\n", glewGetErrorString(err) );
     }
+    m_nSelectionId = 1; // start selection IDs at 1 and not 0 to differentiate between true and false selections
 }
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -304,6 +305,7 @@ void GLWindow::_DoPicking()
     glMultMatrixd( projection );
     glMatrixMode(GL_MODELVIEW );
     glInitNames();
+    //glPushName( 0 );
 
     //DrawSceneGraph();
     m_SceneGraph.draw();
@@ -321,24 +323,41 @@ void GLWindow::_DoPicking()
 void GLWindow::_ProcessHits( unsigned int hits, GLuint buffer[] )
 {
     unsigned int ii, jj;
-    GLuint names, *ptr;
+    GLuint names, *ptr, minZ, mostminZ, nearestId, *ptrNames;
+    nearestId = 0;
     ptr = (GLuint *) buffer;
+    mostminZ = 0xffffffff;
     for( ii = 0; ii < hits; ii++ ) { //  for each hit
         names = *ptr;
         ptr++;
         //float depth1 = (float) *ptr/0x7fffffff;
+        minZ = *ptr;
+        ptrNames = ptr + 2;
+        if ( (names > 0) && (minZ < mostminZ) )
+        {
+            mostminZ = minZ;
+            nearestId = ptrNames[0];
+        }
+
         ptr++;
         //float depth2 = (float) *ptr/0x7fffffff;
         ptr++;
         for( jj = 0; jj < names; jj++ ) {     //  for each name
-            int nId = *ptr;
-            SetSelected( nId );
+            //int nId = *ptr;
+            //SetSelected( nId );
+            //printf("%i\n", nearestId);
 
             //GLObject* pObj = SelectedObject();
             //printf("set %s as selected\n", pObj->ObjectName() );
             //UnSelect(nId); //a desperate fix
             ptr++;
         }
+    }
+
+    if ( nearestId > 0 )
+    {
+        SetSelected( nearestId );
+        //printf("%i\n", nearestId);
     }
 }
 
