@@ -34,6 +34,10 @@ class GLObject
         virtual void drag() {}
 
 		virtual void release() {}
+    
+        // Get top,left,bottom,right coordinates of the object
+        // in the window (if it's a 2d object)
+        virtual void GetBoundingBox(int&, int&, int&, int&) {}
 
         GLWindow* Window();
 

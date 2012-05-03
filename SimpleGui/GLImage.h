@@ -40,12 +40,28 @@ class GLImage : public GLObject
 		// Set border size.
 		void SetBorder( unsigned int nSize );
 
+        // Return image location within window
+        void GetBoundingBox(int &nTop, int& nLeft, int& nBottom, int& nRight);
+    
 		// Return X displacement within window
 		int GetX();
 
 		// Return Y displacement within window
 		int GetY();
+    
+        // Return Image Width within window
+        int GetWidth();
+    
+        // Return Image Width within window
+        int GetHeight();
+    
+        // Return Image Width
+        int GetImageWidth();
 
+        // Return Image Height
+        int GetImageHeight();
+    
+    
         unsigned int MemSize ();
 
         void SetImage( unsigned char* pImageData, int w, int h, int nFormat, int nType );
@@ -191,6 +207,13 @@ inline void GLImage::SetBorder( unsigned int nSize )
 	m_nBorder = nSize;
 }
 
+inline void GLImage::GetBoundingBox(int &nTop, int& nLeft, int& nBottom, int& nRight)
+{
+    nTop = m_fPercentTop * WindowHeight();
+    nLeft = m_fPercentLeft * WindowWidth();
+    nBottom = m_fPercentBottom * WindowHeight();
+    nRight = m_fPercentRight * WindowWidth(); 
+}
 
 inline int GLImage::GetX() 
 {
@@ -202,6 +225,27 @@ inline int GLImage::GetY()
 {
 	return m_fPercentTop*WindowHeight();
 }
+
+inline int GLImage::GetWidth()
+{
+    return (m_fPercentRight - m_fPercentLeft) * WindowWidth();
+}
+
+inline int GLImage::GetHeight()
+{
+    return (m_fPercentBottom - m_fPercentTop) * WindowHeight();
+}
+
+inline int GLImage::GetImageWidth()
+{
+    return m_nImageWidth;
+}
+
+inline int GLImage::GetImageHeight()
+{
+    return m_nImageHeight;
+}
+
 
 inline unsigned int GLImage::MemSize ()
 {

@@ -20,13 +20,16 @@ class GLGrid : public GLObject
         {
 
             int i;
-#define NLINES 50
-#define LDELTA 5
+
+            #define NLINES 50
+            #define LDELTA 2
 
             glPushMatrix();
+
+            glEnable( GL_BLEND );
             glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
             //    glBlendFunc( GL_SRC_ALPHA_SATURATE,  GL_ONE );
-            glEnable( GL_BLEND );
+
 //            glColor4f( 1,1,1,0.1 );
 
             glDisable( GL_LIGHTING );
@@ -37,11 +40,11 @@ class GLGrid : public GLObject
             glBegin(GL_LINES);
 
             for(i = -NLINES; i < NLINES; i++){
-                glColor4ub(132, 132, 132, 195);
+                glColor4ub(132, 132, 132, 50);
                 glVertex3f( LDELTA*NLINES, i*LDELTA, 0.0);
                 glVertex3f(-LDELTA*NLINES, i*LDELTA, 0.0);
 
-                glColor4ub(132, 132, 132, 195);
+                glColor4ub(132, 132, 132, 50);
                 glVertex3f(i*LDELTA,  LDELTA*NLINES, 0.0);
                 glVertex3f(i*LDELTA, -LDELTA*NLINES, 0.0);
             }
