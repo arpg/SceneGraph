@@ -179,7 +179,7 @@ class GLSimCam
             }
             if( nModes & eSimCamDepth ){
                 m_pDepthMode = new SimCamMode( *this, eSimCamDepth );
-                m_pDepthMode->Init( true, m_nDepthShaderProgram, GL_LUMINANCE, GL_FLOAT );
+                m_pDepthMode->Init( true, m_nDepthShaderProgram, GL_RED, GL_FLOAT );
             }
             if( nModes & eSimCamNormals ){
                 m_pNormalsMode = new SimCamMode( *this, eSimCamNormals );

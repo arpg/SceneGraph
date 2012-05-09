@@ -105,6 +105,9 @@ unsigned int NumChannels( unsigned int nFormat )
 {
     switch( nFormat ){
         case GL_LUMINANCE: 
+        case GL_RED:
+        case GL_BLUE:
+        case GL_GREEN:
             return 1;
         case GL_RGB:
             return 3;
