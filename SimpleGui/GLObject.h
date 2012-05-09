@@ -102,6 +102,8 @@ class GLObject
 
         Eigen::Vector6d GetPose();
 
+        Eigen::Vector6d& GetPoseRef();
+
         void SetPose(Eigen::Vector6d v);
 
         void SetPose(double x, double y, double z, double p, double q, double r);

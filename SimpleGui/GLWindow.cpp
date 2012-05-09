@@ -315,7 +315,9 @@ void GLWindow::_DoPicking()
     glMatrixMode( GL_MODELVIEW );
     glFlush();
     GLint nHits = glRenderMode( GL_RENDER );
-    _ProcessHits( nHits, vSelectBuf );
+    if( nHits > 0 ){
+        _ProcessHits( nHits, vSelectBuf );
+    }
 
 }
 

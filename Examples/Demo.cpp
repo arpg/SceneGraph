@@ -23,6 +23,9 @@ std::map<std::string, GLuint> textureIdMap;
 #define aisgl_min(x,y) (x<y?x:y)
 #define aisgl_max(x,y) (y>x?y:x)
 
+#include <CVarHelpers.h>
+using namespace Eigen;
+
 void get_bounding_box_for_node (const struct aiNode* nd, struct aiVector3D* min, 
 														 struct aiVector3D* max)	
 {
@@ -218,6 +221,7 @@ int main( int argc, char** argv )
     grid.SetPerceptable( false );
     GLMesh mesh;
     mesh.Init( pScene );
+    CVarUtils::AttachCVar( "ObjectPose", &mesh.GetPoseRef(), "" );
 
     // register objects
     pWin->AddChildToRoot( &mesh );
