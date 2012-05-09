@@ -1,4 +1,4 @@
-project( test )
+project( SimpleGuiProject )
 cmake_minimum_required(VERSION 2.8)
 
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra")

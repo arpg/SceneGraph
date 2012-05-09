@@ -140,14 +140,13 @@ class GLSimCam
                 "varying float depth;\n"
                 "void main(void)\n"
                 "{\n"
-                "    float A = gl_ProjectionMatrix[2].z;\n"
-                "    float B = gl_ProjectionMatrix[3].z;\n"
-                "    float zNear = - B / (1.0 - A);\n"
-                "    float zFar  =   B / (1.0 + A);\n"
+//                "    float A = gl_ProjectionMatrix[2].z;\n"
+//                "    float B = gl_ProjectionMatrix[3].z;\n"
+//                "    float zNear = - B / (1.0 - A);\n"
+//                "    float zFar  =   B / (1.0 + A);\n"
 //                "    float depthN = (depth - zNear)/(zFar - zNear);  // scale to a value in [0, 1]\n"
 //                "    gl_FragColor[0] = depthN;\n"
-                "    gl_FragColor = vec4( vec3(depth), 1.0 );\n"
-                "    gl_FragColor[0] = depth;\n"
+                    "    gl_FragColor = vec4( vec3(depth), 1.0 );\n"
                 "}\n";
 	    InitShaders( sDepthVertShader, sDepthFragShader, m_nDepthShaderProgram );
 
@@ -651,7 +650,7 @@ class GLSimCam
             float cy = K(1,2);
             for( int jj = m_nSensorHeight-1; jj >=0  ; jj-- ){
                 for( unsigned int ii = 0; ii <  m_nSensorWidth; ii++ ){
-                    // NB to convet to xyz use fact that x/z = u/f
+                    // NB to convert to xyz use fact that x/z = u/f
                     float x, y, z, u, v;
                     u  = ii-cx;
                     v  = (m_nSensorWidth-jj-1)-cy;
