@@ -265,6 +265,17 @@ class GLSimCam
             return false;
         }
 
+       /////////////////////////////////////////////////////////////////////////////////////////
+        bool CaptureDepth( void* DataPtr )
+        {
+            if( m_pDepthMode ){
+                memcpy( DataPtr, m_pDepthMode->Capture(),
+                        ImageWidth()*ImageHeight()*sizeof(float));
+                return true;
+            }
+            return false;
+        }
+
         /////////////////////////////////////////////////////////////////////////////////////////
         bool CaptureNormals( std::vector<unsigned char>& vPixelData )
         {
