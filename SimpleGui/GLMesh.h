@@ -8,10 +8,8 @@
 #include <assimp/aiPostProcess.h>
 #include <assimp/aiScene.h>
 
-#define ILUT_USE_OPENGL
 #include <IL/il.h>
-#include <IL/ilut.h>
-
+#include <IL/ilu.h>
 #include <map>
 
 class GLMesh : public GLObject
@@ -54,6 +52,14 @@ class GLMesh : public GLObject
         ////////////////////////////////////////////////////////////////////////////
         void LoadMeshTextures()
         {
+            // Ensure DevIL library is initialised
+            static bool firsttime = true;
+            if(firsttime) {
+                ilInit();
+                iluInit();
+                firsttime = false;
+            }
+
             // Find textures referenced by mesh
             for (unsigned int m=0; m < m_pScene->mNumMaterials; ++m) {
                 const unsigned int numDiffuseTex = m_pScene->mMaterials[m]->GetTextureCount(aiTextureType_DIFFUSE);
@@ -64,37 +70,114 @@ class GLMesh : public GLObject
                     if( texFound == AI_SUCCESS ) {
                         if( path.length > 0 && path.data[0] == '*' ) {
                             // Texture embedded in file
-                            std::cerr << "Trying to load embedded texture, but this is not yet supported." << std::endl;
+                            std::stringstream ss( std::string(path.data+1) );
+                            int sId = -1;
+                            ss >> sId;
+                            if( 0 <= sId && sId < (int)m_pScene->mNumTextures ) {
+                                aiTexture* aiTex = m_pScene->mTextures[sId];
+                                m_mapPathToGLTex[path.data] = LoadGLTextureFromArray((unsigned char*)aiTex->pcData, aiTex->mWidth);
+                            }else{
+                                std::cerr << "Unable to Load embedded texture, bad path: " << path.data << std::endl;
+                            }
                         }else{
                             // Texture in file resource
-                            m_mapPathToGLTex[path.data] = LoadGLTexture(path.data);
+                            m_mapPathToGLTex[path.data] = LoadGLTextureFromFile(path.data);
                         }
                     }
                 }
             }
         }
 
-        ////////////////////////////////////////////////////////////////////////////
-        GLuint LoadGLTexture( char* filename )
+        GLuint LoadGLTextureFromDevIL(ILuint ilTexId)
         {
-            char filenamecpy[255];
-            strcpy(filenamecpy, filename);
-            filenamecpy[0] = '.';
+            ilBindImage(ilTexId);
 
-            static bool firsttime = true;
-            if(firsttime) {
-                ilInit();
-                ilutInit();
-                ilutRenderer(ILUT_OPENGL);
-                firsttime = false;
+            ILinfo ilImageInfo;
+            iluGetImageInfo(&ilImageInfo);
+
+            if (ilImageInfo.Origin == IL_ORIGIN_UPPER_LEFT) {
+                iluFlipImage();
             }
-            GLuint gltexid = ilutGLLoadImage(filenamecpy);
 
-            // Unbind textures
+            if ( !ilConvertImage(IL_RGB, IL_UNSIGNED_BYTE) ) {
+                ILenum ilError = ilGetError();
+                std::cerr << "Unable to decode image, DevIL: " << ilError << " - " << iluErrorString(ilError) << std::endl;
+                return 0;
+            }
+
+            GLuint glTexId = 0;
+            glGenTextures(1, &glTexId);
+            glBindTexture(GL_TEXTURE_2D, glTexId);
+
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+            glTexImage2D(GL_TEXTURE_2D, 0, ilGetInteger(IL_IMAGE_BPP), ilGetInteger(IL_IMAGE_WIDTH), ilGetInteger(IL_IMAGE_HEIGHT),
+                         0, ilGetInteger(IL_IMAGE_FORMAT), GL_UNSIGNED_BYTE, ilGetData() );
+
             glBindTexture(GL_TEXTURE_2D, 0);
-
-            return gltexid;
+            return glTexId;
         }
+
+        GLuint LoadGLTextureFromFile(const char* path)
+        {
+            char theFileName[255];
+            strcpy(theFileName, path);
+            theFileName[0] = '.';
+
+            ILuint ilTexId;
+            ilGenImages(1, &ilTexId);
+            ilBindImage(ilTexId);
+
+            GLuint glTexId = 0;
+            if( ilLoadImage(theFileName) ) {
+                glTexId = LoadGLTextureFromDevIL(ilTexId);
+            }
+
+            ilDeleteImages(1, &ilTexId);
+
+            return glTexId;
+        }
+
+        GLuint LoadGLTextureFromArray(const unsigned char* data, size_t bytes)
+        {
+            ILuint ilTexId;
+            ilGenImages(1, &ilTexId);
+            ilBindImage(ilTexId);
+
+            GLuint glTexId = 0;
+            if( ilLoadL(IL_PNG, data, bytes) ) {
+                glTexId = LoadGLTextureFromDevIL(ilTexId);
+            }
+
+            ilDeleteImages(1, &ilTexId);
+
+            return glTexId;
+        }
+
+        ////////////////////////////////////////////////////////////////////////////
+//        GLuint LoadGLTexture( char* filename )
+//        {
+//            char filenamecpy[255];
+//            strcpy(filenamecpy, filename);
+//            filenamecpy[0] = '.';
+
+//            static bool firsttime = true;
+//            if(firsttime) {
+//                ilInit();
+//                ilutInit();
+//                ilutRenderer(ILUT_OPENGL);
+//                firsttime = false;
+//            }
+//            GLuint gltexid = ilutGLLoadImage(filenamecpy);
+
+//            // Unbind textures
+//            glBindTexture(GL_TEXTURE_2D, 0);
+
+//            return gltexid;
+//        }
 
         ////////////////////////////////////////////////////////////////////////////
         void AllocateSelectionID()
