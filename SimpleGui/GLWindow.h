@@ -22,7 +22,7 @@
 #include <SimpleGui/GLSceneGraph.h>
 #include <SimpleGui/GLSphereGrid.h>
 
-const double g_dFPS = 1.0/50.0;
+const double g_dFPS = 1.0/30.0;
 
 /////////////////////////////////////////////////////////////////////////////////
 enum eGuiMode { eConsole, eFPSNav, eSelect };
