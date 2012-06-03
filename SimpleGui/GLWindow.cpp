@@ -102,14 +102,13 @@ void GLWindow::Init()
     glHint( GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST );
     glHint( GL_LINE_SMOOTH_HINT, GL_NICEST );
     glHint( GL_POLYGON_SMOOTH_HINT, GL_NICEST );
-    glEnable( GL_TEXTURE_RECTANGLE_ARB );
 
     glClearStencil (0 );           // clear stencil buffer
     glClearDepth( 1.0f );          // 0 is near, 1 is far
     glDepthFunc( GL_LEQUAL );
     glEnable( GL_DEPTH_TEST );
 
-    AddChildToRoot(&m_SphereGrid);
+//    AddChildToRoot(&m_SphereGrid);
 }
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -278,8 +277,10 @@ void GLWindow::draw()
 
     _UpdatePosUnderCursor();
 
-    // now draw with picking
-    _DoPicking();
+    // Picking every cycle is really slow.
+    // Only Pick on mouse events (SimpleDefaultEventHandler)
+//    // now draw with picking
+//    _DoPicking();
 
     CheckForGLErrors();
 }
@@ -542,6 +543,10 @@ void GLWindow::LookAt(
 ////////////////////////////////////////////////////////////////////////////
 int GLWindow::SimpleDefaultEventHandler( int e )
 {
+    if(e==FL_PUSH) {
+        _DoPicking();
+    }
+
     GLObject* pSelect = SelectedObject();
     if( pSelect && e == FL_PUSH ){
   //              printf("%s selected\n", pSelect->ObjectName() );

@@ -37,11 +37,6 @@ void GLSceneGraph::draw()
         _RecursiveDraw( pObj  );
     }
 
-
-    // try to draw all children
-    for( size_t ii = 0; ii < m_vpChildren.size(); ii++ ){
-        _RecursiveDraw( m_vpChildren[ii] );
-    }
 }
 
 /////////////////////////////////////////////////////////////////////////////////

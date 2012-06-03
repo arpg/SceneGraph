@@ -8,6 +8,12 @@
 #include <assimp/aiPostProcess.h>
 #include <assimp/aiScene.h>
 
+#define ILUT_USE_OPENGL
+#include <IL/il.h>
+#include <IL/ilut.h>
+
+#include <map>
+
 class GLMesh : public GLObject
 {
 
@@ -30,6 +36,8 @@ class GLMesh : public GLObject
             m_pScene = aiImportFile( sMeshFile.c_str(), aiProcess_Triangulate | aiProcess_GenSmoothNormals );
             if( m_pScene == NULL ){
                 printf("ERROR: loading mesh '%s'\n", sMeshFile.c_str() );
+            }else{
+                LoadMeshTextures();
             }
         }
 
@@ -37,8 +45,58 @@ class GLMesh : public GLObject
         void Init( const struct aiScene* pScene )
         {
             m_pScene = pScene;
+
+            if(m_pScene != NULL ) {
+                LoadMeshTextures();
+            }
         }
 
+        ////////////////////////////////////////////////////////////////////////////
+        void LoadMeshTextures()
+        {
+            // Find textures referenced by mesh
+            for (unsigned int m=0; m < m_pScene->mNumMaterials; ++m) {
+                const unsigned int numDiffuseTex = m_pScene->mMaterials[m]->GetTextureCount(aiTextureType_DIFFUSE);
+
+                for(unsigned int dt=0; dt < numDiffuseTex; ++dt ) {
+                    aiString path;
+                    aiReturn texFound = m_pScene->mMaterials[m]->GetTexture(aiTextureType_DIFFUSE, dt, &path);
+                    if( texFound == AI_SUCCESS ) {
+                        if( path.length > 0 && path.data[0] == '*' ) {
+                            // Texture embedded in file
+                            std::cerr << "Trying to load embedded texture, but this is not yet supported." << std::endl;
+                        }else{
+                            // Texture in file resource
+                            m_mapPathToGLTex[path.data] = LoadGLTexture(path.data);
+                        }
+                    }
+                }
+            }
+        }
+
+        ////////////////////////////////////////////////////////////////////////////
+        GLuint LoadGLTexture( char* filename )
+        {
+            char filenamecpy[255];
+            strcpy(filenamecpy, filename);
+            filenamecpy[0] = '.';
+
+            static bool firsttime = true;
+            if(firsttime) {
+                ilInit();
+                ilutInit();
+                ilutRenderer(ILUT_OPENGL);
+                firsttime = false;
+            }
+            GLuint gltexid = ilutGLLoadImage(filenamecpy);
+
+            // Unbind textures
+            glBindTexture(GL_TEXTURE_2D, 0);
+
+            return gltexid;
+        }
+
+        ////////////////////////////////////////////////////////////////////////////
         void AllocateSelectionID()
         {
             if ( m_bSelectionIDAllocated )
@@ -177,6 +235,9 @@ class GLMesh : public GLObject
                     float *c = (float*)&mesh->mColors[0][index];
                     glColor4f( c[0], c[1], c[2], fAlpha*c[3] );
                 }
+                if( mesh->mTextureCoords[0] != NULL ){
+                    glTexCoord3fv( &mesh->mTextureCoords[0][index].x );
+                }
                 if( mesh->mNormals != NULL ){
                     glNormal3fv( &mesh->mNormals[index].x );
                     //       printf( "Normal %f, %f, %f\n", mesh->mNormals[index].x,
@@ -216,6 +277,18 @@ class GLMesh : public GLObject
                 glEnable(GL_LIGHTING);
             }
 
+            const unsigned int numDiffuseTex = mtl->GetTextureCount(aiTextureType_DIFFUSE);
+            for(unsigned int dt=0; dt < numDiffuseTex; ++dt ) {
+                aiString path;
+                if( mtl->GetTexture(aiTextureType_DIFFUSE, dt, &path) == AI_SUCCESS ) {
+                    std::map<std::string,GLuint>::iterator ix = m_mapPathToGLTex.find(path.data);
+                    if( ix != m_mapPathToGLTex.end() ) {
+                        glEnable(GL_TEXTURE_2D);
+                        glBindTexture(GL_TEXTURE_2D, ix->second);
+                    }
+                }
+            }
+
             for( unsigned int t = 0; t < mesh->mNumFaces; ++t) {
                 const struct aiFace* face = &mesh->mFaces[t];
                 GLenum face_mode;
@@ -228,6 +301,11 @@ class GLMesh : public GLObject
                 }
                 RenderFace( face_mode, GL_FILL, m_fAlpha, face, mesh );
             }
+
+            if( numDiffuseTex > 0 ) {
+                glDisable(GL_TEXTURE_2D);
+            }
+
         }
 
         ////////////////////////////////////////////////////////////////////////////
@@ -388,6 +466,7 @@ class GLMesh : public GLObject
         bool                    m_bSelectionIDAllocated;
         Eigen::Vector3d         m_Dimensions;
         float                   m_flScale;
+        std::map<std::string,GLuint> m_mapPathToGLTex;
 };
 
 

@@ -215,7 +215,7 @@ class GLWindow : public Fl_Gl_Window, public boost::mutex
     std::vector<CallbackInfo>        m_vPostRenderCallbacks;
 
     // for debugging...
-    GLSphereGrid                     m_SphereGrid;
+//    GLSphereGrid                     m_SphereGrid;
     bool                             m_bFullscreen;
     int                              m_nOldWidth;
     int                              m_nOldHeight;
