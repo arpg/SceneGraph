@@ -50,6 +50,20 @@ class GLMesh : public GLObject
         }
 
         ////////////////////////////////////////////////////////////////////////////
+        GLenum GLWrapFromAiMapMode(aiTextureMapMode mode)
+        {
+            switch(mode) {
+                case aiTextureMapMode_Wrap:
+                    return GL_REPEAT;
+                case aiTextureMapMode_Clamp:
+                    return GL_CLAMP;
+                default:
+                    std::cerr << "Unsupported aiTextureMapMode used" << std::endl;
+                    return GL_CLAMP;
+            }
+        }
+
+        ////////////////////////////////////////////////////////////////////////////
         void LoadMeshTextures()
         {
             // Ensure DevIL library is initialised
@@ -60,34 +74,101 @@ class GLMesh : public GLObject
                 firsttime = false;
             }
 
-            // Find textures referenced by mesh
+            // For each material, find associated textures
             for (unsigned int m=0; m < m_pScene->mNumMaterials; ++m) {
-                const unsigned int numDiffuseTex = m_pScene->mMaterials[m]->GetTextureCount(aiTextureType_DIFFUSE);
+                LoadMaterialTextures(m_pScene->mMaterials[m]);
+            }
+        }
 
-                for(unsigned int dt=0; dt < numDiffuseTex; ++dt ) {
+        ////////////////////////////////////////////////////////////////////////////
+        void LoadMaterialTextures(aiMaterial* pMaterial)
+        {
+            // Try to load textures of any type
+            for(aiTextureType tt = aiTextureType_NONE; tt <= aiTextureType_UNKNOWN; tt = (aiTextureType)((int)tt +1) ) {
+                const unsigned int numTex = pMaterial->GetTextureCount(tt);
+
+                for(unsigned int dt=0; dt < numTex; ++dt ) {
                     aiString path;
-                    aiReturn texFound = m_pScene->mMaterials[m]->GetTexture(aiTextureType_DIFFUSE, dt, &path);
+
+                    aiTextureMapping* mapping = 0;
+                    unsigned int* uvindex = 0;
+                    float* blend = 0;
+                    aiTextureOp* op = 0;
+                    aiTextureMapMode* mapmode = 0;
+
+                    aiReturn texFound = pMaterial->GetTexture(tt, dt, &path, mapping, uvindex, blend, op, mapmode);
+
+                    // Attempt to load reference to texture data as OpenGL
+                    // texture, with appropriate properties set.
                     if( texFound == AI_SUCCESS ) {
-                        if( path.length > 0 && path.data[0] == '*' ) {
-                            // Texture embedded in file
-                            std::stringstream ss( std::string(path.data+1) );
-                            int sId = -1;
-                            ss >> sId;
-                            if( 0 <= sId && sId < (int)m_pScene->mNumTextures ) {
-                                aiTexture* aiTex = m_pScene->mTextures[sId];
-                                m_mapPathToGLTex[path.data] = LoadGLTextureFromArray((unsigned char*)aiTex->pcData, aiTex->mWidth);
-                            }else{
-                                std::cerr << "Unable to Load embedded texture, bad path: " << path.data << std::endl;
+                        GLuint glTex = LoadGLTextureResource(path);
+
+                        if(glTex > 0 ) {
+                            m_mapPathToGLTex[path.data] = glTex;
+                            glBindTexture(GL_TEXTURE_2D, glTex);
+
+                            // Use bilinear interpolation for textures
+                            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+                            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+                            if(mapping != 0) {
+                                std::cerr << "Ignoring mapping" << std::endl;
                             }
-                        }else{
-                            // Texture in file resource
-                            m_mapPathToGLTex[path.data] = LoadGLTextureFromFile(path.data);
+                            if(uvindex != 0) {
+                                std::cerr << "Ignoring uvindex" << std::endl;
+                            }
+                            if(blend != 0) {
+                                std::cerr << "Ignoring blend" << std::endl;
+                            }
+                            if(op != 0) {
+                                std::cerr << "Ignoring aiTextureOp" << std::endl;
+                            }
+                            if(mapmode != 0) {
+                                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GLWrapFromAiMapMode(mapmode[0]) );
+                                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GLWrapFromAiMapMode(mapmode[1]) );
+                            }
+
+                            glBindTexture(GL_TEXTURE_2D, 0);
                         }
                     }
                 }
             }
         }
 
+        ////////////////////////////////////////////////////////////////////////////
+        GLuint LoadGLTextureResource(aiString& path)
+        {
+            GLuint glTex = 0;
+            if( path.length > 0 && path.data[0] == '*' ) {
+                // Texture embedded in file
+                std::stringstream ss( std::string(path.data+1) );
+                int sId = -1;
+                ss >> sId;
+                if( 0 <= sId && sId < (int)m_pScene->mNumTextures ) {
+                    aiTexture* aiTex = m_pScene->mTextures[sId];
+                    if( aiTex->mHeight == 0 ) {
+                        std::ofstream of("test.dat");
+                        of.write((char*)aiTex->pcData, aiTex->mWidth);
+                        of.close();
+                        glTex = LoadGLTextureFromArray((unsigned char*)aiTex->pcData, aiTex->mWidth, aiTex->achFormatHint );
+                    }else{
+                        // WARNING: Untested code condition!
+                        glGenTextures(1, &glTex);
+                        glBindTexture(GL_TEXTURE_2D, glTex);
+                        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, aiTex->mWidth, aiTex->mHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, aiTex->pcData );
+                    }
+                }else{
+                    std::cerr << "Unable to Load embedded texture, bad path: " << path.data << std::endl;
+                }
+            }else{
+                // Texture in file resource
+                glTex = LoadGLTextureFromFile(path.data, path.length);
+            }
+
+            return glTex;
+        }
+
+        ////////////////////////////////////////////////////////////////////////////
         GLuint LoadGLTextureFromDevIL(ILuint ilTexId)
         {
             ilBindImage(ilTexId);
@@ -108,48 +189,28 @@ class GLMesh : public GLObject
             GLuint glTexId = 0;
             glGenTextures(1, &glTexId);
             glBindTexture(GL_TEXTURE_2D, glTexId);
-
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
             glTexImage2D(GL_TEXTURE_2D, 0, ilGetInteger(IL_IMAGE_BPP), ilGetInteger(IL_IMAGE_WIDTH), ilGetInteger(IL_IMAGE_HEIGHT),
                          0, ilGetInteger(IL_IMAGE_FORMAT), GL_UNSIGNED_BYTE, ilGetData() );
-
-            glBindTexture(GL_TEXTURE_2D, 0);
             return glTexId;
         }
 
-        GLuint LoadGLTextureFromFile(const char* path)
+        ////////////////////////////////////////////////////////////////////////////
+        GLuint LoadGLTextureFromFile(const char* path, size_t length)
         {
-            char theFileName[255];
-            strcpy(theFileName, path);
-            theFileName[0] = '.';
-
-            ILuint ilTexId;
-            ilGenImages(1, &ilTexId);
-            ilBindImage(ilTexId);
-
-            GLuint glTexId = 0;
-            if( ilLoadImage(theFileName) ) {
-                glTexId = LoadGLTextureFromDevIL(ilTexId);
+            std::string filename(path);
+            if(length >= 2 && filename[0] == '/' && filename[0] == '/' ) {
+                filename[0] = '.';
             }
 
-            ilDeleteImages(1, &ilTexId);
-
-            return glTexId;
-        }
-
-        GLuint LoadGLTextureFromArray(const unsigned char* data, size_t bytes)
-        {
             ILuint ilTexId;
             ilGenImages(1, &ilTexId);
             ilBindImage(ilTexId);
 
             GLuint glTexId = 0;
-            if( ilLoadL(IL_PNG, data, bytes) ) {
+            if( ilLoadImage(filename.c_str() ) ) {
                 glTexId = LoadGLTextureFromDevIL(ilTexId);
+            }else{
+                std::cerr << "Failed to load texture file '" << filename << "'" << std::endl;
             }
 
             ilDeleteImages(1, &ilTexId);
@@ -158,26 +219,47 @@ class GLMesh : public GLObject
         }
 
         ////////////////////////////////////////////////////////////////////////////
-//        GLuint LoadGLTexture( char* filename )
-//        {
-//            char filenamecpy[255];
-//            strcpy(filenamecpy, filename);
-//            filenamecpy[0] = '.';
+        GLuint LoadGLTextureFromArray(const unsigned char* data, size_t bytes, const char* extensionHint = 0 )
+        {
+            ILuint ilTexId;
+            ilGenImages(1, &ilTexId);
+            ilBindImage(ilTexId);
 
-//            static bool firsttime = true;
-//            if(firsttime) {
-//                ilInit();
-//                ilutInit();
-//                ilutRenderer(ILUT_OPENGL);
-//                firsttime = false;
-//            }
-//            GLuint gltexid = ilutGLLoadImage(filenamecpy);
+            GLuint glTexId = 0;
 
-//            // Unbind textures
-//            glBindTexture(GL_TEXTURE_2D, 0);
+            ILenum filetype = IL_TYPE_UNKNOWN;
 
-//            return gltexid;
-//        }
+            // Guess filetype by data
+            if (filetype == IL_TYPE_UNKNOWN) {
+                filetype = ilDetermineTypeL(data, bytes);
+            }
+
+            // Guess filetype by extension
+            if( filetype == IL_TYPE_UNKNOWN && extensionHint != 0 ) {
+                const std::string sExt(extensionHint);
+                const std::string sDummy = std::string("dummy.") + sExt;
+                filetype = ilDetermineType(sDummy.c_str());
+            }
+
+            // Some extra guesses that seem to be missed in devIL
+            if( filetype == IL_TYPE_UNKNOWN ) {
+                if( !strcmp(extensionHint, "bmp") ) {
+                    filetype = IL_TGA;
+                }
+            }
+
+            // Load image to ilTexId us devIL
+            if( ilLoadL(filetype, data, bytes) ) {
+                glTexId = LoadGLTextureFromDevIL(ilTexId);
+            }else{
+                ILenum ilError = ilGetError();
+                std::cerr << "Failed to Load embedded texture, DevIL: " << ilError << " - " << iluErrorString(ilError) << std::endl;
+            }
+
+            ilDeleteImages(1, &ilTexId);
+
+            return glTexId;
+        }
 
         ////////////////////////////////////////////////////////////////////////////
         void AllocateSelectionID()
@@ -360,14 +442,31 @@ class GLMesh : public GLObject
                 glEnable(GL_LIGHTING);
             }
 
-            const unsigned int numDiffuseTex = mtl->GetTextureCount(aiTextureType_DIFFUSE);
-            for(unsigned int dt=0; dt < numDiffuseTex; ++dt ) {
-                aiString path;
-                if( mtl->GetTexture(aiTextureType_DIFFUSE, dt, &path) == AI_SUCCESS ) {
-                    std::map<std::string,GLuint>::iterator ix = m_mapPathToGLTex.find(path.data);
-                    if( ix != m_mapPathToGLTex.end() ) {
-                        glEnable(GL_TEXTURE_2D);
-                        glBindTexture(GL_TEXTURE_2D, ix->second);
+            // WARNING: A relatively arbitrary list of texture types to
+            // try and load. In the future these should be dealt with properly
+            const size_t numTexTypesToLoad = 4;
+            static aiTextureType texTypesToLoad[numTexTypesToLoad] = {
+                aiTextureType_DIFFUSE, aiTextureType_AMBIENT,
+                aiTextureType_EMISSIVE, aiTextureType_LIGHTMAP
+            };
+
+
+            int totaltex = 0;
+
+            for(size_t tti=0; tti < numTexTypesToLoad; ++tti ) {
+                const aiTextureType tt = texTypesToLoad[tti];
+                const unsigned int numTex = mtl->GetTextureCount(tt);
+                totaltex += numTex;
+                for(unsigned int dt=0; dt < numTex; ++dt ) {
+                    aiString path;
+                    if( mtl->GetTexture(tt, dt, &path) == AI_SUCCESS ) {
+                        std::map<std::string,GLuint>::iterator ix = m_mapPathToGLTex.find(path.data);
+                        if( ix != m_mapPathToGLTex.end() ) {
+                            glEnable(GL_TEXTURE_2D);
+                            glBindTexture(GL_TEXTURE_2D, ix->second);
+                            // Only bind first one for now.
+                            break;
+                        }
                     }
                 }
             }
@@ -385,7 +484,7 @@ class GLMesh : public GLObject
                 RenderFace( face_mode, GL_FILL, m_fAlpha, face, mesh );
             }
 
-            if( numDiffuseTex > 0 ) {
+            if( totaltex > 0 ) {
                 glDisable(GL_TEXTURE_2D);
             }
 
