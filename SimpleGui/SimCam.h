@@ -360,6 +360,8 @@ class GLSimCam
 
             // save camera pose
             glGetDoublev( GL_MODELVIEW_MATRIX, m_dT.data() );
+
+            glPopAttrib();
         }
 
         /////////////////////////////////////////////////////////////////////////////////////////

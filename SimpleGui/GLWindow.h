@@ -160,7 +160,7 @@ class GLWindow : public Fl_Gl_Window, public boost::mutex
     // event handlers -- these can serve as examples
     virtual int handle( int e ); // inherit and override if you want
     int SimpleDefaultEventHandler( int e ); // simple example handler
-    int HandleNavInput( int e );
+    virtual int HandleNavInput( int e );
     int HandleSelectionInput( int e );
 
     void LookAt( float eyex, float eyey, float eyez,

@@ -136,6 +136,8 @@ inline void GLImage::draw()
     int nBottom = m_fPercentBottom * WindowHeight();
     int nRight = m_fPercentRight * WindowWidth();
 
+    glPushAttrib(GL_ENABLE_BIT | GL_TEXTURE_BIT | GL_CURRENT_BIT | GL_LINE_BIT);
+
     InitTexture(); // initialize texture if necessary.
     CheckForGLErrors();
 
@@ -181,11 +183,8 @@ inline void GLImage::draw()
     }
     PopOrtho();
 
- //   glPopAttrib();
+    glPopAttrib();
 
- //   glEnable( GL_BLEND );
- //   glEnable( GL_LIGHTING );
- //   glEnable( GL_DEPTH_TEST );
 }
 
 

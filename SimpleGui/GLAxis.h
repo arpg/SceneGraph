@@ -168,6 +168,7 @@ public:
         {
             Init();
         }
+        glPushAttrib(GL_ENABLE_BIT);
 
         glPushMatrix();
         glRotatef(180, 0.0, 1.0 , 0.0); //fix to robotic coordinate plane
@@ -278,7 +279,7 @@ public:
 
        glPopMatrix(); //pop back to origin
 
-        glDisable( GL_BLEND );
+       glPopAttrib();
 
     }
 

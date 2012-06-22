@@ -435,6 +435,8 @@ class GLMesh : public GLObject
                 const struct aiMaterial* mtl
                 )
         {
+            glPushAttrib(GL_ENABLE_BIT);
+
             ApplyMaterial( mtl );
             if( mesh->mNormals == NULL ) {
                 glDisable(GL_LIGHTING);
@@ -487,6 +489,8 @@ class GLMesh : public GLObject
             if( totaltex > 0 ) {
                 glDisable(GL_TEXTURE_2D);
             }
+
+            glPopAttrib();
 
         }
 

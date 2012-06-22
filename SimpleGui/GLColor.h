@@ -9,9 +9,36 @@
 #include <sstream>
 #include <cstdio>
 
+
+
+
 ////////////////////////////////////////////////////////////////////////////////
 struct GLColor
 {
+    static GLColor HsvColor( double hue, double s = 1.0, double v = 1.0 )
+    {
+      hue *= 360.0;
+      const double h = hue / 60.0;
+      const int i = floor(h);
+      const double f = (i%2 == 0) ? 1-(h-i) : h-i;
+      const double m = v * (1-s);
+      const double n = v * (1-s*f);
+      GLColor color;
+      switch(i)
+      {
+      case 0: color = GLColor(v,n,m,1.0f); break;
+      case 1: color = GLColor(n,v,m,1.0f); break;
+      case 2: color = GLColor(m,v,n,1.0f); break;
+      case 3: color = GLColor(m,n,v,1.0f); break;
+      case 4: color = GLColor(n,m,v,1.0f); break;
+      case 5: color = GLColor(v,m,n,1.0f); break;
+      default:
+        break;
+      }
+      return color;
+    }
+
+
     GLColor(
             float tr = 1.0f,
             float tg = 1.0f, 

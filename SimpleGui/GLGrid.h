@@ -24,6 +24,7 @@ class GLGrid : public GLObject
             #define NLINES 50
             #define LDELTA 2
 
+            glPushAttrib(GL_ENABLE_BIT);
             glPushMatrix();
 
             glEnable( GL_BLEND );
@@ -59,31 +60,10 @@ class GLGrid : public GLObject
 
             glEnd();
 
-            /*
-            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL );
 
-            // so we generate depth on the ground plane
-            glEnable( GL_DEPTH_TEST );
-            glBegin( GL_QUADS );
-            glColor4ub( 0, 0, 0, 0);
-            glVertex3f(  LDELTA*NLINES ,  LDELTA*NLINES, 0.01);
-            glVertex3f( -LDELTA*NLINES ,  LDELTA*NLINES, 0.01);
-            glVertex3f( -LDELTA*NLINES , -LDELTA*NLINES, 0.01);
-            glVertex3f(  LDELTA*NLINES , -LDELTA*NLINES, 0.01);
-            glEnd();
-            */
             glPopMatrix();
-            /*
-            Eigen::Vector3d v = GetPosUnderCursor();
-            glPointSize( 5 );
-            glBegin( GL_POINTS );
-            glColor4ub( 255, 255, 255, 255 );
-            glVertex3f( v[0],  v[1], v[2] );
-            glEnd();
-            */
+            glPopAttrib();
 
-//            glDisable( GL_BLEND );
-//            glEnable( GL_LIGHTING );
         }
 
 };
