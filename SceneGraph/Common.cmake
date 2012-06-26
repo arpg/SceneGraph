@@ -89,8 +89,8 @@ ADD_CUSTOM_COMMAND(
 
 
 macro( export_library LibName )
-    #add_to_lib_include_dirs( SimpleGui dirs )
-    #add_to_lib_libraries( SimpleGui libs )
+    #add_to_lib_include_dirs( SceneGraph dirs )
+    #add_to_lib_libraries( SceneGraph libs )
 #    get_property( dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES )
 #    message( STATUS "got ${dirs}" )
 
@@ -99,8 +99,8 @@ macro( export_library LibName )
 #    message( STATUS "Got IncDirs: ${IncDirs}" )
 #    message( STATUS "Got Libs: ${Libs}" )
 
-#    message( STATUS "Want SimpleGui_LIBRARIES: ${${LibName}_LIBRARIES} " )
-#    message( STATUS "Want SimpleGui_INCLUDE_DIRS: ${${LibName}_INCLUDE_DIRS}")
+#    message( STATUS "Want SceneGraph_LIBRARIES: ${${LibName}_LIBRARIES} " )
+#    message( STATUS "Want SceneGraph_INCLUDE_DIRS: ${${LibName}_INCLUDE_DIRS}")
 
     # Code to cleanup apple frameworks to "export" properly.
     # This is needed because spaces in the list of LIBRARIES in the .cmake we are

@@ -1,5 +1,5 @@
 #include "GLObject.h"
-#include "GLWindow.h"
+#include <map>
 
 std::map<int,GLObject*>   g_mObjects; // map of id to objects
 int                       g_nHandleCounter;
@@ -12,19 +12,6 @@ GLObject::GLObject()
     m_bPerceptable = true; //< can be measured (e.g., not a virtual thing)
     m_sObjectName = "unnamed-object";
     m_dPosition << 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f;
-}
-
-/////////////////////////////////////////////////////////////////////////////////
-// set the parent window pointer
-void GLObject::InitWindowPtr( GLWindow* pWin )
-{
-    _RecursivelyInitObjects( this, pWin  );
-}
-
-/////////////////////////////////////////////////////////////////////////////////
-GLWindow* GLObject::Window()
-{
-    return m_pWin;
 }
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -70,55 +57,49 @@ unsigned int GLObject::Id()
 }
 
 /////////////////////////////////////////////////////////////////////////////////
-int GLObject::WindowWidth()
-{
-    return m_pWin->w();
-}
-
-/////////////////////////////////////////////////////////////////////////////////
-int GLObject::WindowHeight()
-{
-    return m_pWin->h();
-}
-
-/////////////////////////////////////////////////////////////////////////////////
 bool GLObject::IsSelected( unsigned int nId )
 {
-    return m_pWin->IsSelected( nId );
+    // TODO: Implement this functionality
+//    return m_pWin->IsSelected( nId );
 }
 
 /////////////////////////////////////////////////////////////////////////////////
 void GLObject::UnSelect( unsigned int nId )
 {
-    m_pWin->UnSelect( nId );
+    // TODO: Implement this functionality
+//    m_pWin->UnSelect( nId );
 }
 
 /////////////////////////////////////////////////////////////////////////////////
 unsigned int GLObject::AllocSelectionId()
 {
-    unsigned int nId =  m_pWin->AllocSelectionId( this );
-    return nId;
+    // TODO: Implement this functionality
+//    unsigned int nId =  m_pWin->AllocSelectionId( this );
+//    return nId;
 }
 
 /////////////////////////////////////////////////////////////////////////////////
 Eigen::Vector3d GLObject::GetPosUnderCursor()
 {
-    return m_pWin->GetPosUnderCursor();
+    // TODO: Implement this functionality?
+//    return m_pWin->GetPosUnderCursor();
 }
 
 /////////////////////////////////////////////////////////////////////////////////
 Eigen::Vector2i GLObject::GetCursorPos()
 {
-    return m_pWin->GetCursorPos();
+    // TODO: Implement this functionality?
+//    return m_pWin->GetCursorPos();
 }
 
 /////////////////////////////////////////////////////////////////////////////////
 bool GLObject::valid()
 {
-    if( m_pWin && m_pWin->valid() ) {
-        return true;
-    }
-    return false;
+    // TODO: Implement this functionality?
+//    if( m_pWin && m_pWin->valid() ) {
+//        return true;
+//    }
+//    return false;
 }
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -132,17 +113,6 @@ void GLObject::AddChild( GLObject* pChild )
     g_nHandleCounter++;
 
 }
-
-
-///////////////////////////////////////////////////////////////////////////////////////////////
-void  GLObject::_RecursivelyInitObjects( GLObject* pObj, GLWindow* pWin )
-{
-    m_pWin = pWin;
-    for( size_t ii = 0; ii < pObj->m_vpChildren.size(); ii++ ){
-        _RecursivelyInitObjects( pObj->m_vpChildren[ii], pWin );
-    }
-}
-
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 Eigen::Vector6d GLObject::GetPose()

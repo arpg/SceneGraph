@@ -1,8 +1,8 @@
 #ifndef _GL_MESH_H_
 #define _GL_MESH_H_
 
-#include <SimpleGui/GLObject.h>
-#include <SimpleGui/GLCVars.h>
+#include <SceneGraph/GLObject.h>
+#include <SceneGraph/GLCVars.h>
 
 #include <assimp/assimp.h>
 #include <assimp/aiPostProcess.h>

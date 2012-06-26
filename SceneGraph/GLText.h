@@ -1,8 +1,8 @@
 #ifndef _GL_TEXT_H_
 #define _GL_TEXT_H_
 
-#include <SimpleGui/GLObject.h>
-#include <SimpleGui/GLColor.h>
+#include <SceneGraph/GLObject.h>
+#include <SceneGraph/GLColor.h>
 
 #include <string>
 

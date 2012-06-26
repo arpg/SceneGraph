@@ -4,7 +4,7 @@
  * $Id$
  */ 
 
-#include <SimpleGui/GLHelpers.h>
+#include <SceneGraph/GLHelpers.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>

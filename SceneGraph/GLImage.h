@@ -1,7 +1,7 @@
 #ifndef _GL_IMAGE_
 #define _GL_IMAGE_
 
-#include <SimpleGui/GLObject.h>
+#include <SceneGraph/GLObject.h>
 
 class GLImage : public GLObject
 {

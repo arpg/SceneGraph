@@ -1,10 +1,10 @@
 #ifndef _SIMCAM_H_
 #define _SIMCAM_H_
 
-#include <SimpleGui/FBO.h>
-#include <SimpleGui/GLSceneGraph.h>
-#include <SimpleGui/GLSLHelpers.h>
-#include <SimpleGui/GLCVars.h>
+#include <SceneGraph/FBO.h>
+#include <SceneGraph/GLSceneGraph.h>
+#include <SceneGraph/GLSLHelpers.h>
+#include <SceneGraph/GLCVars.h>
 
 #include <string>
 

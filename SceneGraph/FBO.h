@@ -1,7 +1,7 @@
 #ifndef _FBO_H_
 #define _FBO_H_
 
-#include <SimpleGui/GLHelpers.h>
+#include <SceneGraph/GLHelpers.h>
 
 #include <vector>
 #include <iostream>

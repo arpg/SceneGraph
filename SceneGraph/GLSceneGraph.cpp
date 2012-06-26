@@ -1,13 +1,11 @@
-#include <SimpleGui/GLObject.h>
-#include <SimpleGui/GLSceneGraph.h>
-#include <SimpleGui/GLWindow.h>
+#include <SceneGraph/GLObject.h>
+#include <SceneGraph/GLSceneGraph.h>
 
 extern std::map<int,GLObject*>   g_mObjects; // map of id to objects
 
 /////////////////////////////////////////////////////////////////////////////////
 GLSceneGraph::GLSceneGraph()
 {
-    m_pWin = NULL;
     m_vpChildren.clear();
 }
 
@@ -54,12 +52,8 @@ void GLSceneGraph::_RecursiveDraw( GLObject* pObj )
 {
     //printf("Drawing %p %s\n", pObj, pObj->ObjectName() );
     if( pObj->IsVisible() ){
-        Window()->lock();
-        CheckForGLErrors();
         pObj->draw();
-        Window()->unlock();
-    }
-    else{
+    }else{
 //        printf("NOT Drawing %s\n", pObj->ObjectName() );
     }
 

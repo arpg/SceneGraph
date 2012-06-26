@@ -1,7 +1,7 @@
 #ifndef _GL_SCENE_GRAPH_H_
 #define _GL_SCENE_GRAPH_H_
 
-#include <SimpleGui/GLObject.h>
+#include <SceneGraph/GLObject.h>
 #include <map>
 
 class GLSceneGraph : public GLObject

@@ -4,8 +4,6 @@
 #undef Success
 #include <Eigen/Eigen>
 
-class GLWindow;
-
 #include <string>
 #include <vector>
 #include <stdio.h>
@@ -39,8 +37,6 @@ class GLObject
         // in the window (if it's a 2d object)
         virtual void GetBoundingBox(int&, int&, int&, int&) {}
 
-        GLWindow* Window();
-
         void SetVisible();
 
         void SetInVisible();
@@ -54,9 +50,6 @@ class GLObject
         void SetId( unsigned int nId );
 
         unsigned int Id();
-
-        /// set the parent window pointer
-        void InitWindowPtr( GLWindow* pWin );
 
 		// Check if window is valid
 		bool valid(); 
@@ -108,15 +101,11 @@ class GLObject
 
         void SetPose(double x, double y, double z, double p, double q, double r);
 
-//    private:
-        void  _RecursivelyInitObjects( GLObject* pObj, GLWindow* pWin );
-
     protected:
         std::string               m_sObjectName;
         GLObject*                 m_pParent;
         bool                      m_bPerceptable; //< can be measured (e.g., not a virtual thing)
         unsigned int              m_nId;      //< Object handle
-        GLWindow*                 m_pWin;     //< The window the object belongs to
         bool                      m_bVisible;
         bool                      m_bIs2dLayer; //< such as an image
         Eigen::Vector6d           m_dPosition; //< Object position

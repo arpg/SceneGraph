@@ -1,7 +1,7 @@
 #ifndef GLAXIS_H
 #define GLAXIS_H
 
-#include <SimpleGui/GLObject.h>
+#include <SceneGraph/GLObject.h>
 #include <math.h>
 
 namespace Eigen{
