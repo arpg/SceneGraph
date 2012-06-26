@@ -6,6 +6,8 @@
 
 #include <string>
 
+namespace SceneGraph
+{
 
 class GLText : public GLObject
 {
@@ -68,6 +70,8 @@ class GLText : public GLObject
         int          	m_nFontSize;
         GLColor         	m_Color;
 };
+
+} // SceneGraph
 
 
 #endif

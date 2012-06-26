@@ -6,6 +6,9 @@
 #include <vector>
 #include <iostream>
 
+namespace SceneGraph
+{
+
 class FBO
 {
     public:
@@ -225,6 +228,8 @@ class FBO
 	}
 	static FBO*                m_pInstance;
 };
+
+} // SceneGraph
 
 #endif
 

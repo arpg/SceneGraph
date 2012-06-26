@@ -15,6 +15,10 @@
 #include <Eigen/Core>
 #include <Eigen/LU>
 
+namespace SceneGraph
+{
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///  If a GL error has occured, this function outputs "msg" and the
 //   programme exits. To avoid exiting @see WarnForGLErrors.
@@ -608,4 +612,6 @@ void DrawCamera(
     glEnable( GL_CULL_FACE );
 
 }
+
+} // SceneGraph
 

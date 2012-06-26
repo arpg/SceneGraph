@@ -1,5 +1,8 @@
 #include "FBO.h"
 
+namespace SceneGraph
+{
+
 FBO* FBO::m_pInstance = NULL;
 
 FBO* FBO::Instance()
@@ -9,4 +12,6 @@ FBO* FBO::Instance()
   }
   
   return m_pInstance;
+}
+
 }

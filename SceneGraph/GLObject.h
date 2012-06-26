@@ -4,6 +4,8 @@
 #undef Success
 #include <Eigen/Eigen>
 
+#include <GL/gl.h>
+
 #include <string>
 #include <vector>
 #include <stdio.h>
@@ -11,11 +13,17 @@
 namespace Eigen{
     typedef Matrix<double, 6, 1> Vector6d;
 }
+
+namespace SceneGraph
+{
+
 class GLObject
 {
     public:
 
         GLObject();
+
+        GLObject( const std::string& name);
 
         GLObject( const GLObject& rhs )
         {
@@ -109,7 +117,11 @@ class GLObject
         bool                      m_bVisible;
         bool                      m_bIs2dLayer; //< such as an image
         Eigen::Vector6d           m_dPosition; //< Object position
+
+        // Child to Parent transform. Includes position, rotation and scale (x_p = m_T_pc & x_c)
+        Eigen::Matrix4d           m_T_pc;
 };
 
+} // SceneGraph
 
 #endif

@@ -4,6 +4,9 @@
 #include <SceneGraph/GLObject.h>
 #include <map>
 
+namespace SceneGraph
+{
+
 class GLSceneGraph : public GLObject
 {
     public:
@@ -24,5 +27,7 @@ class GLSceneGraph : public GLObject
         void _RecursiveDraw( GLObject* pObj );
         void _RecursiveVisit( void(*pVisitorFunc)(GLObject*), GLObject* pObj );
 };
+
+}
 
 #endif

@@ -1,8 +1,8 @@
 #ifndef _GL_MESH_H_
 #define _GL_MESH_H_
 
+#include <SceneGraph/GLHelpers.h>
 #include <SceneGraph/GLObject.h>
-#include <SceneGraph/GLCVars.h>
 
 #include <assimp/assimp.h>
 #include <assimp/aiPostProcess.h>
@@ -12,20 +12,43 @@
 #include <IL/ilu.h>
 #include <map>
 
+namespace SceneGraph
+{
+
+struct GLMeshException : std::exception
+{
+    GLMeshException(const std::string& description ) throw()
+        : m_sWhat(description)
+    {
+    }
+
+    ~GLMeshException() throw() {}
+
+    const char* what() const throw() {
+        return m_sWhat.c_str();
+    }
+
+protected:
+    std::string m_sWhat;
+};
+
 class GLMesh : public GLObject
 {
 
     public:
         ////////////////////////////////////////////////////////////////////////////
         GLMesh()
+            : GLObject("Mesh"), m_nDisplayList(-1), m_fScale(1), m_fAlpha(1),
+              m_iMeshID(-1), m_bShowMeshNormals(false)
         {
-            m_sObjectName = "Mesh";
-            m_nDisplayList = -1;
-            m_fScale = 1;
-            m_fAlpha = 1;
-            m_iMeshID = -1;
-            m_bSelectionIDAllocated = false;
-            m_flScale = 1.0f;
+        }
+
+        ////////////////////////////////////////////////////////////////////////////
+        GLMesh(const std::string& sMeshFile)
+            : GLObject("Mesh"), m_nDisplayList(-1), m_fScale(1), m_fAlpha(1),
+              m_iMeshID(-1), m_bShowMeshNormals(false)
+        {
+            Init(sMeshFile);
         }
 
         ////////////////////////////////////////////////////////////////////////////
@@ -33,9 +56,9 @@ class GLMesh : public GLObject
         {
             m_pScene = aiImportFile( sMeshFile.c_str(), aiProcess_Triangulate | aiProcess_GenSmoothNormals );
             if( m_pScene == NULL ){
-                printf("ERROR: loading mesh '%s'\n", sMeshFile.c_str() );
+                throw GLMeshException("Unable to load mesh");
             }else{
-                LoadMeshTextures();
+                Init(m_pScene);
             }
         }
 
@@ -49,6 +72,108 @@ class GLMesh : public GLObject
             }
         }
 
+
+        ////////////////////////////////////////////////////////////////////////////
+        virtual void  draw()
+        {
+            if( m_pScene ){
+                glPushAttrib(GL_ENABLE_BIT);
+
+                RecursiveRender( m_pScene, m_pScene->mRootNode );
+                glPopAttrib();
+                return;
+
+                glEnable( GL_DEPTH_TEST );
+                if( m_nDisplayList == -1 ){
+                    m_nDisplayList = glGenLists(1);
+                    glNewList( m_nDisplayList, GL_COMPILE );
+                    RecursiveRender( m_pScene, m_pScene->mRootNode );
+                    glEndList();
+                }
+
+                //               AllocateSelectionID(); holy cow this is badness batman.  should only call this guy from init code... GTS
+
+                glPushMatrix();
+
+                glTranslated( m_dPosition[0], m_dPosition[1], m_dPosition[2] );
+
+                // TODO: Rotations over the world axis instead of local axis
+                // Doing these rotations one after another results in incremental rotations whose results are dependent on each other
+                // I spent several days trying various different methods to come up with a solution, but eventually I just gave up
+                // I am hoping to tackle this again sometime, but I need a break from it for now...
+                glRotated( m_dPosition[3], 1.0f, 0.0f, 0.0f );
+                glRotated( m_dPosition[4], 0.0f, 1.0f, 0.0f );
+                glRotated( m_dPosition[5], 0.0f, 0.0f, 1.0f );
+
+                glScalef( m_fScale, m_fScale, m_fScale );
+
+                glPushName( m_iMeshID );
+                glCallList( m_nDisplayList );
+                glPopName();
+
+                glPopMatrix();
+
+                glPopAttrib();
+            }
+        }
+
+        ///////////////////////////
+        virtual void ComputeDimensions()
+        {
+            Eigen::Vector3d min, max;
+            aiMesh *pAIMesh;
+            aiVector3D *pAIVector;
+
+            for( unsigned int x = 0; x < this->GetScene()->mNumMeshes; x++ ){
+                pAIMesh = this->GetScene()->mMeshes[x];
+                if ( pAIMesh == NULL )
+                    continue;
+
+                for( unsigned int y = 0; y < pAIMesh->mNumVertices; y++ ){
+                    pAIVector = &pAIMesh->mVertices[y];
+                    if ( pAIVector == NULL ){
+                        continue;
+                        }
+
+                    if ( ((pAIVector->x * this->GetScale()) < min[0]) && ((pAIVector->y * this->GetScale()) < min[1]) && ((pAIVector->z * this->GetScale()) < min[2]) ){
+                        min[0] = pAIVector->x * this->GetScale();
+                        min[1] = pAIVector->y * this->GetScale();
+                        min[2] = pAIVector->z * this->GetScale();
+                    }
+
+                    if ( ((pAIVector->x * this->GetScale()) > max[0]) && ((pAIVector->y * this->GetScale()) > max[1]) && ((pAIVector->z * this->GetScale()) > max[2]) ) {
+                        max[0] = pAIVector->x * this->GetScale();
+                        max[1] = pAIVector->y * this->GetScale();
+                        max[2] = pAIVector->z * this->GetScale();
+                    }
+                }
+            }
+
+            m_Dimensions[0] = max[0] - min[0];
+            m_Dimensions[1] = max[1] - min[1];
+            m_Dimensions[2] = max[2] - min[2];
+        }
+
+        // Getters and setters
+        const struct aiScene *GetScene( void ) {
+            return m_pScene;
+        }
+
+        virtual void select( unsigned int )
+        {
+            // WARNING: When an instance of GLMesh is selected, it appears that it remains selected forever
+            // One way to resolve this is to call 'UnSelect( m_iMeshID )' after doing anything pertaining to selection
+            // Hopefully we find a better, more permanent solution soon...
+
+            // UPDATE: Don't know if what's above is still a valid statement...
+        }
+
+        Eigen::Vector3d GetDimensions() { return m_Dimensions; }
+
+        float GetScale() { return m_fScale; }
+        void SetScale( float flScale ) { m_fScale = flScale; }
+
+protected:
         ////////////////////////////////////////////////////////////////////////////
         GLenum GLWrapFromAiMapMode(aiTextureMapMode mode)
         {
@@ -262,17 +387,6 @@ class GLMesh : public GLObject
         }
 
         ////////////////////////////////////////////////////////////////////////////
-        void AllocateSelectionID()
-        {
-            if ( m_bSelectionIDAllocated )
-                return; // selection ID has already been allocated; abort
-
-            m_iMeshID = AllocSelectionId();
-
-            m_bSelectionIDAllocated = true;
-        }
-
-        ////////////////////////////////////////////////////////////////////////////
         void color4_to_float4( const struct aiColor4D *c, float f[4] )
         {
             f[0] = c->r;
@@ -414,7 +528,7 @@ class GLMesh : public GLObject
             glEnd();
 
             // show normals for debugging
-            if( gConfig.m_bShowMeshNormals ){
+            if( m_bShowMeshNormals ){
                 float s = 10;
                 glBegin( GL_LINES );
                 for( unsigned int ii = 0; ii < face->mNumIndices; ii++ ) {
@@ -435,8 +549,6 @@ class GLMesh : public GLObject
                 const struct aiMaterial* mtl
                 )
         {
-            glPushAttrib(GL_ENABLE_BIT);
-
             ApplyMaterial( mtl );
             if( mesh->mNormals == NULL ) {
                 glDisable(GL_LIGHTING);
@@ -451,7 +563,6 @@ class GLMesh : public GLObject
                 aiTextureType_DIFFUSE, aiTextureType_AMBIENT,
                 aiTextureType_EMISSIVE, aiTextureType_LIGHTMAP
             };
-
 
             int totaltex = 0;
 
@@ -489,9 +600,6 @@ class GLMesh : public GLObject
             if( totaltex > 0 ) {
                 glDisable(GL_TEXTURE_2D);
             }
-
-            glPopAttrib();
-
         }
 
         ////////////////////////////////////////////////////////////////////////////
@@ -509,39 +617,6 @@ class GLMesh : public GLObject
             for (; n < nd->mNumMeshes; ++n) {
                 const struct aiMesh* mesh = m_pScene->mMeshes[nd->mMeshes[n]];
                 RenderMesh( mesh, sc->mMaterials[mesh->mMaterialIndex] );
-
-                /*
-                //                glDisable(GL_LIGHTING);
-                //                glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-                //                glEnable (GL_BLEND );
-                for (t = 0; t < mesh->mNumFaces; ++t) {
-                const struct aiFace* face = &mesh->mFaces[t];
-                GLenum face_mode;
-                switch(face->mNumIndices) {
-                case 1: face_mode = GL_POINTS; break;
-                case 2: face_mode = GL_LINES; break;
-                case 3: face_mode = GL_TRIANGLES; break;
-                default: face_mode = GL_POLYGON; break;
-                }
-                glPolygonMode(GL_FRONT_AND_BACK, GL_FILL );
-                glBegin( face_mode );
-                for( int i = 0; i < face->mNumIndices; i++) {
-                int index = face->mIndices[i];
-                //glColor4f( 1.0, 1.0, 1.0, 0.2 );
-                glVertex3fv(&mesh->mVertices[index].x);
-                }
-                glEnd();
-
-                glPolygonMode(GL_FRONT_AND_BACK, GL_LINE );
-                glBegin( face_mode );
-                for( int i = 0; i < face->mNumIndices; i++) {
-                int index = face->mIndices[i];
-                glColor4f( 1.0, 1.0, 1.0, 1 );
-                glVertex3fv(&mesh->mVertices[index].x);
-                }
-                glEnd();
-                }
-                 */
             }
 
 
@@ -553,108 +628,17 @@ class GLMesh : public GLObject
             glPopMatrix();
         }
 
-        ////////////////////////////////////////////////////////////////////////////
-        virtual void  draw()
-        {
-            if( m_pScene ){
-                glEnable( GL_DEPTH_TEST );
-                if( m_nDisplayList == -1 ){
-                    m_nDisplayList = glGenLists(1);
-                    glNewList( m_nDisplayList, GL_COMPILE );
-                    RecursiveRender( m_pScene, m_pScene->mRootNode );
-                    glEndList();
-                }
-
-                //               AllocateSelectionID(); holy cow this is badness batman.  should only call this guy from init code... GTS
-
-                glPushMatrix();
-
-                glTranslated( m_dPosition[0], m_dPosition[1], m_dPosition[2] );
-
-                // TODO: Rotations over the world axis instead of local axis
-                // Doing these rotations one after another results in incremental rotations whose results are dependent on each other
-                // I spent several days trying various different methods to come up with a solution, but eventually I just gave up
-                // I am hoping to tackle this again sometime, but I need a break from it for now...
-                glRotated( m_dPosition[3], 1.0f, 0.0f, 0.0f );
-                glRotated( m_dPosition[4], 0.0f, 1.0f, 0.0f );
-                glRotated( m_dPosition[5], 0.0f, 0.0f, 1.0f );
-
-                glScalef( m_fScale, m_fScale, m_fScale );
-
-                glPushName( m_iMeshID );
-                glCallList( m_nDisplayList );
-                glPopName();
-
-                glPopMatrix();
-            }
-        }
-
-        ///////////////////////////
-        virtual void ComputeDimensions()
-        {
-            Eigen::Vector3d min, max;
-            aiMesh *pAIMesh;
-            aiVector3D *pAIVector;
-
-            for( unsigned int x = 0; x < this->GetScene()->mNumMeshes; x++ ){
-                pAIMesh = this->GetScene()->mMeshes[x];
-                if ( pAIMesh == NULL )
-                    continue;
-
-                for( unsigned int y = 0; y < pAIMesh->mNumVertices; y++ ){
-                    pAIVector = &pAIMesh->mVertices[y];
-                    if ( pAIVector == NULL ){
-                        continue;
-                        }
-
-                    if ( ((pAIVector->x * this->GetScale()) < min[0]) && ((pAIVector->y * this->GetScale()) < min[1]) && ((pAIVector->z * this->GetScale()) < min[2]) ){
-                        min[0] = pAIVector->x * this->GetScale();
-                        min[1] = pAIVector->y * this->GetScale();
-                        min[2] = pAIVector->z * this->GetScale();
-                    }
-
-                    if ( ((pAIVector->x * this->GetScale()) > max[0]) && ((pAIVector->y * this->GetScale()) > max[1]) && ((pAIVector->z * this->GetScale()) > max[2]) ) {
-                        max[0] = pAIVector->x * this->GetScale();
-                        max[1] = pAIVector->y * this->GetScale();
-                        max[2] = pAIVector->z * this->GetScale();
-                    }
-                }
-            }
-
-            m_Dimensions[0] = max[0] - min[0];
-            m_Dimensions[1] = max[1] - min[1];
-            m_Dimensions[2] = max[2] - min[2];
-        }
-
-        // Getters and setters
-        const struct aiScene *GetScene( void ) { return m_pScene; }
-
-        virtual void select( unsigned int )
-        {
-            // WARNING: When an instance of GLMesh is selected, it appears that it remains selected forever
-            // One way to resolve this is to call 'UnSelect( m_iMeshID )' after doing anything pertaining to selection
-            // Hopefully we find a better, more permanent solution soon...
-
-            // UPDATE: Don't know if what's above is still a valid statement...
-        }
-
-        Eigen::Vector3d GetDimensions() { return m_Dimensions; }
-
-        float GetScale() { return m_flScale; }
-        void SetScale( float flScale ) { m_flScale = flScale; }
-
-    protected:
         const struct aiScene*   m_pScene;
         float                   m_fScale;
         float                   m_fAlpha; // render translucent meshes?
         GLint                   m_nDisplayList;
         unsigned int            m_iMeshID;
-        bool                    m_bSelectionIDAllocated;
+        bool                    m_bShowMeshNormals;
         Eigen::Vector3d         m_Dimensions;
-        float                   m_flScale;
         std::map<std::string,GLuint> m_mapPathToGLTex;
 };
 
+} // SceneGraph
 
 #endif
 

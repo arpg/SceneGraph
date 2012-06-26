@@ -7,18 +7,10 @@
 #ifndef _GL_HELPERS_H_
 #define _GL_HELPERS_H_
 
-
-#ifdef HAVE_APPLE_OPENGL_FRAMEWORK
-#    include <FL/gl.h>
-#    include <FL/glu.h>
-#    include <FL/glut.H>
-#else
-#    include <GL/glew.h>
-#    include <GL/glext.h>
-#    include <FL/gl.h>
-#    include <FL/glu.h>
-#    include <FL/glut.H>
-#endif
+#include <GL/glew.h>
+#include <GL/glext.h>
+#include <GL/gl.h>
+#include <GL/glu.h>
 
 #include <iostream>
 #include <unistd.h>
@@ -30,6 +22,9 @@
 //#include <Eigen/Matrix>
 #include <Eigen/Core>
 //#include <Eigen/LU>
+
+namespace SceneGraph
+{
 
 #define CheckForGLErrors() _CheckForGLErrors( __FILE__, __LINE__ );
 
@@ -249,8 +244,9 @@ inline unsigned int GenerateAndBindTextureID(
      */  
 
     return texId;
-}   
+}
 
+} // SceneGraph
 
 
 #endif

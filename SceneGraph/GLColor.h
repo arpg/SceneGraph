@@ -9,8 +9,8 @@
 #include <sstream>
 #include <cstdio>
 
-
-
+namespace SceneGraph
+{
 
 ////////////////////////////////////////////////////////////////////////////////
 struct GLColor
@@ -110,5 +110,7 @@ inline std::istream &operator>>(std::istream &stream, GLColor &color)
  
     return stream;
 }
+
+} // SceneGraph
 
 #endif

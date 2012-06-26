@@ -3,6 +3,9 @@
 
 #include <SceneGraph/GLObject.h>
 
+namespace SceneGraph
+{
+
 class GLImage : public GLObject
 {
     public:
@@ -295,5 +298,6 @@ inline void GLImage::SetSizeAsPercentageOfWindow(
     m_fPercentRight  = fRight;
 }
 
+} // SceneGraph
 
 #endif

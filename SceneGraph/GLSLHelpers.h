@@ -4,6 +4,9 @@
 #include <SceneGraph/GLHelpers.h>
 #include <errno.h>
 
+namespace SceneGraph
+{
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 inline void PrintShaderInfoLog(GLuint obj)
 {
@@ -198,6 +201,8 @@ inline bool InitShaders(
 
     return true;
 }
+
+} // SceneGraph
 
 
 #endif

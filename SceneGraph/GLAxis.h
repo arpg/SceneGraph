@@ -16,6 +16,9 @@ namespace Eigen{
 #define RING  10
 #define LINE  20
 
+namespace SceneGraph
+{
+
 ///////////////////////////////////////////////////////////////////////////////
 class GLAxis : public GLObject
 {
@@ -48,62 +51,45 @@ public:
 
     void select( unsigned int nId )
     {
-        Eigen::Vector2i v;
+        // TODO: Fix 'cursor pos'
+//        m_iMousePos = Window()->GetCursorPos();;
         m_nSelectedId = nId;
 
         if (nId == m_nXLineId)
         {
             printf("XLine Selected\n");
-            v = Window()->GetCursorPos();
-            m_iMousePos[0] = v[0];
-            m_iMousePos[1] = v[1];
-            //draw our invisible back plane
-
         }
         else if (nId == m_nXRingId)
         {
             printf("XRing Selected\n");
-//            v = Window()->GetCursorPos();
-//            m_iMousePos[0] = v[0];
-//            m_iMousePos[1] = v[1];
         }
         else if (nId == m_nYLineId)
         {
             printf("YLine Selected\n");
-            v = Window()->GetCursorPos();
-            m_iMousePos[0] = v[0];
-            m_iMousePos[1] = v[1];
         }
         else if (nId == m_nYRingId)
         {
             printf("YRing Selected\n");
-//            m_dPose[0] = v[0];
-//            m_dPose[1] = v[1];
-//            m_dPose[2] = v[2];
         }
         else if (nId == m_nZLineId)
         {
             printf("ZLine Selected\n");
-            v = Window()->GetCursorPos();
-            m_iMousePos[0] = v[0];
-            m_iMousePos[1] = v[1];
         }
         else if (nId == m_nZRingId)
         {
             printf("ZRing Selected\n");
-//            m_dPose[0] = v[0];
-//            m_dPose[1] = v[1];
-//            m_dPose[2] = v[2];
         }
 
     }
 
     void drag ()
     {
+        // TODO: Fix 'cursor pos'
+//        Eigen::Vector2i v = Window()->GetCursorPos();
+        Eigen::Vector2i v;
+
         if (m_nSelectedId == m_nXLineId)
         {
-
-            Eigen::Vector2i v = Window()->GetCursorPos();
             translate[0] += (double)(v[1]-m_iMousePos[1])*scale;
             m_iMousePos[1] = v[1];
             printf("X Dragged to: %f\n", translate[0]);
@@ -127,7 +113,6 @@ public:
         }
         else if (m_nSelectedId == m_nYLineId)
         {
-            Eigen::Vector2i v = Window()->GetCursorPos();
             translate[1] += (double)(v[1]-m_iMousePos[1])*scale;
             m_iMousePos[1] = v[1];
             printf("Y Dragged to: %f\n", translate[1]);
@@ -138,7 +123,6 @@ public:
         }
         else if (m_nSelectedId == m_nZLineId)
         {
-            Eigen::Vector2i v = Window()->GetCursorPos();
             translate[2] += (double)(v[1]-m_iMousePos[1])*scale;
             m_iMousePos[1] = v[1];
             printf("Z Dragged to: %f\n", translate[2]);
@@ -153,13 +137,6 @@ public:
     {
 
     }
-
-    void MouseOver(unsigned int /*nId*/ )
-    {
-//        printf("mouseover!\n");
-    }
-
-
 
     //dispview
     void draw(void)
@@ -318,5 +295,7 @@ private:
     Eigen::Vector2i m_iMousePos;
     Eigen::Vector3d translate;
 };
+
+} // SceneGraph
 
 #endif // GLAXIS_H

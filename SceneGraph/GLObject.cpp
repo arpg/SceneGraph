@@ -1,18 +1,28 @@
 #include "GLObject.h"
 #include <map>
 
+namespace SceneGraph
+{
+
 std::map<int,GLObject*>   g_mObjects; // map of id to objects
 int                       g_nHandleCounter;
 
 /////////////////////////////////////////////////////////////////////////////////
 GLObject::GLObject()
+    : m_sObjectName("unnamed-object"), m_bVisible(true), m_bIs2dLayer(false),
+      m_bPerceptable(true)
 {
-    m_bVisible = true;
-    m_bIs2dLayer = false; //< such as an image 
-    m_bPerceptable = true; //< can be measured (e.g., not a virtual thing)
-    m_sObjectName = "unnamed-object";
     m_dPosition << 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f;
 }
+
+/////////////////////////////////////////////////////////////////////////////////
+GLObject::GLObject( const std::string& name)
+    : m_sObjectName(name), m_bVisible(true), m_bIs2dLayer(false),
+      m_bPerceptable(true)
+{
+    m_dPosition << 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f;
+}
+
 
 /////////////////////////////////////////////////////////////////////////////////
 void GLObject::SetVisible()
@@ -145,3 +155,5 @@ void GLObject::SetPose(double x, double y, double z, double p, double q, double 
     m_dPosition[4] = q;
     m_dPosition[5] = r;
 }
+
+} // SceneGraph
