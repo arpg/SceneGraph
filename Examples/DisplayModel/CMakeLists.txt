@@ -4,13 +4,10 @@ INCLUDE_DIRECTORIES(${Pangolin_INCLUDE_DIRS})
 LINK_DIRECTORIES(${Pangolin_LIBRARY_DIRS})
 LINK_LIBRARIES(${Pangolin_LIBRARIES})
 
-# Find Pangolin (https://github.com/stevenlovegrove/Pangolin)
+# Find Scenegraph
 FIND_PACKAGE(SceneGraph REQUIRED)
 INCLUDE_DIRECTORIES(${SceneGraph_INCLUDE_DIRS})
 LINK_LIBRARIES(${SceneGraph_LIBRARIES})
-
-MESSAGE(STATUS "${Pangolin_LIBRARY_DIRS}")
-MESSAGE(STATUS "${Pangolin_LIBRARIES}")
 
 FIND_PACKAGE(FREEGLUT)
 

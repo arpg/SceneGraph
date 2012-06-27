@@ -4,7 +4,7 @@
 #undef Success
 #include <Eigen/Eigen>
 
-#include <GL/gl.h>
+#include <SceneGraph/GLHelpers.h>
 
 #include <string>
 #include <vector>
@@ -60,7 +60,7 @@ class GLObject
 
         /// Get / Set wether this object should be drawn
         bool IsVisible();
-        void SetVisible(bool visible);
+        void SetVisible(bool visible = true);
 
         /// can be measured (e.g., not a virtual thing)
         bool IsPerceptable();
@@ -102,10 +102,10 @@ class GLObject
         virtual void GetBoundingBox(int&, int&, int&, int&) {}
 
         /// Get parent window width.
-		int WindowWidth(); 
+        int WindowWidth() { return 1; }
 
         /// Get parent window height.
-        int WindowHeight(); 
+        int WindowHeight() { return 1; }
 
 
         Eigen::Vector3d GetPosUnderCursor();

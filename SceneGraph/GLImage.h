@@ -34,8 +34,7 @@ class GLImage : public GLObject
 
         void InitReset();
 
-		// Called by FLTK
-		void draw();
+        void DrawCanonicalObject();
 
 		// Reposition image within the window.
 		void SetPos( int nTop, int nLeft, int nBottom, int nRight );
@@ -94,27 +93,19 @@ class GLImage : public GLObject
 
 inline void GLImage::InitTexture()
 {
-    if( !valid()) {
-        return;
-    }
-    if( m_bTextureInitialized ) {
+    // TODO this is only accepting grayscale.. perhaps fix later?
+
+    if( m_pImageData ) {
+        if( !m_bTextureInitialized ) {
+            m_nTex = GenerateAndBindRectTextureID( m_nImageWidth, m_nImageHeight, GL_LUMINANCE, GL_UNSIGNED_BYTE, m_pImageData );
+            CheckForGLErrors();
+        }
+
         if( m_bTextureDataChanged == true ) {
             BindRectTextureID( m_nTex, m_nImageWidth, m_nImageHeight, GL_LUMINANCE, GL_UNSIGNED_BYTE, m_pImageData );
+            CheckForGLErrors();
         }
-        return;
     }
-    
-    if( !m_pImageData ) {
-	    return;
-    }
-
-    m_bTextureInitialized = true;
-    CheckForGLErrors();
-
-    // TODO this is only accepting grayscale.. perhaps fix later?
-    m_nTex = GenerateAndBindRectTextureID( m_nImageWidth, m_nImageHeight, GL_LUMINANCE, GL_UNSIGNED_BYTE, m_pImageData );
-
- 	CheckForGLErrors();
 }
 
 
@@ -132,7 +123,7 @@ inline void GLImage::InitReset()
 }
 
 
-inline void GLImage::draw()
+inline void GLImage::DrawCanonicalObject()
 {
     int nTop = m_fPercentTop * WindowHeight();
     int nLeft = m_fPercentLeft * WindowWidth();

@@ -4,14 +4,35 @@
 #include <SceneGraph/GLObject.h>
 #include <SceneGraph/GLColor.h>
 
+#include <GL/freeglut_std.h>
+#include <GL/freeglut_ext.h>
+
 #include <string>
 
 namespace SceneGraph
 {
 
+static void* GLTextDefaultFont = GLUT_BITMAP_HELVETICA_12;
+
 class GLText : public GLObject
 {
     public:
+
+        static void Draw(const std::string& text, void* font = GLTextDefaultFont )
+        {
+            glutBitmapString(font,(unsigned char*)text.c_str());
+        }
+
+        static void Draw(const std::string& text, float x, float y, void* font = GLTextDefaultFont)
+        {
+            glRasterPos2f(x,y);
+            Draw(text, font);
+        }
+
+        static int Width(const std::string& text, void* font = GLTextDefaultFont )
+        {
+            return glutBitmapLength(font, (unsigned char*)text.c_str());
+        }
 
 		GLText()
         {
@@ -26,17 +47,18 @@ class GLText : public GLObject
         	m_nY = 0;
         	m_Color = GLColor();
 			m_sText = "";
-			m_nFontID = 0;
-			m_nFontSize = 10;
+//			m_nFontID = 0;
+//			m_nFontSize = 10;
+            m_font = GLTextDefaultFont;
 		}
 
         void draw()
         {
         	PushOrtho( WindowWidth(), WindowHeight() );
             glColor4f( m_Color.r, m_Color.g, m_Color.b, m_Color.a );
-            gl_font( m_nFontID, m_nFontSize );
-            glRasterPos2f( m_nX, m_nY );
-            gl_draw( m_sText.c_str(), m_sText.length() );
+//            gl_font( m_nFontID, m_nFontSize );
+//            gl_draw( m_sText.c_str(), m_sText.length() );
+            Draw(m_sText,m_nX, m_nY);
             PopOrtho();
         }
 
@@ -47,8 +69,18 @@ class GLText : public GLObject
 
         void SetSize( int nFontSize )
 		{
-        	assert(nFontSize > 0);
-			m_nFontSize = nFontSize;
+            assert(nFontSize > 0);
+
+            // TODO: Make this better somehow?
+            if(nFontSize<=10) {
+                m_font = GLUT_BITMAP_HELVETICA_10;
+            }else if(nFontSize <= 12) {
+                m_font = GLUT_BITMAP_HELVETICA_12;
+            }else{
+                m_font = GLUT_BITMAP_HELVETICA_18;
+            }
+
+//			m_nFontSize = nFontSize;
         }
 
         void SetPos( unsigned int X, unsigned int Y )
@@ -63,11 +95,13 @@ class GLText : public GLObject
         }
 
     private:
+        void*           m_font;
+
         std::string 	m_sText;
         unsigned int	m_nX;
         unsigned int	m_nY;
-        int          	m_nFontID;
-        int          	m_nFontSize;
+//        int          	m_nFontID;
+//        int          	m_nFontSize;
         GLColor         	m_Color;
 };
 
