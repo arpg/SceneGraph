@@ -19,13 +19,9 @@ class GLSceneGraph : public GLObject
 
         void Reset();
 
-        void draw();
-
-        void ApplyDfsVisitor( void(*pVisitorFunc)(GLObject*) );
+        void DrawCanonicalObject();
 
     private:
-        void _RecursiveDraw( GLObject* pObj );
-        void _RecursiveVisit( void(*pVisitorFunc)(GLObject*), GLObject* pObj );
 };
 
 }

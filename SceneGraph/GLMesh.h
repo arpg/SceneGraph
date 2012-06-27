@@ -74,44 +74,22 @@ class GLMesh : public GLObject
 
 
         ////////////////////////////////////////////////////////////////////////////
-        virtual void  draw()
+        virtual void  DrawCanonicalObject()
         {
             if( m_pScene ){
                 glPushAttrib(GL_ENABLE_BIT);
 
-                RecursiveRender( m_pScene, m_pScene->mRootNode );
-                glPopAttrib();
-                return;
-
-                glEnable( GL_DEPTH_TEST );
                 if( m_nDisplayList == -1 ){
                     m_nDisplayList = glGenLists(1);
                     glNewList( m_nDisplayList, GL_COMPILE );
+                    // Recursively render ai_scene's scenegraph
                     RecursiveRender( m_pScene, m_pScene->mRootNode );
                     glEndList();
                 }
 
-                //               AllocateSelectionID(); holy cow this is badness batman.  should only call this guy from init code... GTS
-
-                glPushMatrix();
-
-                glTranslated( m_dPosition[0], m_dPosition[1], m_dPosition[2] );
-
-                // TODO: Rotations over the world axis instead of local axis
-                // Doing these rotations one after another results in incremental rotations whose results are dependent on each other
-                // I spent several days trying various different methods to come up with a solution, but eventually I just gave up
-                // I am hoping to tackle this again sometime, but I need a break from it for now...
-                glRotated( m_dPosition[3], 1.0f, 0.0f, 0.0f );
-                glRotated( m_dPosition[4], 0.0f, 1.0f, 0.0f );
-                glRotated( m_dPosition[5], 0.0f, 0.0f, 1.0f );
-
-                glScalef( m_fScale, m_fScale, m_fScale );
-
                 glPushName( m_iMeshID );
                 glCallList( m_nDisplayList );
                 glPopName();
-
-                glPopMatrix();
 
                 glPopAttrib();
             }

@@ -67,7 +67,7 @@ int main( int /*argc*/, char** /*argv[]*/ )
     // Render some stuff
     glTranslatef(0,0,-3);
     glColor3f(1.0,1.0,1.0);
-    glGraph.draw();
+    glGraph.DrawObjectAndChildren();
 
     // Swap frames and Process Events
     glutSwapBuffers();

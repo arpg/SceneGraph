@@ -12,13 +12,13 @@ class GLGrid : public GLObject
     public:
 
         GLGrid()
+            : GLObject("Grid")
         {
-            m_sObjectName = "Grid";
             m_bPerceptable = false;
         }
 
         // from mvl dispview
-        void draw(void)
+        void DrawCanonicalObject(void)
         {
             #define NLINES 50
             #define LDELTA 2

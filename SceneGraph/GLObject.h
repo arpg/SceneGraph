@@ -21,85 +21,55 @@ class GLObject
 {
     public:
 
+        /////////////////////////////////
+        // GLObject Constructors
+        /////////////////////////////////
+
         GLObject();
-
         GLObject( const std::string& name);
+        GLObject( const GLObject& rhs );
 
-        GLObject( const GLObject& rhs )
-        {
-            *this = rhs;
-        }
+        /////////////////////////////////
+        // Drawing methods
+        /////////////////////////////////
 
-        // User supplied gl drawing routine
-		virtual void draw() = 0;
+        /// Apply object transform, then draw object and its children (recursively)
+        void DrawObjectAndChildren();
 
-        virtual void select( unsigned int ) {};
+        /// Draw Canonical object (i.e. without pose transform applied)
+        virtual void DrawCanonicalObject() = 0;
 
-        virtual void MouseOver( unsigned int ) {};
+        /////////////////////////////////
+        // Interaction methods: can be overridden
+        /////////////////////////////////
 
+        virtual void select( unsigned int ) {}
         virtual void drag() {}
+        virtual void release() {}
 
-		virtual void release() {}
-    
-        // Get top,left,bottom,right coordinates of the object
-        // in the window (if it's a 2d object)
-        virtual void GetBoundingBox(int&, int&, int&, int&) {}
+        /////////////////////////////////
+        // Object Properties
+        /////////////////////////////////
 
-        void SetVisible();
+        const std::string& ObjectName() const;
+        void SetObjectName( const std::string& sName );
 
-        void SetInVisible();
-
-        bool IsVisible();
-
-        void SetName( const std::string& sName );
-        
-        const char* ObjectName();
-
+        /// Get / Set Object Id for picking perposes
+        unsigned int Id();
         void SetId( unsigned int nId );
 
-        unsigned int Id();
-
-		// Check if window is valid
-		bool valid(); 
-
-        /// Get parent window width.
-		int WindowWidth(); 
-
-        /// Get parent window height.
-        int WindowHeight(); 
-
-        /// If the name nId is selected
-        bool IsSelected( unsigned int nId );
-
-        /// Unselect name nId
-        void UnSelect( unsigned int nId );
-
-        unsigned int AllocSelectionId(); 
-
-        Eigen::Vector3d GetPosUnderCursor();
-
-		Eigen::Vector2i GetCursorPos(); 
-
-        void AddChild( GLObject* pChild ); 
-
-        std::vector< GLObject* >  m_vpChildren;
-
-        /// such as an image
-        bool Is2dLayer()
-        {
-            return m_bIs2dLayer;
-        }
+        /// Get / Set wether this object should be drawn
+        bool IsVisible();
+        void SetVisible(bool visible);
 
         /// can be measured (e.g., not a virtual thing)
-        bool IsPerceptable()
-        {
-            return m_bPerceptable;
-        } 
+        bool IsPerceptable();
+        void SetPerceptable( bool bPerceptable );
 
-        void SetPerceptable( bool bPerceptable )
-        {
-            m_bPerceptable = bPerceptable;
-        }
+
+        /////////////////////////////////
+        // Object Pose
+        /////////////////////////////////
 
         Eigen::Vector6d GetPose();
 
@@ -109,9 +79,49 @@ class GLObject
 
         void SetPose(double x, double y, double z, double p, double q, double r);
 
+
+        /////////////////////////////////
+        // Children
+        /////////////////////////////////
+
+        void AddChild( GLObject* pChild );
+
+        size_t NumChildren() const;
+
+        /// Access child objects
+        GLObject& operator[](int i);
+        const GLObject& operator[](int i) const;
+
+
+        /////////////////////////////////
+        // 2D Specific features - rethink these?
+        /////////////////////////////////
+    
+        // Get top,left,bottom,right coordinates of the object
+        // in the window (if it's a 2d object)
+        virtual void GetBoundingBox(int&, int&, int&, int&) {}
+
+        /// Get parent window width.
+		int WindowWidth(); 
+
+        /// Get parent window height.
+        int WindowHeight(); 
+
+
+        Eigen::Vector3d GetPosUnderCursor();
+
+		Eigen::Vector2i GetCursorPos(); 
+
+        /// such as an image
+        bool Is2dLayer()
+        {
+            return m_bIs2dLayer;
+        }
+
     protected:
+        std::vector<GLObject*>    m_vpChildren;
+
         std::string               m_sObjectName;
-        GLObject*                 m_pParent;
         bool                      m_bPerceptable; //< can be measured (e.g., not a virtual thing)
         unsigned int              m_nId;      //< Object handle
         bool                      m_bVisible;

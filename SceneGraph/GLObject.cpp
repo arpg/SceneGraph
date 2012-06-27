@@ -1,4 +1,5 @@
 #include "GLObject.h"
+
 #include <map>
 
 namespace SceneGraph
@@ -10,7 +11,7 @@ int                       g_nHandleCounter;
 /////////////////////////////////////////////////////////////////////////////////
 GLObject::GLObject()
     : m_sObjectName("unnamed-object"), m_bVisible(true), m_bIs2dLayer(false),
-      m_bPerceptable(true)
+      m_bPerceptable(true), m_T_pc(Eigen::Matrix4d::Identity())
 {
     m_dPosition << 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f;
 }
@@ -18,22 +19,37 @@ GLObject::GLObject()
 /////////////////////////////////////////////////////////////////////////////////
 GLObject::GLObject( const std::string& name)
     : m_sObjectName(name), m_bVisible(true), m_bIs2dLayer(false),
-      m_bPerceptable(true)
+      m_bPerceptable(true), m_T_pc(Eigen::Matrix4d::Identity())
 {
     m_dPosition << 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f;
 }
 
-
 /////////////////////////////////////////////////////////////////////////////////
-void GLObject::SetVisible()
+GLObject::GLObject( const GLObject& rhs )
 {
-    m_bVisible = true;
+    *this = rhs;
+}
+
+void GLObject::DrawObjectAndChildren()
+{
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glMultMatrixd(m_T_pc.data());
+
+    DrawCanonicalObject();
+
+    for(std::vector<GLObject*>::const_iterator i=m_vpChildren.begin(); i!= m_vpChildren.end(); ++i)
+    {
+        (*i)->DrawObjectAndChildren();
+    }
+
+    glPopMatrix();
 }
 
 /////////////////////////////////////////////////////////////////////////////////
-void GLObject::SetInVisible()
+void GLObject::SetVisible(bool visible)
 {
-    m_bVisible = false;
+    m_bVisible = visible;
 }
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -43,15 +59,27 @@ bool GLObject::IsVisible()
 }
 
 /////////////////////////////////////////////////////////////////////////////////
-void GLObject::SetName( const std::string& sName )
+bool GLObject::IsPerceptable()
+{
+    return m_bPerceptable;
+}
+
+/////////////////////////////////////////////////////////////////////////////////
+void GLObject::SetPerceptable( bool bPerceptable )
+{
+    m_bPerceptable = bPerceptable;
+}
+
+/////////////////////////////////////////////////////////////////////////////////
+void GLObject::SetObjectName( const std::string& sName )
 {
     m_sObjectName = sName;
 }
 
 /////////////////////////////////////////////////////////////////////////////////
-const char* GLObject::ObjectName()
+const std::string& GLObject::ObjectName() const
 {
-    return m_sObjectName.c_str();
+    return m_sObjectName;
 }
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -64,28 +92,6 @@ void GLObject::SetId( unsigned int nId )
 unsigned int GLObject::Id()
 {
     return m_nId;
-}
-
-/////////////////////////////////////////////////////////////////////////////////
-bool GLObject::IsSelected( unsigned int nId )
-{
-    // TODO: Implement this functionality
-//    return m_pWin->IsSelected( nId );
-}
-
-/////////////////////////////////////////////////////////////////////////////////
-void GLObject::UnSelect( unsigned int nId )
-{
-    // TODO: Implement this functionality
-//    m_pWin->UnSelect( nId );
-}
-
-/////////////////////////////////////////////////////////////////////////////////
-unsigned int GLObject::AllocSelectionId()
-{
-    // TODO: Implement this functionality
-//    unsigned int nId =  m_pWin->AllocSelectionId( this );
-//    return nId;
 }
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -103,25 +109,31 @@ Eigen::Vector2i GLObject::GetCursorPos()
 }
 
 /////////////////////////////////////////////////////////////////////////////////
-bool GLObject::valid()
-{
-    // TODO: Implement this functionality?
-//    if( m_pWin && m_pWin->valid() ) {
-//        return true;
-//    }
-//    return false;
-}
-
-/////////////////////////////////////////////////////////////////////////////////
 void GLObject::AddChild( GLObject* pChild )
 {
     m_vpChildren.push_back( pChild );
-    pChild->m_pParent = this;
     g_mObjects[ g_nHandleCounter ] = pChild;
     pChild->SetId( g_nHandleCounter ); 
     //printf("adding %s in slot %d\n", pChild->m_sObjectName.c_str(), g_nHandleCounter );
     g_nHandleCounter++;
+}
 
+/////////////////////////////////////////////////////////////////////////////////
+size_t GLObject::NumChildren() const
+{
+    return m_vpChildren.size();
+}
+
+/////////////////////////////////////////////////////////////////////////////////
+GLObject& GLObject::operator[](int i)
+{
+    return *m_vpChildren[i];
+}
+
+/////////////////////////////////////////////////////////////////////////////////
+const GLObject& GLObject::operator[](int i) const
+{
+    return *m_vpChildren[i];
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
