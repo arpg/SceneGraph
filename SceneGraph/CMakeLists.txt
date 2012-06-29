@@ -41,6 +41,7 @@ set( SceneGraph_INCLUDE_DIRS
         ${ASSIMP_INCLUDE_DIR}
         ${EIGEN3_INCLUDE_DIR}
         ${IL_INCLUDE_DIR}
+        ${IL_INCLUDE_DIR}/..
    )
 
 # set for "export_library", below 
