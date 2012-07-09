@@ -2,7 +2,7 @@
 
 static int m_nUsedAttachments = 0;
 static int m_nIndex = 0;
-        
+
 /////////////////////////////////////////////////////////////////////////////////////////
 SimCamMode::SimCamMode( GLSimCam& sc, eSimCamType eCamType ) : m_SimCam( sc ), m_eCamType( eCamType )
 {
@@ -10,7 +10,7 @@ SimCamMode::SimCamMode( GLSimCam& sc, eSimCamType eCamType ) : m_SimCam( sc ), m
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
-void SimCamMode::PboInit( int format, int type ) 
+void SimCamMode::PboInit( int format, int type )
 {
     m_eFormat = format;
     m_eType = type;
@@ -22,7 +22,7 @@ void SimCamMode::PboInit( int format, int type )
 
     int bytesPerChannel = BitsPerChannel( m_eType) / 8;
 
-    m_nDataSize = m_SimCam.ImageWidth() * m_SimCam.ImageHeight() * (numberOfChannels * bytesPerChannel); 
+    m_nDataSize = m_SimCam.ImageWidth() * m_SimCam.ImageHeight() * (numberOfChannels * bytesPerChannel);
 
     // Create pixel buffer object
     glGenBuffersARB( 1, m_pPboIds );
@@ -40,12 +40,12 @@ void SimCamMode::PboInit( int format, int type )
 	    break;
         case GL_FLOAT:
 	    m_pBuffer = new GLfloat[m_nDataSize / bytesPerChannel];
-	    break; 
+	    break;
         default:
 	    m_pBuffer = new GLubyte[m_nDataSize / bytesPerChannel];
 	    break;
     }
-   
+
     CheckForGLErrors();
 }
 
@@ -93,7 +93,7 @@ void SimCamMode::Init( bool shader, GLuint sp, GLenum format, GLenum type )
 {
     m_bHasShader = shader;
     m_nShaderProgram = sp;
- 
+
     m_eAttachmentIndex = getNextAttachmentIndex();
     m_nColorTextureId = getNextCTId();
     PboInit(format, type);
@@ -105,7 +105,7 @@ void SimCamMode::RenderToTexture()
     m_SimCam.m_pFbo->Begin();
     glDrawBuffer(m_eAttachmentIndex);
 
-    if( m_bHasShader ){ 
+    if( m_bHasShader ){
         glUseProgram(m_nShaderProgram);
     }
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT );
@@ -151,7 +151,7 @@ int SimCamMode::getNextCTId()
 
 /////////////////////////////////////////////////////////////////////////////////////////
 // Looks like the limit is 16.
-GLenum SimCamMode::getNextAttachmentIndex() 
+GLenum SimCamMode::getNextAttachmentIndex()
 {
     unsigned int nextAttachment = -1;
     if (m_nUsedAttachments < GL_MAX_COLOR_ATTACHMENTS) { // Not sure if this check works
@@ -206,7 +206,7 @@ GLenum SimCamMode::getNextAttachmentIndex()
                 break;
         }
         m_nUsedAttachments++;
-    } 
+    }
     else {
         printf("ERROR: Out of color attachments.\n");
     }
