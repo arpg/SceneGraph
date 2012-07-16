@@ -44,36 +44,36 @@ class GLImage : public GLObject
 
         // Return image location within window
         void GetBoundingBox(int &nTop, int& nLeft, int& nBottom, int& nRight);
-    
+
 		// Return X displacement within window
 		int GetX();
 
 		// Return Y displacement within window
 		int GetY();
-    
+
         // Return Image Width within window
         int GetWidth();
-    
+
         // Return Image Width within window
         int GetHeight();
-    
+
         // Return Image Width
         int GetImageWidth();
 
         // Return Image Height
         int GetImageHeight();
-    
-    
+
+
         unsigned int MemSize ();
 
         void SetImage( unsigned char* pImageData, int w, int h, int nFormat, int nType );
 
         void SetSizeAsPercentageOfWindow( float fTop, float fLeft, float fBottom, float fRight );
- 
+
 	private:
 		/// Allocate and bind a texture.
 		void InitTexture();
-    
+
 	private:
         bool           	m_bTextureInitialized;
         bool            m_bTextureDataChanged;
@@ -97,12 +97,12 @@ inline void GLImage::InitTexture()
 
     if( m_pImageData ) {
         if( !m_bTextureInitialized ) {
-            m_nTex = GenerateAndBindRectTextureID( m_nImageWidth, m_nImageHeight, GL_LUMINANCE, GL_UNSIGNED_BYTE, m_pImageData );
+            m_nTex = GenerateAndBindRectTextureID( m_nImageWidth, m_nImageHeight, m_nFormat, m_nType, m_pImageData );
             CheckForGLErrors();
         }
 
         if( m_bTextureDataChanged == true ) {
-            BindRectTextureID( m_nTex, m_nImageWidth, m_nImageHeight, GL_LUMINANCE, GL_UNSIGNED_BYTE, m_pImageData );
+            BindRectTextureID( m_nTex, m_nImageWidth, m_nImageHeight, m_nFormat, m_nType, m_pImageData );
             CheckForGLErrors();
         }
     }
@@ -188,14 +188,14 @@ inline void GLImage::SetPos( int nTop, int nLeft, int nBottom, int nRight )
         return;
     }
 
-    m_fPercentTop = float(nTop)/WindowHeight(); 
-    m_fPercentBottom = float(nBottom)/WindowHeight(); 
-    m_fPercentLeft = float(nLeft)/WindowWidth(); 
-    m_fPercentRight = float(nRight)/WindowWidth(); 
+    m_fPercentTop = float(nTop)/WindowHeight();
+    m_fPercentBottom = float(nBottom)/WindowHeight();
+    m_fPercentLeft = float(nLeft)/WindowWidth();
+    m_fPercentRight = float(nRight)/WindowWidth();
 }
 
 
-inline void GLImage::SetBorder( unsigned int nSize ) 
+inline void GLImage::SetBorder( unsigned int nSize )
 {
 	m_nBorder = nSize;
 }
@@ -205,10 +205,10 @@ inline void GLImage::GetBoundingBox(int &nTop, int& nLeft, int& nBottom, int& nR
     nTop = m_fPercentTop * WindowHeight();
     nLeft = m_fPercentLeft * WindowWidth();
     nBottom = m_fPercentBottom * WindowHeight();
-    nRight = m_fPercentRight * WindowWidth(); 
+    nRight = m_fPercentRight * WindowWidth();
 }
 
-inline int GLImage::GetX() 
+inline int GLImage::GetX()
 {
 	return m_fPercentLeft*WindowWidth();
 }
@@ -276,11 +276,11 @@ inline void GLImage::SetImage( unsigned char* pImageData, int w, int h, int nFor
     m_nFormat = nFormat;
     m_nType = nType;
 
-    
+
 }
 
-inline void GLImage::SetSizeAsPercentageOfWindow( 
-        float fTop, float fLeft, float fBottom, float fRight 
+inline void GLImage::SetSizeAsPercentageOfWindow(
+        float fTop, float fLeft, float fBottom, float fRight
         )
 {
     m_fPercentTop    = fTop;
