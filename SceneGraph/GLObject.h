@@ -39,6 +39,11 @@ class GLObject
         /// Draw Canonical object (i.e. without pose transform applied)
         virtual void DrawCanonicalObject() = 0;
 
+        /// Alow this object to draw itself as a functor
+        inline void operator()() {
+            DrawObjectAndChildren();
+        }
+
         /////////////////////////////////
         // Interaction methods: can be overridden
         /////////////////////////////////
@@ -46,7 +51,9 @@ class GLObject
         virtual void Mouse(int button, int x, int y, bool pressed, int button_state) {
             std::cout << m_sObjectName << std::endl;
         }
-        virtual void MouseMotion(int x, int y, int button_state) {}
+        virtual void MouseMotion(int x, int y, int button_state) {
+            std::cout << m_sObjectName << ": " << x << "," << y << std::endl;
+        }
 
         /////////////////////////////////
         // Object Properties
@@ -114,7 +121,7 @@ class GLObject
 		Eigen::Vector2i GetCursorPos(); 
 
         /// such as an image
-        bool Is2dLayer()
+        inline bool Is2dLayer()
         {
             return m_bIs2dLayer;
         }
