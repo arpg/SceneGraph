@@ -15,10 +15,9 @@ class GLSceneGraph : public GLObject
 
         GLObject* GetObject( unsigned int nId );
 
-        void RegisterObject( GLObject* pObj );
-
         void Reset();
 
+        // Perform any scene setup
         void DrawCanonicalObject();
 
     private:

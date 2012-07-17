@@ -6,20 +6,20 @@ namespace SceneGraph
 {
 
 std::map<int,GLObject*>   g_mObjects; // map of id to objects
-int                       g_nHandleCounter;
+int                       g_nHandleCounter = 1;
 
 /////////////////////////////////////////////////////////////////////////////////
 GLObject::GLObject()
-    : m_sObjectName("unnamed-object"), m_bVisible(true), m_bIs2dLayer(false),
-      m_bPerceptable(true), m_T_pc(Eigen::Matrix4d::Identity())
+    : m_sObjectName("unnamed-object"), m_bVisible(true), m_bPerceptable(true),
+      m_nId(0), m_T_pc(Eigen::Matrix4d::Identity()), m_bIs2dLayer(false)
 {
     m_dPosition << 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f;
 }
 
 /////////////////////////////////////////////////////////////////////////////////
 GLObject::GLObject( const std::string& name)
-    : m_sObjectName(name), m_bVisible(true), m_bIs2dLayer(false),
-      m_bPerceptable(true), m_T_pc(Eigen::Matrix4d::Identity())
+    : m_sObjectName(name), m_bVisible(true), m_bPerceptable(true),
+      m_nId(0), m_T_pc(Eigen::Matrix4d::Identity()), m_bIs2dLayer(false)
 {
     m_dPosition << 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f;
 }
@@ -36,12 +36,14 @@ void GLObject::DrawObjectAndChildren()
     glPushMatrix();
     glMultMatrixd(m_T_pc.data());
 
+    glPushName(m_nId);
     DrawCanonicalObject();
 
     for(std::vector<GLObject*>::const_iterator i=m_vpChildren.begin(); i!= m_vpChildren.end(); ++i)
     {
         (*i)->DrawObjectAndChildren();
     }
+    glPopName();
 
     glPopMatrix();
 }
@@ -114,7 +116,6 @@ void GLObject::AddChild( GLObject* pChild )
     m_vpChildren.push_back( pChild );
     g_mObjects[ g_nHandleCounter ] = pChild;
     pChild->SetId( g_nHandleCounter ); 
-    //printf("adding %s in slot %d\n", pChild->m_sObjectName.c_str(), g_nHandleCounter );
     g_nHandleCounter++;
 }
 

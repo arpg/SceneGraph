@@ -43,9 +43,10 @@ class GLObject
         // Interaction methods: can be overridden
         /////////////////////////////////
 
-        virtual void select( unsigned int ) {}
-        virtual void drag() {}
-        virtual void release() {}
+        virtual void Mouse(int button, int x, int y, bool pressed, int button_state) {
+            std::cout << m_sObjectName << std::endl;
+        }
+        virtual void MouseMotion(int x, int y, int button_state) {}
 
         /////////////////////////////////
         // Object Properties
@@ -122,14 +123,16 @@ class GLObject
         std::vector<GLObject*>    m_vpChildren;
 
         std::string               m_sObjectName;
+        bool                      m_bVisible;
         bool                      m_bPerceptable; //< can be measured (e.g., not a virtual thing)
         unsigned int              m_nId;      //< Object handle
-        bool                      m_bVisible;
-        bool                      m_bIs2dLayer; //< such as an image
-        Eigen::Vector6d           m_dPosition; //< Object position
 
         // Child to Parent transform. Includes position, rotation and scale (x_p = m_T_pc & x_c)
         Eigen::Matrix4d           m_T_pc;
+
+        // Deprecate these?
+        bool                      m_bIs2dLayer; //< such as an image
+        Eigen::Vector6d           m_dPosition; //< Object position
 };
 
 } // SceneGraph

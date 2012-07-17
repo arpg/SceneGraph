@@ -21,13 +21,17 @@ GLObject* GLSceneGraph::Root()
 /////////////////////////////////////////////////////////////////////////////////
 void GLSceneGraph::Reset()
 {
-    m_vpChildren.clear(); // HACK -- should recursively clear these guys...
+    // Remove children
+    m_vpChildren.clear();
+
+    // Remove id->child mappings
     g_mObjects.clear();
 }
 
 /////////////////////////////////////////////////////////////////////////////////
 void GLSceneGraph::DrawCanonicalObject()
 {
+    // Apply lights and any global properties
 }
 
 /////////////////////////////////////////////////////////////////////////////////

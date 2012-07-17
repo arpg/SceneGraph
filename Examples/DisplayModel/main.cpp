@@ -3,6 +3,8 @@
 #include <SceneGraph/GLSceneGraph.h>
 #include <SceneGraph/GLMesh.h>
 #include <SceneGraph/GLGrid.h>
+#include <boost/bind.hpp>
+
 
 using namespace SceneGraph;
 using namespace pangolin;
@@ -35,45 +37,131 @@ void SetupOpenGL()
 
 }
 
+struct DrawGLObjectFunctor
+{
+    DrawGLObjectFunctor(SceneGraph::GLObject& glObject, pangolin::OpenGlRenderState& renderState)
+        :glObject(glObject), renderState(renderState)
+    {
+    }
+
+    void operator()(pangolin::View& view) {
+        view.ActivateScissorAndClear(renderState);
+        glObject.DrawObjectAndChildren();
+    }
+
+    SceneGraph::GLObject& glObject;
+    pangolin::OpenGlRenderState& renderState;
+};
+
+struct HandlerSceneGraph : Handler3D
+{
+
+    HandlerSceneGraph(GLSceneGraph& graph, OpenGlRenderState& cam_state, AxisDirection enforce_up=AxisNone, float trans_scale=0.01f)
+        : Handler3D(cam_state,enforce_up, trans_scale), graph(graph), grab_width(10) {}
+
+    void ProcessHits (GLint hits, GLuint* buf, MouseButton button, int x, int y, bool pressed, int button_state)
+    {
+        GLuint* closestNames = 0;
+        GLuint closestNumNames;
+        GLuint closestZ = numeric_limits<GLuint>::max();
+
+        for (int i = 0; i < hits; i++) {
+            if (buf[1] < closestZ) {
+                closestNames = buf+3;
+                closestNumNames = buf[0];
+                closestZ = buf[1];
+            }
+            buf += buf[0]+3;
+        }
+        for (unsigned int i = 0; i < closestNumNames; i++) {
+            GLObject* obj = graph.GetObject(closestNames[i]);
+            if(obj) obj->Mouse(button,x, y, pressed, button_state);
+        }
+    }
+
+    void Mouse(View& display, MouseButton button, int x, int y, bool pressed, int button_state)
+    {
+        if(pressed) {
+            GLint viewport[4] = {display.v.l,display.v.b,display.v.w,display.v.h};
+            OpenGlMatrix mv = cam_state->GetModelViewMatrix();
+            OpenGlMatrix proj = cam_state->GetProjectionMatrix();
+
+            const unsigned int MAX_SEL_SIZE = 64;
+            GLuint vSelectBuf[MAX_SEL_SIZE];
+            glSelectBuffer( MAX_SEL_SIZE, vSelectBuf );
+
+            glMatrixMode(GL_PROJECTION);
+            glLoadIdentity();
+            gluPickMatrix( x, y, grab_width, grab_width, viewport );
+            proj.Multiply();
+
+            glMatrixMode(GL_MODELVIEW);
+            mv.Load();
+
+            glRenderMode( GL_SELECT );
+            glInitNames();
+            graph.DrawObjectAndChildren();
+            glFlush();
+
+            GLint nHits = glRenderMode( GL_RENDER );
+
+            if( nHits > 0 ){
+                ProcessHits( nHits, vSelectBuf, button, x, y, pressed, button_state );
+            }
+        }
+        Handler3D::Mouse(display,button,x,y,pressed,button_state);
+    }
+
+    void MouseMotion(View& view, int x, int y, int button_state)
+    {
+        Handler3D::MouseMotion(view,x,y,button_state);
+    }
+
+    GLSceneGraph& graph;
+    unsigned grab_width;
+};
+
 int main( int /*argc*/, char** /*argv[]*/ )
 {  
-  // Create OpenGL window in single line thanks to GLUT
-  pangolin::CreateGlutWindowAndBind("Main",640,480);
-  SetupOpenGL();
+    // Create OpenGL window in single line thanks to GLUT
+    pangolin::CreateGlutWindowAndBind("Main",640,480);
+    SetupOpenGL();
 
-  // Define Camera Render Object (for view / scene browsing)
-  pangolin::OpenGlRenderState renderState;
-  renderState.Set(ProjectionMatrix(640,480,420,420,320,240,0.1,1000));
-  renderState.Set(IdentityMatrix(GlModelViewStack));
+    // Define objects to draw
+    GLMesh glCar("beatle-no-wheels-no-interior-embedded-texture.blend");
+    GLGrid glGrid;
 
-  // Add named OpenGL viewport to window and provide 3D Handler
-  View& v3d = pangolin::CreateDisplay()
-    .SetBounds(0.0, 1.0, 0.0, 1.0, -640.0f/480.0f)
-    .SetHandler(new Handler3D(renderState,AxisNegZ));
+    // Add to scenegraph
+    GLSceneGraph glGraph;
+    glGraph.AddChild(&glCar);
+    glGraph.AddChild(&glGrid);
 
-  GLSceneGraph glGraph;
-  GLMesh glCar("beatle-no-wheels-no-interior.blend");
-  glGraph.AddChild(&glCar);
-  GLGrid glGrid;
-  glGraph.AddChild(&glGrid);
+    //  glGraph.SetId(10);
+    //  glCar.SetId(30);
+    //  glGrid.SetId(20);
 
-  // Default hooks for exiting (Esc) and fullscreen (tab).
-  while( !pangolin::ShouldQuit() )
-  {
-    v3d.ActivateScissorAndClear(renderState);
+    // Define Camera Render Object (for view / scene browsing)
+    pangolin::OpenGlRenderState renderState(
+                ProjectionMatrix(640,480,420,420,320,240,0.1,1000),
+                Pose(0,0,-3, AxisNegZ, AxisY)
+                );
 
-    // Render some stuff
-    glTranslatef(0,0,-3);
-    glColor3f(1.0,1.0,1.0);
-    glGraph.DrawObjectAndChildren();
+    // Add viewport to window and provide 3D Handler
+    View& v3d = pangolin::CreateDisplay()
+            .SetBounds(0.0, 1.0, 0.0, 1.0, -640.0f/480.0f)
+            .SetHandler(new HandlerSceneGraph(glGraph,renderState,AxisNegZ));
+    v3d.extern_draw_function = DrawGLObjectFunctor(glGraph, renderState);
 
-    // Swap frames and Process Events
-    glutSwapBuffers();
-    glutMainLoopEvent();
+    // Default hooks for exiting (Esc) and fullscreen (tab).
+    while( !pangolin::ShouldQuit() )
+    {
+        v3d.ActivateScissorAndClear(renderState);
 
-//    pangolin::FinishGlutFrame();
-    usleep(1000);
-  }
+        // Swap frames and Process Events
+        FinishGlutFrame();
 
-  return 0;
+        usleep(1000);
+    }
+
+    return 0;
 }

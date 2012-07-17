@@ -87,9 +87,7 @@ class GLMesh : public GLObject
                     glEndList();
                 }
 
-                glPushName( m_iMeshID );
                 glCallList( m_nDisplayList );
-                glPopName();
 
                 glPopAttrib();
             }
@@ -607,9 +605,9 @@ protected:
         }
 
         const struct aiScene*   m_pScene;
+        GLint                   m_nDisplayList;
         float                   m_fScale;
         float                   m_fAlpha; // render translucent meshes?
-        GLint                   m_nDisplayList;
         unsigned int            m_iMeshID;
         bool                    m_bShowMeshNormals;
         Eigen::Vector3d         m_Dimensions;
