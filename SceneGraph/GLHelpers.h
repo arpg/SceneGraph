@@ -287,6 +287,50 @@ inline Eigen::Matrix4d GLCart2T(
     return T;
 }
 
+inline Eigen::Vector3d GLR2Cart(
+        const Eigen::Matrix3d& R
+        )
+{
+    Eigen::Vector3d rpq;
+    // roll
+    rpq[0] = atan2( R(2,1), R(2,2) );
+
+    // pitch
+    double det = -R(2,0) * R(2,0) + 1.0;
+    if (det <= 0) {
+        if (R(2,0) > 0){
+            rpq[1] = -M_PI / 2.0;
+        }
+        else{
+            rpq[1] = M_PI / 2.0;
+        }
+    }
+    else{
+        rpq[1] = -asin(R(2,0));
+    }
+
+    // yaw
+    rpq[2] = atan2(R(1,0), R(0,0));
+
+    return rpq;
+}
+
+inline Eigen::Matrix<double,6,1> GLT2Cart(
+        const Eigen::Matrix4d& T
+        )
+{
+    Eigen::Matrix<double,6,1> Cart;
+    Eigen::Vector3d rpq = GLR2Cart( T.block<3,3>(0,0) );
+    Cart[0] = T(0,3);
+    Cart[1] = T(1,3);
+    Cart[2] = T(2,3);
+    Cart[3] = rpq[0];
+    Cart[4] = rpq[1];
+    Cart[5] = rpq[2];
+
+    return Cart;
+}
+
 
 // TODO: Should these really be here?
 inline Eigen::Matrix3d GLCart2R(

@@ -75,8 +75,6 @@ class GLObject
 
         Eigen::Vector6d GetPose();
 
-        Eigen::Vector6d& GetPoseRef();
-
         void SetPose(Eigen::Vector6d v);
 
         void SetPose(double x, double y, double z, double p, double q, double r);
@@ -130,7 +128,6 @@ class GLObject
 
         // Deprecate these?
         bool                      m_bIs2dLayer; //< such as an image
-        Eigen::Vector6d           m_dPosition; //< Object position
 
         // static map of id to objects
         static std::map<int,GLObject*> g_mObjects;

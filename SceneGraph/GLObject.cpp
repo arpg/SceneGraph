@@ -11,7 +11,6 @@ GLObject::GLObject()
     : m_sObjectName("unnamed-object"), m_bVisible(true), m_bPerceptable(true),
       m_T_pc(Eigen::Matrix4d::Identity()), m_bIs2dLayer(false)
 {
-    Init();
 }
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -19,19 +18,12 @@ GLObject::GLObject( const std::string& name)
     : m_sObjectName(name), m_bVisible(true), m_bPerceptable(true),
       m_T_pc(Eigen::Matrix4d::Identity()), m_bIs2dLayer(false)
 {
-    Init();
 }
 
 /////////////////////////////////////////////////////////////////////////////////
 GLObject::GLObject( const GLObject& rhs )
 {
     *this = rhs;
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////
-void GLObject::Init()
-{
-    m_dPosition.setZero();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
@@ -122,33 +114,20 @@ const GLObject& GLObject::operator[](int i) const
 ///////////////////////////////////////////////////////////////////////////////////////////
 Eigen::Vector6d GLObject::GetPose()
 {
-    return m_dPosition;
+    return GLT2Cart(m_T_pc);
 }
-
-
-///////////////////////////////////////////////////////////////////////////////////////////
-Eigen::Vector6d& GLObject::GetPoseRef()
-{
-    return m_dPosition;
-}
-
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 void GLObject::SetPose(Eigen::Vector6d v)
 {
-    m_dPosition = v;
+    SetPose(v(0), v(1), v(2), v(3), v(4), v(5));
 }
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
 void GLObject::SetPose(double x, double y, double z, double p, double q, double r)
 {
-    m_dPosition[0] = x;
-    m_dPosition[1] = y;
-    m_dPosition[2] = z;
-    m_dPosition[3] = p;
-    m_dPosition[4] = q;
-    m_dPosition[5] = r;
+    m_T_pc = GLCart2T(x,y,z,r,p,q);
 }
 
 

@@ -18,9 +18,11 @@ int main( int /*argc*/, char** /*argv[]*/ )
 
     // Define objects to draw
     GLGrid glGrid(50,2.0, true);
-    GLWayPoint glWaypoint;
-    GLLineStrip glLineStrip;
 
+    GLWayPoint glWaypoint;
+    glWaypoint.SetPose(0.5,0.5,0,0,0,0);
+
+    GLLineStrip glLineStrip;
     glLineStrip.SetPoint(1,1,1);
     glLineStrip.SetPoint(2,1,1);
     glLineStrip.SetPoint(3,1,1);
@@ -35,7 +37,7 @@ int main( int /*argc*/, char** /*argv[]*/ )
     // Define Camera Render Object (for view / scene browsing)
     pangolin::OpenGlRenderState renderState(
                 ProjectionMatrix(640,480,420,420,320,240,0.1,1000),
-                Pose(0,0,-3, AxisNegZ, AxisY)
+                Pose(0,0,-3)
                 );
 
     // Add viewport to window and provide 3D Handler
