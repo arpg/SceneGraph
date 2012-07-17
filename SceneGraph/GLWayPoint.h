@@ -34,12 +34,12 @@ public:
         m_nFrontId = AllocSelectionId();
     }
 
-    bool Mouse(int button, const Eigen::Vector3d &win, const Eigen::Vector3d &obj, const Eigen::Vector3d& normal, bool pressed, int button_state, int pickId)
-    {
-        return false;
-    }
+//    bool Mouse(int button, const Eigen::Vector3d &win, const Eigen::Vector3d &obj, const Eigen::Vector3d& normal, bool pressed, int button_state, int pickId)
+//    {
+//        return false;
+//    }
 
-    bool MouseMotion(const Eigen::Vector3d &win, const Eigen::Vector3d &obj, const Eigen::Vector3d& normal, int button_state, int pickId)
+    bool MouseMotion(const Eigen::Vector3d& /*win*/, const Eigen::Vector3d &obj, const Eigen::Vector3d& normal, int /*button_state*/, int pickId)
     {
         m_bDirty = true; // flag for update
         Eigen::Matrix4d& T = m_T_pc;
@@ -63,10 +63,6 @@ public:
         }
         return true;
     }
-    
-//    void release() {
-//        m_sLabel.clear();
-//    }
         
     void DrawCanonicalObject() {
         glPushAttrib(GL_ENABLE_BIT);

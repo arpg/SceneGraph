@@ -49,15 +49,9 @@ class GLObject
         // Interaction methods: can be overridden
         /////////////////////////////////
 
-        virtual bool Mouse(int button, const Eigen::Vector3d& win, const Eigen::Vector3d& obj, const Eigen::Vector3d& normal, bool pressed, int button_state, int pickId) {
-            return false;
-//            std::cout << m_sObjectName << std::endl;
-        }
+        virtual bool Mouse(int button, const Eigen::Vector3d& win, const Eigen::Vector3d& obj, const Eigen::Vector3d& normal, bool pressed, int button_state, int pickId);
 
-        virtual bool MouseMotion(const Eigen::Vector3d& win, const Eigen::Vector3d& obj, const Eigen::Vector3d& normal, int button_state, int pickId) {
-            return false;
-//            std::cout << m_sObjectName << ": " << x << "," << y << std::endl;
-        }
+        virtual bool MouseMotion(const Eigen::Vector3d& win, const Eigen::Vector3d& obj, const Eigen::Vector3d& normal, int button_state, int pickId);
 
         /////////////////////////////////
         // Object Properties
@@ -143,6 +137,16 @@ class GLObject
         static int g_nHandleCounter;
 
 };
+
+inline bool GLObject::Mouse(int, const Eigen::Vector3d&, const Eigen::Vector3d&, const Eigen::Vector3d&, bool, int, int) {
+    return false;
+}
+
+inline bool GLObject::MouseMotion(const Eigen::Vector3d&, const Eigen::Vector3d&, const Eigen::Vector3d&, int, int) {
+    return false;
+}
+
+
 
 } // SceneGraph
 

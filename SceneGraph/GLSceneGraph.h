@@ -11,14 +11,16 @@ class GLSceneGraph : public GLObject
 {
     public:
         GLSceneGraph();
-        GLObject* Root();
 
+        GLObject* Root();
         GLObject* GetObject( unsigned int nId );
 
         void Reset();
 
         // Perform any scene setup
         void DrawCanonicalObject();
+
+        static void ApplyPreferredGlSettings();
 
     private:
 };

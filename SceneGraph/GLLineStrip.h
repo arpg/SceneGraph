@@ -20,13 +20,10 @@ class GLLineStrip : public GLObject
 
         void InitReset()
         {
-			m_Xref = 0;
-			m_Yref = 0;
-			m_Zref = 0;
 			m_Color = GLColor();
         }
 
-        void draw()
+        void DrawCanonicalObject()
         {
             glPushAttrib(GL_ENABLE_BIT);
 
@@ -35,11 +32,10 @@ class GLLineStrip : public GLObject
             glBegin( GL_LINE_STRIP );
             glColor4f( m_Color.r, m_Color.g, m_Color.b, m_Color.a );
             for( unsigned int ii = 0; ii < m_vPts.size(); ii+=3 ) {
-                  glVertex3d( m_vPts[ii] + m_Xref, m_vPts[ii+1] + m_Yref, m_vPts[ii+2] + m_Zref );
+                  glVertex3d( m_vPts[ii], m_vPts[ii+1], m_vPts[ii+2] );
             }
             glEnd();
             glPopAttrib();
-
         }
 
         void SetPoint( Eigen::Vector3d Point )
@@ -78,11 +74,12 @@ class GLLineStrip : public GLObject
             }
 		}
 
+        // deprecated: set GLLineStrip pose instead.
         void SetReference( unsigned int Xref, unsigned int Yref, unsigned int Zref )
 		{
-        	m_Xref = Xref;
-        	m_Yref = Yref;
-			m_Zref = Zref;
+            m_T_pc(0,3) = Xref;
+            m_T_pc(1,3) = Yref;
+            m_T_pc(2,3) = Zref;
         }
 
         void ClearLines()
@@ -97,9 +94,6 @@ class GLLineStrip : public GLObject
 
     private:
         std::vector< double >						m_vPts;
-        unsigned int								m_Xref;
-        unsigned int			 				    m_Yref;
-		unsigned int								m_Zref;
         GLColor         				   			m_Color;
 };
 

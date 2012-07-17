@@ -22,6 +22,8 @@ set( SceneGraph_SOURCES
    )
 
 set( SceneGraph_HEADERS
+        PangolinSceneGraph.h
+        SceneGraph.h
         GLSLHelpers.h
         GLHelpers.h
         GLColor.h
