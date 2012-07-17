@@ -3,7 +3,12 @@
 #include <SceneGraph/GLSceneGraph.h>
 #include <SceneGraph/GLMesh.h>
 #include <SceneGraph/GLGrid.h>
+#include <SceneGraph/GLWaypoint.h>
+#include <SceneGraph/GLLineStrip.h>
+
 #include <boost/bind.hpp>
+
+#include <Eigen/Eigen>
 
 
 using namespace SceneGraph;
@@ -46,9 +51,9 @@ struct HandlerSceneGraph : Handler3D
 {
 
     HandlerSceneGraph(GLSceneGraph& graph, OpenGlRenderState& cam_state, AxisDirection enforce_up=AxisNone, float trans_scale=0.01f)
-        : Handler3D(cam_state,enforce_up, trans_scale), m_scenegraph(graph), m_grab_width(10) {}
+        : Handler3D(cam_state,enforce_up, trans_scale), m_scenegraph(graph), m_grab_width(15) {}
 
-    void ProcessHitBuffer (GLint hits, GLuint* buf, std::vector<GLObject*>& objects )
+    void ProcessHitBuffer (GLint hits, GLuint* buf, std::map<int,GLObject*>& objects )
     {
         GLuint* closestNames = 0;
         GLuint closestNumNames;
@@ -62,13 +67,20 @@ struct HandlerSceneGraph : Handler3D
             }
             buf += buf[0]+3;
         }
+//        cout << "------" << endl;
         for (unsigned int i = 0; i < closestNumNames; i++) {
-            GLObject* obj = m_scenegraph.GetObject(closestNames[i]);
-            if(obj) objects.push_back(obj);
+            const int pickId = closestNames[i];
+            GLObject* obj = m_scenegraph.GetObject(pickId);
+            if(obj) {
+                objects[pickId] = obj;
+//                cout << obj->ObjectName();
+            }
+//            cout << " (" << pickId << "), ";
         }
+//        cout << endl;
     }
 
-    void ComputeHits(View& display, const OpenGlRenderState& cam_state, int x, int y, int grab_width, std::vector<GLObject*>& hit_objects )
+    void ComputeHits(View& display, const OpenGlRenderState& cam_state, int x, int y, int grab_width, std::map<int,GLObject*>& hit_objects )
     {
         // Get views viewport / modelview /projection
         GLint viewport[4] = {display.v.l,display.v.b,display.v.w,display.v.h};
@@ -100,31 +112,71 @@ struct HandlerSceneGraph : Handler3D
         }
     }
 
-    void Mouse(View& display, MouseButton button, int x, int y, bool pressed, int button_state)
+    void GetPosNormal(View& view, int x, int y, Eigen::Vector3d& p, Eigen::Vector3d& P, Eigen::Vector3d& n)
     {
+        const GLint viewport[4] = {view.v.l,view.v.b,view.v.w,view.v.h};
+        const OpenGlMatrix proj = cam_state->GetProjectionMatrix();
+        const OpenGlMatrix mv = cam_state->GetModelViewMatrix();
+
+        glReadBuffer(GL_FRONT);
+        const int zl = (hwin*2+1);
+        const int zsize = zl*zl;
+        GLfloat zs[zsize];
+        glReadPixels(x-hwin,y-hwin,zl,zl,GL_DEPTH_COMPONENT,GL_FLOAT,zs);
+        const GLfloat mindepth = *(std::min_element(zs,zs+zsize));
+
+        p << x, y, mindepth;
+        gluUnProject(x, y, mindepth, mv.m, proj.m, viewport, &P(0), &P(1), &P(2));
+
+        Eigen::Vector3d Pl,Pr,Pb,Pt;
+        gluUnProject(x-hwin, y, zs[hwin*zl + 0],    mv.m, proj.m, viewport, &Pl(0), &Pl(1), &Pl(2));
+        gluUnProject(x+hwin, y, zs[hwin*zl + zl-1], mv.m, proj.m, viewport, &Pr(0), &Pr(1), &Pr(2));
+        gluUnProject(x, y-hwin, zs[hwin+1],         mv.m, proj.m, viewport, &Pb(0), &Pb(1), &Pb(2));
+        gluUnProject(x, y+hwin, zs[zsize-(hwin+1)], mv.m, proj.m, viewport, &Pt(0), &Pt(1), &Pt(2));
+
+        n = ((Pr-Pl).cross(Pt-Pb)).normalized();
+    }
+
+    void Mouse(View& view, MouseButton button, int x, int y, bool pressed, int button_state)
+    {
+        Eigen::Vector3d p, P, n;
+        GetPosNormal(view,x,y,p,P,n);
+
+        bool handled = false;
+
         if(pressed) {
             m_selected_objects.clear();
-            ComputeHits(display,*cam_state,x,y,m_grab_width,m_selected_objects);
-            BOOST_FOREACH(GLObject* obj, m_selected_objects) {
-                obj->Mouse(button,x, y, pressed, button_state);
+            ComputeHits(view,*cam_state,x,y,m_grab_width,m_selected_objects);
+            for(std::map<int,GLObject*>::iterator i = m_selected_objects.begin(); i != m_selected_objects.end(); ++i ) {
+                handled |= i->second->Mouse(button, p, P, n, pressed, button_state, i->first);
             }
         }else{
-            BOOST_FOREACH(GLObject* obj, m_selected_objects) {
-                obj->Mouse(button,x, y, pressed, button_state);
+            for(std::map<int,GLObject*>::iterator i = m_selected_objects.begin(); i != m_selected_objects.end(); ++i ) {
+                handled |= i->second->Mouse(button, p, P, n, pressed, button_state, i->first);
             }
         }
-        Handler3D::Mouse(display,button,x,y,pressed,button_state);
+        if(!handled) {
+            Handler3D::Mouse(view,button,x,y,pressed,button_state);
+        }
     }
 
     void MouseMotion(View& view, int x, int y, int button_state)
     {
-        BOOST_FOREACH(GLObject* obj, m_selected_objects) {
-            obj->MouseMotion(x, y, button_state);
+        Eigen::Vector3d p, P, n;
+        GetPosNormal(view,x,y,p,P,n);
+
+        bool handled = false;
+
+        for(std::map<int,GLObject*>::iterator i = m_selected_objects.begin(); i != m_selected_objects.end(); ++i ) {
+            handled |= i->second->MouseMotion(p, P, n, button_state, i->first);
         }
-        Handler3D::MouseMotion(view,x,y,button_state);
+
+        if(!handled) {
+            Handler3D::MouseMotion(view,x,y,button_state);
+        }
     }
 
-    std::vector<GLObject*> m_selected_objects;
+    std::map<int,GLObject*> m_selected_objects;
     GLSceneGraph& m_scenegraph;
     unsigned m_grab_width;
 };
@@ -162,13 +214,16 @@ int main( int /*argc*/, char** /*argv[]*/ )
     SetupOpenGL();
 
     // Define objects to draw
+    GLGrid glGrid(50,1.0);
+    glGrid.SetPerceptable(true);
     GLMesh glCar("beatle-no-wheels-no-interior-embedded-texture.blend");
-    GLGrid glGrid;
+    GLWayPoint glWaypoint;
 
     // Add to scenegraph
     GLSceneGraph glGraph;
-    glGraph.AddChild(&glCar);
     glGraph.AddChild(&glGrid);
+//    glGraph.AddChild(&glCar);
+    glGraph.AddChild(&glWaypoint);
 
     // Define Camera Render Object (for view / scene browsing)
     pangolin::OpenGlRenderState renderState(
@@ -179,8 +234,8 @@ int main( int /*argc*/, char** /*argv[]*/ )
     // Add viewport to window and provide 3D Handler
     View& v3d = pangolin::CreateDisplay()
             .SetBounds(0.0, 1.0, 0.0, 1.0, -640.0f/480.0f)
-            .SetHandler(new HandlerSceneGraph(glGraph,renderState,AxisNegZ));
-    v3d.extern_draw_function = ActivateScissorClearDrawFunctor(glGraph, renderState);
+            .SetHandler(new HandlerSceneGraph(glGraph,renderState,AxisZ))
+            .SetDrawFunction(ActivateScissorClearDrawFunctor(glGraph, renderState));
 
     // Default hooks for exiting (Esc) and fullscreen (tab).
     while( !pangolin::ShouldQuit() )

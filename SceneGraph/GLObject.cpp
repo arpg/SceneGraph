@@ -1,27 +1,25 @@
 #include "GLObject.h"
 
-#include <map>
-
 namespace SceneGraph
 {
 
-std::map<int,GLObject*>   g_mObjects; // map of id to objects
-int                       g_nHandleCounter = 1;
+std::map<int,GLObject*> GLObject::g_mObjects;
+int GLObject::g_nHandleCounter = 1;
 
 /////////////////////////////////////////////////////////////////////////////////
 GLObject::GLObject()
     : m_sObjectName("unnamed-object"), m_bVisible(true), m_bPerceptable(true),
-      m_nId(0), m_T_pc(Eigen::Matrix4d::Identity()), m_bIs2dLayer(false)
+      m_T_pc(Eigen::Matrix4d::Identity()), m_bIs2dLayer(false)
 {
-    m_dPosition << 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f;
+    Init();
 }
 
 /////////////////////////////////////////////////////////////////////////////////
 GLObject::GLObject( const std::string& name)
     : m_sObjectName(name), m_bVisible(true), m_bPerceptable(true),
-      m_nId(0), m_T_pc(Eigen::Matrix4d::Identity()), m_bIs2dLayer(false)
+      m_T_pc(Eigen::Matrix4d::Identity()), m_bIs2dLayer(false)
 {
-    m_dPosition << 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f;
+    Init();
 }
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -30,20 +28,33 @@ GLObject::GLObject( const GLObject& rhs )
     *this = rhs;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////
+void GLObject::Init()
+{
+    m_dPosition.setZero();
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////
+int GLObject::AllocSelectionId()
+{
+    int handle = g_nHandleCounter++;
+    g_mObjects[ handle ] = this;
+    return handle;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////
 void GLObject::DrawObjectAndChildren()
 {
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
     glMultMatrixd(m_T_pc.data());
 
-    glPushName(m_nId);
     DrawCanonicalObject();
 
     for(std::vector<GLObject*>::const_iterator i=m_vpChildren.begin(); i!= m_vpChildren.end(); ++i)
     {
         (*i)->DrawObjectAndChildren();
     }
-    glPopName();
 
     glPopMatrix();
 }
@@ -85,38 +96,9 @@ const std::string& GLObject::ObjectName() const
 }
 
 /////////////////////////////////////////////////////////////////////////////////
-void GLObject::SetId( unsigned int nId )
-{
-    m_nId = nId;
-}
-
-/////////////////////////////////////////////////////////////////////////////////
-unsigned int GLObject::Id()
-{
-    return m_nId;
-}
-
-/////////////////////////////////////////////////////////////////////////////////
-Eigen::Vector3d GLObject::GetPosUnderCursor()
-{
-    // TODO: Implement this functionality?
-//    return m_pWin->GetPosUnderCursor();
-}
-
-/////////////////////////////////////////////////////////////////////////////////
-Eigen::Vector2i GLObject::GetCursorPos()
-{
-    // TODO: Implement this functionality?
-//    return m_pWin->GetCursorPos();
-}
-
-/////////////////////////////////////////////////////////////////////////////////
 void GLObject::AddChild( GLObject* pChild )
 {
     m_vpChildren.push_back( pChild );
-    g_mObjects[ g_nHandleCounter ] = pChild;
-    pChild->SetId( g_nHandleCounter ); 
-    g_nHandleCounter++;
 }
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -168,5 +150,6 @@ void GLObject::SetPose(double x, double y, double z, double p, double q, double 
     m_dPosition[4] = q;
     m_dPosition[5] = r;
 }
+
 
 } // SceneGraph

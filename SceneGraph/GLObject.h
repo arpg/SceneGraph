@@ -8,6 +8,7 @@
 
 #include <string>
 #include <vector>
+#include <map>
 #include <stdio.h>
 
 namespace Eigen{
@@ -48,11 +49,14 @@ class GLObject
         // Interaction methods: can be overridden
         /////////////////////////////////
 
-        virtual void Mouse(int button, int x, int y, bool pressed, int button_state) {
-            std::cout << m_sObjectName << std::endl;
+        virtual bool Mouse(int button, const Eigen::Vector3d& win, const Eigen::Vector3d& obj, const Eigen::Vector3d& normal, bool pressed, int button_state, int pickId) {
+            return false;
+//            std::cout << m_sObjectName << std::endl;
         }
-        virtual void MouseMotion(int x, int y, int button_state) {
-            std::cout << m_sObjectName << ": " << x << "," << y << std::endl;
+
+        virtual bool MouseMotion(const Eigen::Vector3d& win, const Eigen::Vector3d& obj, const Eigen::Vector3d& normal, int button_state, int pickId) {
+            return false;
+//            std::cout << m_sObjectName << ": " << x << "," << y << std::endl;
         }
 
         /////////////////////////////////
@@ -61,10 +65,6 @@ class GLObject
 
         const std::string& ObjectName() const;
         void SetObjectName( const std::string& sName );
-
-        /// Get / Set Object Id for picking perposes
-        unsigned int Id();
-        void SetId( unsigned int nId );
 
         /// Get / Set wether this object should be drawn
         bool IsVisible();
@@ -115,11 +115,6 @@ class GLObject
         /// Get parent window height.
         int WindowHeight() { return 1; }
 
-
-        Eigen::Vector3d GetPosUnderCursor();
-
-		Eigen::Vector2i GetCursorPos(); 
-
         /// such as an image
         inline bool Is2dLayer()
         {
@@ -127,12 +122,14 @@ class GLObject
         }
 
     protected:
+        void Init();
+        int AllocSelectionId();
+
         std::vector<GLObject*>    m_vpChildren;
 
         std::string               m_sObjectName;
         bool                      m_bVisible;
         bool                      m_bPerceptable; //< can be measured (e.g., not a virtual thing)
-        unsigned int              m_nId;      //< Object handle
 
         // Child to Parent transform. Includes position, rotation and scale (x_p = m_T_pc & x_c)
         Eigen::Matrix4d           m_T_pc;
@@ -140,6 +137,11 @@ class GLObject
         // Deprecate these?
         bool                      m_bIs2dLayer; //< such as an image
         Eigen::Vector6d           m_dPosition; //< Object position
+
+        // static map of id to objects
+        static std::map<int,GLObject*> g_mObjects;
+        static int g_nHandleCounter;
+
 };
 
 } // SceneGraph

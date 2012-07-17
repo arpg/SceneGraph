@@ -8,6 +8,7 @@ extern std::map<int,GLObject*>   g_mObjects; // map of id to objects
 
 /////////////////////////////////////////////////////////////////////////////////
 GLSceneGraph::GLSceneGraph()
+    : GLObject("SceneGraph")
 {
     m_vpChildren.clear();
 }

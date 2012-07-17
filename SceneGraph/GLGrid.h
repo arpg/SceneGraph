@@ -10,48 +10,58 @@ namespace SceneGraph
 class GLGrid : public GLObject
 {
     public:
-
-        GLGrid()
-            : GLObject("Grid")
+        GLGrid(int numLines = 50, float lineSpacing = 2.0, bool perceptable = false)
+            : GLObject("Grid"), m_iNumLines(numLines), m_fLineSpacing(lineSpacing)
         {
-            m_bPerceptable = false;
+            m_bPerceptable = perceptable;
         }
 
         // from mvl dispview
         void DrawCanonicalObject(void)
         {
-            #define NLINES 50
-            #define LDELTA 2
-
             glPushAttrib(GL_ENABLE_BIT);
             {
                 glDisable(GL_LIGHTING);
 
+                if(m_bPerceptable) {
+                    glColor4ub(90, 90, 90, 128);
+                    glBegin(GL_TRIANGLE_STRIP);
+                    glVertex3f( -m_fLineSpacing*m_iNumLines , -m_fLineSpacing*m_iNumLines, 0.0);
+                    glVertex3f( +m_fLineSpacing*m_iNumLines , -m_fLineSpacing*m_iNumLines, 0.0);
+                    glVertex3f( -m_fLineSpacing*m_iNumLines , +m_fLineSpacing*m_iNumLines, 0.0);
+                    glVertex3f( +m_fLineSpacing*m_iNumLines , +m_fLineSpacing*m_iNumLines, 0.0);
+                    glEnd();
+                }
+
                 glBegin(GL_LINES);
                 {
-                    for(int i = -NLINES; i < NLINES; i++){
+                    for(int i = -m_iNumLines; i < m_iNumLines; i++){
                         glColor4ub(132, 132, 132, 50);
-                        glVertex3f( LDELTA*NLINES, i*LDELTA, 0.0);
-                        glVertex3f(-LDELTA*NLINES, i*LDELTA, 0.0);
+                        glVertex3f( m_fLineSpacing*m_iNumLines, i*m_fLineSpacing, 0.0);
+                        glVertex3f(-m_fLineSpacing*m_iNumLines, i*m_fLineSpacing, 0.0);
 
                         glColor4ub(132, 132, 132, 50);
-                        glVertex3f(i*LDELTA,  LDELTA*NLINES, 0.0);
-                        glVertex3f(i*LDELTA, -LDELTA*NLINES, 0.0);
+                        glVertex3f(i*m_fLineSpacing,  m_fLineSpacing*m_iNumLines, 0.0);
+                        glVertex3f(i*m_fLineSpacing, -m_fLineSpacing*m_iNumLines, 0.0);
                     }
 
                     glColor4ub(255, 0, 0, 128);
-                    glVertex3f( LDELTA*NLINES , 0.0, 0.0);
-                    glVertex3f(-LDELTA*NLINES , 0.0, 0.0);
+                    glVertex3f( m_fLineSpacing*m_iNumLines , 0.0, 0.0);
+                    glVertex3f(-m_fLineSpacing*m_iNumLines , 0.0, 0.0);
 
                     glColor4ub(0, 255, 0, 128);
-                    glVertex3f( 0.0,  LDELTA*NLINES, 0.0);
-                    glVertex3f( 0.0, -LDELTA*NLINES, 0.0);
+                    glVertex3f( 0.0,  m_fLineSpacing*m_iNumLines, 0.0);
+                    glVertex3f( 0.0, -m_fLineSpacing*m_iNumLines, 0.0);
                 }
                 glEnd();
             }
             glPopAttrib();
 
         }
+
+protected:
+        int m_iNumLines;
+        float m_fLineSpacing;
 
 };
 

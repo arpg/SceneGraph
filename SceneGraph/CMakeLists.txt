@@ -30,6 +30,8 @@ set( SceneGraph_HEADERS
         GLText.h
         GLGrid.h
         GLAxis.h
+        GLWaypoint.h
+        GLLineStrip.h
 #       SimCam.h
    )
 
