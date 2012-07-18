@@ -19,20 +19,26 @@ int main( int /*argc*/, char** /*argv[]*/ )
     // Define objects to draw
     GLGrid glGrid(50,2.0, true);
 
+    GLAxis glAxis;
+    glAxis.SetPose(-1,-2,0, 0, M_PI/4, 0);
+    glAxis.Scale(0.25);
+
     GLWayPoint glWaypoint;
     glWaypoint.SetPose(0.5,0.5,0,0,0,0);
 
     GLLineStrip glLineStrip;
-    glLineStrip.SetPoint(1,1,1);
-    glLineStrip.SetPoint(2,1,1);
-    glLineStrip.SetPoint(3,1,1);
-    glLineStrip.SetPoint(3,2,1);
-    glLineStrip.SetPoint(3,3,1);
+    for(double t=0; t < 10*M_PI; t+= M_PI/10) {
+        glLineStrip.SetPoint(cos(t)+2, sin(t)+2, 0.2*t);
+    }
+
+    GLText glText("Some Text", -1, 1, 1);
 
     // Add objects to scenegraph
     glGraph.AddChild(&glGrid);
     glGraph.AddChild(&glWaypoint);
     glGraph.AddChild(&glLineStrip);
+    glGraph.AddChild(&glAxis);
+    glGraph.AddChild(&glText);
 
     // Define Camera Render Object (for view / scene browsing)
     pangolin::OpenGlRenderState renderState(

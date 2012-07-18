@@ -42,7 +42,7 @@ public:
     bool MouseMotion(const Eigen::Vector3d& /*win*/, const Eigen::Vector3d &obj, const Eigen::Vector3d& normal, int /*button_state*/, int pickId)
     {
         m_bDirty = true; // flag for update
-        Eigen::Matrix4d& T = m_T_pc;
+        Eigen::Matrix4d& T = m_T_po;
 
         if (pickId == m_nBaseId ) {
             Eigen::Vector3d d = -normal;

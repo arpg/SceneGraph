@@ -65,9 +65,11 @@ struct GLColor
         a = ta/255.0f;
     }
 
-    //        float fColor[4];
-    float fColor[0];
-    struct{
+    void Apply() {
+        glColor4f(r,g,b,a);
+    }
+
+    struct {
         float r;
         float g;
         float b;

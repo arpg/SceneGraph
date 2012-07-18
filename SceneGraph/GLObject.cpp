@@ -9,14 +9,14 @@ int GLObject::g_nHandleCounter = 1;
 /////////////////////////////////////////////////////////////////////////////////
 GLObject::GLObject()
     : m_sObjectName("unnamed-object"), m_bVisible(true), m_bPerceptable(true),
-      m_T_pc(Eigen::Matrix4d::Identity()), m_bIs2dLayer(false)
+      m_T_po(Eigen::Matrix4d::Identity())
 {
 }
 
 /////////////////////////////////////////////////////////////////////////////////
 GLObject::GLObject( const std::string& name)
     : m_sObjectName(name), m_bVisible(true), m_bPerceptable(true),
-      m_T_pc(Eigen::Matrix4d::Identity()), m_bIs2dLayer(false)
+      m_T_po(Eigen::Matrix4d::Identity())
 {
 }
 
@@ -40,7 +40,7 @@ void GLObject::DrawObjectAndChildren()
     if(IsVisible()) {
         glMatrixMode(GL_MODELVIEW);
         glPushMatrix();
-        glMultMatrixd(m_T_pc.data());
+        glMultMatrixd(m_T_po.data());
 
         DrawCanonicalObject();
 
@@ -59,13 +59,13 @@ void GLObject::SetVisible(bool visible)
 }
 
 /////////////////////////////////////////////////////////////////////////////////
-bool GLObject::IsVisible()
+bool GLObject::IsVisible() const
 {
     return m_bVisible;
 }
 
 /////////////////////////////////////////////////////////////////////////////////
-bool GLObject::IsPerceptable()
+bool GLObject::IsPerceptable() const
 {
     return m_bPerceptable;
 }
@@ -113,9 +113,27 @@ const GLObject& GLObject::operator[](int i) const
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
-Eigen::Vector6d GLObject::GetPose()
+Eigen::Matrix4d GLObject::GetPose4x4_po() const
 {
-    return GLT2Cart(m_T_pc);
+    return m_T_po;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////
+Eigen::Vector6d GLObject::GetPose() const
+{
+    return GLT2Cart(m_T_po);
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////
+void GLObject::SetPosition(Eigen::Vector3d v)
+{
+    SetPosition(v(0),v(1),v(2));
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////
+void GLObject::SetPosition(double x, double y, double z)
+{
+    SetPose(x,y,z,0,0,0);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -128,7 +146,15 @@ void GLObject::SetPose(Eigen::Vector6d v)
 /////////////////////////////////////////////////////////////////////////////////////////////////
 void GLObject::SetPose(double x, double y, double z, double p, double q, double r)
 {
-    m_T_pc = GLCart2T(x,y,z,r,p,q);
+    m_T_po = GLCart2T(x,y,z,r,p,q);
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////
+void GLObject::Scale(double s)
+{
+    Eigen::Matrix4d S = Eigen::Matrix4d::Identity();
+    S.block<3,3>(0,0) *= s;
+    m_T_po = S * m_T_po;
 }
 
 

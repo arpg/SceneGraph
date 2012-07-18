@@ -12,9 +12,8 @@ class GLLineStrip : public GLObject
     public:
 
 		GLLineStrip()
+            :GLObject("LineStrip")
 		{
-            m_sObjectName = "LineStrip"; 
-			InitReset();
             m_bPerceptable = false;
 		}
 
@@ -26,11 +25,11 @@ class GLLineStrip : public GLObject
         void DrawCanonicalObject()
         {
             glPushAttrib(GL_ENABLE_BIT);
-
             glDisable(GL_LIGHTING);
             glEnable( GL_DEPTH_TEST );
+
+            m_Color.Apply();
             glBegin( GL_LINE_STRIP );
-            glColor4f( m_Color.r, m_Color.g, m_Color.b, m_Color.a );
             for( unsigned int ii = 0; ii < m_vPts.size(); ii+=3 ) {
                   glVertex3d( m_vPts[ii], m_vPts[ii+1], m_vPts[ii+2] );
             }
@@ -45,7 +44,7 @@ class GLLineStrip : public GLObject
 			m_vPts.push_back( Point(2) );
         }
 
-		void SetPoint( double* Point )
+        void SetPoint( double Point[3] )
 		{
 			m_vPts.push_back( Point[0] );
 			m_vPts.push_back( Point[1] );
@@ -77,9 +76,9 @@ class GLLineStrip : public GLObject
         // deprecated: set GLLineStrip pose instead.
         void SetReference( unsigned int Xref, unsigned int Yref, unsigned int Zref )
 		{
-            m_T_pc(0,3) = Xref;
-            m_T_pc(1,3) = Yref;
-            m_T_pc(2,3) = Zref;
+            m_T_po(0,3) = Xref;
+            m_T_po(1,3) = Yref;
+            m_T_po(2,3) = Zref;
         }
 
         void ClearLines()
@@ -87,7 +86,7 @@ class GLLineStrip : public GLObject
         	m_vPts.clear();
         }
 
-        void SetColor( GLColor c )
+        void SetColor( const GLColor& c )
         {
             m_Color = c;
         } 

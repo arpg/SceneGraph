@@ -34,11 +34,12 @@ class GLObject
         // Drawing methods
         /////////////////////////////////
 
+        /// Draw Canonical object (i.e. without pose transform applied)
+        /// Overide this in your derived classes.
+        virtual void DrawCanonicalObject() = 0;
+
         /// Apply object transform, then draw object and its children (recursively)
         void DrawObjectAndChildren();
-
-        /// Draw Canonical object (i.e. without pose transform applied)
-        virtual void DrawCanonicalObject() = 0;
 
         /// Alow this object to draw itself as a functor
         inline void operator()() {
@@ -61,11 +62,11 @@ class GLObject
         void SetObjectName( const std::string& sName );
 
         /// Get / Set wether this object should be drawn
-        bool IsVisible();
+        bool IsVisible() const;
         void SetVisible(bool visible = true);
 
         /// can be measured (e.g., not a virtual thing)
-        bool IsPerceptable();
+        bool IsPerceptable() const;
         void SetPerceptable( bool bPerceptable );
 
 
@@ -73,12 +74,29 @@ class GLObject
         // Object Pose
         /////////////////////////////////
 
-        Eigen::Vector6d GetPose();
+        /// Return Object (o) to Parent (p) 4x4 transformation matrix
+        /// (as used by OpenGL) such that x_p = GetPose4x4_po() * x_o;
+        Eigen::Matrix4d GetPose4x4_po() const;
 
+        /// Return pose as (x,y,z,roll,pitch,yaw) vector
+        Eigen::Vector6d GetPose() const;
+
+        /// Set position only (x,y,z)
+        void SetPosition(Eigen::Vector3d v);
+
+        /// Set position only (x,y,z)
+        void SetPosition(double x, double y, double z = 0);
+
+        /// Set pose as (x,y,z,roll,pitch,yaw) vector
         void SetPose(Eigen::Vector6d v);
 
+        /// Set pose using x,y,z,roll,pitch,yaw parametrisation
         void SetPose(double x, double y, double z, double p, double q, double r);
 
+        /// Note: This method is a little dangerous right now.
+        /// Once we encapsulate pose as a similarity transform we will
+        /// be better offer.
+        void Scale(double s);
 
         /////////////////////////////////
         // Children
@@ -92,42 +110,24 @@ class GLObject
         GLObject& operator[](int i);
         const GLObject& operator[](int i) const;
 
-
-        /////////////////////////////////
-        // 2D Specific features - rethink these?
-        /////////////////////////////////
-    
-        // Get top,left,bottom,right coordinates of the object
-        // in the window (if it's a 2d object)
-        virtual void GetBoundingBox(int&, int&, int&, int&) {}
-
-        /// Get parent window width.
-        int WindowWidth() { return 1; }
-
-        /// Get parent window height.
-        int WindowHeight() { return 1; }
-
-        /// such as an image
-        inline bool Is2dLayer()
-        {
-            return m_bIs2dLayer;
-        }
-
     protected:
-        void Init();
         int AllocSelectionId();
 
+        //! Vector of children whose poses are expressed relative to
+        //! this object
         std::vector<GLObject*>    m_vpChildren;
 
+        //! Object name
         std::string               m_sObjectName;
+
+        //! Whether this object should be drawn
         bool                      m_bVisible;
-        bool                      m_bPerceptable; //< can be measured (e.g., not a virtual thing)
 
-        // Child to Parent transform. Includes position, rotation and scale (x_p = m_T_pc & x_c)
-        Eigen::Matrix4d           m_T_pc;
+        //! can be measured (e.g., not a virtual thing)
+        bool                      m_bPerceptable;
 
-        // Deprecate these?
-        bool                      m_bIs2dLayer; //< such as an image
+        //! Object to Parent transform. Includes position, rotation and scale (x_p = m_T_po & x_o)
+        Eigen::Matrix4d           m_T_po;
 
         // static map of id to objects
         static std::map<int,GLObject*> g_mObjects;
