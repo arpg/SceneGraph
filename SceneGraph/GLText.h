@@ -12,7 +12,7 @@
 namespace SceneGraph
 {
 
-static void* GLTextDefaultFont = GLUT_BITMAP_HELVETICA_12;
+static void* GLTextDefaultFont = GLUT_BITMAP_HELVETICA_10;
 
 class GLText : public GLObject
 {
@@ -69,9 +69,9 @@ public:
         //            gl_draw( m_sText.c_str(), m_sText.length() );
 
         glPushAttrib(GL_ENABLE_BIT);
-//        glDisable(GL_DEPTH_TEST);
+        glDisable(GL_DEPTH_TEST);
         glDisable(GL_LIGHTING);
-        Draw(m_sText, pos(0), pos(1), pos(2));
+        Draw(m_sText, 0,0,0);
         glPopAttrib();
     }
 

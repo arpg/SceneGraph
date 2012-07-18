@@ -35,6 +35,26 @@ struct ActivateScissorClearDrawFunctor
     pangolin::OpenGlRenderState& renderState;
 };
 
+struct ActivateScissorClearDrawFunctor3d2d
+{
+    ActivateScissorClearDrawFunctor3d2d(SceneGraph::GLObject& glObject3d, pangolin::OpenGlRenderState& renderState3d,
+                                    SceneGraph::GLObject& glObject2d, pangolin::OpenGlRenderState& renderState2d)
+        :glObject3d(glObject3d), renderState3d(renderState3d),
+        glObject2d(glObject2d), renderState2d(renderState2d)
+    {
+    }
+
+    void operator()(pangolin::View& view) {
+        view.ActivateScissorAndClear(renderState3d);
+        glObject3d.DrawObjectAndChildren();
+        renderState2d.Apply();
+        glObject2d.DrawObjectAndChildren();
+    }
+
+    SceneGraph::GLObject& glObject3d,&glObject2d;
+    pangolin::OpenGlRenderState& renderState3d,&renderState2d;
+};
+
 struct HandlerSceneGraph : pangolin::Handler3D
 {
 
