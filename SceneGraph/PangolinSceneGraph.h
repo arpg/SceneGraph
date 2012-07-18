@@ -1,5 +1,7 @@
-#include <SceneGraph/SceneGraph.h>
+#pragma once
+
 #include <pangolin/pangolin.h>
+#include <SceneGraph/SceneGraph.h>
 
 struct ActivateDrawFunctor
 {

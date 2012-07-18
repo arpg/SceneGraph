@@ -37,18 +37,19 @@ int GLObject::AllocSelectionId()
 /////////////////////////////////////////////////////////////////////////////////////////////////
 void GLObject::DrawObjectAndChildren()
 {
-    glMatrixMode(GL_MODELVIEW);
-    glPushMatrix();
-    glMultMatrixd(m_T_pc.data());
+    if(IsVisible()) {
+        glMatrixMode(GL_MODELVIEW);
+        glPushMatrix();
+        glMultMatrixd(m_T_pc.data());
 
-    DrawCanonicalObject();
+        DrawCanonicalObject();
 
-    for(std::vector<GLObject*>::const_iterator i=m_vpChildren.begin(); i!= m_vpChildren.end(); ++i)
-    {
-        (*i)->DrawObjectAndChildren();
+        for(std::vector<GLObject*>::const_iterator i=m_vpChildren.begin(); i!= m_vpChildren.end(); ++i)
+        {
+            (*i)->DrawObjectAndChildren();
+        }
+        glPopMatrix();
     }
-
-    glPopMatrix();
 }
 
 /////////////////////////////////////////////////////////////////////////////////
