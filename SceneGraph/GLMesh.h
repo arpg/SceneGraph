@@ -78,16 +78,21 @@ class GLMesh : public GLObject
         {
             if( m_pScene ){
                 glPushAttrib(GL_ENABLE_BIT);
+                glPushMatrix();
+                glScalef(m_fScale,m_fScale,m_fScale);
 
                 if( m_nDisplayList == -1 ){
                     m_nDisplayList = glGenLists(1);
                     glNewList( m_nDisplayList, GL_COMPILE );
+
                     // Recursively render ai_scene's scenegraph
                     RecursiveRender( m_pScene, m_pScene->mRootNode );
                     glEndList();
                 }
 
                 glCallList( m_nDisplayList );
+
+                glPopMatrix();
 
                 glPopAttrib();
             }

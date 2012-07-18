@@ -144,7 +144,7 @@ void GLObject::SetPose(Eigen::Vector6d v)
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
-void GLObject::SetPose(double x, double y, double z, double p, double q, double r)
+void GLObject::SetPose(double x, double y, double z, double r, double p, double q)
 {
     m_T_po = GLCart2T(x,y,z,r,p,q);
 }

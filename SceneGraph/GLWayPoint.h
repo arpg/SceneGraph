@@ -131,10 +131,11 @@ public:
     void SetDirty(bool bVal) { m_bDirty = bVal; }
     bool GetDirty() { return m_bDirty; }
     double GetVelocity() { return m_dVelocity; }
+    void SetVelocity(double vel) { m_dVelocity = vel; }
     Eigen::Matrix<double,5,1> GetPose5d(){
         Eigen::Matrix<double,5,1> pose5d;
         Eigen::Vector3d xVec = GetPose4x4_po().block<3,1>(0,0);
-        pose5d << GetPose()[0], GetPose()[1], atan2(xVec[1],xVec[0]),m_dVelocity,0;
+        pose5d << GetPose()[0], GetPose()[1], atan2(xVec[1],xVec[0]),0,m_dVelocity;
         return pose5d;
     }
     
