@@ -93,10 +93,9 @@ class GLObject
         /// Set pose using x,y,z,roll,pitch,yaw parametrisation
         void SetPose(double x, double y, double z, double p, double q, double r);
 
-        /// Note: This method is a little dangerous right now.
-        /// Once we encapsulate pose as a similarity transform we will
-        /// be better offer.
-        void Scale(double s);
+        /// Set objects scale
+        void SetScale(double s);
+        double GetScale();
 
         /////////////////////////////////
         // Children
@@ -126,8 +125,9 @@ class GLObject
         //! can be measured (e.g., not a virtual thing)
         bool                      m_bPerceptable;
 
-        //! Object to Parent transform. Includes position, rotation and scale (x_p = m_T_po & x_o)
+        //! Object to Parent transform. Includes position, rotation (x_p = m_T_po & m_dScale * x_o)
         Eigen::Matrix4d           m_T_po;
+        double                    m_dScale;
 
         // static map of id to objects
         static std::map<int,GLObject*> g_mObjects;

@@ -7,7 +7,7 @@
 namespace SceneGraph
 {
 
-const static int VELOCITY_MULTIPLIER = 2;
+const static float VELOCITY_MULTIPLIER = 1;
 
 class GLWayPoint : public GLObject 
 {
@@ -21,7 +21,7 @@ public:
 
         m_dVelocity = 1.0;
         m_bPerceptable = false;
-        m_wpScale = 0.25;
+        m_dScale = 0.25;
 
         // Set unique waypoint name
         static int wid = 0;
@@ -65,18 +65,22 @@ public:
     }
         
     void DrawCanonicalObject() {
-        glPushAttrib(GL_ENABLE_BIT);
+        glPushAttrib(GL_ENABLE_BIT | GL_DEPTH_BUFFER_BIT);
 
         glDisable(GL_CULL_FACE);
         glDisable(GL_LIGHTING);
+        // TODO: loose this glDisable after we fix Nima's heightmap
         glDisable(GL_DEPTH_TEST);
+        glDepthMask(false);
+
+        const double velx = m_dVelocity/(m_dScale*VELOCITY_MULTIPLIER);
 
         // draw velocity line
         glPushName(m_nFrontId);
         glColor4ub(255, 255, 255, 255);
         glBegin(GL_LINES);
-        glVertex3d(m_dVelocity/VELOCITY_MULTIPLIER, 0, 0);
-        glVertex3d(0, 0, 0);
+        glVertex3d(velx, 0, 0);
+        glVertex3d(1, 0, 0);
         glEnd();
         glPopName();
 
@@ -85,15 +89,15 @@ public:
         glBegin(GL_LINES);
         glColor4f(1, 0, 0, 1);
         glVertex3d(0, 0, 0);
-        glVertex3d(m_wpScale, 0, 0);
+        glVertex3d(1, 0, 0);
 
         glColor4f(0, 1, 0, 1);
         glVertex3d(0, 0, 0);
-        glVertex3d(0, m_wpScale, 0);
+        glVertex3d(0, 1, 0);
 
         glColor4f(0, 0, 1, 1);
         glVertex3d(0, 0, 0);
-        glVertex3d(0, 0, m_wpScale);
+        glVertex3d(0, 0, 1);
         glEnd();
 
         if(m_bSelected) {
@@ -113,17 +117,9 @@ public:
         // draw front velocity point
         glPointSize(5);
         glBegin(GL_POINTS);
-        glVertex3d(m_dVelocity/VELOCITY_MULTIPLIER, 0, 0);
+        glVertex3d(velx, 0, 0);
         glEnd();
         glPopName();
-        
-        // draw label
-//            PushOrtho(WindowWidth(), WindowHeight());
-//            glColor4f(1.0, 1.0, 1.0, 1.0);
-//            gl_font(0, 8);
-//            glRasterPos2f(m_nLabelPos(0), m_nLabelPos(1));
-//            gl_draw(m_sLabel.c_str(), m_sLabel.length());
-//            PopOrtho();
 
         glPopAttrib();
     }
@@ -143,7 +139,6 @@ private:
     bool            m_bSelected;
     bool            m_bDirty;
     double          m_dVelocity;
-    float           m_wpScale;
 
     int             m_nBaseId;
     int             m_nFrontId;

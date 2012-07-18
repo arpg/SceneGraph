@@ -14,6 +14,7 @@ public:
     GLAxis()
       : GLObject("Axis")
     {
+        m_bPerceptable = false;
     }
 
     void DrawCanonicalObject()

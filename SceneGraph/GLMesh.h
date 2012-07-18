@@ -38,14 +38,14 @@ class GLMesh : public GLObject
     public:
         ////////////////////////////////////////////////////////////////////////////
         GLMesh()
-            : GLObject("Mesh"), m_nDisplayList(-1), m_fScale(1), m_fAlpha(1),
+            : GLObject("Mesh"), m_nDisplayList(-1), m_fAlpha(1),
               m_iMeshID(-1), m_bShowMeshNormals(false)
         {
         }
 
         ////////////////////////////////////////////////////////////////////////////
         GLMesh(const std::string& sMeshFile)
-            : GLObject("Mesh"), m_nDisplayList(-1), m_fScale(1), m_fAlpha(1),
+            : GLObject("Mesh"), m_nDisplayList(-1), m_fAlpha(1),
               m_iMeshID(-1), m_bShowMeshNormals(false)
         {
             Init(sMeshFile);
@@ -78,8 +78,6 @@ class GLMesh : public GLObject
         {
             if( m_pScene ){
                 glPushAttrib(GL_ENABLE_BIT);
-                glPushMatrix();
-                glScalef(m_fScale,m_fScale,m_fScale);
 
                 if( m_nDisplayList == -1 ){
                     m_nDisplayList = glGenLists(1);
@@ -91,8 +89,6 @@ class GLMesh : public GLObject
                 }
 
                 glCallList( m_nDisplayList );
-
-                glPopMatrix();
 
                 glPopAttrib();
             }
@@ -140,19 +136,7 @@ class GLMesh : public GLObject
             return m_pScene;
         }
 
-        virtual void select( unsigned int )
-        {
-            // WARNING: When an instance of GLMesh is selected, it appears that it remains selected forever
-            // One way to resolve this is to call 'UnSelect( m_iMeshID )' after doing anything pertaining to selection
-            // Hopefully we find a better, more permanent solution soon...
-
-            // UPDATE: Don't know if what's above is still a valid statement...
-        }
-
         Eigen::Vector3d GetDimensions() { return m_Dimensions; }
-
-        float GetScale() { return m_fScale; }
-        void SetScale( float flScale ) { m_fScale = flScale; }
 
 protected:
         ////////////////////////////////////////////////////////////////////////////
@@ -611,7 +595,6 @@ protected:
 
         const struct aiScene*   m_pScene;
         GLint                   m_nDisplayList;
-        float                   m_fScale;
         float                   m_fAlpha; // render translucent meshes?
         unsigned int            m_iMeshID;
         bool                    m_bShowMeshNormals;

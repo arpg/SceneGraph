@@ -9,14 +9,14 @@ int GLObject::g_nHandleCounter = 1;
 /////////////////////////////////////////////////////////////////////////////////
 GLObject::GLObject()
     : m_sObjectName("unnamed-object"), m_bVisible(true), m_bPerceptable(true),
-      m_T_po(Eigen::Matrix4d::Identity())
+      m_T_po(Eigen::Matrix4d::Identity()), m_dScale(1)
 {
 }
 
 /////////////////////////////////////////////////////////////////////////////////
 GLObject::GLObject( const std::string& name)
     : m_sObjectName(name), m_bVisible(true), m_bPerceptable(true),
-      m_T_po(Eigen::Matrix4d::Identity())
+      m_T_po(Eigen::Matrix4d::Identity()), m_dScale(1)
 {
 }
 
@@ -41,6 +41,7 @@ void GLObject::DrawObjectAndChildren()
         glMatrixMode(GL_MODELVIEW);
         glPushMatrix();
         glMultMatrixd(m_T_po.data());
+        glScaled(m_dScale,m_dScale,m_dScale);
 
         DrawCanonicalObject();
 
@@ -150,12 +151,15 @@ void GLObject::SetPose(double x, double y, double z, double r, double p, double 
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
-void GLObject::Scale(double s)
-{
-    Eigen::Matrix4d S = Eigen::Matrix4d::Identity();
-    S.block<3,3>(0,0) *= s;
-    m_T_po = S * m_T_po;
+void GLObject::SetScale(double s) {
+    m_dScale = s;
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////
+double GLObject::GetScale() {
+    return m_dScale;
+}
+
 
 
 } // SceneGraph

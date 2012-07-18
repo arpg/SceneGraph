@@ -61,8 +61,6 @@ public:
 
     void DrawCanonicalObject()
     {
-        Eigen::Vector6d pos = GetPose();
-
         m_Color.Apply();
 
         //            gl_font( m_nFontID, m_nFontSize );

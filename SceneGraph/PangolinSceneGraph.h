@@ -51,8 +51,10 @@ struct ActivateScissorClearDrawFunctor3d2d
         glObject2d.DrawObjectAndChildren();
     }
 
-    SceneGraph::GLObject& glObject3d,&glObject2d;
-    pangolin::OpenGlRenderState& renderState3d,&renderState2d;
+    SceneGraph::GLObject& glObject3d;
+    pangolin::OpenGlRenderState& renderState3d;
+    SceneGraph::GLObject& glObject2d;
+    pangolin::OpenGlRenderState& renderState2d;
 };
 
 struct HandlerSceneGraph : pangolin::Handler3D
