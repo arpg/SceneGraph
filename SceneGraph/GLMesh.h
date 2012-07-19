@@ -8,8 +8,17 @@
 #include <assimp/aiPostProcess.h>
 #include <assimp/aiScene.h>
 
+#define USE_BOOST_IMAGE_LOADER
+
+#ifdef USE_BOOST_IMAGE_LOADER
+#include <boost/gil/gil_all.hpp>
+#endif // USE_BOOST_IMAGE_LOADER
+
+#ifdef USE_DEVIL_IMAGE_LOADER
 #include <IL/il.h>
 #include <IL/ilu.h>
+#endif // USE_DEVIL_IMAGE_LOADER
+
 #include <map>
 
 namespace SceneGraph
@@ -156,6 +165,7 @@ protected:
         ////////////////////////////////////////////////////////////////////////////
         void LoadMeshTextures()
         {
+#ifdef USE_DEVIL_IMAGE_LOADER
             // Ensure DevIL library is initialised
             static bool firsttime = true;
             if(firsttime) {
@@ -163,6 +173,7 @@ protected:
                 iluInit();
                 firsttime = false;
             }
+#endif // USE_DEVIL_IMAGE_LOADER
 
             // For each material, find associated textures
             for (unsigned int m=0; m < m_pScene->mNumMaterials; ++m) {
@@ -258,6 +269,7 @@ protected:
             return glTex;
         }
 
+#ifdef USE_DEVIL_IMAGE_LOADER
         ////////////////////////////////////////////////////////////////////////////
         GLuint LoadGLTextureFromDevIL(ILuint ilTexId)
         {
@@ -283,6 +295,7 @@ protected:
                          0, ilGetInteger(IL_IMAGE_FORMAT), GL_UNSIGNED_BYTE, ilGetData() );
             return glTexId;
         }
+#endif // USE_DEVIL_IMAGE_LOADER
 
         ////////////////////////////////////////////////////////////////////////////
         GLuint LoadGLTextureFromFile(const char* path, size_t length)
@@ -292,11 +305,13 @@ protected:
                 filename[0] = '.';
             }
 
+            GLuint glTexId = 0;
+
+#ifdef USE_DEVIL_IMAGE_LOADER
             ILuint ilTexId;
             ilGenImages(1, &ilTexId);
             ilBindImage(ilTexId);
 
-            GLuint glTexId = 0;
             if( ilLoadImage(filename.c_str() ) ) {
                 glTexId = LoadGLTextureFromDevIL(ilTexId);
             }else{
@@ -304,6 +319,7 @@ protected:
             }
 
             ilDeleteImages(1, &ilTexId);
+#endif // USE_DEVIL_IMAGE_LOADER
 
             return glTexId;
         }
@@ -311,11 +327,12 @@ protected:
         ////////////////////////////////////////////////////////////////////////////
         GLuint LoadGLTextureFromArray(const unsigned char* data, size_t bytes, const char* extensionHint = 0 )
         {
+            GLuint glTexId = 0;
+
+#ifdef USE_DEVIL_IMAGE_LOADER
             ILuint ilTexId;
             ilGenImages(1, &ilTexId);
             ilBindImage(ilTexId);
-
-            GLuint glTexId = 0;
 
             ILenum filetype = IL_TYPE_UNKNOWN;
 
@@ -347,6 +364,7 @@ protected:
             }
 
             ilDeleteImages(1, &ilTexId);
+#endif
 
             return glTexId;
         }

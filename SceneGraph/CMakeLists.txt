@@ -11,7 +11,7 @@ find_package( OpenGL REQUIRED )
 find_package( ASSIMP REQUIRED )
 find_package( Eigen3 REQUIRED )
 find_package( GLEW REQUIRED )
-find_package( DevIL REQUIRED )
+#find_package( DevIL REQUIRED )
 
 set( SceneGraph_SOURCES
         GLHelpers.cpp
@@ -44,8 +44,8 @@ set( SceneGraph_INCLUDE_DIRS
         ${GLEW_INCLUDE_DIR}
         ${ASSIMP_INCLUDE_DIR}
         ${EIGEN3_INCLUDE_DIR}
-        ${IL_INCLUDE_DIR}
-        ${IL_INCLUDE_DIR}/..
+#        ${IL_INCLUDE_DIR}
+#        ${IL_INCLUDE_DIR}/..
    )
 
 # set for "export_library", below 
@@ -53,9 +53,9 @@ set( SceneGraph_LIBRARIES
         ${OPENGL_LIBRARIES}
         ${GLEW_LIBRARIES}
         ${ASSIMP_LIBRARIES}
-        ${IL_LIBRARIES}
-        ${ILU_LIBRARIES}
-        ${ILUT_LIBRARIES}
+#        ${IL_LIBRARIES}
+#        ${ILU_LIBRARIES}
+#        ${ILUT_LIBRARIES}
    )
 
 include_directories( ${SceneGraph_INCLUDE_DIRS} )
