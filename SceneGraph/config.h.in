@@ -1,0 +1,11 @@
+#ifndef SCENEGRAPH_CONFIG_H
+#define SCENEGRAPH_CONFIG_H
+
+/// Configured libraries
+#cmakedefine HAVE_ASSIMP
+#cmakedefine HAVE_DEVIL
+#cmakedefine HAVE_PNG
+#cmakedefine HAVE_JPEG
+#cmakedefine HAVE_TIFF
+
+#endif //SCENEGRAPH_CONFIG_H

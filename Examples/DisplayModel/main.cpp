@@ -34,12 +34,15 @@ int main( int /*argc*/, char** /*argv[]*/ )
 
     GLText glText3d("3D Floating Text", -1, 1, -1);
 
+    GLMesh glMesh("/Users/slovegrove/code/kangaroo/Models/beatle-no-wheels-no-interior-embedded-texture.blend");
+
     // Add objects to scenegraph
     glGraph.AddChild(&glGrid);
     glGraph.AddChild(&glWaypoint);
     glGraph.AddChild(&glLineStrip);
     glGraph.AddChild(&glAxis);
     glGraph.AddChild(&glText3d);
+    glGraph.AddChild(&glMesh);
 
     GLText glText2d("2D Overlay Text", 10, 460);
     glGraph2d.AddChild(&glText2d);

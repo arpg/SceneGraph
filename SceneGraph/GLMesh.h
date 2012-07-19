@@ -1,23 +1,29 @@
 #ifndef _GL_MESH_H_
 #define _GL_MESH_H_
 
-#include <SceneGraph/GLHelpers.h>
-#include <SceneGraph/GLObject.h>
+#include <SceneGraph/SceneGraph.h>
 
 #include <assimp/assimp.h>
 #include <assimp/aiPostProcess.h>
 #include <assimp/aiScene.h>
 
-#define USE_BOOST_IMAGE_LOADER
-
-#ifdef USE_BOOST_IMAGE_LOADER
 #include <boost/gil/gil_all.hpp>
-#endif // USE_BOOST_IMAGE_LOADER
+#ifdef HAVE_PNG
+#define png_infopp_NULL (png_infopp)NULL
+#define int_p_NULL (int*)NULL
+#include <boost/gil/extension/io/png_io.hpp>
+#endif // HAVE_PNG
+#ifdef HAVE_JPEG
+#include <boost/gil/extension/io/jpeg_io.hpp>
+#endif // HAVE_JPEG
+#ifdef HAVE_TIFF
+#include <boost/gil/extension/io/tiff_io.hpp>
+#endif // HAVE_TIFF
 
-#ifdef USE_DEVIL_IMAGE_LOADER
+#ifdef HAVE_DEVIL
 #include <IL/il.h>
 #include <IL/ilu.h>
-#endif // USE_DEVIL_IMAGE_LOADER
+#endif
 
 #include <map>
 
@@ -165,7 +171,7 @@ protected:
         ////////////////////////////////////////////////////////////////////////////
         void LoadMeshTextures()
         {
-#ifdef USE_DEVIL_IMAGE_LOADER
+#ifdef HAVE_DEVIL
             // Ensure DevIL library is initialised
             static bool firsttime = true;
             if(firsttime) {
@@ -173,7 +179,7 @@ protected:
                 iluInit();
                 firsttime = false;
             }
-#endif // USE_DEVIL_IMAGE_LOADER
+#endif // HAVE_DEVIL
 
             // For each material, find associated textures
             for (unsigned int m=0; m < m_pScene->mNumMaterials; ++m) {
@@ -248,9 +254,6 @@ protected:
                 if( 0 <= sId && sId < (int)m_pScene->mNumTextures ) {
                     aiTexture* aiTex = m_pScene->mTextures[sId];
                     if( aiTex->mHeight == 0 ) {
-                        std::ofstream of("test.dat");
-                        of.write((char*)aiTex->pcData, aiTex->mWidth);
-                        of.close();
                         glTex = LoadGLTextureFromArray((unsigned char*)aiTex->pcData, aiTex->mWidth, aiTex->achFormatHint );
                     }else{
                         // WARNING: Untested code condition!
@@ -269,7 +272,7 @@ protected:
             return glTex;
         }
 
-#ifdef USE_DEVIL_IMAGE_LOADER
+#ifdef HAVE_DEVIL
         ////////////////////////////////////////////////////////////////////////////
         GLuint LoadGLTextureFromDevIL(ILuint ilTexId)
         {
@@ -295,19 +298,11 @@ protected:
                          0, ilGetInteger(IL_IMAGE_FORMAT), GL_UNSIGNED_BYTE, ilGetData() );
             return glTexId;
         }
-#endif // USE_DEVIL_IMAGE_LOADER
 
-        ////////////////////////////////////////////////////////////////////////////
-        GLuint LoadGLTextureFromFile(const char* path, size_t length)
+        GLuint LoadGLTextureFromDevIL(const std::string filename)
         {
-            std::string filename(path);
-            if(length >= 2 && filename[0] == '/' && filename[0] == '/' ) {
-                filename[0] = '.';
-            }
-
             GLuint glTexId = 0;
 
-#ifdef USE_DEVIL_IMAGE_LOADER
             ILuint ilTexId;
             ilGenImages(1, &ilTexId);
             ilBindImage(ilTexId);
@@ -319,17 +314,13 @@ protected:
             }
 
             ilDeleteImages(1, &ilTexId);
-#endif // USE_DEVIL_IMAGE_LOADER
-
             return glTexId;
         }
 
-        ////////////////////////////////////////////////////////////////////////////
-        GLuint LoadGLTextureFromArray(const unsigned char* data, size_t bytes, const char* extensionHint = 0 )
+        GLuint LoadGLTextureFromDevIL(const unsigned char* data, size_t bytes, const char* extensionHint = 0 )
         {
             GLuint glTexId = 0;
 
-#ifdef USE_DEVIL_IMAGE_LOADER
             ILuint ilTexId;
             ilGenImages(1, &ilTexId);
             ilBindImage(ilTexId);
@@ -364,6 +355,104 @@ protected:
             }
 
             ilDeleteImages(1, &ilTexId);
+
+            return glTexId;
+        }
+
+#endif // HAVE_DEVIL
+
+        ////////////////////////////////////////////////////////////////////////////
+        GLuint LoadGLTextureFromFile(const char* path, size_t length)
+        {
+            std::string filename(path);
+            if(length >= 2 && filename[0] == '/' && filename[0] == '/' ) {
+                filename[0] = '.';
+            }
+
+            GLuint glTexId = 0;
+
+#ifdef HAVE_DEVIL
+            if(!glTexId) glTexId = LoadGLTextureFromDevIL(filename);
+#endif // HAVE_DEVIL
+
+            return glTexId;
+        }
+
+        void LoadGILImage(boost::gil::rgb8_image_t& runtime_image, std::string filename, const char* extensionHint )
+        {
+#ifdef HAVE_PNG
+            if(!strcmp(extensionHint,"png")) {
+                boost::gil::png_read_and_convert_image(filename, runtime_image);
+            }else
+#endif // HAVE_PNG
+#ifdef HAVE_JPEG
+            if(!strcmp(extensionHint,"jpg") || !strcmp(extensionHint,"jpeg")) {
+                boost::gil::jpeg_read_and_convert_image(filename, runtime_image);
+            }else
+#endif // HAVE_JPEG
+#ifdef HAVE_TIFF
+            if(!strcmp(extensionHint,"tif") ) {
+                boost::gil::tiff_read_and_convert_image(filename, runtime_image);
+            }else
+#endif // HAVE_TIFF
+            {
+                // do nothing
+            }
+        }
+
+        void LoadGILImage(boost::gil::rgb8_image_t& runtime_image, const unsigned char* data, size_t bytes, const char* extensionHint )
+        {
+            const std::string tempfile = "embed.dat";
+
+            std::ofstream of(tempfile.c_str());
+            of.write((char*)data, bytes);
+            of.close();
+
+            LoadGILImage(runtime_image, tempfile, extensionHint);
+
+            remove(tempfile.c_str());
+        }
+
+        GLuint LoadGLTexture(GLint width, GLint height, void* data, GLint internal_format = GL_RGB8, GLenum data_layout = GL_RGB, GLenum data_type = GL_UNSIGNED_BYTE )
+        {
+            GLuint glTexId = 0;
+            glGenTextures(1,&glTexId);
+
+            glBindTexture(GL_TEXTURE_2D, glTexId);
+            glTexImage2D(GL_TEXTURE_2D, 0, internal_format, width, height, 0, data_layout, data_type, data);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+            glBindTexture(GL_TEXTURE_2D, 0);
+
+            return glTexId;
+        }
+
+        GLuint LoadGLTextureUsingGIL(const unsigned char* data, size_t bytes, const char* extensionHint = 0 )
+        {
+            GLuint glTexId = 0;
+
+            boost::gil::rgb8_image_t img;
+
+            LoadGILImage(img, data, bytes, extensionHint);
+
+            if( img.width() > 0 && img.width() > 0 ) {
+                unsigned char* data =  boost::gil::interleaved_view_get_raw_data( view( img ) );
+                glTexId = LoadGLTexture(img.width(), img.height(), data, GL_RGB8, GL_RGB, GL_UNSIGNED_BYTE);
+            }
+
+            return glTexId;
+        }
+
+        ////////////////////////////////////////////////////////////////////////////
+        GLuint LoadGLTextureFromArray(const unsigned char* data, size_t bytes, const char* extensionHint = 0 )
+        {
+            GLuint glTexId = 0;
+
+            if(!glTexId) glTexId = LoadGLTextureUsingGIL(data,bytes,extensionHint);
+#ifdef HAVE_DEVIL
+            if(!glTexId) glTexId = LoadGLTextureFromDevIL(data,bytes,extensionHint);
 #endif
 
             return glTexId;
