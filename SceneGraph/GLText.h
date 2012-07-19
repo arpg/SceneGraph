@@ -4,9 +4,6 @@
 #include <SceneGraph/GLObject.h>
 #include <SceneGraph/GLColor.h>
 
-#include <GL/freeglut_std.h>
-#include <GL/freeglut_ext.h>
-
 #include <string>
 
 namespace SceneGraph
@@ -28,7 +25,9 @@ public:
     /// Render text at current glRasterPos
     static void Draw(const std::string& text, void* font = GLTextDefaultFont )
     {
-        glutBitmapString(font,(unsigned char*)text.c_str());
+        for(const unsigned char* s = (unsigned char*)text.c_str(); *s != 0; ++s) {
+            glutBitmapCharacter(font, *s);
+        }
     }
 
     /// Render text at (x,y,z)
@@ -78,6 +77,11 @@ public:
         m_sText = sText;
     }
 
+    void ClearText()
+    {
+        m_sText.clear();
+    }
+
     void SetSize( int nFontSize )
     {
         assert(nFontSize > 0);
@@ -94,18 +98,10 @@ public:
         //			m_nFontSize = nFontSize;
     }
 
-    void ClearText()
-    {
-        m_sText.clear();
-    }
-
 private:
     void*           m_font;
-
     std::string 	m_sText;
-    //        int          	m_nFontID;
-    //        int          	m_nFontSize;
-    GLColor         	m_Color;
+    GLColor         m_Color;
 };
 
 } // SceneGraph

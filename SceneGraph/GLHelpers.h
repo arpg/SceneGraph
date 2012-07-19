@@ -11,7 +11,7 @@
 #include <GL/glext.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
-#include <GL/glut.h>
+//#include <GL/glut.h>
 
 #include <iostream>
 #include <unistd.h>
