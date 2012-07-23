@@ -63,7 +63,7 @@ class GLLineStrip : public GLObject
 			m_vPts = vPts;
 		}
 
-		void SetPointsFromTrajectory( const std::vector<Eigen::Vector6d>& vPts )
+        void SetPointsFromTrajectory( const Eigen::Vector6dAlignedVec& vPts )
 		{
             m_vPts.clear();
             for( size_t ii = 0; ii < vPts.size(); ii++ ){
