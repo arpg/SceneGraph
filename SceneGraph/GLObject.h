@@ -11,6 +11,8 @@
 #include <map>
 #include <stdio.h>
 
+
+
 namespace Eigen{
     typedef Matrix<double, 6, 1> Vector6d;
     typedef std::vector<Eigen::Vector6d,Eigen::aligned_allocator<Eigen::Vector6d> > Vector6dAlignedVec;
@@ -18,6 +20,14 @@ namespace Eigen{
 
 namespace SceneGraph
 {
+enum MouseButton
+{
+  MouseButtonLeft = 1,
+  MouseButtonMiddle = 2,
+  MouseButtonRight = 4,
+  MouseWheelUp = 8,
+  MouseWheelDown = 16
+};
 
 class GLObject
 {

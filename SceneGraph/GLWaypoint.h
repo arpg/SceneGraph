@@ -7,6 +7,7 @@
 namespace SceneGraph
 {
 
+
 const static float VELOCITY_MULTIPLIER = 1;
 
 class GLWayPoint : public GLObject 
@@ -35,10 +36,20 @@ public:
         m_nFrontId = AllocSelectionId();
     }
 
-//    bool Mouse(int button, const Eigen::Vector3d &win, const Eigen::Vector3d &obj, const Eigen::Vector3d& normal, bool pressed, int button_state, int pickId)
-//    {
-//        return false;
-//    }
+    bool Mouse(int button, const Eigen::Vector3d &win, const Eigen::Vector3d &obj, const Eigen::Vector3d& normal, bool pressed, int button_state, int pickId)
+    {
+        if(button == MouseWheelUp)
+        {
+            m_dVelocity *= 1.01;
+            return true;
+        }else if(button == MouseWheelDown)
+        {
+            m_dVelocity *= 0.99;
+            return true;
+        }else {
+            return false;
+        }
+    }
 
     bool MouseMotion(const Eigen::Vector3d& /*win*/, const Eigen::Vector3d &obj, const Eigen::Vector3d& normal, int /*button_state*/, int pickId)
     {
@@ -127,10 +138,11 @@ public:
     }
 
     void SetDirty(bool bVal) { m_bDirty = bVal; }
-    bool GetDirty() { return m_bDirty; }
-    double GetVelocity() { return m_dVelocity; }
+    bool GetDirty() { return m_bDirty; } const
+    double GetVelocity() const { return m_dVelocity; }
     void SetVelocity(double vel) { m_dVelocity = vel; }
-    const Eigen::Matrix<double,5,1> GetPose5d() const{
+    const Eigen::Matrix<double,5,1> GetPose5d() const
+    {
         Eigen::Matrix<double,5,1> pose5d;
         Eigen::Vector3d xVec = GetPose4x4_po().block<3,1>(0,0);
         pose5d << GetPose4x4_po()(0,3), GetPose4x4_po()(1,3), atan2(xVec[1],xVec[0]),0,m_dVelocity;
