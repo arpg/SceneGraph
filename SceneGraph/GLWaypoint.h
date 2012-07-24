@@ -133,7 +133,7 @@ public:
     const Eigen::Matrix<double,5,1> GetPose5d() const{
         Eigen::Matrix<double,5,1> pose5d;
         Eigen::Vector3d xVec = GetPose4x4_po().block<3,1>(0,0);
-        pose5d << GetPose()[0], GetPose()[1], atan2(xVec[1],xVec[0]),0,m_dVelocity;
+        pose5d << GetPose4x4_po()(0,3), GetPose4x4_po()(1,3), atan2(xVec[1],xVec[0]),0,m_dVelocity;
         return pose5d;
     }
     
