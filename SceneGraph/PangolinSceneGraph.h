@@ -12,7 +12,7 @@ struct ActivateDrawFunctor
 
     void operator()(pangolin::View& view) {
         view.Activate(renderState);
-        glObject.DrawObjectAndChildren();
+        glObject.DrawObjectAndChildren(GL_RENDER);
     }
 
     SceneGraph::GLObject& glObject;
@@ -28,7 +28,7 @@ struct ActivateScissorClearDrawFunctor
 
     void operator()(pangolin::View& view) {
         view.ActivateScissorAndClear(renderState);
-        glObject.DrawObjectAndChildren();
+        glObject.DrawObjectAndChildren(GL_RENDER);
     }
 
     SceneGraph::GLObject& glObject;
@@ -46,9 +46,9 @@ struct ActivateScissorClearDrawFunctor3d2d
 
     void operator()(pangolin::View& view) {
         view.ActivateScissorAndClear(renderState3d);
-        glObject3d.DrawObjectAndChildren();
+        glObject3d.DrawObjectAndChildren(GL_RENDER);
         renderState2d.Apply();
-        glObject2d.DrawObjectAndChildren();
+        glObject2d.DrawObjectAndChildren(GL_RENDER);
     }
 
     SceneGraph::GLObject& glObject3d;
@@ -109,7 +109,7 @@ struct HandlerSceneGraph : pangolin::Handler3D
         // Render scenegraph in 'select' mode
         glRenderMode( GL_SELECT );
         glInitNames();
-        m_scenegraph.DrawObjectAndChildren();
+        m_scenegraph.DrawObjectAndChildren(GL_SELECT);
         glFlush();
 
         GLint nHits = glRenderMode( GL_RENDER );

@@ -9,14 +9,14 @@ int GLObject::g_nHandleCounter = 1;
 /////////////////////////////////////////////////////////////////////////////////
 GLObject::GLObject()
     : m_sObjectName("unnamed-object"), m_bVisible(true), m_bPerceptable(true),
-      m_T_po(Eigen::Matrix4d::Identity()), m_dScale(1)
+      m_T_po(Eigen::Matrix4d::Identity()), m_dScale(1), m_bIsSelectable(false)
 {
 }
 
 /////////////////////////////////////////////////////////////////////////////////
 GLObject::GLObject( const std::string& name)
     : m_sObjectName(name), m_bVisible(true), m_bPerceptable(true),
-      m_T_po(Eigen::Matrix4d::Identity()), m_dScale(1)
+      m_T_po(Eigen::Matrix4d::Identity()), m_dScale(1), m_bIsSelectable(false)
 {
 }
 
@@ -35,7 +35,7 @@ int GLObject::AllocSelectionId()
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
-void GLObject::DrawObjectAndChildren()
+void GLObject::DrawObjectAndChildren(int renderMode)
 {
     if(IsVisible()) {
         glMatrixMode(GL_MODELVIEW);
@@ -43,15 +43,23 @@ void GLObject::DrawObjectAndChildren()
         glMultMatrixd(m_T_po.data());
         glScaled(m_dScale,m_dScale,m_dScale);
 
-        DrawCanonicalObject();
+        //if we are in GL_Select mode
+        if(renderMode == GL_SELECT){
+            if(IsSelectable() == true){
+                DrawCanonicalObject();
+            }
+        }else {
+            DrawCanonicalObject();
+        }
 
         for(std::vector<GLObject*>::const_iterator i=m_vpChildren.begin(); i!= m_vpChildren.end(); ++i)
         {
-            (*i)->DrawObjectAndChildren();
+            (*i)->DrawObjectAndChildren(renderMode);
         }
         glPopMatrix();
     }
 }
+
 
 /////////////////////////////////////////////////////////////////////////////////
 void GLObject::SetVisible(bool visible)
@@ -158,6 +166,12 @@ void GLObject::SetScale(double s) {
 /////////////////////////////////////////////////////////////////////////////////////////////////
 double GLObject::GetScale() {
     return m_dScale;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////
+bool GLObject::IsSelectable()
+{
+    return m_bIsSelectable;
 }
 
 

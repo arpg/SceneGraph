@@ -40,11 +40,11 @@ class GLObject
         virtual void DrawCanonicalObject() = 0;
 
         /// Apply object transform, then draw object and its children (recursively)
-        void DrawObjectAndChildren();
+        void DrawObjectAndChildren(int renderMode);
 
         /// Alow this object to draw itself as a functor
         inline void operator()() {
-            DrawObjectAndChildren();
+            DrawObjectAndChildren(GL_RENDER);
         }
 
         /////////////////////////////////
@@ -112,6 +112,7 @@ class GLObject
 
     protected:
         int AllocSelectionId();
+        bool IsSelectable();
 
         //! Vector of children whose poses are expressed relative to
         //! this object
@@ -125,6 +126,9 @@ class GLObject
 
         //! can be measured (e.g., not a virtual thing)
         bool                      m_bPerceptable;
+
+        //! Can be selected
+        bool                        m_bIsSelectable;
 
         //! Object to Parent transform. Includes position, rotation (x_p = m_T_po & m_dScale * x_o)
         Eigen::Matrix4d           m_T_po;

@@ -18,6 +18,7 @@ public:
     {
         m_bSelected = false;
         m_bDirty = false;
+        m_bIsSelectable = true;
 
         m_dVelocity = 1.0;
         m_bPerceptable = false;
