@@ -49,7 +49,8 @@ public:
             Eigen::Vector3d d = -normal;
 //            d << 0, 0, 1;
             Eigen::Vector3d f = T.block <3,1> (0, 0);
-            Eigen::Vector3d r = d.cross(f);
+            Eigen::Vector3d r = d.cross(f).normalized();
+            f = r.cross(d).normalized();
             T.block<3,1>(0,3) = obj;
             T.block<3,1>(0,0) = f;
             T.block<3,1>(0,1) = r;
@@ -57,7 +58,7 @@ public:
         }else if (pickId == m_nFrontId) {
             Eigen::Vector3d dir = obj - T.block<3,1>(0,3);
             Eigen::Vector3d nr  = (T.block<3,1>(0,2).cross(dir)).normalized();
-            Eigen::Vector3d nf = nr.cross(T.block<3,1>(0,2));
+            Eigen::Vector3d nf = nr.cross(T.block<3,1>(0,2)).normalized();
             T.block<3,1>(0,0) = nf;
             T.block<3,1>(0,1) = nr;
             m_dVelocity = dir.norm()*VELOCITY_MULTIPLIER;
