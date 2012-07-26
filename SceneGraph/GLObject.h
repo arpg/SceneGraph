@@ -137,12 +137,12 @@ class GLObject
         //! can be measured (e.g., not a virtual thing)
         bool                      m_bPerceptable;
 
-        //! Can be selected
-        bool                        m_bIsSelectable;
-
         //! Object to Parent transform. Includes position, rotation (x_p = m_T_po & m_dScale * x_o)
         Eigen::Matrix4d           m_T_po;
         double                    m_dScale;
+
+        //! Can be selected
+        bool                        m_bIsSelectable;
 
         // static map of id to objects
         static std::map<int,GLObject*> g_mObjects;
