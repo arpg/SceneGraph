@@ -21,7 +21,6 @@ set( SceneGraph_SOURCES
 
 set( SceneGraph_HEADERS
         config.h.in
-        PangolinSceneGraph.h
         SceneGraph.h
         GLSLHelpers.h
         GLHelpers.h
@@ -34,6 +33,9 @@ set( SceneGraph_HEADERS
         GLWaypoint.h
         GLLineStrip.h
 #       SimCam.h
+        Pangolin.h
+        PangolinDrawGLObject.h
+        PangolinSceneGraphHandler.h
    )
 
 # Basic includes / libraries
