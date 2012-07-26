@@ -1,8 +1,9 @@
 #include <iostream>
-#include <pangolin/pangolin.h>
-#include <SceneGraph/SceneGraph.h>
+#include <boost/bind.hpp>
 #include <Eigen/Eigen>
 
+#include <pangolin/pangolin.h>
+#include <SceneGraph/SceneGraph.h>
 
 using namespace SceneGraph;
 using namespace pangolin;
@@ -15,10 +16,30 @@ void setRandomImageData(T* imageArray, int width, int height, int channels){
   }
 }
 
+// Draw in pixel units (center of image pixels)
+struct ExampleDrawSomethingInPixelCoords
+{
+    void operator()(pangolin::View&) {
+        glColor3f(1,1,1);
+        glBegin(GL_LINE_STRIP);
+        glVertex2d(10, 10);
+        glVertex2d(40, 10);
+        glVertex2d(40, 40);
+        glVertex2d(10, 40);
+        glVertex2d(10, 10);
+        glEnd();
+    }
+};
+
+void GlobalKeyHook(std::string str)
+{
+    cout << str << endl;
+}
+
 int main( int /*argc*/, char** /*argv[]*/ )
 {  
     // Create OpenGL window in single line thanks to GLUT
-    pangolin::CreateGlutWindowAndBind("Main",640*2,480);
+    pangolin::CreateGlutWindowAndBind("Main",640*3,480);
     GLSceneGraph::ApplyPreferredGlSettings();
 
     // Scenegraph to hold GLObjects and relative transformations
@@ -71,22 +92,28 @@ int main( int /*argc*/, char** /*argv[]*/ )
     glGraph2d.AddChild(&glText2d);
 
     // Synthetic random image for demonstration
-    const int w = 640;
-    const int h = 480;
+    const int w = 64;
+    const int h = 48;
     unsigned char uImage[w*h*3];
     setRandomImageData(uImage,w,h,3);
 
     // Define Camera Render Object (for view / scene browsing)
     pangolin::OpenGlRenderState stacks3d(
-                ProjectionMatrix(640,480,420,420,320,240,0.1,1000),
-                ModelViewLookAt(0,-2,-4, 0,1,0, AxisNegZ)
-                );
+        ProjectionMatrix(640,480,420,420,320,240,0.1,1000),
+        ModelViewLookAt(0,-2,-4, 0,1,0, AxisNegZ)
+    );
+
+    // Define second camera render object
+    pangolin::OpenGlRenderState stacks3d_2(
+        ProjectionMatrix(640,480,420,420,320,240,0.1,1000),
+        ModelViewLookAt(2,-1,-2, 0,1,0, AxisNegZ)
+    );
 
     // Use different orthographic render state for 2D drawing.
     // Virtualise screen resolution to 640x480
     pangolin::OpenGlRenderState stacks2d(
-                ProjectionMatrixOrthographic(480,0,0,640,0,1000)
-                );
+        ProjectionMatrixOrthographic(0,640,0,480,0,1000)
+    );
 
     // Pangolin abstracts the OpenGL viewport as a View.
     // Here we get a reference to the default 'base' view.
@@ -98,18 +125,31 @@ int main( int /*argc*/, char** /*argv[]*/ )
     // We set the views location on screen and add a handler which will
     // let user input update the model_view matrix (stacks3d) and feed through
     // to our scenegraph
-    view3d.SetBounds(0.0, 1.0, 0.0, 0.5, 640.0f/480.0f)
+    view3d.SetBounds(0.0, 1.0, 0.0, 1.0/3.0, 640.0f/480.0f)
           .SetHandler(new HandlerSceneGraph(glGraph,stacks3d,AxisNegZ))
-          .SetDrawFunction(ActivateDrawFunctor3d2d(glGraph, stacks3d, glGraph2d, stacks2d));
+          .SetDrawFunction(ActivateDrawFunctor(glGraph, stacks3d));
+
+    // We can define another view on the same scenegraph. We can also
+    // render a second scenegraph as a 2D overlay using the different
+    // 2D ModelView and Projection matrices (stacks3d)
+    pangolin::View view3d_2d;
+    view3d_2d.SetBounds(0.0,1.0, 2.0/3.0, 1.0, 640.0f/480.0f)
+          .SetHandler(new HandlerSceneGraph(glGraph,stacks3d_2,AxisNegZ))
+          .SetDrawFunction(ActivateDrawFunctor3d2d(glGraph, stacks3d_2, glGraph2d, stacks2d));
 
     // We define a special type of view which will accept image data
     // to display and set its bounds on screen.
     ImageView viewImage(w,h, GL_RGBA8, true, false);
-    viewImage.SetBounds(0.0,1.0, 0.5, 1.0, (double)w/h);
+    viewImage.SetBounds(0.0, 1.0, 1.0/3.0, 2.0/3.0, (double)w/h);
+    viewImage.SetDrawFunction(ExampleDrawSomethingInPixelCoords());
 
     // Add our views as children to the base container.
     container.AddDisplay(view3d);
+    container.AddDisplay(view3d_2d);
     container.AddDisplay(viewImage);
+
+    // Demonstration of how we can register a keyboard hook to trigger a method
+    pangolin::RegisterKeyPressCallback( PANGO_CTRL + 'r', boost::bind(GlobalKeyHook, "You Pushed ctrl-r!" ) );
 
     // Default hooks for exiting (Esc) and fullscreen (tab).
     while( !pangolin::ShouldQuit() )

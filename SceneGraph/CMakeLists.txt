@@ -36,6 +36,7 @@ set( SceneGraph_HEADERS
         Pangolin.h
         PangolinDrawGLObject.h
         PangolinSceneGraphHandler.h
+        PangolinImageView.h
    )
 
 # Basic includes / libraries
