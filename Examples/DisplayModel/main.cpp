@@ -139,7 +139,7 @@ int main( int /*argc*/, char** /*argv[]*/ )
 
     // We define a special type of view which will accept image data
     // to display and set its bounds on screen.
-    ImageView viewImage(w,h, GL_RGBA8, true, false);
+    ImageView viewImage(true,false);
     viewImage.SetBounds(0.0, 1.0, 1.0/3.0, 2.0/3.0, (double)w/h);
     viewImage.SetDrawFunction(ExampleDrawSomethingInPixelCoords());
 
@@ -159,7 +159,7 @@ int main( int /*argc*/, char** /*argv[]*/ )
 
         // These calla can safely be made outside of the OpenGL thread.
         setRandomImageData(uImage,w,h,3);
-        viewImage.SetImage(uImage, GL_RGB, GL_UNSIGNED_BYTE);
+        viewImage.SetImage(uImage, w,h, GL_RGB8, GL_RGB, GL_UNSIGNED_BYTE);
 
         // Swap frames and Process Events
         pangolin::FinishGlutFrame();

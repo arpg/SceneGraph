@@ -8,11 +8,21 @@ namespace SceneGraph
 
 //! Specialisation of pangolin::View that automatically sets an orthographic
 //! tranforms to display image data and any external draw functions.
-class ImageView : public pangolin::View, public pangolin::GlTexture
+class ImageView : public pangolin::View
 {
 public:
-    ImageView(GLint width, GLint height, GLint internal_format = GL_RGB8, bool flipy = true, bool sampling_linear = true)
-        : pangolin::GlTexture(width,height,internal_format, sampling_linear), m_bFlipy(flipy), m_pImageData(0), m_iImageDataSizeBytes(0)
+    ImageView(bool flipy = true, bool sampling_linear = true )
+        : m_bFlipy(flipy), m_bSamplingLinear(sampling_linear), m_bImageDataDirty(false), m_pImageData(0), m_iImageDataSizeBytes(0)
+    {
+    }
+
+    ~ImageView() {
+        if( m_pImageData) {
+            delete [] m_pImageData;
+        }
+    }
+
+    void ResizeTexture(GLint width, GLint height, GLint internal_format = GL_RGB8)
     {
         this->SetAspect((double)width / (double)height);
 
@@ -22,30 +32,30 @@ public:
             m_ortho = pangolin::ProjectionMatrixOrthographic(-0.5, width-0.5, -0.5, height-0.5, 0, 1E4 );
         }
 
-    }
-
-    ~ImageView() {
-        if( m_pImageData) {
-            delete [] m_pImageData;
-        }
+        tex.Reinitialise(width, height, internal_format, m_bSamplingLinear);
     }
 
     //! Set the image data to be used for display.
     //! The OpenGL Texture associated with this display will be
     //! updated before drawing from within the OpenGL thread.
-    void SetImage(void* pImageData, GLenum nFormat = GL_RGB, GLenum nType = GL_UNSIGNED_BYTE)
+    void SetImage(const void* pImageData, GLint w, GLint h, GLint internal_format = GL_RGB8, GLenum nFormat = GL_RGB, GLenum nType = GL_UNSIGNED_BYTE)
     {
-        const size_t nMemSize = this->width * this->height * GLBytesPerPixel( nFormat, nType );
+        const size_t nMemSize = w * h * GLBytesPerPixel( nFormat, nType );
 
         // Resize buffer if needed
-        if(nMemSize != m_iImageDataSizeBytes) {
-            delete [] m_pImageData;
+        if(nMemSize > m_iImageDataSizeBytes) {
+            if(m_pImageData) {
+              delete [] m_pImageData;
+            }
             m_pImageData = new unsigned char[nMemSize];
             m_iImageDataSizeBytes = nMemSize;
         }
 
         // Update Cpu image data
         memcpy( m_pImageData, pImageData, nMemSize );
+        m_iImageWidth = w;
+        m_iImageHeight = h;
+        m_nInternalFormat = internal_format;
         m_nFormat = nFormat;
         m_nType = nType;
 
@@ -56,8 +66,12 @@ public:
     //! This should only be called from within the OpenGL Thread.
     void UpdateGlTexture()
     {
+        if(m_iImageWidth != tex.width || m_iImageHeight != tex.height || m_nInternalFormat != tex.internal_format) {
+            ResizeTexture(m_iImageWidth, m_iImageHeight, m_nInternalFormat);
+        }
+
         m_bImageDataDirty = false;
-        this->Upload(m_pImageData, m_nFormat, m_nType);
+        tex.Upload(m_pImageData, m_nFormat, m_nType);
     }
 
     //! Render this view.
@@ -81,13 +95,13 @@ public:
         glLoadIdentity();
 
         // Render texture
-        Bind();
+        tex.Bind();
         glEnable(GL_TEXTURE_2D);
         glBegin(GL_QUADS);
         glTexCoord2f(0, 0); glVertex2d(-0.5,-0.5);
-        glTexCoord2f(1, 0); glVertex2d(width-0.5,-0.5);
-        glTexCoord2f(1, 1); glVertex2d(width-0.5,height-0.5);
-        glTexCoord2f(0, 1); glVertex2d(-0.5,height-0.5);
+        glTexCoord2f(1, 0); glVertex2d(tex.width-0.5,-0.5);
+        glTexCoord2f(1, 1); glVertex2d(tex.width-0.5,tex.height-0.5);
+        glTexCoord2f(0, 1); glVertex2d(-0.5,tex.height-0.5);
         glEnd();
         glDisable(GL_TEXTURE_2D);
 
@@ -96,18 +110,25 @@ public:
     }
 
 protected:
+    // OpenGL Texture
+    pangolin::GlTexture tex;
+
     // Projection matrix
     pangolin::OpenGlMatrix m_ortho;
 
     // Should the image be drawn counter to OpenGL Convention
     bool   m_bFlipy;
+    bool   m_bSamplingLinear;
 
     // Is the cached image data newer than the GlTexture data
     bool   m_bImageDataDirty;
 
     // Saved Image data to be uploaded before draw
+    GLint m_iImageWidth;
+    GLint m_iImageHeight;
     unsigned char*  m_pImageData;
     size_t m_iImageDataSizeBytes;
+    GLint m_nInternalFormat;
     GLenum m_nFormat;
     GLenum m_nType;
 };
