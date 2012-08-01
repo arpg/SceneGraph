@@ -29,6 +29,13 @@ enum MouseButton
   MouseWheelDown = 16
 };
 
+enum RenderMode
+{
+	eRenderVisible = GL_RENDER,
+	eRenderSelectable = GL_SELECT,
+	eRenderPerceptable
+};
+
 class GLObject
 {
     public:
@@ -50,11 +57,11 @@ class GLObject
         virtual void DrawCanonicalObject() = 0;
 
         /// Apply object transform, then draw object and its children (recursively)
-        void DrawObjectAndChildren(int renderMode);
+        void DrawObjectAndChildren(RenderMode renderMode = eRenderVisible);
 
         /// Alow this object to draw itself as a functor
         inline void operator()() {
-            DrawObjectAndChildren(GL_RENDER);
+            DrawObjectAndChildren();
         }
 
         /////////////////////////////////

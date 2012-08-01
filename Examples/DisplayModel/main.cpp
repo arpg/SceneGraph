@@ -37,7 +37,7 @@ void GlobalKeyHook(std::string str)
 }
 
 int main( int /*argc*/, char** /*argv[]*/ )
-{  
+{
     // Create OpenGL window in single line thanks to GLUT
     pangolin::CreateGlutWindowAndBind("Main",640*3,480);
     GLSceneGraph::ApplyPreferredGlSettings();
@@ -100,7 +100,7 @@ int main( int /*argc*/, char** /*argv[]*/ )
     // Define Camera Render Object (for view / scene browsing)
     pangolin::OpenGlRenderState stacks3d(
         ProjectionMatrix(640,480,420,420,320,240,0.1,1000),
-        ModelViewLookAt(0,-2,-4, 0,1,0, AxisNegZ)
+        ModelViewLookAt(0,-2,-4, 0,1,0, AxisZ)
     );
 
     // Define second camera render object
@@ -126,7 +126,7 @@ int main( int /*argc*/, char** /*argv[]*/ )
     // let user input update the model_view matrix (stacks3d) and feed through
     // to our scenegraph
     view3d.SetBounds(0.0, 1.0, 0.0, 1.0/3.0, 640.0f/480.0f)
-          .SetHandler(new HandlerSceneGraph(glGraph,stacks3d,AxisNegZ))
+          .SetHandler(new HandlerSceneGraph(glGraph,stacks3d,AxisZ))
           .SetDrawFunction(ActivateDrawFunctor(glGraph, stacks3d));
 
     // We can define another view on the same scenegraph. We can also

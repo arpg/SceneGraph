@@ -4,9 +4,12 @@
 #include <SceneGraph/FBO.h>
 #include <SceneGraph/GLSceneGraph.h>
 #include <SceneGraph/GLSLHelpers.h>
-#include <SceneGraph/GLCVars.h>
+//#include <SceneGraph/GLCVars.h>
 
 #include <string>
+
+namespace SceneGraph
+{
 
 class GLSimCam;
 
@@ -148,7 +151,18 @@ class GLSimCam
 //                "    gl_FragColor[0] = depthN;\n"
                     "    gl_FragColor = vec4( vec3(depth), 1.0 );\n"
                 "}\n";
-	    InitShaders( sDepthVertShader, sDepthFragShader, m_nDepthShaderProgram );
+
+
+			// init GLEW
+			GLenum err = glewInit();
+
+			if (err != GLEW_OK) {
+				std::cout << "Could not initialize GLEW!!!" << std::endl;
+				exit(1);
+			}
+
+			// init shaders
+			InitShaders( sDepthVertShader, sDepthFragShader, m_nDepthShaderProgram );
 
 	    /* Helpful for quick testing of shaders, don't need to recompile if loaded from file
 	    if ( LoadShaders( "Depth.vert", "Depth.frag", m_nDepthShaderProgram ) == false) {
@@ -176,6 +190,10 @@ class GLSimCam
                 m_pRGBMode = new SimCamMode( *this, eSimCamRGB );
                 m_pRGBMode->Init( false, 0, GL_RGB, GL_UNSIGNED_BYTE );
             }
+            if( nModes & eSimCamLuminance ){
+                m_pGreyMode = new SimCamMode( *this, eSimCamLuminance );
+                m_pGreyMode->Init( false, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE );
+            }
             if( nModes & eSimCamDepth ){
                 m_pDepthMode = new SimCamMode( *this, eSimCamDepth );
                 m_pDepthMode->Init( true, m_nDepthShaderProgram, GL_RED, GL_FLOAT );
@@ -197,6 +215,15 @@ class GLSimCam
         {
             if( m_pRGBMode ){
                 return m_pRGBMode->Texture();
+            }
+            return -1;
+        }
+
+		/////////////////////////////////////////////////////////////////////////////////////////
+        GLint GreyTexture()
+        {
+            if( m_pGreyMode ){
+                return m_pGreyMode->Texture();
             }
             return -1;
         }
@@ -245,6 +272,37 @@ class GLSimCam
 		// set correctly. Right now, PboRead is only called while in middle of the regular
 		// render loop. - JamesII
                 memcpy( DataPtr, m_pRGBMode->Capture(), ImageWidth()*ImageHeight()*3);
+                return true;
+            }
+            return false;
+        }
+
+        /////////////////////////////////////////////////////////////////////////////////////////
+        bool CaptureGrey( std::vector<unsigned char>& vPixelData )
+        {
+            if( m_pGreyMode ){
+                if( vPixelData.size() < ImageWidth()*ImageHeight() ){
+                    vPixelData.resize( ImageWidth()*ImageHeight() );
+                }
+                // TODO Capture here should do the PboRead and fill vPixelData...
+		// NB: Having Capture do a PboRead may cause probelems if the render state is not
+		// set correctly. Right now, PboRead is only called while in middle of the regular
+		// render loop. - JamesII
+                memcpy( &vPixelData[0], m_pGreyMode->Capture(), ImageWidth()*ImageHeight() );
+                return true;
+            }
+            return false;
+        }
+
+        /////////////////////////////////////////////////////////////////////////////////////////
+        bool CaptureGrey( void* DataPtr )
+        {
+            if( m_pGreyMode ){
+                // TODO Capture here should do the PboRead and fill vPixelData...
+		// NB: Having Capture do a PboRead may cause probelems if the render state is not
+		// set correctly. Right now, PboRead is only called while in middle of the regular
+		// render loop. - JamesII
+                memcpy( DataPtr, m_pGreyMode->Capture(), ImageWidth()*ImageHeight() );
                 return true;
             }
             return false;
@@ -405,11 +463,11 @@ class GLSimCam
 
         /////////////////////////////////////////////////////////////////////////////////////////
         /// For registering our PreRender callback
-        static void RenderCallBack( GLWindow*, void* pUserData )
-        {
-            GLSimCam* pThis = (GLSimCam*)pUserData;
-            pThis->RenderToTexture();
-        }
+//        static void RenderCallBack( GLWindow*, void* pUserData )
+//        {
+//            GLSimCam* pThis = (GLSimCam*)pUserData;
+//            pThis->RenderToTexture();
+//        }
 
         /////////////////////////////////////////////////////////////////////////////////////////
         /// Change the nuber of pixels in the sensor
@@ -434,6 +492,10 @@ class GLSimCam
         /////////////////////////////////////////////////////////////////////////////////////////
         void DrawCamera()
         {
+            glPushAttrib(GL_ENABLE_BIT);
+
+			//glDisable(GL_LIGHTING);
+
             // OK
             Eigen::Matrix4d M = m_dM.inverse();
             Eigen::Matrix4d T = m_dT.inverse();
@@ -586,6 +648,8 @@ class GLSimCam
             glVertex3dv( lbn.data() );
 
             glEnd();
+
+            glPopAttrib();
         }
 
         /////////////////////////////////////////////////////////////////////////////////////////
@@ -729,8 +793,10 @@ class GLSimCam
         Eigen::Matrix<double,4,4,Eigen::ColMajor>   m_dM; // to save projection matrix
         Eigen::Matrix<double,4,4,Eigen::ColMajor>   m_dT; // to save modelview matrix
         SimCamMode*                                 m_pRGBMode;
+        SimCamMode*                                 m_pGreyMode;
         SimCamMode*                                 m_pDepthMode;
         SimCamMode*                                 m_pNormalsMode;
 };
+}
 
 #endif

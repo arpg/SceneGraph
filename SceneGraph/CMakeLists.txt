@@ -16,7 +16,7 @@ set( SceneGraph_SOURCES
         GLObject.cpp
         GLSceneGraph.cpp
 	FBO.cpp
-#	SimCam.cpp
+	SimCam.cpp
    )
 
 set( SceneGraph_HEADERS
@@ -32,7 +32,7 @@ set( SceneGraph_HEADERS
         GLAxis.h
         GLWaypoint.h
         GLLineStrip.h
-#       SimCam.h
+        SimCam.h
         Pangolin.h
         PangolinDrawGLObject.h
         PangolinSceneGraphHandler.h
@@ -89,7 +89,7 @@ CONFIGURE_FILE(
   "${CMAKE_CURRENT_BINARY_DIR}/config.h"
 )
 
-# If set, this will use global variables SceneGraph_INCLUDE_DIRS and SceneGraph_LIBRARIES 
+# If set, this will use global variables SceneGraph_INCLUDE_DIRS and SceneGraph_LIBRARIES
 # and will write a SceneGraphConfig.cmake file with these values filled in.
 export_library( SceneGraph )
 

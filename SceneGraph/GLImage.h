@@ -18,7 +18,6 @@ class GLImage : public GLObject
             m_bTextureDataChanged = false;
             m_bTextureInitialized = false;
             InitReset();
-            m_bIs2dLayer = true; // this is crucial, as it causes this layer to be rendered after all the 3d info.
             m_fPercentTop    = 0;
             m_fPercentLeft   = 0;
             m_fPercentBottom = 0.5;
