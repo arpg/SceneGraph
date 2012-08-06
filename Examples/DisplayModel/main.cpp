@@ -100,7 +100,7 @@ int main( int /*argc*/, char** /*argv[]*/ )
     // Define Camera Render Object (for view / scene browsing)
     pangolin::OpenGlRenderState stacks3d(
         ProjectionMatrix(640,480,420,420,320,240,0.1,1000),
-        ModelViewLookAt(0,-2,-4, 0,1,0, AxisZ)
+        ModelViewLookAt(0,-2,-4, 0,1,0, AxisNegZ)
     );
 
     // Define second camera render object
