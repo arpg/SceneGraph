@@ -1,0 +1,5 @@
+# automatically generated SimpleGui.cmake.in file
+SET( SimpleGui_LIBRARIES  @SimpleGui_LIBRARIES@ CACHE INTERNAL "SimpleGui libraries" FORCE )
+mark_as_advanced( SimpleGui_LIBRARIES )
+SET( SimpleGui_INCLUDE_DIRS  @SimpleGui_INCLUDE_DIRS@ CACHE INTERNAL "SimpleGui include directories" FORCE )
+mark_as_advanced( SimpleGui_INCLUDE_DIRS )

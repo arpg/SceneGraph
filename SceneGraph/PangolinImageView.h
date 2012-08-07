@@ -15,7 +15,7 @@ public:
         : m_bFlipy(flipy), m_bSamplingLinear(sampling_linear), m_bImageDataDirty(false), m_pImageData(0), m_iImageDataSizeBytes(0)
     {
     }
-
+        
     ~ImageView() {
         if( m_pImageData) {
             delete [] m_pImageData;
@@ -73,6 +73,11 @@ public:
         m_bImageDataDirty = false;
         tex.Upload(m_pImageData, m_nFormat, m_nType);
     }
+    
+    void SetSamplingLinear(bool sampling_linear)
+    {
+        m_bSamplingLinear = sampling_linear;
+    }
 
     //! Render this view.
     virtual void Render()
@@ -85,7 +90,7 @@ public:
         // Activate viewport
         this->Activate();
         glColor3f(1,1,1);
-
+        
         // Load orthographic projection matrix to match image
         glMatrixMode(GL_PROJECTION);
         m_ortho.Load();
@@ -94,6 +99,9 @@ public:
         glMatrixMode(GL_MODELVIEW);
         glLoadIdentity();
 
+        glPushAttrib(GL_ENABLE_BIT);
+        glDisable(GL_LIGHTING);
+        
         // Render texture
         tex.Bind();
         glEnable(GL_TEXTURE_2D);
@@ -107,6 +115,8 @@ public:
 
         // Call base View implementation
         pangolin::View::Render();
+        
+        glPopAttrib();
     }
 
 protected:
