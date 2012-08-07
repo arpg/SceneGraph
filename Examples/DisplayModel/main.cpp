@@ -126,7 +126,7 @@ int main( int /*argc*/, char** /*argv[]*/ )
     // let user input update the model_view matrix (stacks3d) and feed through
     // to our scenegraph
     view3d.SetBounds(0.0, 1.0, 0.0, 1.0/3.0, 640.0f/480.0f)
-          .SetHandler(new HandlerSceneGraph(glGraph,stacks3d,AxisZ))
+          .SetHandler(new HandlerSceneGraph(glGraph,stacks3d,AxisNegZ))
           .SetDrawFunction(ActivateDrawFunctor(glGraph, stacks3d));
 
     // We can define another view on the same scenegraph. We can also

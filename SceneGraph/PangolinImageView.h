@@ -82,6 +82,9 @@ public:
             UpdateGlTexture();
         }
 
+        glPushAttrib(GL_ENABLE_BIT);
+        glDisable(GL_LIGHTING);
+
         // Activate viewport
         this->Activate();
         glColor3f(1,1,1);
@@ -107,6 +110,8 @@ public:
 
         // Call base View implementation
         pangolin::View::Render();
+
+        glPopAttrib();
     }
 
 protected:
