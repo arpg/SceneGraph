@@ -15,7 +15,7 @@ public:
         : m_bFlipy(flipy), m_bSamplingLinear(sampling_linear), m_bImageDataDirty(false), m_pImageData(0), m_iImageDataSizeBytes(0)
     {
     }
-        
+
     ~ImageView() {
         if( m_pImageData) {
             delete [] m_pImageData;
@@ -87,6 +87,9 @@ public:
             UpdateGlTexture();
         }
 
+        glPushAttrib(GL_ENABLE_BIT);
+        glDisable(GL_LIGHTING);
+
         // Activate viewport
         this->Activate();
         glColor3f(1,1,1);
@@ -99,9 +102,6 @@ public:
         glMatrixMode(GL_MODELVIEW);
         glLoadIdentity();
 
-        glPushAttrib(GL_ENABLE_BIT);
-        glDisable(GL_LIGHTING);
-        
         // Render texture
         tex.Bind();
         glEnable(GL_TEXTURE_2D);
@@ -115,7 +115,7 @@ public:
 
         // Call base View implementation
         pangolin::View::Render();
-        
+
         glPopAttrib();
     }
 

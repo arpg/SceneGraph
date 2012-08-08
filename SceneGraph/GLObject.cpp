@@ -35,22 +35,20 @@ int GLObject::AllocSelectionId()
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
-void GLObject::DrawObjectAndChildren(int renderMode)
+void GLObject::DrawObjectAndChildren(RenderMode renderMode)
 {
-    if(IsVisible()) {
+    if( IsVisible() && (
+			(renderMode == eRenderVisible) ||
+			(renderMode == eRenderSelectable && IsSelectable()) ||
+			(renderMode == eRenderPerceptable && IsPerceptable())
+		)
+	) {
         glMatrixMode(GL_MODELVIEW);
         glPushMatrix();
         glMultMatrixd(m_T_po.data());
         glScaled(m_dScale,m_dScale,m_dScale);
 
-        //if we are in GL_Select mode
-        if(renderMode == GL_SELECT){
-            if(IsSelectable() == true){
-                DrawCanonicalObject();
-            }
-        }else {
-            DrawCanonicalObject();
-        }
+        DrawCanonicalObject();
 
         for(std::vector<GLObject*>::const_iterator i=m_vpChildren.begin(); i!= m_vpChildren.end(); ++i)
         {

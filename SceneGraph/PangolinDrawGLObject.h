@@ -15,7 +15,7 @@ struct ActivateDrawFunctor
 
     void operator()(pangolin::View& view) {
         view.Activate(renderState);
-        glObject.DrawObjectAndChildren(GL_RENDER);
+        glObject.DrawObjectAndChildren( eRenderVisible );
     }
 
     SceneGraph::GLObject& glObject;
@@ -31,7 +31,7 @@ struct ActivateScissorClearDrawFunctor
 
     void operator()(pangolin::View& view) {
         view.ActivateScissorAndClear(renderState);
-        glObject.DrawObjectAndChildren(GL_RENDER);
+        glObject.DrawObjectAndChildren(eRenderVisible);
     }
 
     SceneGraph::GLObject& glObject;
@@ -49,9 +49,9 @@ struct ActivateDrawFunctor3d2d
 
     void operator()(pangolin::View& view) {
         view.Activate(renderState3d);
-        glObject3d.DrawObjectAndChildren(GL_RENDER);
+        glObject3d.DrawObjectAndChildren(eRenderVisible);
         renderState2d.Apply();
-        glObject2d.DrawObjectAndChildren(GL_RENDER);
+        glObject2d.DrawObjectAndChildren(eRenderVisible);
     }
 
     SceneGraph::GLObject& glObject3d;
@@ -71,9 +71,9 @@ struct ActivateScissorClearDrawFunctor3d2d
 
     void operator()(pangolin::View& view) {
         view.ActivateScissorAndClear(renderState3d);
-        glObject3d.DrawObjectAndChildren(GL_RENDER);
+        glObject3d.DrawObjectAndChildren(eRenderVisible);
         renderState2d.Apply();
-        glObject2d.DrawObjectAndChildren(GL_RENDER);
+        glObject2d.DrawObjectAndChildren(eRenderVisible);
     }
 
     SceneGraph::GLObject& glObject3d;

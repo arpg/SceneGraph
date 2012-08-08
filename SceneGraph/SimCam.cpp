@@ -1,5 +1,7 @@
 #include "SimCam.h"
 
+using namespace SceneGraph;
+
 static int m_nUsedAttachments = 0;
 static int m_nIndex = 0;
 
@@ -109,7 +111,7 @@ void SimCamMode::RenderToTexture()
         glUseProgram(m_nShaderProgram);
     }
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT );
-    m_SimCam.m_pSceneGraph->ApplyDfsVisitor( _ShaderVisitor );
+    m_SimCam.m_pSceneGraph->DrawObjectAndChildren( eRenderPerceptable );
 
     PboRead();
 
@@ -137,7 +139,7 @@ GLuint SimCamMode::Texture()
 void SimCamMode::_ShaderVisitor( GLObject* pObj )
 {
     if( pObj->IsPerceptable() ) {
-        pObj->draw();
+		pObj->DrawCanonicalObject();
     }
 }
 

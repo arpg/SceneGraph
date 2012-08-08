@@ -587,7 +587,9 @@ protected:
                     glColor4f( c[0], c[1], c[2], fAlpha*c[3] );
                 }
                 if( mesh->mTextureCoords[0] != NULL ){
-                    glTexCoord3fv( &mesh->mTextureCoords[0][index].x );
+                    aiVector3D texcoord = mesh->mTextureCoords[0][index];
+                    texcoord.y = 1-texcoord.y;
+                    glTexCoord3fv( &texcoord.x );
                 }
                 if( mesh->mNormals != NULL ){
                     glNormal3fv( &mesh->mNormals[index].x );

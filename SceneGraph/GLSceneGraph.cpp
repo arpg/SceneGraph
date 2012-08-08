@@ -10,7 +10,7 @@ extern std::map<int,GLObject*>   g_mObjects; // map of id to objects
 GLSceneGraph::GLSceneGraph()
     : GLObject("SceneGraph")
 {
-    m_vpChildren.clear();
+    Reset();
 }
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,9 @@ void GLSceneGraph::Reset()
 {
     // Remove children
     m_vpChildren.clear();
+
+    // This object and children can be selected
+    m_bIsSelectable = true;
 }
 
 /////////////////////////////////////////////////////////////////////////////////

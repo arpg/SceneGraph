@@ -58,10 +58,10 @@ struct HandlerSceneGraph : pangolin::Handler3D
         // Render scenegraph in 'select' mode
         glRenderMode( GL_SELECT );
         glInitNames();
-        m_scenegraph.DrawObjectAndChildren(GL_SELECT);
+        m_scenegraph.DrawObjectAndChildren(eRenderSelectable);
         glFlush();
 
-        GLint nHits = glRenderMode( GL_RENDER );
+        GLint nHits = glRenderMode( eRenderVisible );
         if( nHits > 0 ){
             ProcessHitBuffer( nHits, vSelectBuf, hit_objects );
         }

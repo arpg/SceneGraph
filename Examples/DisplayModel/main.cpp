@@ -37,7 +37,7 @@ void GlobalKeyHook(std::string str)
 }
 
 int main( int /*argc*/, char** /*argv[]*/ )
-{  
+{
     // Create OpenGL window in single line thanks to GLUT
     pangolin::CreateGlutWindowAndBind("Main",640*3,480);
     GLSceneGraph::ApplyPreferredGlSettings();
