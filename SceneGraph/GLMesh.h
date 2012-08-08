@@ -365,11 +365,16 @@ protected:
         GLuint LoadGLTextureFromFile(const char* path, size_t length)
         {
             std::string filename(path);
-            if(length >= 2 && filename[0] == '/' && filename[0] == '/' ) {
+            if(length >= 2 && filename[0] == '/' && filename[1] == '/' ) {
                 filename[0] = '.';
             }
 
             GLuint glTexId = 0;
+
+			std::string extension;
+			extension = filename.substr( filename.rfind( "." ) + 1 );
+
+			glTexId = LoadGLTextureUsingGIL(filename, extension.c_str());
 
 #ifdef HAVE_DEVIL
             if(!glTexId) glTexId = LoadGLTextureFromDevIL(filename);
@@ -425,6 +430,22 @@ protected:
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
             glBindTexture(GL_TEXTURE_2D, 0);
+
+            return glTexId;
+        }
+
+        GLuint LoadGLTextureUsingGIL(const std::string& filename, const char* extensionHint = 0 )
+        {
+            GLuint glTexId = 0;
+
+            boost::gil::rgb8_image_t img;
+
+            LoadGILImage(img, filename, extensionHint);
+
+            if( img.width() > 0 && img.width() > 0 ) {
+                unsigned char* data =  boost::gil::interleaved_view_get_raw_data( view( img ) );
+                glTexId = LoadGLTexture(img.width(), img.height(), data, GL_RGB8, GL_RGB, GL_UNSIGNED_BYTE);
+            }
 
             return glTexId;
         }

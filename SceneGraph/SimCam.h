@@ -131,6 +131,14 @@ class GLSimCam
             m_dK = dK;
             m_dPose = dPose;
 
+			// init GLEW
+			GLenum err = glewInit();
+
+			if (err != GLEW_OK) {
+				std::cout << "Could not initialize GLEW!!!" << std::endl;
+				exit(1);
+			}
+
             std::string sDepthVertShader =
                 "varying float depth;\n"
                 "void main(void)\n"
@@ -151,15 +159,6 @@ class GLSimCam
 //                "    gl_FragColor[0] = depthN;\n"
                     "    gl_FragColor = vec4( vec3(depth), 1.0 );\n"
                 "}\n";
-
-
-			// init GLEW
-			GLenum err = glewInit();
-
-			if (err != GLEW_OK) {
-				std::cout << "Could not initialize GLEW!!!" << std::endl;
-				exit(1);
-			}
 
 			// init shaders
 			InitShaders( sDepthVertShader, sDepthFragShader, m_nDepthShaderProgram );
@@ -357,6 +356,12 @@ class GLSimCam
         }
 
         /////////////////////////////////////////////////////////////////////////////////////////
+        bool HasGrey()
+        {
+            return m_pGreyMode;
+        }
+
+        /////////////////////////////////////////////////////////////////////////////////////////
         bool HasDepth()
         {
             return m_pDepthMode;
@@ -451,6 +456,9 @@ class GLSimCam
             if( m_pRGBMode ){
                 m_pRGBMode->RenderToTexture();
             }
+            if( m_pGreyMode ){
+                m_pGreyMode->RenderToTexture();
+            }
             if( m_pDepthMode ){
                 m_pDepthMode->RenderToTexture();
             }
@@ -523,6 +531,8 @@ class GLSimCam
 //            }
             if( m_pRGBMode ){
                 glBindTexture( GL_TEXTURE_RECTANGLE_ARB, m_pRGBMode->Texture() );
+            } else if( m_pGreyMode ){
+                glBindTexture( GL_TEXTURE_RECTANGLE_ARB, m_pGreyMode->Texture() );
             }
 
             glBegin( GL_QUADS );
