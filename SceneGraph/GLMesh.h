@@ -3,9 +3,10 @@
 
 #include <SceneGraph/SceneGraph.h>
 
-#include <assimp/assimp.h>
-#include <assimp/aiPostProcess.h>
-#include <assimp/aiScene.h>
+#include <assimp/cimport.h>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+#include <assimp/material.h>
 
 #include <boost/gil/gil_all.hpp>
 #ifdef HAVE_PNG
@@ -69,9 +70,19 @@ class GLMesh : public GLObject
         ////////////////////////////////////////////////////////////////////////////
         void Init( const std::string& sMeshFile )
         {
-            m_pScene = aiImportFile( sMeshFile.c_str(), aiProcess_Triangulate | aiProcess_GenSmoothNormals );
+            m_pScene = aiImportFile( sMeshFile.c_str(), aiProcess_Triangulate
+													| aiProcess_GenSmoothNormals
+//													| aiProcess_TransformUVCoords
+//													| aiProcess_FlipUVs
+//													| aiProcess_FlipWindingOrder
+//													| aiProcess_OptimizeMeshes
+//													| aiProcess_FindInvalidData
+//													| aiProcess_SortByPType
+//													| aiProcess_GenUVCoords
+//													| aiProcess_PreTransformVertices
+									);
             if( m_pScene == NULL ){
-                throw GLMeshException("Unable to load mesh");
+                throw GLMeshException("Unable to load mesh.");
             }else{
                 Init(m_pScene);
             }
@@ -480,7 +491,7 @@ protected:
         }
 
         ////////////////////////////////////////////////////////////////////////////
-        void color4_to_float4( const struct aiColor4D *c, float f[4] )
+        void color4_to_float4( const aiColor4D *c, float f[4] )
         {
             f[0] = c->r;
             f[1] = c->g;
@@ -497,7 +508,6 @@ protected:
             f[3] = d;
         }
 
-
         ////////////////////////////////////////////////////////////////////////////
         void ApplyMaterial( const struct aiMaterial *mtl )
         {
@@ -509,10 +519,10 @@ protected:
 
             GLenum fill_mode;
             int ret1, ret2;
-            struct aiColor4D diffuse;
-            struct aiColor4D specular;
-            struct aiColor4D ambient;
-            struct aiColor4D emission;
+			aiColor4D diffuse;
+            aiColor4D specular;
+            aiColor4D ambient;
+            aiColor4D emission;
             float shininess, strength;
             int two_sided;
             int wireframe;
@@ -701,7 +711,7 @@ protected:
         void RecursiveRender( const struct aiScene *sc, const struct aiNode* nd )
         {
             unsigned int n = 0;
-            struct aiMatrix4x4 m = nd->mTransformation;
+            aiMatrix4x4 m = nd->mTransformation;
 
             // update transform
             aiTransposeMatrix4( &m );

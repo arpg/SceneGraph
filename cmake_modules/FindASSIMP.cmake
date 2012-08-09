@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------
-# 
+#
 #-------------------------------------------------------------------
 
 # - Try to find Assimp
@@ -16,7 +16,7 @@ findpkg_begin(ASSIMP)
 getenv_path(ASSIMP_HOME)
 
 # construct search paths
-set(ASSIMP_PREFIX_PATH ${ASSIMP_HOME} ${ENV_ASSIMP_HOME} /usr/local /usr/local/include /usr/local/lib /usr/include /usr/lib /usr/local/include/assimp /usr/include/assimp /usr/lib/assimp /usr/local/lib/assimp)
+set(ASSIMP_PREFIX_PATH ${ASSIMP_HOME} ${ENV_ASSIMP_HOME} /usr/local /usr/local/include /usr/local/lib /usr/include /usr/lib /usr/local/include/assimp /usr/include/assimp /usr/lib/assimp /usr/local/lib/assimp /opt/local /opt/local/include/assimp /opt/local/lib)
 create_search_paths(ASSIMP)
 # redo search if prefix path changed
     clear_if_changed(ASSIMP_PREFIX_PATH
@@ -32,7 +32,7 @@ use_pkgconfig(ASSIMP_PKGC ASSIMP)
 
 findpkg_framework(ASSIMP)
 
-find_path(ASSIMP_INCLUDE_DIR NAMES assimp/assimp.h HINTS ${ASSIMP_INC_SEARCH_PATH} ${ASSIMP_PKGC_INCLUDE_DIRS} PATH_SUFFIXES assimp)
+find_path(ASSIMP_INCLUDE_DIR NAMES assimp/cimport.h HINTS ${ASSIMP_INC_SEARCH_PATH} ${ASSIMP_PKGC_INCLUDE_DIRS} PATH_SUFFIXES assimp)
     find_library(ASSIMP_LIBRARY_REL NAMES ${ASSIMP_LIBRARY_NAMES} HINTS ${ASSIMP_LIB_SEARCH_PATH} ${ASSIMP_PKGC_LIBRARY_DIRS} PATH_SUFFIXES "" release relwithdebinfo minsizerel)
     find_library(ASSIMP_LIBRARY_DBG NAMES ${ASSIMP_LIBRARY_NAMES_DBG} HINTS ${ASSIMP_LIB_SEARCH_PATH} ${ASSIMP_PKGC_LIBRARY_DIRS} PATH_SUFFIXES "" debug)
 make_library_set(ASSIMP_LIBRARY)
