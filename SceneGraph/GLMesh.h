@@ -72,14 +72,15 @@ class GLMesh : public GLObject
         {
             m_pScene = aiImportFile( sMeshFile.c_str(), aiProcess_Triangulate
 													| aiProcess_GenSmoothNormals
+													| aiProcess_JoinIdenticalVertices
 //													| aiProcess_TransformUVCoords
 //													| aiProcess_FlipUVs
 //													| aiProcess_FlipWindingOrder
-//													| aiProcess_OptimizeMeshes
-//													| aiProcess_FindInvalidData
+													| aiProcess_OptimizeMeshes
+													| aiProcess_FindInvalidData
 //													| aiProcess_SortByPType
 //													| aiProcess_GenUVCoords
-//													| aiProcess_PreTransformVertices
+													| aiProcess_FixInfacingNormals
 									);
             if( m_pScene == NULL ){
                 throw GLMeshException("Unable to load mesh.");
@@ -618,15 +619,13 @@ protected:
                     glColor4f( c[0], c[1], c[2], fAlpha*c[3] );
                 }
                 if( mesh->mTextureCoords[0] != NULL ){
-                    aiVector3D texcoord = mesh->mTextureCoords[0][index];
-                    texcoord.y = 1-texcoord.y;
-                    glTexCoord3fv( &texcoord.x );
+                    glTexCoord3fv( &mesh->mTextureCoords[0][index].x );
                 }
                 if( mesh->mNormals != NULL ){
                     glNormal3fv( &mesh->mNormals[index].x );
                     //       printf( "Normal %f, %f, %f\n", mesh->mNormals[index].x,
-                    //            mesh->mNormals[index].y, mesh->mNormals[index].z );
-                    //                    glNormal3f( -mesh->mNormals[index].x, -mesh->mNormals[index].y, -mesh->mNormals[index].z );
+                    //       mesh->mNormals[index].y, mesh->mNormals[index].z );
+                    //       glNormal3f( -mesh->mNormals[index].x, -mesh->mNormals[index].y, -mesh->mNormals[index].z );
                 }
                 glVertex3fv( &mesh->mVertices[index].x );
             }
