@@ -106,6 +106,9 @@ class GLMesh : public GLObject
             if( m_pScene ){
                 glPushAttrib(GL_ENABLE_BIT);
 
+				// jmf: not sure if this is the best option, but have textures ignore lighting
+				glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL );
+
                 if( m_nDisplayList == -1 ){
                     m_nDisplayList = glGenLists(1);
                     glNewList( m_nDisplayList, GL_COMPILE );

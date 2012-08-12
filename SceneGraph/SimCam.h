@@ -191,7 +191,8 @@ class GLSimCam
             }
             if( nModes & eSimCamLuminance ){
                 m_pGreyMode = new SimCamMode( *this, eSimCamLuminance );
-                m_pGreyMode->Init( false, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE );
+				// setting this to GL_LUMINANCE seems to screw things up
+                m_pGreyMode->Init( false, 0, GL_GREEN, GL_UNSIGNED_BYTE );
             }
             if( nModes & eSimCamDepth ){
                 m_pDepthMode = new SimCamMode( *this, eSimCamDepth );
@@ -210,7 +211,7 @@ class GLSimCam
         }
 
         /////////////////////////////////////////////////////////////////////////////////////////
-        GLint RGBTexture()
+        GLuint RGBTexture()
         {
             if( m_pRGBMode ){
                 return m_pRGBMode->Texture();
@@ -219,7 +220,7 @@ class GLSimCam
         }
 
 		/////////////////////////////////////////////////////////////////////////////////////////
-        GLint GreyTexture()
+        GLuint GreyTexture()
         {
             if( m_pGreyMode ){
                 return m_pGreyMode->Texture();
@@ -228,7 +229,7 @@ class GLSimCam
         }
 
         /////////////////////////////////////////////////////////////////////////////////////////
-        GLint DepthTexture()
+        GLuint DepthTexture()
         {
             if( m_pDepthMode ){
                 return m_pDepthMode->Texture();
@@ -237,7 +238,7 @@ class GLSimCam
         }
 
         /////////////////////////////////////////////////////////////////////////////////////////
-        GLint NormalsTexture()
+        GLuint NormalsTexture()
         {
             if( m_pNormalsMode ){
                 return m_pNormalsMode->Texture();
@@ -390,6 +391,7 @@ class GLSimCam
         {
             // 0) push some attribs
             glPushAttrib( GL_COLOR_BUFFER_BIT );
+			CheckForGLErrors();
 
             // 1) setup off-screen "camera" we will render to:
             glMatrixMode( GL_PROJECTION ); // change mode to save projection matrix
@@ -501,7 +503,6 @@ class GLSimCam
         void DrawCamera()
         {
             glPushAttrib(GL_ENABLE_BIT);
-
 			//glDisable(GL_LIGHTING);
 
             // OK

@@ -73,7 +73,7 @@ public:
         m_bImageDataDirty = false;
         tex.Upload(m_pImageData, m_nFormat, m_nType);
     }
-    
+
     void SetSamplingLinear(bool sampling_linear)
     {
         m_bSamplingLinear = sampling_linear;
@@ -93,7 +93,7 @@ public:
         // Activate viewport
         this->Activate();
         glColor3f(1,1,1);
-        
+
         // Load orthographic projection matrix to match image
         glMatrixMode(GL_PROJECTION);
         m_ortho.Load();
