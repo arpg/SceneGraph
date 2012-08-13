@@ -84,6 +84,24 @@ include_directories( ${SceneGraph_INCLUDE_DIRS} )
 add_library( SceneGraph ${SceneGraph_SOURCES} ${SceneGraph_HEADERS} )
 target_link_libraries( SceneGraph ${SceneGraph_LIBRARIES} )
 
+# Test platform type
+IF(WIN32 OR WIN64)
+  SET(_WIN_ 1)
+ENDIF()
+
+IF(UNIX)
+  SET(_UNIX_ 1)
+ENDIF()
+
+IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+   SET(_OSX_ 1)
+ENDIF()
+
+IF(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+   SET(_LINUX_ 1)
+ENDIF()
+
+# Generate config file for use in headers
 CONFIGURE_FILE(
   "${CMAKE_CURRENT_SOURCE_DIR}/config.h.in"
   "${CMAKE_CURRENT_BINARY_DIR}/config.h"

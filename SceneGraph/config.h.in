@@ -1,6 +1,12 @@
 #ifndef SCENEGRAPH_CONFIG_H
 #define SCENEGRAPH_CONFIG_H
 
+/// Platform
+#cmakedefine _UNIX_
+#cmakedefine _WIN_
+#cmakedefine _OSX_
+#cmakedefine _LINUX_
+
 /// Configured libraries
 #cmakedefine HAVE_ASSIMP
 #cmakedefine HAVE_DEVIL

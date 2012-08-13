@@ -7,11 +7,19 @@
 #ifndef _GL_HELPERS_H_
 #define _GL_HELPERS_H_
 
+#include <SceneGraph/config.h>
+
 #include <GL/glew.h>
+
+#ifdef _OSX_
+#include <OpenGL/glext.h>
+#include <OpenGL/gl.h>
+#include <OpenGL/glu.h>
+#else
 #include <GL/glext.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
-//#include <GL/glut.h>
+#endif
 
 #include <iostream>
 #include <unistd.h>
@@ -20,9 +28,7 @@
 #include <math.h>
 #include <vector>
 #undef Success
-//#include <Eigen/Matrix>
 #include <Eigen/Core>
-//#include <Eigen/LU>
 
 namespace SceneGraph
 {
