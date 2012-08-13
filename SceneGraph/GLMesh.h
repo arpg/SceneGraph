@@ -67,6 +67,18 @@ class GLMesh : public GLObject
             Init(sMeshFile);
         }
 
+        ~GLMesh()
+        {
+            // Delete textures
+            for(std::map<std::string,GLuint>::iterator i = m_mapPathToGLTex.begin(); i!= m_mapPathToGLTex.end(); ++i)
+            {
+                glDeleteTextures(1, &i->second);
+            }
+
+            // Free scene
+            aiReleaseImport(m_pScene);
+        }
+
         ////////////////////////////////////////////////////////////////////////////
         void Init( const std::string& sMeshFile )
         {
