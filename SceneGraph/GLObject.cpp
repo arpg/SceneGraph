@@ -144,9 +144,14 @@ void GLObject::SetPosition(double x, double y, double z)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
-void GLObject::SetPose(Eigen::Vector6d v)
+void GLObject::SetPose(const Eigen::Vector6d& v)
 {
     SetPose(v(0), v(1), v(2), v(3), v(4), v(5));
+}
+
+void GLObject::SetPose(const Eigen::Matrix4d& T_po)
+{
+	m_T_po = T_po;
 }
 
 

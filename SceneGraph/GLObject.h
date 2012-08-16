@@ -106,7 +106,10 @@ class GLObject
         void SetPosition(double x, double y, double z = 0);
 
         /// Set pose as (x,y,z,roll,pitch,yaw) vector
-        void SetPose(Eigen::Vector6d v);
+        void SetPose(const Eigen::Vector6d& v);
+
+		/// Set pose as 4x4 matrix
+        void SetPose(const Eigen::Matrix4d& T_po);
 
         /// Set pose using x,y,z,roll,pitch,yaw parametrisation
         void SetPose(double x, double y, double z, double p, double q, double r);

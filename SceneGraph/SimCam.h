@@ -522,7 +522,7 @@ class GLSimCam
             Eigen::Vector4d rtf = T*M*Vec4(  1, 1, 1, 1 );  rtf/=rtf[3];
 
             /// Draw texture
-            //glDisable( GL_BLEND );
+//            glDisable( GL_BLEND );
             glColor4f( 1,1,1,1 );
             glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL );
             glEnable( GL_TEXTURE_RECTANGLE_ARB );
@@ -550,7 +550,7 @@ class GLSimCam
 
 
             /// draw frustum
-            glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+            glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
             glEnable( GL_DEPTH_TEST );
             glDisable( GL_LIGHTING );
             glDisable( GL_LIGHT0 );
@@ -600,6 +600,7 @@ class GLSimCam
             glDisable( GL_BLEND );
             glEnable( GL_DEPTH_TEST );
             glEnable( GL_CULL_FACE );
+            glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 
 
             // now draw coordinate frame and outline frustum
