@@ -89,6 +89,8 @@ public:
 
         glPushAttrib(GL_ENABLE_BIT);
         glDisable(GL_LIGHTING);
+        glDisable(GL_COLOR_MATERIAL);
+        glDisable(GL_BLEND);
 
         // Activate viewport
         this->Activate();
