@@ -8,6 +8,7 @@
 #cmakedefine _LINUX_
 
 /// Configured libraries
+#cmakedefine HAVE_PANGOLIN
 #cmakedefine HAVE_ASSIMP
 #cmakedefine HAVE_DEVIL
 #cmakedefine HAVE_PNG

@@ -27,6 +27,7 @@ set( SceneGraph_HEADERS
         GLColor.h
         GLImage.h
         GLMesh.h
+        GLVbo.h
         GLText.h
         GLGrid.h
         GLAxis.h
@@ -78,6 +79,15 @@ if(TIFF_FOUND)
   set(HAVE_TIFF 1)
   list(APPEND SceneGraph_INCLUDE_DIRS ${TIFF_INCLUDE_DIR} )
   list(APPEND SceneGraph_LIBRARIES ${TIFF_LIBRARY} )
+endif()
+
+# Find Pangolin (https://github.com/stevenlovegrove/Pangolin)
+find_package(Pangolin)
+if(Pangolin_FOUND)
+  set(HAVE_PANGOLIN 1)
+  include_directories(${Pangolin_INCLUDE_DIRS})
+  link_directories(${Pangolin_LIBRARY_DIRS})
+  link_libraries(${Pangolin_LIBRARIES})
 endif()
 
 include_directories( ${SceneGraph_INCLUDE_DIRS} )
