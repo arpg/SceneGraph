@@ -185,7 +185,7 @@ namespace SceneGraph {
 					"void main(void)\n"
 					"{\n"
 					"    gl_Position = gl_ProjectionMatrix * gl_ModelViewMatrix * gl_Vertex;\n"
-					"    depth = -(gl_ModelViewMatrix * gl_Vertex).z;\n"
+					"    depth = (gl_ModelViewMatrix * gl_Vertex).z;\n"
 					"}\n";
 
 			std::string sDepthFragShader =
@@ -503,9 +503,9 @@ namespace SceneGraph {
 		{
 			// 3) go back to the main "camera" (i.e., the screen)
 			glMatrixMode( GL_PROJECTION );
-			glPopMatrix( ); // pop projection marix
+			glPopMatrix( ); // pop projection matrix
 			glMatrixMode( GL_MODELVIEW );
-			glPopMatrix( ); // pop model view marix
+			glPopMatrix( ); // pop model view matrix
 
 			glPopAttrib( );
 		}
