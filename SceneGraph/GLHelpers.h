@@ -2,8 +2,8 @@
  *  \file GLHelpers.h
  *
  * $Id$
- */ 
- 
+ */
+
 #ifndef _GL_HELPERS_H_
 #define _GL_HELPERS_H_
 
@@ -49,7 +49,7 @@ Eigen::Matrix4d GLGetCameraPose();
 Eigen::Matrix3d GLGetProjectionMatrix();
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/// If a GL error has occured, this function outputs "msg" and  automatically sets 
+/// If a GL error has occured, this function outputs "msg" and  automatically sets
 //  the gl error state back to normal.
 void WarnForGLErrors( const char * msg = NULL );
 
@@ -71,7 +71,7 @@ void PopOrtho();
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Set projection matrix
-void OrthoQuad( 
+void OrthoQuad(
         const int nTexWidth,    //< Input:
         const int nTexHeight,   //< Input:
         const int nTop,      //< Input:
@@ -116,7 +116,7 @@ unsigned int GLBytesPerPixel( unsigned int nFormat, unsigned int nType );
 
 //////////////////////////////////////////////////////////////////////////////
 // read from opengl buffer into our own vector
-void ReadPixels( 
+void ReadPixels(
         std::vector<unsigned char>& vPixels,
         int nWidth,
         int nHeight,
@@ -125,13 +125,13 @@ void ReadPixels(
 
 //////////////////////////////////////////////////////////////////////////////
 // read from opengl buffer into our own vector
-void ReadDepthPixels( 
+void ReadDepthPixels(
         std::vector<float>& vPixels,
         int nWidth,
         int nHeight,
         bool bFlip = true
         );
-    
+
 //////////////////////////////////////////////////////////////////////////////
 void CheckFBOStatus();
 
@@ -188,20 +188,20 @@ inline unsigned int GenerateAndBindRectTextureID(
 
 
 
-/// 1) Generate a texutre ID 
+/// 1) Generate a texutre ID
 //  2) Bind texture to memory
 //  3) Load texture into memory
 inline unsigned int GenerateAndBindTextureID(
         const unsigned int nWidth,
         const unsigned int nHeight,
         const unsigned int nFormat,
-        const unsigned int nType, 
-        const unsigned char* pData 
+        const unsigned int nType,
+        const unsigned char* pData
         )
 {
     GLuint texId;
 
-    /// Ask for an ID 
+    /// Ask for an ID
     glGenTextures( 1, &texId );
 
     /// Associate that ID with the next thing we upload.
@@ -213,13 +213,13 @@ inline unsigned int GenerateAndBindTextureID(
 //    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL );
 
     // GL_UNPACK_ALIGNMENT Specifies the alignment requirements for the start of each
-    //  pixel row in memory.  1 specifies byte-alignment. 
+    //  pixel row in memory.  1 specifies byte-alignment.
     glPixelStorei( GL_UNPACK_ALIGNMENT, 1);
 
     // Actually copy the texture into opengl
-    glTexImage2D( 
+    glTexImage2D(
             GL_TEXTURE_2D,  // texture target
-            0,              // mipmap level 
+            0,              // mipmap level
             GL_RGB,         // internal format
             nWidth,         // texture widht
             nHeight,        // texture height
@@ -233,22 +233,22 @@ inline unsigned int GenerateAndBindTextureID(
     glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
 
     /*
-    // 
+    //
     glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
 
-    // 
+    //
     glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP );
 
-    // 
+    //
     glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP );
 
-    // 
+    //
     glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
 
-    //  
+    //
     glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
     //    glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE );
-     */  
+     */
 
     return texId;
 }
