@@ -1,4 +1,5 @@
 SET( BuildExamples true CACHE "" force )
 IF(BuildExamples)
   ADD_SUBDIRECTORY(DisplayModel)
+  ADD_SUBDIRECTORY(DisplayImage)
 ENDIF()
