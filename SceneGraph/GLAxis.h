@@ -17,11 +17,8 @@ public:
         m_bPerceptable = false;
     }
 
-    void DrawCanonicalObject()
+    static void DrawUnitAxis()
     {
-        glPushAttrib(GL_ENABLE_BIT | GL_LINE_BIT);
-        glDisable( GL_LIGHTING );
-
         // draw axis
         glBegin(GL_LINES);
         glColor4f(1, 0, 0, 1);
@@ -36,8 +33,14 @@ public:
         glVertex3d(0, 0, 0);
         glVertex3d(0, 0, 1);
         glEnd();
+    }
 
-       glPopAttrib();
+    void DrawCanonicalObject()
+    {
+        glPushAttrib(GL_ENABLE_BIT | GL_LINE_BIT);
+        glDisable( GL_LIGHTING );
+        DrawUnitAxis();
+        glPopAttrib();
     }
 };
 
