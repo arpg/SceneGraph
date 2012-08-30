@@ -2,11 +2,9 @@
 #define	_GL_WAYPOINT_
 
 #include <SceneGraph/GLObject.h>
-#include <SceneGraph/GLMesh.h>
 
 namespace SceneGraph
 {
-
 
 const static float VELOCITY_MULTIPLIER = 1;
 
