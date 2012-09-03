@@ -110,7 +110,6 @@ void SimCamMode::RenderToTexture()
     if( m_bHasShader ){
         glUseProgram(m_nShaderProgram);
     }
-	glClearColor( 1, 0, 0, 1 );
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT );
     m_SimCam.m_pSceneGraph->DrawObjectAndChildren( eRenderPerceptable );
 
