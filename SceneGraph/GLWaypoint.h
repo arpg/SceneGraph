@@ -2,11 +2,9 @@
 #define	_GL_WAYPOINT_
 
 #include <SceneGraph/GLObject.h>
-#include <SceneGraph/GLMesh.h>
 
 namespace SceneGraph
 {
-
 
 const static float VELOCITY_MULTIPLIER = 1;
 
@@ -37,7 +35,7 @@ public:
         m_nFrontId = AllocSelectionId();
     }
 
-    bool Mouse(int button, const Eigen::Vector3d &win, const Eigen::Vector3d &obj, const Eigen::Vector3d& normal, bool pressed, int button_state, int pickId)
+    bool Mouse(int button, const Eigen::Vector3d& /*win*/, const Eigen::Vector3d& /*obj*/, const Eigen::Vector3d& /*normal*/, bool /*pressed*/, int /*button_state*/, int /*pickId*/)
     {
         if(button == MouseWheelUp)
         {
@@ -146,9 +144,11 @@ public:
     void SetAerial(bool bVal) { m_bAerial = bVal; }
     bool GetAerial() { return m_bAerial; } const
     void SetDirty(bool bVal) { m_bDirty = bVal; }
-    bool GetDirty() { return m_bDirty; } const
+    bool GetDirty() const { return m_bDirty; }
+
     double GetVelocity() const { return m_dVelocity; }
     void SetVelocity(double vel) { m_dVelocity = vel; }
+
     const Eigen::Matrix<double,5,1> GetPose5d() const
     {
         Eigen::Matrix<double,5,1> pose5d;

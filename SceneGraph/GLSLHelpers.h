@@ -68,7 +68,7 @@ inline char *ReadTextFile( const char *fn )
     int count=0;
     if( fn != NULL) {
         fp = fopen(fn,"rt");
-        if(fp != NULL) {            
+        if(fp != NULL) {
             fseek(fp, 0, SEEK_END);
             count = ftell(fp);
             rewind(fp);
@@ -88,7 +88,7 @@ inline char *ReadTextFile( const char *fn )
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-inline bool LoadShaders( 
+inline bool LoadShaders(
         const std::string& sVertexShader,
         const std::string& sFragmentShader,
         GLuint& nShaderProgram
@@ -153,7 +153,7 @@ inline bool LoadShaders(
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-inline bool InitShaders( 
+inline bool InitShaders(
         const std::string& sVertShaderSource, //<  Input:
         const std::string& sFragShaderSource, //< Input:
         GLuint& nShaderProgram //< Output:

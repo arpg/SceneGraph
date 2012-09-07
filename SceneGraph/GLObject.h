@@ -29,6 +29,13 @@ enum MouseButton
   MouseWheelDown = 16
 };
 
+enum RenderMode
+{
+	eRenderVisible = GL_RENDER,
+	eRenderSelectable = GL_SELECT,
+	eRenderPerceptable
+};
+
 class GLObject
 {
     public:
@@ -50,11 +57,11 @@ class GLObject
         virtual void DrawCanonicalObject() = 0;
 
         /// Apply object transform, then draw object and its children (recursively)
-        void DrawObjectAndChildren(int renderMode);
+        void DrawObjectAndChildren(RenderMode renderMode = eRenderVisible);
 
         /// Alow this object to draw itself as a functor
         inline void operator()() {
-            DrawObjectAndChildren(GL_RENDER);
+            DrawObjectAndChildren();
         }
 
         /////////////////////////////////
@@ -99,7 +106,10 @@ class GLObject
         void SetPosition(double x, double y, double z = 0);
 
         /// Set pose as (x,y,z,roll,pitch,yaw) vector
-        void SetPose(Eigen::Vector6d v);
+        void SetPose(const Eigen::Vector6d& v);
+
+		/// Set pose as 4x4 matrix
+        void SetPose(const Eigen::Matrix4d& T_po);
 
         /// Set pose using x,y,z,roll,pitch,yaw parametrisation
         void SetPose(double x, double y, double z, double p, double q, double r);
@@ -137,12 +147,12 @@ class GLObject
         //! can be measured (e.g., not a virtual thing)
         bool                      m_bPerceptable;
 
-        //! Can be selected
-        bool                        m_bIsSelectable;
-
         //! Object to Parent transform. Includes position, rotation (x_p = m_T_po & m_dScale * x_o)
         Eigen::Matrix4d           m_T_po;
         double                    m_dScale;
+
+        //! Can be selected
+        bool                        m_bIsSelectable;
 
         // static map of id to objects
         static std::map<int,GLObject*> g_mObjects;

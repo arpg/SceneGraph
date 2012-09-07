@@ -4,9 +4,17 @@
 #include <SceneGraph/FBO.h>
 #include <SceneGraph/GLSceneGraph.h>
 #include <SceneGraph/GLSLHelpers.h>
-#include <SceneGraph/GLCVars.h>
+//#include <SceneGraph/GLCVars.h>
+
+#include <pangolin/pangolin.h>
+#include <unsupported/Eigen/OpenGLSupport>
 
 #include <string>
+
+#define VISION 1
+
+namespace SceneGraph
+{
 
 class GLSimCam;
 
@@ -36,7 +44,6 @@ class SimCamMode
         static void _ShaderVisitor( GLObject* pObj );
 
         void PboRead();
-	// void PboReadDepth();
         void PboInit( int format, int type );
 
     private:
@@ -88,24 +95,67 @@ class GLSimCam
             m_bOrthoCam = false;
         }
 
+
+
+#if VISION
         /////////////////////////////////////////////////////////////////////////////////////////
-        /// Store pose as a roboitcs frame pose
+        /// Store pose as a robotics frame pose
+        void SetPoseVision( const Eigen::Matrix4d& dPose )
+        {
+            m_dPose = dPose;
+        }
+
+        ///////////////////////////////////////////////////////////////////////////////
+        Eigen::Matrix4d GetPoseVision()
+        {
+            return m_dPose;
+        }
+
+		void SetPoseRobot( const Eigen::Matrix4d& dPose )
+		{
+			m_dPose = dPose * m_dTrv;
+//			m_dPose = m_dTvr * dPose;
+		}
+
+		Eigen::Matrix4d GetPoseRobot() const
+		{
+			return m_dPose * m_dTvr;
+//			return m_dTrv * m_dPose;
+		}
+#else
+        /////////////////////////////////////////////////////////////////////////////////////////
+        /// Store pose as a robotics frame pose
         void SetPose( const Eigen::Matrix4d& dPose )
         {
             m_dPose = dPose;
         }
 
         ///////////////////////////////////////////////////////////////////////////////
-        Eigen::Matrix4d& GetPoseRef()
+        Eigen::Matrix4d GetPose()
         {
             return m_dPose;
         }
+#endif
 
+#if VISION
+		///////////////////////////////////////////////////////////////////////////////
+
+		void SetIntrinsics( const Eigen::Matrix3d& dK )
+		{
+			m_dK = dK;
+			m_dKinv << 1.0 / dK( 0, 0 ), 0, -dK( 0, 2 ) / dK( 0, 0 ),
+					0, 1.0 / dK( 1, 1 ), -dK( 1, 2 ) / dK( 1, 1 ),
+					0, 0, 1;
+			m_dKgl = (Eigen::Matrix4d)pangolin::ProjectionMatrixRDF_BottomLeft( m_nSensorWidth, m_nSensorHeight, m_dK( 0, 0 ), m_dK( 1, 1 ), m_dK( 0, 2 ), m_dK( 1, 2 ), m_fNear, m_fFar );
+		}
+
+#else
         ///////////////////////////////////////////////////////////////////////////////
         void SetIntrinsics( const Eigen::Matrix3d& dK )
         {
             m_dK = dK;
         }
+#endif
 
         /////////////////////////////////////////////////////////////////////////////////////////
         /// Init shaders. Given K matrix, compute the corresponding GL_PROJECTION_MATRIX.
@@ -116,7 +166,7 @@ class GLSimCam
                 const unsigned int nSensorWidth, //< Input: sensor width in pixels
                 const unsigned int nSensorHeight,//< Input: sensor height in pixels
                 int nModes = eSimCamRGB,         //< Input:
-                float fNear = 1,                //< Input: opengl near clipping plane
+                float fNear = 1,               //< Input: opengl near clipping plane
                 float fFar = 100                //< Input: opengl far clipping plane
                 )
         {
@@ -125,9 +175,45 @@ class GLSimCam
             m_nSensorHeight = nSensorHeight;
             m_fNear = fNear;
             m_fFar = fFar;
-            m_dK = dK;
-            m_dPose = dPose;
 
+			SetIntrinsics( dK );
+
+#if VISION
+			// Setup relation between
+			// robot frame  X-forward, Y-right, Z-down and
+			// vision frame X-right, Y-down, Z-forward
+			// In general, this transformation could include a robot-body to camera offset.
+			Eigen::Matrix3d RDFvision;
+			RDFvision << 1, 0, 0, 0, 1, 0, 0, 0, 1;
+			Eigen::Matrix3d RDFrobot;
+			RDFrobot << 0, 1, 0, 0, 0, 1, 1, 0, 0;
+			m_dTvr = Eigen::Matrix4d::Identity( );
+			m_dTrv = Eigen::Matrix4d::Identity( );
+			m_dTvr.block < 3, 3 > (0, 0) = RDFvision.transpose( ) * RDFrobot;
+			m_dTrv.block < 3, 3 > (0, 0) = RDFrobot.transpose( ) * RDFvision;
+
+			SetPoseRobot(dPose);
+#else
+			m_dPose = dPose;
+#endif
+
+			// init GLEW
+			GLenum err = glewInit();
+
+			if (err != GLEW_OK) {
+				std::cout << "Could not initialize GLEW!!!" << std::endl;
+				exit(1);
+			}
+
+#if VISION
+            std::string sDepthVertShader =
+                "varying float depth;\n"
+                "void main(void)\n"
+                "{\n"
+                "    gl_Position = gl_ProjectionMatrix * gl_ModelViewMatrix * gl_Vertex;\n"
+                "    depth = (gl_ModelViewMatrix * gl_Vertex).z;\n"
+                "}\n";
+#else
             std::string sDepthVertShader =
                 "varying float depth;\n"
                 "void main(void)\n"
@@ -135,6 +221,7 @@ class GLSimCam
                 "    gl_Position = gl_ProjectionMatrix * gl_ModelViewMatrix * gl_Vertex;\n"
                 "    depth = -(gl_ModelViewMatrix * gl_Vertex).z;\n"
                 "}\n";
+#endif
 
             std::string sDepthFragShader =
                 "varying float depth;\n"
@@ -148,7 +235,9 @@ class GLSimCam
 //                "    gl_FragColor[0] = depthN;\n"
                     "    gl_FragColor = vec4( vec3(depth), 1.0 );\n"
                 "}\n";
-	    InitShaders( sDepthVertShader, sDepthFragShader, m_nDepthShaderProgram );
+
+			// init shaders
+			InitShaders( sDepthVertShader, sDepthFragShader, m_nDepthShaderProgram );
 
 	    /* Helpful for quick testing of shaders, don't need to recompile if loaded from file
 	    if ( LoadShaders( "Depth.vert", "Depth.frag", m_nDepthShaderProgram ) == false) {
@@ -176,6 +265,11 @@ class GLSimCam
                 m_pRGBMode = new SimCamMode( *this, eSimCamRGB );
                 m_pRGBMode->Init( false, 0, GL_RGB, GL_UNSIGNED_BYTE );
             }
+            if( nModes & eSimCamLuminance ){
+                m_pGreyMode = new SimCamMode( *this, eSimCamLuminance );
+				// setting this to GL_LUMINANCE seems to screw things up
+                m_pGreyMode->Init( false, 0, GL_GREEN, GL_UNSIGNED_BYTE );
+            }
             if( nModes & eSimCamDepth ){
                 m_pDepthMode = new SimCamMode( *this, eSimCamDepth );
                 m_pDepthMode->Init( true, m_nDepthShaderProgram, GL_RED, GL_FLOAT );
@@ -193,7 +287,7 @@ class GLSimCam
         }
 
         /////////////////////////////////////////////////////////////////////////////////////////
-        GLint RGBTexture()
+        GLuint RGBTexture()
         {
             if( m_pRGBMode ){
                 return m_pRGBMode->Texture();
@@ -201,8 +295,17 @@ class GLSimCam
             return -1;
         }
 
+		/////////////////////////////////////////////////////////////////////////////////////////
+        GLuint GreyTexture()
+        {
+            if( m_pGreyMode ){
+                return m_pGreyMode->Texture();
+            }
+            return -1;
+        }
+
         /////////////////////////////////////////////////////////////////////////////////////////
-        GLint DepthTexture()
+        GLuint DepthTexture()
         {
             if( m_pDepthMode ){
                 return m_pDepthMode->Texture();
@@ -211,7 +314,7 @@ class GLSimCam
         }
 
         /////////////////////////////////////////////////////////////////////////////////////////
-        GLint NormalsTexture()
+        GLuint NormalsTexture()
         {
             if( m_pNormalsMode ){
                 return m_pNormalsMode->Texture();
@@ -245,6 +348,37 @@ class GLSimCam
 		// set correctly. Right now, PboRead is only called while in middle of the regular
 		// render loop. - JamesII
                 memcpy( DataPtr, m_pRGBMode->Capture(), ImageWidth()*ImageHeight()*3);
+                return true;
+            }
+            return false;
+        }
+
+        /////////////////////////////////////////////////////////////////////////////////////////
+        bool CaptureGrey( std::vector<unsigned char>& vPixelData )
+        {
+            if( m_pGreyMode ){
+                if( vPixelData.size() < ImageWidth()*ImageHeight() ){
+                    vPixelData.resize( ImageWidth()*ImageHeight() );
+                }
+                // TODO Capture here should do the PboRead and fill vPixelData...
+		// NB: Having Capture do a PboRead may cause probelems if the render state is not
+		// set correctly. Right now, PboRead is only called while in middle of the regular
+		// render loop. - JamesII
+                memcpy( &vPixelData[0], m_pGreyMode->Capture(), ImageWidth()*ImageHeight() );
+                return true;
+            }
+            return false;
+        }
+
+        /////////////////////////////////////////////////////////////////////////////////////////
+        bool CaptureGrey( void* DataPtr )
+        {
+            if( m_pGreyMode ){
+                // TODO Capture here should do the PboRead and fill vPixelData...
+		// NB: Having Capture do a PboRead may cause probelems if the render state is not
+		// set correctly. Right now, PboRead is only called while in middle of the regular
+		// render loop. - JamesII
+                memcpy( DataPtr, m_pGreyMode->Capture(), ImageWidth()*ImageHeight() );
                 return true;
             }
             return false;
@@ -299,6 +433,12 @@ class GLSimCam
         }
 
         /////////////////////////////////////////////////////////////////////////////////////////
+        bool HasGrey()
+        {
+            return m_pGreyMode;
+        }
+
+        /////////////////////////////////////////////////////////////////////////////////////////
         bool HasDepth()
         {
             return m_pDepthMode;
@@ -325,8 +465,26 @@ class GLSimCam
         /////////////////////////////////////////////////////////////////////////////////////////
         void Begin()
         {
+
+#if VISION
+			// 0) push some attribs
+			glPushAttrib( GL_COLOR_BUFFER_BIT );
+			CheckForGLErrors( );
+
+			// 1) setup off-screen "camera" we will render to:
+			glMatrixMode( GL_PROJECTION ); // change mode to save projection matrix
+			glPushMatrix( ); // push proj mat
+			glLoadMatrix( m_dKgl );
+
+			glMatrixMode( GL_MODELVIEW );
+			glPushMatrix( ); // push proj mat
+			glLoadMatrix( m_dPose.inverse() ); // orig
+
+#else
+
             // 0) push some attribs
             glPushAttrib( GL_COLOR_BUFFER_BIT );
+			CheckForGLErrors();
 
             // 1) setup off-screen "camera" we will render to:
             glMatrixMode( GL_PROJECTION ); // change mode to save projection matrix
@@ -360,7 +518,7 @@ class GLSimCam
 
             // save camera pose
             glGetDoublev( GL_MODELVIEW_MATRIX, m_dT.data() );
-
+#endif
         }
 
         /////////////////////////////////////////////////////////////////////////////////////////
@@ -374,6 +532,7 @@ class GLSimCam
             glPopAttrib();
         }
 
+#if VISION == 0
         /////////////////////////////////////////////////////////////////////////////////////////
         Eigen::Matrix4d& GetModelViewMatrixRef()
         {
@@ -385,13 +544,16 @@ class GLSimCam
         {
             return m_dM; // set in Begin
         }
-
+#endif
         /////////////////////////////////////////////////////////////////////////////////////////
         void RenderToTexture()
         {
             Begin();
             if( m_pRGBMode ){
                 m_pRGBMode->RenderToTexture();
+            }
+            if( m_pGreyMode ){
+                m_pGreyMode->RenderToTexture();
             }
             if( m_pDepthMode ){
                 m_pDepthMode->RenderToTexture();
@@ -401,14 +563,6 @@ class GLSimCam
             }
 
             End();
-        }
-
-        /////////////////////////////////////////////////////////////////////////////////////////
-        /// For registering our PreRender callback
-        static void RenderCallBack( GLWindow*, void* pUserData )
-        {
-            GLSimCam* pThis = (GLSimCam*)pUserData;
-            pThis->RenderToTexture();
         }
 
         /////////////////////////////////////////////////////////////////////////////////////////
@@ -434,6 +588,35 @@ class GLSimCam
         /////////////////////////////////////////////////////////////////////////////////////////
         void DrawCamera()
         {
+#if VISION
+			glPushAttrib( GL_ENABLE_BIT );
+
+			glMatrixMode( GL_MODELVIEW );
+			glPushMatrix( );
+//			glMultMatrix( m_dPose.inverse() ); // orig
+			glMultMatrix( m_dPose );
+			glColor4f( 1, 1, 1, 1 );
+
+			glDisable( GL_LIGHTING );
+
+			glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+			glBegin( GL_TRIANGLE_FAN );
+			glVertex3f( 0, 0, 0 );
+			glVertex( m_dKinv * Eigen::Vector3d( 0, 0, 1 ) );
+			glVertex( m_dKinv * Eigen::Vector3d( m_nSensorWidth, 0, 1 ) );
+			glVertex( m_dKinv * Eigen::Vector3d( m_nSensorWidth, m_nSensorHeight, 1 ) );
+			glVertex( m_dKinv * Eigen::Vector3d( 0, m_nSensorHeight, 1 ) );
+			glVertex( m_dKinv * Eigen::Vector3d( 0, 0, 1 ) );
+			glEnd( );
+			glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+
+			glPopMatrix();
+
+			glPopAttrib( );
+#else
+            glPushAttrib(GL_ENABLE_BIT);
+			//glDisable(GL_LIGHTING);
+
             // OK
             Eigen::Matrix4d M = m_dM.inverse();
             Eigen::Matrix4d T = m_dT.inverse();
@@ -451,7 +634,7 @@ class GLSimCam
             Eigen::Vector4d rtf = T*M*Vec4(  1, 1, 1, 1 );  rtf/=rtf[3];
 
             /// Draw texture
-            //glDisable( GL_BLEND );
+//            glDisable( GL_BLEND );
             glColor4f( 1,1,1,1 );
             glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL );
             glEnable( GL_TEXTURE_RECTANGLE_ARB );
@@ -461,6 +644,8 @@ class GLSimCam
 //            }
             if( m_pRGBMode ){
                 glBindTexture( GL_TEXTURE_RECTANGLE_ARB, m_pRGBMode->Texture() );
+            } else if( m_pGreyMode ){
+                glBindTexture( GL_TEXTURE_RECTANGLE_ARB, m_pGreyMode->Texture() );
             }
 
             glBegin( GL_QUADS );
@@ -477,7 +662,7 @@ class GLSimCam
 
 
             /// draw frustum
-            glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+            glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
             glEnable( GL_DEPTH_TEST );
             glDisable( GL_LIGHTING );
             glDisable( GL_LIGHT0 );
@@ -527,6 +712,7 @@ class GLSimCam
             glDisable( GL_BLEND );
             glEnable( GL_DEPTH_TEST );
             glEnable( GL_CULL_FACE );
+            glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 
 
             // now draw coordinate frame and outline frustum
@@ -586,12 +772,17 @@ class GLSimCam
             glVertex3dv( lbn.data() );
 
             glEnd();
+
+            glPopAttrib();
+#endif
         }
 
         /////////////////////////////////////////////////////////////////////////////////////////
         Eigen::Matrix3d GetKMatrix()
         {
-
+#if VISION
+			return m_dK;
+#else
             Eigen::Matrix4d M = m_dM.inverse();
             Eigen::Matrix4d T = m_dT.inverse();
 
@@ -622,7 +813,8 @@ class GLSimCam
             K(2,1) = 0.0;
             K(2,2) = 1.0;
 
-            return K;
+			return K;
+#endif
         }
 
         /////////////////////////////////////////////////////////////////////////////////////////
@@ -726,11 +918,20 @@ class GLSimCam
         float                                       m_fOrthoRight;
         Eigen::Matrix3d                             m_dK; // computer vision K matrix
         Eigen::Matrix4d                             m_dPose; // desired camera pose
+#if VISION
+		Eigen::Matrix3d								m_dKinv; // computer vision K matrix
+		Eigen::Matrix4d								m_dKgl; // OpenGL Projection Matrix
+		Eigen::Matrix4d								m_dTvr; // OpenGL Projection Matrix
+		Eigen::Matrix4d								m_dTrv; // OpenGL Projection Matrix
+#else
         Eigen::Matrix<double,4,4,Eigen::ColMajor>   m_dM; // to save projection matrix
         Eigen::Matrix<double,4,4,Eigen::ColMajor>   m_dT; // to save modelview matrix
+#endif
         SimCamMode*                                 m_pRGBMode;
+        SimCamMode*                                 m_pGreyMode;
         SimCamMode*                                 m_pDepthMode;
         SimCamMode*                                 m_pNormalsMode;
 };
+}
 
 #endif

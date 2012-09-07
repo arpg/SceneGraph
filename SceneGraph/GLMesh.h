@@ -3,9 +3,10 @@
 
 #include <SceneGraph/SceneGraph.h>
 
-#include <assimp/assimp.h>
-#include <assimp/aiPostProcess.h>
-#include <assimp/aiScene.h>
+#include <assimp/cimport.h>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+#include <assimp/material.h>
 
 #include <boost/gil/gil_all.hpp>
 #ifdef HAVE_PNG
@@ -66,12 +67,35 @@ class GLMesh : public GLObject
             Init(sMeshFile);
         }
 
+        ~GLMesh()
+        {
+            // Delete textures
+            for(std::map<std::string,GLuint>::iterator i = m_mapPathToGLTex.begin(); i!= m_mapPathToGLTex.end(); ++i)
+            {
+                glDeleteTextures(1, &i->second);
+            }
+
+            // Free scene
+            aiReleaseImport(m_pScene);
+        }
+
         ////////////////////////////////////////////////////////////////////////////
         void Init( const std::string& sMeshFile )
         {
-            m_pScene = aiImportFile( sMeshFile.c_str(), aiProcess_Triangulate | aiProcess_GenSmoothNormals );
+            m_pScene = aiImportFile( sMeshFile.c_str(), aiProcess_Triangulate
+													| aiProcess_GenSmoothNormals
+													| aiProcess_JoinIdenticalVertices
+//													| aiProcess_TransformUVCoords
+//													| aiProcess_FlipUVs
+//													| aiProcess_FlipWindingOrder
+													| aiProcess_OptimizeMeshes
+													| aiProcess_FindInvalidData
+//													| aiProcess_SortByPType
+//													| aiProcess_GenUVCoords
+													| aiProcess_FixInfacingNormals
+									);
             if( m_pScene == NULL ){
-                throw GLMeshException("Unable to load mesh");
+                throw GLMeshException("Unable to load mesh.");
             }else{
                 Init(m_pScene);
             }
@@ -93,6 +117,9 @@ class GLMesh : public GLObject
         {
             if( m_pScene ){
                 glPushAttrib(GL_ENABLE_BIT);
+
+				// jmf: not sure if this is the best option, but have textures ignore lighting
+				glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL );
 
                 if( m_nDisplayList == -1 ){
                     m_nDisplayList = glGenLists(1);
@@ -294,8 +321,11 @@ protected:
             GLuint glTexId = 0;
             glGenTextures(1, &glTexId);
             glBindTexture(GL_TEXTURE_2D, glTexId);
-            glTexImage2D(GL_TEXTURE_2D, 0, ilGetInteger(IL_IMAGE_BPP), ilGetInteger(IL_IMAGE_WIDTH), ilGetInteger(IL_IMAGE_HEIGHT),
-                         0, ilGetInteger(IL_IMAGE_FORMAT), GL_UNSIGNED_BYTE, ilGetData() );
+            // load Mipmaps instead of single texture
+//            glTexImage2D(GL_TEXTURE_2D, 0, ilGetInteger(IL_IMAGE_BPP), ilGetInteger(IL_IMAGE_WIDTH), ilGetInteger(IL_IMAGE_HEIGHT),
+//                         0, ilGetInteger(IL_IMAGE_FORMAT), GL_UNSIGNED_BYTE, ilGetData() );
+            gluBuild2DMipmaps(GL_TEXTURE_2D, 3, ilGetInteger(IL_IMAGE_WIDTH), ilGetInteger(IL_IMAGE_HEIGHT),
+                        ilGetInteger(IL_IMAGE_FORMAT), GL_UNSIGNED_BYTE, ilGetData() );
             return glTexId;
         }
 
@@ -365,11 +395,16 @@ protected:
         GLuint LoadGLTextureFromFile(const char* path, size_t length)
         {
             std::string filename(path);
-            if(length >= 2 && filename[0] == '/' && filename[0] == '/' ) {
+            if(length >= 2 && filename[0] == '/' && filename[1] == '/' ) {
                 filename[0] = '.';
             }
 
             GLuint glTexId = 0;
+
+			std::string extension;
+			extension = filename.substr( filename.rfind( "." ) + 1 );
+
+			glTexId = LoadGLTextureUsingGIL(filename, extension.c_str());
 
 #ifdef HAVE_DEVIL
             if(!glTexId) glTexId = LoadGLTextureFromDevIL(filename);
@@ -419,12 +454,31 @@ protected:
             glGenTextures(1,&glTexId);
 
             glBindTexture(GL_TEXTURE_2D, glTexId);
-            glTexImage2D(GL_TEXTURE_2D, 0, internal_format, width, height, 0, data_layout, data_type, data);
+            // load Mipmaps instead of single texture
+//            glTexImage2D(GL_TEXTURE_2D, 0, internal_format, width, height, 0, data_layout, data_type, data);
+            gluBuild2DMipmaps(GL_TEXTURE_2D, 3, width, height, data_layout, data_type, data );
+
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
             glBindTexture(GL_TEXTURE_2D, 0);
+
+            return glTexId;
+        }
+
+        GLuint LoadGLTextureUsingGIL(const std::string& filename, const char* extensionHint = 0 )
+        {
+            GLuint glTexId = 0;
+
+            boost::gil::rgb8_image_t img;
+
+            LoadGILImage(img, filename, extensionHint);
+
+            if( img.width() > 0 && img.width() > 0 ) {
+                unsigned char* data =  boost::gil::interleaved_view_get_raw_data( view( img ) );
+                glTexId = LoadGLTexture(img.width(), img.height(), data, GL_RGB8, GL_RGB, GL_UNSIGNED_BYTE);
+            }
 
             return glTexId;
         }
@@ -459,7 +513,7 @@ protected:
         }
 
         ////////////////////////////////////////////////////////////////////////////
-        void color4_to_float4( const struct aiColor4D *c, float f[4] )
+        void color4_to_float4( const aiColor4D *c, float f[4] )
         {
             f[0] = c->r;
             f[1] = c->g;
@@ -476,7 +530,6 @@ protected:
             f[3] = d;
         }
 
-
         ////////////////////////////////////////////////////////////////////////////
         void ApplyMaterial( const struct aiMaterial *mtl )
         {
@@ -488,10 +541,10 @@ protected:
 
             GLenum fill_mode;
             int ret1, ret2;
-            struct aiColor4D diffuse;
-            struct aiColor4D specular;
-            struct aiColor4D ambient;
-            struct aiColor4D emission;
+			aiColor4D diffuse;
+            aiColor4D specular;
+            aiColor4D ambient;
+            aiColor4D emission;
             float shininess, strength;
             int two_sided;
             int wireframe;
@@ -592,8 +645,8 @@ protected:
                 if( mesh->mNormals != NULL ){
                     glNormal3fv( &mesh->mNormals[index].x );
                     //       printf( "Normal %f, %f, %f\n", mesh->mNormals[index].x,
-                    //            mesh->mNormals[index].y, mesh->mNormals[index].z );
-                    //                    glNormal3f( -mesh->mNormals[index].x, -mesh->mNormals[index].y, -mesh->mNormals[index].z );
+                    //       mesh->mNormals[index].y, mesh->mNormals[index].z );
+                    //       glNormal3f( -mesh->mNormals[index].x, -mesh->mNormals[index].y, -mesh->mNormals[index].z );
                 }
                 glVertex3fv( &mesh->mVertices[index].x );
             }
@@ -678,7 +731,7 @@ protected:
         void RecursiveRender( const struct aiScene *sc, const struct aiNode* nd )
         {
             unsigned int n = 0;
-            struct aiMatrix4x4 m = nd->mTransformation;
+            aiMatrix4x4 m = nd->mTransformation;
 
             // update transform
             aiTransposeMatrix4( &m );

@@ -35,22 +35,20 @@ int GLObject::AllocSelectionId()
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
-void GLObject::DrawObjectAndChildren(int renderMode)
+void GLObject::DrawObjectAndChildren(RenderMode renderMode)
 {
-    if(IsVisible()) {
+    if( IsVisible() && (
+			(renderMode == eRenderVisible) ||
+			(renderMode == eRenderSelectable && IsSelectable()) ||
+			(renderMode == eRenderPerceptable && IsPerceptable())
+		)
+	) {
         glMatrixMode(GL_MODELVIEW);
         glPushMatrix();
         glMultMatrixd(m_T_po.data());
         glScaled(m_dScale,m_dScale,m_dScale);
 
-        //if we are in GL_Select mode
-        if(renderMode == GL_SELECT){
-            if(IsSelectable() == true){
-                DrawCanonicalObject();
-            }
-        }else {
-            DrawCanonicalObject();
-        }
+        DrawCanonicalObject();
 
         for(std::vector<GLObject*>::const_iterator i=m_vpChildren.begin(); i!= m_vpChildren.end(); ++i)
         {
@@ -146,9 +144,14 @@ void GLObject::SetPosition(double x, double y, double z)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
-void GLObject::SetPose(Eigen::Vector6d v)
+void GLObject::SetPose(const Eigen::Vector6d& v)
 {
     SetPose(v(0), v(1), v(2), v(3), v(4), v(5));
+}
+
+void GLObject::SetPose(const Eigen::Matrix4d& T_po)
+{
+	m_T_po = T_po;
 }
 
 

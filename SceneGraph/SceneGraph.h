@@ -16,5 +16,5 @@
 #endif // HAVE_ASSIMP
 
 #ifdef HAVE_PANGOLIN
-#include <SceneGraph/PangolinSceneGraph.h>
+#include <SceneGraph/Pangolin.h>
 #endif // HAVE_PANGOLIN
