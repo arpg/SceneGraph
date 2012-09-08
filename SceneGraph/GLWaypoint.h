@@ -117,8 +117,8 @@ public:
         glVertex3d(0, 0, 1);
         glEnd();
 
-        if(m_bSelected) {
-            glColor3ub(255, 0, 0);
+        if(m_bAerial) {
+            glColor3ub(0, 0, 255);
         }else{
             glColor3ub(0, 255, 0);
         }
