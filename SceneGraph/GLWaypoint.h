@@ -142,7 +142,7 @@ public:
     }
 
     void SetAerial(bool bVal) { m_bAerial = bVal; }
-    bool GetAerial() { return m_bAerial; } const
+    bool GetAerial() const { return m_bAerial; }
     void SetDirty(bool bVal) { m_bDirty = bVal; }
     bool GetDirty() const { return m_bDirty; }
 
