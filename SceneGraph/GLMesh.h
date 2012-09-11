@@ -243,7 +243,8 @@ protected:
 
                             // Use bilinear interpolation for textures
                             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-                            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+//                            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+                            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 
                             if(mapping != 0) {
                                 std::cerr << "Ignoring mapping" << std::endl;
@@ -322,8 +323,9 @@ protected:
             glGenTextures(1, &glTexId);
             glBindTexture(GL_TEXTURE_2D, glTexId);
             // load Mipmaps instead of single texture
-//            glTexImage2D(GL_TEXTURE_2D, 0, ilGetInteger(IL_IMAGE_BPP), ilGetInteger(IL_IMAGE_WIDTH), ilGetInteger(IL_IMAGE_HEIGHT),
-//                         0, ilGetInteger(IL_IMAGE_FORMAT), GL_UNSIGNED_BYTE, ilGetData() );
+            glTexImage2D(GL_TEXTURE_2D, 0, ilGetInteger(IL_IMAGE_BPP), ilGetInteger(IL_IMAGE_WIDTH), ilGetInteger(IL_IMAGE_HEIGHT),
+                         0, ilGetInteger(IL_IMAGE_FORMAT), GL_UNSIGNED_BYTE, ilGetData() );
+//            glGenerateMipmap( GL_TEXTURE_2D );
             gluBuild2DMipmaps(GL_TEXTURE_2D, 3, ilGetInteger(IL_IMAGE_WIDTH), ilGetInteger(IL_IMAGE_HEIGHT),
                         ilGetInteger(IL_IMAGE_FORMAT), GL_UNSIGNED_BYTE, ilGetData() );
             return glTexId;
@@ -455,11 +457,13 @@ protected:
 
             glBindTexture(GL_TEXTURE_2D, glTexId);
             // load Mipmaps instead of single texture
-//            glTexImage2D(GL_TEXTURE_2D, 0, internal_format, width, height, 0, data_layout, data_type, data);
+            glTexImage2D(GL_TEXTURE_2D, 0, internal_format, width, height, 0, data_layout, data_type, data);
+//            glGenerateMipmap( GL_TEXTURE_2D );
             gluBuild2DMipmaps(GL_TEXTURE_2D, 3, width, height, data_layout, data_type, data );
 
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+//            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
             glBindTexture(GL_TEXTURE_2D, 0);
