@@ -15,6 +15,7 @@ public:
     GLWayPoint()
         : GLObject("Waypoint")
     {
+        SetAerial(false);
         m_bSelected = false;
         m_bDirty = false;
         m_bIsSelectable = true;
@@ -38,10 +39,12 @@ public:
     {
         if(button == MouseWheelUp)
         {
+            m_bDirty = true;
             m_dVelocity *= 1.01;
             return true;
         }else if(button == MouseWheelDown)
         {
+            m_bDirty = true;
             m_dVelocity *= 0.99;
             return true;
         }else {
@@ -65,6 +68,9 @@ public:
             T.block<3,1>(0,1) = r;
             T.block<3,1>(0,2) = d;
         }else if (pickId == m_nFrontId) {
+            if(glutGetModifiers() & GLUT_ACTIVE_SHIFT){
+                SetAerial(true);
+            }
             Eigen::Vector3d dir = obj - T.block<3,1>(0,3);
             Eigen::Vector3d nr  = (T.block<3,1>(0,2).cross(dir)).normalized();
             Eigen::Vector3d nf = nr.cross(T.block<3,1>(0,2)).normalized();
@@ -111,8 +117,8 @@ public:
         glVertex3d(0, 0, 1);
         glEnd();
 
-        if(m_bSelected) {
-            glColor3ub(255, 0, 0);
+        if(m_bAerial) {
+            glColor3ub(0, 0, 255);
         }else{
             glColor3ub(0, 255, 0);
         }
@@ -135,6 +141,8 @@ public:
         glPopAttrib();
     }
 
+    void SetAerial(bool bVal) { m_bAerial = bVal; }
+    bool GetAerial() const { return m_bAerial; }
     void SetDirty(bool bVal) { m_bDirty = bVal; }
     bool GetDirty() const { return m_bDirty; }
 
@@ -150,6 +158,7 @@ public:
     }
     
 private:
+    bool            m_bAerial;
     bool            m_bSelected;
     bool            m_bDirty;
     double          m_dVelocity;
