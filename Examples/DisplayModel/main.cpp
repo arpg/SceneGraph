@@ -32,6 +32,10 @@ int main( int /*argc*/, char** /*argv[]*/ )
     glAxis.SetPose(-1,-2,-0.1, 0, 0, M_PI/4);
     glAxis.SetScale(0.25);
 
+    GLAxisAlignedBox glBox;
+    glBox.SetPosition(-3,3,-1);
+    glBox.SetResizable();
+
     // Define movable waypoint object with velocity
     GLWayPoint glWaypoint;
     glWaypoint.SetPose(0.5,0.5,-0.1,0,0,0);
@@ -60,6 +64,7 @@ int main( int /*argc*/, char** /*argv[]*/ )
     glGraph.AddChild(&glWaypoint);
     glGraph.AddChild(&glLineStrip);
     glGraph.AddChild(&glAxis);
+    glGraph.AddChild(&glBox);
     glGraph.AddChild(&glText3d);
 
     // We can have more than one scenegraph. This 2d scenegraph will

@@ -131,6 +131,31 @@ struct HandlerSceneGraph : pangolin::Handler3D
         }
     }
 
+    void Special(pangolin::View& view, pangolin::InputSpecial inType, int x, int y, float p1, float p2, float p3, float p4, int button_state)
+    {
+        // TODO: Implement Special handler for GLObjects too
+
+        Eigen::Vector3d p, P, n;
+        GetPosNormal(view,x,y,p,P,n);
+
+        bool handled = false;
+
+        if(inType == pangolin::InputSpecialScroll) {
+            m_selected_objects.clear();
+            ComputeHits(view,*cam_state,x,y,m_grab_width,m_selected_objects);
+
+            const pangolin::MouseButton button = p2 > 0 ? pangolin::MouseWheelUp : pangolin::MouseWheelDown;
+            for(std::map<int,SceneGraph::GLObject*>::iterator i = m_selected_objects.begin(); i != m_selected_objects.end(); ++i ) {
+                handled |= i->second->Mouse(button, p, P, n, true, button_state, i->first);
+            }
+        }
+
+        if(!handled) {
+            pangolin::Handler3D::Special(view,inType,x,y,p1,p2,p3,p4,button_state);
+        }
+    }
+
+
     std::map<int,SceneGraph::GLObject*> m_selected_objects;
     SceneGraph::GLSceneGraph& m_scenegraph;
     unsigned m_grab_width;
