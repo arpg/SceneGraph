@@ -39,7 +39,7 @@ void GLObject::DrawObjectAndChildren(RenderMode renderMode)
 {
     if( IsVisible() && (
 			(renderMode == eRenderVisible) ||
-            (renderMode == eRenderSelectable /*&& IsSelectable()*/) ||
+            (renderMode == eRenderSelectable && (IsSelectable() || m_vpChildren.size() > 0) ) ||
 			(renderMode == eRenderPerceptable && IsPerceptable())
 		)
 	) {

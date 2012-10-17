@@ -23,11 +23,13 @@ public:
     bool Mouse(int button, const Eigen::Vector3d& /*win*/, const Eigen::Vector3d& /*obj*/, const Eigen::Vector3d& /*normal*/, bool /*pressed*/, int /*button_state*/, int pickId)
     {
         if((button == MouseWheelUp || button == MouseWheelDown) ) {
-            const float scale = (button == MouseWheelUp) ? 0.01 : -0.01;
+            float scale = (button == MouseWheelUp) ? 0.01 : -0.01;
+            if(glutGetModifiers() & GLUT_ACTIVE_SHIFT) scale /= 10;
+
             Eigen::Matrix<double,6,1> T_po = GetPose();
             Eigen::Matrix<double,6,1> T_on = Eigen::Matrix<double,6,1>::Zero();
 
-            if(glutGetModifiers() & GLUT_ACTIVE_SHIFT) {
+            if(glutGetModifiers() & GLUT_ACTIVE_CTRL) {
                 if(m_rotatable) {
                     // rotate
                     if(pickId == x_label) {
@@ -44,11 +46,11 @@ public:
                 if(m_translatable) {
                     // translate
                     if(pickId == x_label) {
-                        T_on(0) += scale;
+                        T_on(0) += m_axisSize*scale;
                     }else if(pickId == y_label) {
-                        T_on(1) += scale;
+                        T_on(1) += m_axisSize*scale;
                     }else if(pickId == z_label) {
-                        T_on(2) += scale;
+                        T_on(2) += m_axisSize*scale;
                     }else{
                         return false;
                     }
