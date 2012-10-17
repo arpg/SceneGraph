@@ -31,6 +31,8 @@ set( SceneGraph_HEADERS
         GLText.h
         GLGrid.h
         GLAxis.h
+        GLMovableAxis.h
+        GLAxisAlignedBox.h
         GLWaypoint.h
         GLLineStrip.h
         SimCam.h

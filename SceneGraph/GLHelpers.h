@@ -293,6 +293,11 @@ inline Eigen::Matrix4d GLCart2T(
     return T;
 }
 
+inline Eigen::Matrix4d GLCart2T( Eigen::Matrix<double,6,1> x)
+{
+    return GLCart2T(x(0),x(1),x(2),x(3),x(4),x(5));
+}
+
 inline Eigen::Vector3d GLR2Cart(
         const Eigen::Matrix3d& R
         )
