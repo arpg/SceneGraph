@@ -100,6 +100,12 @@ public:
         glPopAttrib();
     }
 
+    void SetBounds(float minx, float miny, float minz, float maxx, float maxy, float maxz)
+    {
+        x_min = minx; y_min = miny; z_min = minz;
+        x_max = maxx; y_max = maxy; z_max = maxz;
+    }
+
 protected:
     bool m_resizable;
     float x_min,y_min,z_min;
