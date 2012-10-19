@@ -14,6 +14,7 @@ public:
     GLMovableAxis(float axisSize = 1.0f, bool rotatable = true, bool translatable = true)
         : GLObject("Axis"), m_axisSize(axisSize), m_rotatable(rotatable), m_translatable(translatable)
     {
+        m_bIsSelectable = translatable | rotatable;
         m_bPerceptable = false;
         x_label = AllocSelectionId();
         y_label = AllocSelectionId();

@@ -375,6 +375,30 @@ inline Eigen::Matrix3d GLCart2R(
     return R;
 }
 
+inline Eigen::Matrix3d Rotation_a2b(const Eigen::Vector3d& a, const Eigen::Vector3d& b)
+{
+    Eigen::Vector3d n = a.cross(b);
+
+    if(n.squaredNorm() == 0) {
+        // TODO: Should this be identity?
+        return Eigen::Matrix3d::Identity();
+    }
+
+    n.normalize();
+    Eigen::Matrix3d R1;
+    R1.col(0) = a.normalized();
+    R1.col(1) = n;
+    R1.col(2) = n.cross(R1.col(0));
+
+    Eigen::Matrix3d M;
+    M.col(0) = b.normalized();
+    M.col(1) = n;
+    M.col(2) = n.cross(M.col(0));
+    M = M * R1.transpose();
+    return M;
+}
+
+
 } // SceneGraph
 
 
