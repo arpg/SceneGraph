@@ -19,6 +19,7 @@ public:
         m_bSelected = false;
         m_bDirty = false;
         m_bIsSelectable = true;
+        m_bClampToPlane = false;
 
         m_dVelocity = 1.0;
         m_bPerceptable = false;
@@ -57,13 +58,25 @@ public:
         m_bDirty = true; // flag for update
         Eigen::Matrix4d& T = m_T_po;
 
+        // TODO: Convert p_w to local frame of reference
+        Eigen::Vector3d p_w = obj;
+        Eigen::Vector3d n_w = normal;
+
+        if(m_bClampToPlane) {
+            // project point obj onto plane
+            const Eigen::Vector3d n = m_mClampPlaneN_p.head<3>();
+            const double d = m_mClampPlaneN_p(3);
+            p_w = p_w - ((p_w.dot(n)-d) * n);
+            n_w = -n;
+        }
+
         if (pickId == m_nBaseId ) {
-            Eigen::Vector3d d = -normal;
+            Eigen::Vector3d d = -n_w;
 //            d << 0, 0, 1;
             Eigen::Vector3d f = T.block <3,1> (0, 0);
             Eigen::Vector3d r = d.cross(f).normalized();
             f = r.cross(d).normalized();
-            T.block<3,1>(0,3) = obj;
+            T.block<3,1>(0,3) = p_w;
             T.block<3,1>(0,0) = f;
             T.block<3,1>(0,1) = r;
             T.block<3,1>(0,2) = d;
@@ -71,7 +84,7 @@ public:
             if(glutGetModifiers() & GLUT_ACTIVE_SHIFT){
                 SetAerial(true);
             }
-            Eigen::Vector3d dir = obj - T.block<3,1>(0,3);
+            Eigen::Vector3d dir = p_w - T.block<3,1>(0,3);
             Eigen::Vector3d nr  = (T.block<3,1>(0,2).cross(dir)).normalized();
             Eigen::Vector3d nf = nr.cross(T.block<3,1>(0,2)).normalized();
             T.block<3,1>(0,0) = nf;
@@ -156,6 +169,12 @@ public:
         pose5d << GetPose4x4_po()(0,3), GetPose4x4_po()(1,3), atan2(xVec[1],xVec[0]),0,m_dVelocity;
         return pose5d;
     }
+
+    void ClampToPlane(Eigen::Vector4d N_p)
+    {
+        m_mClampPlaneN_p = N_p;
+        m_bClampToPlane = true;
+    }
     
 private:
     bool            m_bAerial;
@@ -165,6 +184,9 @@ private:
 
     int             m_nBaseId;
     int             m_nFrontId;
+
+    bool            m_bClampToPlane;
+    Eigen::Vector4d m_mClampPlaneN_p;
 
 //    double          m_dScale;
 //    std::string     m_sLabel;

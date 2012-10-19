@@ -42,6 +42,9 @@ int main( int /*argc*/, char** /*argv[]*/ )
     GLWayPoint glWaypoint;
     glWaypoint.SetPose(0.5,0.5,-0.1,0,0,0);
 
+    // Optionally clamp waypoint to specific plane
+    glWaypoint.ClampToPlane(Eigen::Vector4d(0,0,1,0));
+
     // Define 3D spiral using a line strip object
     GLLineStrip glLineStrip;
     for(double t=0; t < 10*M_PI; t+= M_PI/10) {
