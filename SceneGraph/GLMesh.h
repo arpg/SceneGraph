@@ -139,7 +139,8 @@ class GLMesh : public GLObject
         ///////////////////////////
         virtual void ComputeDimensions()
         {
-            Eigen::Vector3d min, max;
+            Eigen::Vector3d bbmin(std::numeric_limits<double>::max(),std::numeric_limits<double>::max(),std::numeric_limits<double>::max());
+            Eigen::Vector3d bbmax(std::numeric_limits<double>::min(),std::numeric_limits<double>::min(),std::numeric_limits<double>::min());
             aiMesh *pAIMesh;
             aiVector3D *pAIVector;
 
@@ -150,27 +151,22 @@ class GLMesh : public GLObject
 
                 for( unsigned int y = 0; y < pAIMesh->mNumVertices; y++ ){
                     pAIVector = &pAIMesh->mVertices[y];
-                    if ( pAIVector == NULL ){
-                        continue;
-                        }
+                    if ( pAIVector != NULL ){
+                        const Eigen::Vector3d p = Eigen::Vector3d(pAIVector->x,pAIVector->y,pAIVector->z) * this->GetScale();
+                        bbmin(0) = std::min(bbmin(0),p(0));
+                        bbmin(1) = std::min(bbmin(1),p(1));
+                        bbmin(2) = std::min(bbmin(2),p(2));
 
-                    if ( ((pAIVector->x * this->GetScale()) < min[0]) && ((pAIVector->y * this->GetScale()) < min[1]) && ((pAIVector->z * this->GetScale()) < min[2]) ){
-                        min[0] = pAIVector->x * this->GetScale();
-                        min[1] = pAIVector->y * this->GetScale();
-                        min[2] = pAIVector->z * this->GetScale();
-                    }
-
-                    if ( ((pAIVector->x * this->GetScale()) > max[0]) && ((pAIVector->y * this->GetScale()) > max[1]) && ((pAIVector->z * this->GetScale()) > max[2]) ) {
-                        max[0] = pAIVector->x * this->GetScale();
-                        max[1] = pAIVector->y * this->GetScale();
-                        max[2] = pAIVector->z * this->GetScale();
+                        bbmax(0) = std::max(bbmax(0),p(0));
+                        bbmax(1) = std::max(bbmax(1),p(1));
+                        bbmax(2) = std::max(bbmax(2),p(2));
                     }
                 }
             }
 
-            m_Dimensions[0] = max[0] - min[0];
-            m_Dimensions[1] = max[1] - min[1];
-            m_Dimensions[2] = max[2] - min[2];
+            m_Dimensions[0] = bbmax[0] - bbmin[0];
+            m_Dimensions[1] = bbmax[1] - bbmin[1];
+            m_Dimensions[2] = bbmax[2] - bbmin[2];
         }
 
         // Getters and setters

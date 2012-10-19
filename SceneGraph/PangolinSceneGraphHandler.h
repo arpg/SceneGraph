@@ -14,7 +14,7 @@ struct HandlerSceneGraph : pangolin::Handler3D
     void ProcessHitBuffer (GLint hits, GLuint* buf, std::map<int,SceneGraph::GLObject*>& objects )
     {
         GLuint* closestNames = 0;
-        GLuint closestNumNames;
+        GLuint closestNumNames = 0;
         GLuint closestZ = std::numeric_limits<GLuint>::max();
 
         for (int i = 0; i < hits; i++) {
