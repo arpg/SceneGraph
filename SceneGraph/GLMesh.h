@@ -111,6 +111,11 @@ class GLMesh : public GLObject
             }
         }
 
+        ////////////////////////////////////////////////////////////////////////////
+        void ShowNormals(bool showNormals = true)
+        {
+            m_bShowMeshNormals = showNormals;
+        }
 
         ////////////////////////////////////////////////////////////////////////////
         virtual void  DrawCanonicalObject()
@@ -118,8 +123,12 @@ class GLMesh : public GLObject
             if( m_pScene ){
                 glPushAttrib(GL_ENABLE_BIT);
 
-				// jmf: not sure if this is the best option, but have textures ignore lighting
-				glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL );
+                glColor3f(1,1,1);
+
+                // Lighting it now controlled in GLSceneGraph
+//				// jmf: not sure if this is the best option, but have textures ignore lighting
+//                glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL );
+//                glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
 
                 if( m_nDisplayList == -1 ){
                     m_nDisplayList = glGenLists(1);
@@ -535,7 +544,7 @@ protected:
         {
 
             //            glShadeModel( GL_FLAT );
-            glDisable( GL_COLOR_MATERIAL );                                 // activate material
+//            glDisable( GL_COLOR_MATERIAL );                                 // activate material
 
             float c[4];
 
@@ -553,28 +562,24 @@ protected:
             set_float4( c, 0.8f, 0.8f, 0.8f, 1.0f );
             if(AI_SUCCESS == aiGetMaterialColor(mtl, AI_MATKEY_COLOR_DIFFUSE, &diffuse)){
                 color4_to_float4( &diffuse, c);
-                //    printf("Applying GL_DIFFUSE %f, %f, %f, %f\n", c[0], c[1], c[2], c[3] );
             }
             glMaterialfv( GL_FRONT_AND_BACK, GL_DIFFUSE, c );
 
             set_float4( c, 0.0f, 0.0f, 0.0f, 1.0f );
             if(AI_SUCCESS == aiGetMaterialColor(mtl, AI_MATKEY_COLOR_SPECULAR, &specular)){
                 color4_to_float4(&specular, c);
-                //    printf("Applying GL_SPECULAR %f, %f, %f, %f\n", c[0], c[1], c[2], c[3] );
             }
             glMaterialfv( GL_FRONT_AND_BACK, GL_SPECULAR, c );
 
             set_float4( c, 0.2f, 0.2f, 0.2f, 1.0f );
             if(AI_SUCCESS == aiGetMaterialColor(mtl, AI_MATKEY_COLOR_AMBIENT, &ambient)){
                 color4_to_float4( &ambient, c );
-                //   printf("Applying GL_AMBIENT %f, %f, %f, %f\n", c[0], c[1], c[2], c[3] );
             }
             glMaterialfv( GL_FRONT_AND_BACK, GL_AMBIENT, c );
 
             set_float4( c, 0.0f, 0.0f, 0.0f, 1.0f );
             if(AI_SUCCESS == aiGetMaterialColor(mtl, AI_MATKEY_COLOR_EMISSIVE, &emission)){
                 color4_to_float4(&emission, c);
-                //    printf("Applying GL_EMISSION %f, %f, %f, %f\n", c[0], c[1], c[2], c[3] );
             }
             glMaterialfv( GL_FRONT_AND_BACK, GL_EMISSION, c );
 
@@ -644,9 +649,6 @@ protected:
                 }
                 if( mesh->mNormals != NULL ){
                     glNormal3fv( &mesh->mNormals[index].x );
-                    //       printf( "Normal %f, %f, %f\n", mesh->mNormals[index].x,
-                    //       mesh->mNormals[index].y, mesh->mNormals[index].z );
-                    //       glNormal3f( -mesh->mNormals[index].x, -mesh->mNormals[index].y, -mesh->mNormals[index].z );
                 }
                 glVertex3fv( &mesh->mVertices[index].x );
             }
@@ -654,7 +656,7 @@ protected:
 
             // show normals for debugging
             if( m_bShowMeshNormals ){
-                float s = 10;
+                float s = 0.1;
                 glBegin( GL_LINES );
                 for( unsigned int ii = 0; ii < face->mNumIndices; ii++ ) {
                     int index = face->mIndices[ii];

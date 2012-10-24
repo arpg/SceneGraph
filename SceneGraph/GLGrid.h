@@ -2,6 +2,7 @@
 #define _GL_GRID_H_
 
 #include <SceneGraph/GLObject.h>
+#include <SceneGraph/GLColor.h>
 
 namespace SceneGraph
 {
@@ -11,14 +12,15 @@ class GLGrid : public GLObject
 {
     public:
         GLGrid(int numLines = 50, float lineSpacing = 2.0, bool perceptable = false)
-            : GLObject("Grid"), m_iNumLines(numLines), m_fLineSpacing(lineSpacing)
+            : GLObject("Grid"), m_iNumLines(numLines), m_fLineSpacing(lineSpacing),
+              m_colorPlane(90,90,90,255), m_colorLines(132,132,132,128)
         {
             m_bPerceptable = perceptable;
             mT_op = Eigen::Matrix4d::Identity();
         }
 
         // from mvl dispview
-        static inline void DrawGridZ0(bool filled, int numLines, float lineSpacing)
+        static inline void DrawGridZ0(bool filled, int numLines, float lineSpacing, GLColor colorPlane, GLColor colorLines)
         {
             glPushAttrib(GL_ENABLE_BIT);
             {
@@ -27,7 +29,7 @@ class GLGrid : public GLObject
                 const float halfsize = lineSpacing*numLines;
 
                 if(filled) {
-                    glColor4ub(90, 90, 90, 128);
+                    colorPlane.Apply();
                     glBegin(GL_TRIANGLE_STRIP);
                     glVertex3f( -halfsize , -halfsize, 0.0);
                     glVertex3f( +halfsize , -halfsize, 0.0);
@@ -39,11 +41,9 @@ class GLGrid : public GLObject
                 glBegin(GL_LINES);
                 {
                     for(int i = -numLines; i < numLines; i++){
-                        glColor4ub(132, 132, 132, 255);
+                        colorLines.Apply();
                         glVertex3f( halfsize, i*lineSpacing, 0.0);
                         glVertex3f(-halfsize, i*lineSpacing, 0.0);
-
-                        glColor4ub(132, 132, 132, 255);
                         glVertex3f(i*lineSpacing,  halfsize, 0.0);
                         glVertex3f(i*lineSpacing, -halfsize, 0.0);
                     }
@@ -65,14 +65,22 @@ class GLGrid : public GLObject
         {
             glPushMatrix();
             glMultMatrixd(mT_op.data());
-            DrawGridZ0(m_bPerceptable, m_iNumLines, m_fLineSpacing);
+            DrawGridZ0(m_bPerceptable, m_iNumLines, m_fLineSpacing, m_colorPlane, m_colorLines);
             glPopMatrix();
+        }
+
+        inline void SetPlaneColor(const GLColor& color) {
+            m_colorPlane = color;
+        }
+
+        inline void SetLineColor(const GLColor& color) {
+            m_colorLines = color;
         }
 
         // nd_o = (n_o / d_o)
         // n_o : Normal of plane with respect to object frame of ref
         // d_o : Distance of closest approach with origin of object frame
-        void SetPlane(Eigen::Vector3d nd_o)
+        inline void SetPlane(const Eigen::Vector3d& nd_o)
         {
             const double d = 1.0 / nd_o.norm();
             const Eigen::Vector3d n = d * nd_o;
@@ -83,6 +91,9 @@ class GLGrid : public GLObject
 protected:
         int m_iNumLines;
         float m_fLineSpacing;
+
+        GLColor m_colorPlane;
+        GLColor m_colorLines;
 
         // Plane to object transform (represents canonical basis for plane)
         Eigen::Matrix4d mT_op;

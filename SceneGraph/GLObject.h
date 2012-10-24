@@ -48,6 +48,8 @@ class GLObject
         GLObject( const std::string& name);
         GLObject( const GLObject& rhs );
 
+        virtual ~GLObject() {}
+
         /////////////////////////////////
         // Drawing methods
         /////////////////////////////////
@@ -57,7 +59,9 @@ class GLObject
         virtual void DrawCanonicalObject() = 0;
 
         /// Apply object transform, then draw object and its children (recursively)
-        void DrawObjectAndChildren(RenderMode renderMode = eRenderVisible);
+        /// Although this method is virtual, you should not override it without
+        /// good cause. Override DrawCanonicalObject instead.
+        virtual void DrawObjectAndChildren(RenderMode renderMode = eRenderVisible);
 
         /// Alow this object to draw itself as a functor
         inline void operator()() {
