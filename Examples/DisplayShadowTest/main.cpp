@@ -23,7 +23,7 @@ int main( int /*argc*/, char** /*argv[]*/ )
 
     // Scenegraph to hold GLObjects and relative transformations
     SceneGraph::GLSceneGraph glGraph;
-    glGraph.AddLight(Eigen::Vector3d(0,0,-10));
+    glGraph.AddLight(Eigen::Vector3d(1,1,-10));
 
     // Define grid object
     SceneGraph::GLGrid glGrid(50,2.0, true);
@@ -82,17 +82,26 @@ int main( int /*argc*/, char** /*argv[]*/ )
     // Add our view as children to the base container.
     container.AddDisplay(view3d);
 
+    SceneGraph::GLLight& light = glGraph.GetLight(0);
+
     // Default hooks for exiting (Esc) and fullscreen (tab).
     while( !pangolin::ShouldQuit() )
     {
         // Clear whole screen
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        // Point light at scene
+        const Eigen::Vector3d lpos = light.GetPose().head<3>();
+        pangolin::OpenGlRenderState stacks_light(
+            pangolin::ProjectionMatrix(640,480,420,420,320,240,0.1,1000),
+            pangolin::ModelViewLookAt(lpos(0), lpos(1), lpos(2), 0,0,0, pangolin::AxisNegZ)
+        );
+
         // Render view of scene to framebuffer
         framebuffer.Bind();
         glViewport(0,0,640,480);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        stacks3d.Apply();
+        stacks_light.Apply();
         glGraph.DrawObjectAndChildren();
         framebuffer.Unbind();
 
