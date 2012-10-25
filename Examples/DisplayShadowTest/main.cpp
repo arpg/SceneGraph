@@ -8,51 +8,6 @@
 
 using namespace std;
 
-class GLTexturedCube : public SceneGraph::GLObject
-{
-public:
-    GLTexturedCube(pangolin::GlTexture& tex)
-        : m_tex(tex)
-    {
-    }
-
-    void DrawCanonicalObject()
-    {
-        m_tex.Bind();
-        glEnable(GL_TEXTURE_2D);
-        glColor3f(1,1,1);
-        glBegin(GL_QUADS);
-        glTexCoord2f(0, 0); glVertex3f(  0.5, -0.5, -0.5 );
-        glTexCoord2f(0, 1); glVertex3f(  0.5,  0.5, -0.5 );
-        glTexCoord2f(1, 1); glVertex3f( -0.5,  0.5, -0.5 );
-        glTexCoord2f(1, 0); glVertex3f( -0.5, -0.5, -0.5 );
-        glTexCoord2f(0, 0); glVertex3f(  0.5, -0.5, 0.5 );
-        glTexCoord2f(0, 1); glVertex3f(  0.5,  0.5, 0.5 );
-        glTexCoord2f(1, 1); glVertex3f( -0.5,  0.5, 0.5 );
-        glTexCoord2f(1, 0); glVertex3f( -0.5, -0.5, 0.5 );
-        glTexCoord2f(0, 0); glVertex3f( 0.5, -0.5, -0.5 );
-        glTexCoord2f(0, 1); glVertex3f( 0.5,  0.5, -0.5 );
-        glTexCoord2f(1, 1); glVertex3f( 0.5,  0.5,  0.5 );
-        glTexCoord2f(1, 0); glVertex3f( 0.5, -0.5,  0.5 );
-        glTexCoord2f(0, 0); glVertex3f( -0.5, -0.5,  0.5 );
-        glTexCoord2f(0, 1); glVertex3f( -0.5,  0.5,  0.5 );
-        glTexCoord2f(1, 1); glVertex3f( -0.5,  0.5, -0.5 );
-        glTexCoord2f(1, 0); glVertex3f( -0.5, -0.5, -0.5 );
-        glTexCoord2f(0, 0); glVertex3f(  0.5,  0.5,  0.5 );
-        glTexCoord2f(0, 1); glVertex3f(  0.5,  0.5, -0.5 );
-        glTexCoord2f(1, 1); glVertex3f( -0.5,  0.5, -0.5 );
-        glTexCoord2f(1, 0); glVertex3f( -0.5,  0.5,  0.5 );
-        glTexCoord2f(0, 0); glVertex3f(  0.5, -0.5, -0.5 );
-        glTexCoord2f(0, 1); glVertex3f(  0.5, -0.5,  0.5 );
-        glTexCoord2f(1, 1); glVertex3f( -0.5, -0.5,  0.5 );
-        glTexCoord2f(1, 0); glVertex3f( -0.5, -0.5, -0.5 );
-        glEnd();
-        glDisable(GL_TEXTURE_2D);
-    }
-protected:
-    pangolin::GlTexture& m_tex;
-};
-
 int main( int /*argc*/, char** /*argv[]*/ )
 {
     // Create OpenGL window in single line thanks to GLUT
@@ -68,7 +23,7 @@ int main( int /*argc*/, char** /*argv[]*/ )
 
     // Scenegraph to hold GLObjects and relative transformations
     SceneGraph::GLSceneGraph glGraph;
-//    glGraph.AddLight(Eigen::Vector3d(0,0,-10));
+    glGraph.AddLight(Eigen::Vector3d(0,0,-10));
 
     // Define grid object
     SceneGraph::GLGrid glGrid(50,2.0, true);
@@ -94,8 +49,9 @@ int main( int /*argc*/, char** /*argv[]*/ )
         cerr << "Cannot load mesh. Check file exists" << endl;
     }
 
-    GLTexturedCube glCube(fb_img);
-    glCube.SetPose(0,0,-1, M_PI/4, M_PI/4, M_PI/4);
+    SceneGraph::GLCube glCube;
+    glCube.SetTexture(fb_img.tid);
+    glCube.SetPose(0,0,-sqrt(3), M_PI/4, M_PI/4, M_PI/4);
 
     // Add objects to scenegraph
     glGraph.AddChild(&glGrid);

@@ -1,33 +1,59 @@
-#ifndef _CUBE_H_
-#define _CUBE_H_
+#ifndef _GLCUBE_H_
+#define _GLCUBE_H_
 
-#include <math.h> // for M_PI
-#include <FL/gl.h>
+#include <SceneGraph/GLObject.h>
+#include <math.h>
 
-#define FPS 1.0/20.0
-#define TEX_W 64
-#define TEX_H 64
-
-class GLCube
+namespace SceneGraph
 {
-    public:
-        double m_dSpin;
 
-    public:
-        ///  OpenGL stuff to do *only once* on startup.
-        void Init();
+///////////////////////////////////////////////////////////////////////////////
+// GLCube
+///////////////////////////////////////////////////////////////////////////////
 
-        /// Main function called by FLTK to draw the scene.
-        void draw();
+class GLCube : public GLObject
+{
+public:
+    GLCube();
 
-    private:
-        GLuint m_nTexID;
+    GLCube(GLuint texId);
+
+    void ClearTexture();
+
+    void SetCheckerboard();
+
+    void SetTexture(GLuint texId);
+
+    void DrawCanonicalObject();
+
+protected:
+    const static int TEX_W = 64;
+    const static int TEX_H = 64;
+
+    bool   m_bOwnsTexture;
+    GLuint m_nTexID;
 };
 
+///////////////////////////////////////////////////////////////////////////////
+// Implementation
+///////////////////////////////////////////////////////////////////////////////
 
-
-inline void GLCube::Init() 
+inline void GLCube::ClearTexture()
 {
+    if(m_nTexID > 0) {
+        if(m_bOwnsTexture) {
+            glDeleteTextures(1,&m_nTexID);
+        }
+        m_nTexID = 0;
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+inline void GLCube::SetCheckerboard()
+{
+    ClearTexture();
+
     // Texture Map Init
     GLubyte img[TEX_W][TEX_H][3]; // after glTexImage2D(), array is no longer needed
     for (int x=0; x<TEX_W; x++) {
@@ -39,71 +65,101 @@ inline void GLCube::Init()
         }
     }
 
-    // Generate and bind the texture 
+    // Generate and bind the texture
+    m_bOwnsTexture = true;
     glGenTextures( 1, &m_nTexID );
     glBindTexture( GL_TEXTURE_2D, m_nTexID );
-    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);  
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
     glPixelStorei( GL_UNPACK_ALIGNMENT, 1);
-    glTexImage2D( GL_TEXTURE_2D, 0, 
+    glTexImage2D( GL_TEXTURE_2D, 0,
             GL_RGB, TEX_W, TEX_H, 0, GL_RGB, GL_UNSIGNED_BYTE, &img[0][0][0] );
     glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
     glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
 }
 
-/// Main function called by FLTK to draw the scene.
-inline void GLCube::draw() 
-{
+///////////////////////////////////////////////////////////////////////////////
 
-    glEnable( GL_TEXTURE_2D );
-    // Setup model matrix
-    glLoadIdentity();
-    glRotatef( m_dSpin, 0.5, 1.0, 0.0); // show all sides of cube
+inline void GLCube::SetTexture(GLuint texId)
+{
+    ClearTexture();
+
+    m_bOwnsTexture = false;
+    m_nTexID = texId;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+inline GLCube::GLCube()
+    : m_bOwnsTexture(false), m_nTexID(0)
+{
+    SetCheckerboard();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+inline GLCube::GLCube(GLuint texId)
+    : m_bOwnsTexture(false), m_nTexID(0)
+{
+    SetTexture(texId);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+inline void GLCube::DrawCanonicalObject()
+{
+    if(m_nTexID) {
+        glEnable( GL_TEXTURE_2D );
+        glBindTexture( GL_TEXTURE_2D, m_nTexID );
+    }
+
+    glColor3f(1,1,1);
+
     // Draw cube with texture assigned to each face
     glBegin(GL_QUADS);
     // Front Face
-    glColor3f(1.0, 0.0, 0.0); // red
+    glNormal3f(0,0,1);
     glTexCoord2f(0.0, 1.0); glVertex3f(-1.0,  1.0,  1.0); 
     glTexCoord2f(1.0, 1.0); glVertex3f( 1.0,  1.0,  1.0); 
     glTexCoord2f(1.0, 0.0); glVertex3f( 1.0, -1.0,  1.0); 
     glTexCoord2f(0.0, 0.0); glVertex3f(-1.0, -1.0,  1.0); 
     // Back Face
-    glColor3f(0.0, 1.0, 1.0); // cyn
-    glTexCoord2f(0.0, 1.0); glVertex3f( 1.0,  1.0, -1.0); 
+    glNormal3f(0,0,-1);
+    glTexCoord2f(0.0, 1.0); glVertex3f( 1.0,  1.0, -1.0);
     glTexCoord2f(1.0, 1.0); glVertex3f(-1.0,  1.0, -1.0); 
     glTexCoord2f(1.0, 0.0); glVertex3f(-1.0, -1.0, -1.0); 
     glTexCoord2f(0.0, 0.0); glVertex3f( 1.0, -1.0, -1.0); 
     // Top Face
-    glColor3f(0.0, 1.0, 0.0); // grn
-    glTexCoord2f(0.0, 1.0); glVertex3f(-1.0,  1.0, -1.0); 
+    glNormal3f(0,1,0);
+    glTexCoord2f(0.0, 1.0); glVertex3f(-1.0,  1.0, -1.0);
     glTexCoord2f(1.0, 1.0); glVertex3f( 1.0,  1.0, -1.0); 
     glTexCoord2f(1.0, 0.0); glVertex3f( 1.0,  1.0,  1.0); 
     glTexCoord2f(0.0, 0.0); glVertex3f(-1.0,  1.0,  1.0); 
     // Bottom Face
-    glColor3f(1.0, 0.0, 1.0); // mag
-    glTexCoord2f(0.0, 1.0); glVertex3f( 1.0, -1.0, -1.0); 
+    glNormal3f(0,-1,0);
+    glTexCoord2f(0.0, 1.0); glVertex3f( 1.0, -1.0, -1.0);
     glTexCoord2f(1.0, 1.0); glVertex3f(-1.0, -1.0, -1.0); 
     glTexCoord2f(1.0, 0.0); glVertex3f(-1.0, -1.0,  1.0); 
     glTexCoord2f(0.0, 0.0); glVertex3f( 1.0, -1.0,  1.0); 
-
     // Right face
-    glColor3f(0.0, 0.0, 1.0); // blu
-    glTexCoord2f(0.0, 1.0); glVertex3f( 1.0,  1.0,  1.0); 
+    glNormal3f(1,0,0);
+    glTexCoord2f(0.0, 1.0); glVertex3f( 1.0,  1.0,  1.0);
     glTexCoord2f(1.0, 1.0); glVertex3f( 1.0,  1.0, -1.0); 
     glTexCoord2f(1.0, 0.0); glVertex3f( 1.0, -1.0, -1.0); 
     glTexCoord2f(0.0, 0.0); glVertex3f( 1.0, -1.0,  1.0); 
-
     // Left Face
-    glColor3f(1.0, 1.0, 0.0); // yel
-    glTexCoord2f(0.0, 1.0); glVertex3f(-1.0,  1.0, -1.0); 
+    glNormal3f(-1,0,0);
+    glTexCoord2f(0.0, 1.0); glVertex3f(-1.0,  1.0, -1.0);
     glTexCoord2f(1.0, 1.0); glVertex3f(-1.0,  1.0,  1.0); 
     glTexCoord2f(1.0, 0.0); glVertex3f(-1.0, -1.0,  1.0); 
     glTexCoord2f(0.0, 0.0); glVertex3f(-1.0, -1.0, -1.0); 
     glEnd();
     
-    glDisable( GL_TEXTURE_2D );
+    if(m_nTexID) {
+        glDisable( GL_TEXTURE_2D );
+    }
 }
 
+}
 
-
-#endif
+#endif //_GLCube_H_
 

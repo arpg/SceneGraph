@@ -7,6 +7,7 @@
 
 #include <SceneGraph/GLGrid.h>
 #include <SceneGraph/GLAxis.h>
+#include <SceneGraph/GLCube.h>
 #include <SceneGraph/GLAxisAlignedBox.h>
 #include <SceneGraph/GLMovableAxis.h>
 #include <SceneGraph/GLWaypoint.h>
