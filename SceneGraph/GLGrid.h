@@ -22,9 +22,21 @@ class GLGrid : public GLObject
         // from mvl dispview
         static inline void DrawGridZ0(bool filled, int numLines, float lineSpacing, GLColor colorPlane, GLColor colorLines)
         {
-            glPushAttrib(GL_ENABLE_BIT);
+            glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT);
             {
-                glDisable(GL_LIGHTING);
+//                glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT);
+
+                GLfloat ambient[4] = {1,1,1,1};
+//                GLfloat diffuse[4] = {0.1,0.1,0.1,1};
+                GLfloat diffuse[4] = {0,0,0,1};
+                GLfloat specular[4] = {0,0,0,1};
+                glMaterialfv( GL_FRONT_AND_BACK, GL_AMBIENT, ambient );
+                glMaterialfv( GL_FRONT_AND_BACK, GL_DIFFUSE, diffuse );
+                glMaterialfv( GL_FRONT_AND_BACK, GL_SPECULAR, specular );
+
+//                glDisable(GL_LIGHTING);
+
+                glNormal3f(0,0,-1);
 
                 const float halfsize = lineSpacing*numLines;
 

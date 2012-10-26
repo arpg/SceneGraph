@@ -33,7 +33,7 @@
 namespace SceneGraph
 {
 
-#define CheckForGLErrors() _CheckForGLErrors( __FILE__, __LINE__ );
+#define CheckForGLErrors() SceneGraph::_CheckForGLErrors( __FILE__, __LINE__ );
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///  If a GL error has occured, this function outputs "msg" and the
