@@ -24,9 +24,8 @@ class GLLineStrip : public GLObject
 
         void DrawCanonicalObject()
         {
-            glPushAttrib(GL_ENABLE_BIT);
-            glDisable(GL_LIGHTING);
-            glDisable( GL_DEPTH_TEST );
+            glPushAttrib(GL_ENABLE_BIT | GL_DEPTH_BUFFER_BIT);
+//            glDepthMask(false);
 
             m_Color.Apply();
             glBegin( GL_LINE_STRIP );
