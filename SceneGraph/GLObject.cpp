@@ -35,10 +35,19 @@ int GLObject::AllocSelectionId()
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
+void GLObject::DrawChildren(RenderMode renderMode)
+{
+    for(std::vector<GLObject*>::const_iterator i=m_vpChildren.begin(); i!= m_vpChildren.end(); ++i)
+    {
+        (*i)->DrawObjectAndChildren(renderMode);
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////
 void GLObject::DrawObjectAndChildren(RenderMode renderMode)
 {
     if( IsVisible() && (
-			(renderMode == eRenderVisible) ||
+            (renderMode == eRenderVisible) || (renderMode == eRenderNoPrePostHooks) ||
             (renderMode == eRenderSelectable && (IsSelectable() || m_vpChildren.size() > 0) ) ||
 			(renderMode == eRenderPerceptable && IsPerceptable())
 		)
@@ -49,11 +58,8 @@ void GLObject::DrawObjectAndChildren(RenderMode renderMode)
         glScaled(m_dScale,m_dScale,m_dScale);
 
         DrawCanonicalObject();
+        DrawChildren();
 
-        for(std::vector<GLObject*>::const_iterator i=m_vpChildren.begin(); i!= m_vpChildren.end(); ++i)
-        {
-            (*i)->DrawObjectAndChildren(renderMode);
-        }
         glPopMatrix();
     }
 }

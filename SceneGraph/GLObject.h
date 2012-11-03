@@ -33,7 +33,8 @@ enum RenderMode
 {
 	eRenderVisible = GL_RENDER,
 	eRenderSelectable = GL_SELECT,
-	eRenderPerceptable
+    eRenderPerceptable,
+    eRenderNoPrePostHooks
 };
 
 class GLObject
@@ -58,9 +59,12 @@ class GLObject
         /// Overide this in your derived classes.
         virtual void DrawCanonicalObject() = 0;
 
+        /// Draw Children (without pose transform applied)
+        void DrawChildren(RenderMode renderMode = eRenderVisible);
+
         /// Apply object transform, then draw object and its children (recursively)
-        /// Although this method is virtual, you should not override it without
-        /// good cause. Override DrawCanonicalObject instead.
+        /// Although virtual, you should NOT overide this method unless you have
+        /// a very good reason. Implement DrawCanonicalObject instead.
         virtual void DrawObjectAndChildren(RenderMode renderMode = eRenderVisible);
 
         /// Alow this object to draw itself as a functor

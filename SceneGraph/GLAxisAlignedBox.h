@@ -100,6 +100,12 @@ public:
         glPopAttrib();
     }
 
+    void SetBounds(Eigen::Vector3d boxmin, Eigen::Vector3d boxmax)
+    {
+        x_min = boxmin(0); y_min = boxmin(1); z_min = boxmin(2);
+        x_max = boxmax(0); y_max = boxmax(1); z_max = boxmax(2);
+    }
+
     void SetBounds(float minx, float miny, float minz, float maxx, float maxy, float maxz)
     {
         x_min = minx; y_min = miny; z_min = minz;

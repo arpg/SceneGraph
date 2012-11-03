@@ -1,5 +1,6 @@
 #include <SceneGraph/GLObject.h>
 #include <SceneGraph/GLSceneGraph.h>
+#include <SceneGraph/GLLight.h>
 
 namespace SceneGraph
 {
@@ -8,7 +9,7 @@ extern std::map<int,GLObject*>   g_mObjects; // map of id to objects
 
 /////////////////////////////////////////////////////////////////////////////////
 GLSceneGraph::GLSceneGraph()
-    : GLObject("SceneGraph"), m_bShowLights(false), m_bShowShaddows(false)
+    : GLObject("SceneGraph"), m_bEnableLighting(false)
 {
     Reset();
 }
@@ -25,12 +26,7 @@ void GLSceneGraph::Clear()
     // Remove children
     m_vpChildren.clear();
 
-    // Clear lights
-    for(unsigned int l=0; l < m_vpLights.size(); ++l) {
-        glDisable( GL_LIGHT0 + l );
-        delete m_vpLights[l];
-    }
-    m_vpLights.clear();
+    m_vpPrePostRender.clear();
 
     // This object and children can be selected
     m_bIsSelectable = true;
@@ -43,55 +39,41 @@ void GLSceneGraph::Reset()
 }
 
 /////////////////////////////////////////////////////////////////////////////////
-GLLight& GLSceneGraph::AddLight(Eigen::Vector3d pos)
+void GLSceneGraph::AddChild( GLObject* pChild )
 {
-    GLLight* light = new GLLight();
-    light->SetPosition(pos);
-    light->SetVisible(m_bShowLights);
+    GLObjectPrePostRender* prepost = dynamic_cast<GLObjectPrePostRender*>(pChild);
+    GLLight* light = dynamic_cast<GLLight*>(pChild);
 
-    m_vpLights.push_back(light);
-    AddChild(light);
-
-    return *light;
-}
-
-/////////////////////////////////////////////////////////////////////////////////
-GLLight& GLSceneGraph::GetLight(unsigned int i)
-{
-    assert(i < m_vpLights.size());
-    return *m_vpLights[i];
-}
-
-/////////////////////////////////////////////////////////////////////////////////
-void GLSceneGraph::ShowLights(bool showLights)
-{
-    m_bShowLights = showLights;
-    for(unsigned int l=0; l < m_vpLights.size(); ++l) {
-        m_vpLights[l]->SetVisible(showLights);
+    if(light) {
+        m_bEnableLighting = true;
     }
-}
 
-void GLSceneGraph::ShowShaddows(bool showShaddows)
-{
-    m_bShowShaddows = showShaddows;
+    if(prepost) {
+        m_vpPrePostRender.push_back(prepost);
+    }
+
+    GLObject::AddChild(pChild);
 }
 
 /////////////////////////////////////////////////////////////////////////////////
 void GLSceneGraph::DrawCanonicalObject()
 {
-    for(unsigned int l=0; l < m_vpLights.size(); ++l) {
-        m_vpLights[l]->ApplyAsGlLight(GL_LIGHT0 + l);
-    }
+    // Nothing to do here
 }
 
-void GLSceneGraph::DrawObjectAndChildren(RenderMode renderMode )
+void GLSceneGraph::DrawObjectAndChildren(RenderMode renderMode)
 {
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glMultMatrixd(m_T_po.data());
+    glScaled(m_dScale,m_dScale,m_dScale);
+
     glPushAttrib(GL_ENABLE_BIT);
 
-    if(m_vpLights.size() > 0) {
+    if(m_bEnableLighting) {
         glEnable( GL_LIGHTING );
-        glColorMaterial( GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE );
         glEnable( GL_COLOR_MATERIAL );
+        glColorMaterial( GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE );
         glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
     }else{
         glDisable( GL_LIGHTING );
@@ -99,9 +81,20 @@ void GLSceneGraph::DrawObjectAndChildren(RenderMode renderMode )
         glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL );
     }
 
-    GLObject::DrawObjectAndChildren(renderMode);
+    if(renderMode == eRenderNoPrePostHooks) {
+        DrawChildren(eRenderVisible);
+    }else{
+        for(unsigned int l=0; l < m_vpPrePostRender.size(); ++l) {
+            m_vpPrePostRender[l]->PreRender(*this);
+        }
+        DrawChildren(renderMode);
+        for(unsigned int l=0; l < m_vpPrePostRender.size(); ++l) {
+            m_vpPrePostRender[l]->PostRender(*this);
+        }
+    }
 
     glPopAttrib();
+    glPopMatrix();
 }
 
 void GLSceneGraph::ApplyPreferredGlSettings()

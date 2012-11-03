@@ -14,12 +14,8 @@ int main( int /*argc*/, char** /*argv[]*/ )
     SceneGraph::GLSceneGraph::ApplyPreferredGlSettings();
     glewInit();
 
-    SceneGraph::ShadowMap shadowMap(2048,2048);
-
     // Scenegraph to hold GLObjects and relative transformations
     SceneGraph::GLSceneGraph glGraph;
-    glGraph.AddLight(Eigen::Vector3d(10,10,-20));
-    glGraph.ShowLights();
 
     // Define grid object
     SceneGraph::GLGrid glGrid(50,2.0, true);
@@ -57,6 +53,13 @@ int main( int /*argc*/, char** /*argv[]*/ )
     glGraph.AddChild(&glAxis);
     glGraph.AddChild(&glCube);
 
+    SceneGraph::GLShadowLight shadowLight(0,0,-10, 2048,2048);
+    shadowLight.SetVisible();
+//    shadowLight.AddShadowCasterAndReceiver(&glGraph);
+    shadowLight.AddShadowCaster(&glMesh);
+    shadowLight.AddShadowReceiver(&glGrid);
+    glGraph.AddChild(&shadowLight);
+
     // Define Camera Render Object (for view / scene browsing)
     pangolin::OpenGlRenderState stacks3d(
         pangolin::ProjectionMatrix(640,480,420,420,320,240,0.1,1000),
@@ -75,7 +78,7 @@ int main( int /*argc*/, char** /*argv[]*/ )
     // to our scenegraph
     view3d.SetBounds(0.0, 1.0, 0.0, 1.0, 640.0f/480.0f)
           .SetHandler(new SceneGraph::HandlerSceneGraph(glGraph,stacks3d,pangolin::AxisNegZ))
-          ;//.SetDrawFunction(SceneGraph::ActivateDrawFunctor(glGraph, stacks3d));
+          .SetDrawFunction(SceneGraph::ActivateDrawFunctor(glGraph, stacks3d));
 
     // Add our view as children to the base container.
     container.AddDisplay(view3d);
@@ -86,11 +89,7 @@ int main( int /*argc*/, char** /*argv[]*/ )
         // Clear whole screen
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        SceneGraph::GLLight& light = glGraph.GetLight(0);
-        light.SetPose(100*cos(frame/100.0), 100*sin(frame/100.0), -100, 0,0,0);
-
-        view3d.Activate(stacks3d);
-        shadowMap.ComputeShadowsAndDrawScene(glGraph,light);
+        shadowLight.SetPosition(100*cos(frame/100.0), 100*sin(frame/100.0), -100);
 
         // Swap frames and Process Events
         pangolin::FinishGlutFrame();

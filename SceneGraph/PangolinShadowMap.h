@@ -2,15 +2,17 @@
 
 #include <pangolin/gl.h>
 #include <SceneGraph/SceneGraph.h>
+#include <SceneGraph/GLLight.h>
 
 namespace SceneGraph
 {
 
-class ShadowMap
+class GLShadowLight : public GLLight
 {
 public:
-    ShadowMap(int shadowBufferWidth, int shadowBufferHeight)
-        : fb_img(shadowBufferWidth,shadowBufferHeight),
+    GLShadowLight(double x=0, double y=0, double z=0, int shadowBufferWidth = 1024, int shadowBufferHeight = 1024)
+        : GLLight(x,y,z),
+          fb_img(shadowBufferWidth,shadowBufferHeight),
           fb_depth(shadowBufferWidth,shadowBufferHeight,GL_DEPTH_COMPONENT32),
           framebuffer(fb_img,fb_depth),
           depth_tex(shadowBufferWidth,shadowBufferHeight,GL_DEPTH_COMPONENT32,true,1,GL_DEPTH_COMPONENT,GL_UNSIGNED_BYTE)
@@ -24,7 +26,44 @@ public:
         CheckForGLErrors();
     }
 
-    void ComputeShadows(SceneGraph::GLObject& scene, Eigen::Vector3d lpos)
+    void AddShadowCaster(GLObject* obj)
+    {
+        shadow_casters.push_back(obj);
+    }
+
+    void AddShadowReceiver(GLObject* obj)
+    {
+        shadow_receivers.push_back(obj);
+    }
+
+    void AddShadowCasterAndReceiver(GLObject* obj)
+    {
+        shadow_casters.push_back(obj);
+        shadow_receivers.push_back(obj);
+    }
+
+
+    virtual void PreRender(GLSceneGraph& /*scene*/) {
+        SetupLight(this->GetPose().head<3>());
+        ComputeShadows();
+
+        ApplyAsGlLight(GL_LIGHT0);
+        GLfloat ambientLight [] = {0.2, 0.2, 0.2, 1.0};
+        GLfloat diffuseLight [] = {0.4, 0.4, 0.4, 1.0};
+        glLightfv(GL_LIGHT0, GL_AMBIENT, ambientLight);
+        glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuseLight);
+    }
+
+    virtual void PostRender(GLSceneGraph& /*scene*/) {
+        GLfloat lowAmbient[4] = {0.01f, 0.01f, 0.01f, 1.0f};
+        GLfloat lowDiffuse[4] = {0.01f, 0.01f, 0.01f, 1.0f};
+        glLightfv(GL_LIGHT0, GL_AMBIENT, lowAmbient);
+        glLightfv(GL_LIGHT0, GL_DIFFUSE, lowDiffuse);
+        DrawShadows();
+        glDisable( GL_LIGHT0 );
+    }
+
+    void ComputeShadows()
     {
         // Save ModelView and Projection
         glMatrixMode(GL_MODELVIEW);
@@ -32,8 +71,6 @@ public:
         glMatrixMode(GL_PROJECTION);
         glPushMatrix();
         glMatrixMode(GL_MODELVIEW);
-
-        SetupLight(scene, lpos);
 
         // Put depthmap from light into depth_tex
         glPushAttrib(GL_ENABLE_BIT | GL_LIGHTING_BIT | GL_COLOR_BUFFER_BIT | GL_VIEWPORT_BIT);
@@ -49,7 +86,9 @@ public:
         glViewport(0,0,fb_img.width,fb_img.height);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         stacks_light.Apply();
-        scene.DrawObjectAndChildren();
+        for(unsigned int i=0; i<shadow_casters.size(); ++i ) {
+            shadow_casters[i]->DrawObjectAndChildren(eRenderNoPrePostHooks);
+        }
 
         depth_tex.Bind();
         glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, 0, 0, fb_img.width, fb_img.height, 0);
@@ -66,7 +105,7 @@ public:
         glMatrixMode(GL_MODELVIEW);
     }
 
-    void DrawShadows(SceneGraph::GLObject& scene)
+    void DrawShadows()
     {
         glPushAttrib(GL_ENABLE_BIT | GL_LIGHTING_BIT | GL_COLOR_BUFFER_BIT);
 
@@ -91,7 +130,9 @@ public:
         glEnable(GL_TEXTURE_2D);
         glActiveTextureARB(GL_TEXTURE0_ARB);
 
-        scene.DrawObjectAndChildren();
+        for(unsigned int i=0; i<shadow_receivers.size(); ++i ) {
+            shadow_receivers[i]->DrawObjectAndChildren(eRenderNoPrePostHooks);
+        }
 
         glActiveTextureARB(GL_TEXTURE1_ARB);
         glDisable(GL_TEXTURE_2D);
@@ -101,37 +142,8 @@ public:
         CheckForGLErrors();
     }
 
-    void DrawSceneWithPreComputedShadows(SceneGraph::GLObject& scene, SceneGraph::GLLight& light)
-    {
-        light.ApplyAsGlLight(GL_LIGHT0);
-
-        // Draw Everything
-        {
-            GLfloat ambientLight [] = {0.2, 0.2, 0.2, 1.0};
-            GLfloat diffuseLight [] = {0.4, 0.4, 0.4, 1.0};
-            glLightfv(GL_LIGHT0, GL_AMBIENT, ambientLight);
-            glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuseLight);
-            scene.DrawObjectAndChildren();
-        }
-
-        // Draw areas in shadow
-        {
-            GLfloat lowAmbient[4] = {0.01f, 0.01f, 0.01f, 1.0f};
-            GLfloat lowDiffuse[4] = {0.01f, 0.01f, 0.01f, 1.0f};
-            glLightfv(GL_LIGHT0, GL_AMBIENT, lowAmbient);
-            glLightfv(GL_LIGHT0, GL_DIFFUSE, lowDiffuse);
-            DrawShadows(scene);
-        }
-    }
-
-    void ComputeShadowsAndDrawScene(SceneGraph::GLObject& scene, SceneGraph::GLLight& light)
-    {
-        ComputeShadows(scene,light.GetPose().head<3>() );
-        DrawSceneWithPreComputedShadows(scene,light);
-    }
-
 protected:
-    void SetupLight(SceneGraph::GLObject& /*scene*/, Eigen::Vector3d lpos)
+    void SetupLight(Eigen::Vector3d lpos)
     {
         // Point light at scene
         stacks_light.SetProjectionMatrix(pangolin::ProjectionMatrix(fb_img.width,fb_img.height, 50000, 50000, fb_img.width/2.0f,fb_img.height/2.0f, 90, 400));
@@ -143,6 +155,9 @@ protected:
     pangolin::GlFramebuffer framebuffer;
     pangolin::GlTexture depth_tex;
     pangolin::OpenGlRenderState stacks_light;
+
+    std::vector<GLObject*> shadow_casters;
+    std::vector<GLObject*> shadow_receivers;
 };
 
 }
