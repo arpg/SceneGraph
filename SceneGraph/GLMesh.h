@@ -21,6 +21,12 @@
 #include <boost/gil/extension/io/tiff_io.hpp>
 #endif // HAVE_TIFF
 
+// http://code.google.com/p/gil-contributions/
+//#include <boost/gil/extension/io_new/png_io_old.hpp>
+//#include <boost/gil/extension/io_new/jpeg_io_old.hpp>
+//#include <boost/gil/extension/io_new/tiff_io_old.hpp>
+//#include <boost/gil/extension/io_new/targa_io_old.hpp>
+
 #ifdef HAVE_DEVIL
 #include <IL/il.h>
 #include <IL/ilu.h>
@@ -256,7 +262,11 @@ protected:
                             }
 
                             glBindTexture(GL_TEXTURE_2D, 0);
+                        }else{
+                            std::cerr << "Failed to load texture. Type: " << (int)tt << ", id: " << dt << " path: " << path.C_Str() << std::endl;
                         }
+                    }else{
+                        std::cerr << "Failed to get texture. Type: " << (int)tt << ", id: " << dt << " path: " << path.C_Str() << std::endl;
                     }
                 }
             }
@@ -279,7 +289,7 @@ protected:
                         // WARNING: Untested code condition!
                         glGenTextures(1, &glTex);
                         glBindTexture(GL_TEXTURE_2D, glTex);
-                        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, aiTex->mWidth, aiTex->mHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, aiTex->pcData );
+                        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, aiTex->mWidth, aiTex->mHeight, 0, GL_BGRA, GL_UNSIGNED_BYTE, aiTex->pcData );
                     }
                 }else{
                     std::cerr << "Unable to Load embedded texture, bad path: " << path.data << std::endl;
@@ -424,6 +434,12 @@ protected:
                 boost::gil::tiff_read_and_convert_image(filename, runtime_image);
             }else
 #endif // HAVE_TIFF
+
+//            // http://code.google.com/p/gil-contributions/
+//            if(!strcmp(extensionHint,"tga") ) {
+//                boost::gil::targa_read_and_convert_image(filename, runtime_image);
+//            }else
+
             {
                 // do nothing
             }
@@ -692,11 +708,12 @@ protected:
                             glEnable(GL_TEXTURE_2D);
                             glBindTexture(GL_TEXTURE_2D, ix->second);
                             // Only bind first one for now.
-                            break;
+                            goto endoftextures;
                         }
                     }
                 }
             }
+        endoftextures:
 
             for( unsigned int t = 0; t < mesh->mNumFaces; ++t) {
                 const struct aiFace* face = &mesh->mFaces[t];
