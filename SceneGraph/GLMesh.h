@@ -108,6 +108,7 @@ class GLMesh : public GLObject
 
             if(m_pScene != NULL ) {
                 LoadMeshTextures();
+                ComputeDimensions();
             }
         }
 
@@ -124,11 +125,6 @@ class GLMesh : public GLObject
                 glPushAttrib(GL_ENABLE_BIT);
 
                 glColor3f(1,1,1);
-
-                // Lighting it now controlled in GLSceneGraph
-//				// jmf: not sure if this is the best option, but have textures ignore lighting
-//                glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL );
-//                glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
 
                 if( m_nDisplayList == -1 ){
                     m_nDisplayList = glGenLists(1);
@@ -148,8 +144,7 @@ class GLMesh : public GLObject
         ///////////////////////////
         virtual void ComputeDimensions()
         {
-            Eigen::Vector3d bbmin(std::numeric_limits<double>::max(),std::numeric_limits<double>::max(),std::numeric_limits<double>::max());
-            Eigen::Vector3d bbmax(std::numeric_limits<double>::min(),std::numeric_limits<double>::min(),std::numeric_limits<double>::min());
+            m_aabb.Clear();
             aiMesh *pAIMesh;
             aiVector3D *pAIVector;
 
@@ -162,20 +157,10 @@ class GLMesh : public GLObject
                     pAIVector = &pAIMesh->mVertices[y];
                     if ( pAIVector != NULL ){
                         const Eigen::Vector3d p = Eigen::Vector3d(pAIVector->x,pAIVector->y,pAIVector->z) * this->GetScale();
-                        bbmin(0) = std::min(bbmin(0),p(0));
-                        bbmin(1) = std::min(bbmin(1),p(1));
-                        bbmin(2) = std::min(bbmin(2),p(2));
-
-                        bbmax(0) = std::max(bbmax(0),p(0));
-                        bbmax(1) = std::max(bbmax(1),p(1));
-                        bbmax(2) = std::max(bbmax(2),p(2));
+                        m_aabb.Insert(p);
                     }
                 }
             }
-
-            m_Dimensions[0] = bbmax[0] - bbmin[0];
-            m_Dimensions[1] = bbmax[1] - bbmin[1];
-            m_Dimensions[2] = bbmax[2] - bbmin[2];
         }
 
         // Getters and setters
@@ -183,7 +168,9 @@ class GLMesh : public GLObject
             return m_pScene;
         }
 
-        Eigen::Vector3d GetDimensions() { return m_Dimensions; }
+        Eigen::Vector3d GetDimensions() {
+            return m_aabb.Size();
+        }
 
 protected:
         ////////////////////////////////////////////////////////////////////////////
@@ -760,7 +747,6 @@ protected:
         float                   m_fAlpha; // render translucent meshes?
         unsigned int            m_iMeshID;
         bool                    m_bShowMeshNormals;
-        Eigen::Vector3d         m_Dimensions;
         std::map<std::string,GLuint> m_mapPathToGLTex;
 };
 

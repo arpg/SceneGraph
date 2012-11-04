@@ -53,9 +53,9 @@ int main( int /*argc*/, char** /*argv[]*/ )
     glGraph.AddChild(&glAxis);
     glGraph.AddChild(&glCube);
 
-    SceneGraph::GLShadowLight shadowLight(0,0,-10, 2048,2048);
+    SceneGraph::GLShadowLight shadowLight(10,10,-100, 2048,2048);
     shadowLight.SetVisible();
-//    shadowLight.AddShadowCasterAndReceiver(&glGraph);
+    shadowLight.AddShadowCaster(&glCube);
     shadowLight.AddShadowCaster(&glMesh);
     shadowLight.AddShadowReceiver(&glGrid);
     glGraph.AddChild(&shadowLight);
@@ -89,6 +89,7 @@ int main( int /*argc*/, char** /*argv[]*/ )
         // Clear whole screen
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        // Animate position of light over time.
         shadowLight.SetPosition(100*cos(frame/100.0), 100*sin(frame/100.0), -100);
 
         // Swap frames and Process Events

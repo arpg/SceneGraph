@@ -17,6 +17,7 @@ class GLGrid : public GLObject
         {
             m_bPerceptable = perceptable;
             mT_op = Eigen::Matrix4d::Identity();
+            ComputeBounds();
         }
 
         // from mvl dispview
@@ -98,9 +99,20 @@ class GLGrid : public GLObject
             const Eigen::Vector3d n = d * nd_o;
             mT_op.block<3,3>(0,0) = Rotation_a2b(Eigen::Vector3d(0,0,-1),n);
             mT_op.block<3,1>(0,3) = -d*n;
+            ComputeBounds();
         }
 
 protected:
+        void ComputeBounds()
+        {
+            const float halfsize = m_fLineSpacing*m_iNumLines;
+            m_aabb.Clear();
+            m_aabb.Insert(mT_op,Eigen::Vector3d(-halfsize,-halfsize,0));
+            m_aabb.Insert(mT_op,Eigen::Vector3d(-halfsize,halfsize,0));
+            m_aabb.Insert(mT_op,Eigen::Vector3d(halfsize,-halfsize,0));
+            m_aabb.Insert(mT_op,Eigen::Vector3d(halfsize,halfsize,0));
+        }
+
         int m_iNumLines;
         float m_fLineSpacing;
 

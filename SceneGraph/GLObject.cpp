@@ -183,6 +183,27 @@ bool GLObject::IsSelectable()
     return m_bIsSelectable;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////
+const AxisAlignedBoundingBox& GLObject::ObjectBounds() const
+{
+    return m_aabb;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////
+AxisAlignedBoundingBox GLObject::ObjectAndChildrenBounds() const
+{
+    AxisAlignedBoundingBox bbox = ObjectBounds();
+
+    for(std::vector<GLObject*>::const_iterator i=m_vpChildren.begin(); i!= m_vpChildren.end(); ++i) {
+        if((*i)->IsVisible()) {
+            bbox.Insert((*i)->m_T_po, (*i)->ObjectAndChildrenBounds() );
+        }
+    }
+
+    return bbox;
+}
+
+
 
 
 } // SceneGraph

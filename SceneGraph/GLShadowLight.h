@@ -44,7 +44,7 @@ public:
 
 
     virtual void PreRender(GLSceneGraph& /*scene*/) {
-        SetupLight(this->GetPose().head<3>());
+        SetupLight();
         ComputeShadows();
 
         ApplyAsGlLight(GL_LIGHT0);
@@ -107,6 +107,9 @@ public:
 
     void DrawShadows()
     {
+        // TODO: Probably use shader
+        // e.g. http://fabiensanglard.net/shadowmapping/index.php
+
         glPushAttrib(GL_ENABLE_BIT | GL_LIGHTING_BIT | GL_COLOR_BUFFER_BIT);
 
         glActiveTextureARB(GL_TEXTURE1_ARB);
@@ -143,11 +146,35 @@ public:
     }
 
 protected:
-    void SetupLight(Eigen::Vector3d lpos)
+    inline AxisAlignedBoundingBox ObjectBounds(std::vector<GLObject*> objs)
     {
+        AxisAlignedBoundingBox bbox;
+        for(std::vector<GLObject*>::const_iterator i=objs.begin(); i!= objs.end(); ++i) {
+            bbox.Insert((*i)->GetPose4x4_po(), (*i)->ObjectAndChildrenBounds() );
+        }
+        return bbox;
+    }
+
+    inline void SetupLight()
+    {
+        // TODO: Ideally we would work out a tight fit around shadow_casters only
+        const AxisAlignedBoundingBox bboxcasters = ObjectBounds(shadow_casters);
+        const AxisAlignedBoundingBox bboxreceivers = ObjectBounds(shadow_receivers);
+        AxisAlignedBoundingBox bbox_both;
+        bbox_both.Insert(bboxcasters);
+        bbox_both.Insert(bboxreceivers);
+
+        const Eigen::Vector3d lpos = this->GetPose().head<3>();
+        const Eigen::Vector3d center = bboxcasters.Center();
+        const double dist = (center - lpos).norm();
+        const double bothrad = bbox_both.Size().norm() / 2.0f;
+
+        // TODO: Get rid of the hack factor (8)!? Do this properly.
+        const double f = fb_img.width * dist / (8*bboxcasters.Size().norm());
+
         // Point light at scene
-        stacks_light.SetProjectionMatrix(pangolin::ProjectionMatrix(fb_img.width,fb_img.height, 50000, 50000, fb_img.width/2.0f,fb_img.height/2.0f, 90, 400));
-        stacks_light.SetModelViewMatrix(pangolin::ModelViewLookAt(lpos(0), lpos(1), lpos(2), 0,0,0, pangolin::AxisNegZ));
+        stacks_light.SetProjectionMatrix(pangolin::ProjectionMatrix(fb_img.width,fb_img.height, f, f, fb_img.width/2.0f,fb_img.height/2.0f, std::max(dist-bothrad,0.1), dist+bothrad));
+        stacks_light.SetModelViewMatrix(pangolin::ModelViewLookAt(lpos(0), lpos(1), lpos(2), center(0), center(1), center(2), pangolin::AxisNegZ));
     }
 
     pangolin::GlTexture fb_img;

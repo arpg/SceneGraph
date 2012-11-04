@@ -5,6 +5,7 @@
 #include <Eigen/Eigen>
 
 #include <SceneGraph/GLHelpers.h>
+#include <SceneGraph/AxisAlignedBoundingBox.h>
 
 #include <string>
 #include <vector>
@@ -127,6 +128,16 @@ class GLObject
         double GetScale();
 
         /////////////////////////////////
+        // Object Size
+        /////////////////////////////////
+
+        /// Return this Objects axis aligned extent
+        const AxisAlignedBoundingBox& ObjectBounds() const;
+
+        /// Return the extent of this object including all visible children.
+        AxisAlignedBoundingBox ObjectAndChildrenBounds() const;
+
+        /////////////////////////////////
         // Children
         /////////////////////////////////
 
@@ -158,6 +169,9 @@ class GLObject
         //! Object to Parent transform. Includes position, rotation (x_p = m_T_po & m_dScale * x_o)
         Eigen::Matrix4d           m_T_po;
         double                    m_dScale;
+
+        // Extent of this GLObject
+        AxisAlignedBoundingBox    m_aabb;
 
         //! Can be selected
         bool                        m_bIsSelectable;
