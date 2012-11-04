@@ -22,7 +22,7 @@ int main( int /*argc*/, char** /*argv[]*/ )
     // Scenegraph to hold GLObjects and relative transformations
     SceneGraph::GLSceneGraph glGraph;
 
-    SceneGraph::GLLight light(0,0,-10);
+    SceneGraph::GLLight light(10,10,-100);
     glGraph.AddChild(&light);
 
     // Define grid object

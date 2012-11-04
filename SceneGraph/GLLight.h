@@ -41,6 +41,10 @@ public:
 
     virtual void PreRender(GLSceneGraph& /*scene*/) {
         ApplyAsGlLight(GL_LIGHT0);
+        GLfloat ambientLight [] = {0.2, 0.2, 0.2, 1.0};
+        GLfloat diffuseLight [] = {0.4, 0.4, 0.4, 1.0};
+        glLightfv(GL_LIGHT0, GL_AMBIENT, ambientLight);
+        glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuseLight);
     }
 
     virtual void PostRender(GLSceneGraph& /*scene*/) {
