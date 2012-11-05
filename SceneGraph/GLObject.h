@@ -68,11 +68,6 @@ class GLObject
         /// a very good reason. Implement DrawCanonicalObject instead.
         virtual void DrawObjectAndChildren(RenderMode renderMode = eRenderVisible);
 
-        /// Alow this object to draw itself as a functor
-        inline void operator()() {
-            DrawObjectAndChildren();
-        }
-
         /////////////////////////////////
         // Interaction methods: can be overridden
         /////////////////////////////////
@@ -131,10 +126,11 @@ class GLObject
         // Object Size
         /////////////////////////////////
 
-        /// Return this Objects axis aligned extent
+        /// Return this Objects axis aligned extent (in object coordinate frame)
         const AxisAlignedBoundingBox& ObjectBounds() const;
 
-        /// Return the extent of this object including all visible children.
+        /// Return the extent of this object including all visible children
+        /// (in object coordinate frame)
         AxisAlignedBoundingBox ObjectAndChildrenBounds() const;
 
         /////////////////////////////////

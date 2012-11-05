@@ -169,6 +169,18 @@ public:
         return boxmax - boxmin;
     }
 
+    inline double Volume() const
+    {
+        Eigen::Vector3d s = Size();
+        return s(0)*s(1)*s(2);
+    }
+
+    // Useful for bullet collision box shape
+    inline Eigen::Vector3d HalfSizeFromOrigin() const
+    {
+        return ElementwiseMax(boxmax,(Eigen::Vector3d)(-1.0*boxmin) );
+    }
+
 
 protected:
     Eigen::Vector3d boxmin;
