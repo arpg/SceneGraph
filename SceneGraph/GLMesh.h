@@ -92,7 +92,7 @@ class GLMesh : public GLObject
 													| aiProcess_GenSmoothNormals
 													| aiProcess_JoinIdenticalVertices
 //													| aiProcess_TransformUVCoords
-//													| aiProcess_FlipUVs
+													| aiProcess_FlipUVs
 //													| aiProcess_FlipWindingOrder
 													| aiProcess_OptimizeMeshes
 													| aiProcess_FindInvalidData
