@@ -13,9 +13,9 @@ public:
     GLShadowLight(double x=0, double y=0, double z=0, int shadowBufferWidth = 1024, int shadowBufferHeight = 1024)
         : GLLight(x,y,z),
           fb_img(shadowBufferWidth,shadowBufferHeight),
-          fb_depth(shadowBufferWidth,shadowBufferHeight,GL_DEPTH_COMPONENT32),
+          fb_depth(shadowBufferWidth,shadowBufferHeight,GL_DEPTH_COMPONENT),
           framebuffer(fb_img,fb_depth),
-          depth_tex(shadowBufferWidth,shadowBufferHeight,GL_DEPTH_COMPONENT32,true,1,GL_DEPTH_COMPONENT,GL_UNSIGNED_BYTE)
+          depth_tex(shadowBufferWidth,shadowBufferHeight,GL_DEPTH_COMPONENT,true,1,GL_DEPTH_COMPONENT,GL_UNSIGNED_BYTE)
     {
         // Setup border so we don't cast shadows beyond shadow map.
         depth_tex.Bind();
@@ -91,7 +91,7 @@ public:
         }
 
         depth_tex.Bind();
-        glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, 0, 0, fb_img.width, fb_img.height, 0);
+        glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, 0, 0, fb_img.width, fb_img.height, 0);
 
         framebuffer.Unbind();
         glPopAttrib();

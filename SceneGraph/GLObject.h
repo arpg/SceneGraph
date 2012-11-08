@@ -138,6 +138,7 @@ class GLObject
         /////////////////////////////////
 
         void AddChild( GLObject* pChild );
+        bool RemoveChild( GLObject* pChild );
 
         size_t NumChildren() const;
 

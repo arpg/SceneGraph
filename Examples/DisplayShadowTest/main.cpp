@@ -53,7 +53,7 @@ int main( int /*argc*/, char** /*argv[]*/ )
     glGraph.AddChild(&glAxis);
     glGraph.AddChild(&glCube);
 
-    SceneGraph::GLShadowLight shadowLight(10,10,-100, 2048,2048);
+    SceneGraph::GLShadowLight shadowLight(10,10,-100, 1024,1024);
     shadowLight.SetVisible();
     shadowLight.AddShadowCaster(&glCube);
     shadowLight.AddShadowCaster(&glMesh);

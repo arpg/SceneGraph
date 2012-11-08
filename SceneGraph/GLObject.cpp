@@ -107,6 +107,18 @@ void GLObject::AddChild( GLObject* pChild )
     m_vpChildren.push_back( pChild );
 }
 
+bool GLObject::RemoveChild( GLObject* pChild )
+{
+    for(int ii = 0 ; ii < m_vpChildren.size() ; ii++) {
+        if(m_vpChildren[ii] == pChild ){
+            m_vpChildren.erase(m_vpChildren.begin()+ii);
+            return true;
+        }
+    }
+
+    return false;
+}
+
 /////////////////////////////////////////////////////////////////////////////////
 size_t GLObject::NumChildren() const
 {
