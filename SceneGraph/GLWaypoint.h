@@ -100,7 +100,7 @@ public:
         glDisable(GL_CULL_FACE);
         glDisable(GL_LIGHTING);
         // TODO: loose this glDisable after we fix Nima's heightmap
-        glDisable(GL_DEPTH_TEST);
+        //glDisable(GL_DEPTH_TEST);
         glDepthMask(false);
 
         const double velx = m_dVelocity/(m_dScale*VELOCITY_MULTIPLIER);
