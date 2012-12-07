@@ -15,9 +15,12 @@
 #include <Eigen/Core>
 #include <Eigen/LU>
 
+#include "GLLight.h"
+
 namespace SceneGraph
 {
 
+int GLLight::s_nNextLightId = GL_LIGHT0;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///  If a GL error has occured, this function outputs "msg" and the

@@ -53,10 +53,10 @@ int main( int /*argc*/, char** /*argv[]*/ )
     glGraph.AddChild(&glAxis);
     glGraph.AddChild(&glCube);
 
-    SceneGraph::GLShadowLight shadowLight(10,10,-100, 1024,1024);
-    shadowLight.SetVisible();
+    SceneGraph::GLShadowLight shadowLight(10,10,-100, 2048,2048);
+    //shadowLight.SetVisible();
     shadowLight.AddShadowCaster(&glCube);
-    shadowLight.AddShadowCaster(&glMesh);
+    shadowLight.AddShadowCasterAndReceiver(&glMesh);
     shadowLight.AddShadowReceiver(&glGrid);
     glGraph.AddChild(&shadowLight);
 
@@ -65,6 +65,8 @@ int main( int /*argc*/, char** /*argv[]*/ )
         pangolin::ProjectionMatrix(640,480,420,420,320,240,0.1,1000),
         pangolin::ModelViewLookAt(0,-2,-4, 0,1,0, pangolin::AxisNegZ)
     );
+
+
 
     // Pangolin abstracts the OpenGL viewport as a View.
     // Here we get a reference to the default 'base' view.
@@ -80,8 +82,14 @@ int main( int /*argc*/, char** /*argv[]*/ )
           .SetHandler(new SceneGraph::HandlerSceneGraph(glGraph,stacks3d,pangolin::AxisNegZ))
           .SetDrawFunction(SceneGraph::ActivateDrawFunctor(glGraph, stacks3d));
 
+    pangolin::View& viewLight = pangolin::CreateDisplay()
+            .SetBounds(0.0, 0.3, 0, 0.3)
+            .SetDrawFunction(SceneGraph::ActivateScissorClearDrawFunctor(glGraph,shadowLight.GetRenderState()));
+
+
     // Add our view as children to the base container.
     container.AddDisplay(view3d);
+    container.AddDisplay(viewLight);
 
     // Default hooks for exiting (Esc) and fullscreen (tab).
     for(int frame=0; !pangolin::ShouldQuit(); ++frame )
@@ -90,7 +98,7 @@ int main( int /*argc*/, char** /*argv[]*/ )
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // Animate position of light over time.
-        shadowLight.SetPosition(100*cos(frame/100.0), 100*sin(frame/100.0), -100);
+        shadowLight.SetPosition(100*cos(frame/100.0), 100*sin(frame/100.0), -50 );
 
         // Swap frames and Process Events
         pangolin::FinishGlutFrame();

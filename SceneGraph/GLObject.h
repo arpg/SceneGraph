@@ -120,7 +120,8 @@ class GLObject
 
         /// Set objects scale
         void SetScale(double s);
-        double GetScale();
+        void SetScale(const Eigen::Vector3d& s);
+        Eigen::Vector3d GetScale();
 
         /////////////////////////////////
         // Object Size
@@ -165,7 +166,7 @@ class GLObject
 
         //! Object to Parent transform. Includes position, rotation (x_p = m_T_po & m_dScale * x_o)
         Eigen::Matrix4d           m_T_po;
-        double                    m_dScale;
+        Eigen::Vector3d                    m_dScale;
 
         // Extent of this GLObject
         AxisAlignedBoundingBox    m_aabb;

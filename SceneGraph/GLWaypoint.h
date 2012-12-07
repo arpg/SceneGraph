@@ -23,7 +23,7 @@ public:
 
         m_dVelocity = 1.0;
         m_bPerceptable = false;
-        m_dScale = 0.25;
+        m_dScale = Eigen::Vector3d(0.25,0.25,0.25);
 
         // Set unique waypoint name
         static int wid = 0;
@@ -103,7 +103,7 @@ public:
         //glDisable(GL_DEPTH_TEST);
         glDepthMask(false);
 
-        const double velx = m_dVelocity/(m_dScale*VELOCITY_MULTIPLIER);
+        const double velx = m_dVelocity/(m_dScale[0]*VELOCITY_MULTIPLIER);
 
         // draw velocity line
         glPushName(m_nFrontId);
