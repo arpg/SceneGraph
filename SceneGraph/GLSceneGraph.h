@@ -25,6 +25,7 @@ class GLSceneGraph : public GLObject
 
         // Add GLObject to scenegraph
         void AddChild( GLObject* pChild );
+        bool RemoveChild( GLObject* pChild );
 
         void DrawCanonicalObject();
 

@@ -25,6 +25,8 @@ set( SceneGraph_HEADERS
         GLGroup.h
         GLSLHelpers.h
         GLHelpers.h
+        GLLight.h
+        GLShadowLight.h
         GLColor.h
         GLImage.h
         GLMesh.h
