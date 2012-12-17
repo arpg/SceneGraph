@@ -60,14 +60,14 @@ class GLMesh : public GLObject
     public:
         ////////////////////////////////////////////////////////////////////////////
         GLMesh()
-            : GLObject("Mesh"), m_nDisplayList(-1), m_fAlpha(1),
+            : GLObject("Mesh"), m_fAlpha(1),
               m_iMeshID(-1), m_bShowMeshNormals(false)
         {
         }
 
         ////////////////////////////////////////////////////////////////////////////
         GLMesh(const std::string& sMeshFile)
-            : GLObject("Mesh"), m_nDisplayList(-1), m_fAlpha(1),
+            : GLObject("Mesh"), m_fAlpha(1),
               m_iMeshID(-1), m_bShowMeshNormals(false)
         {
             Init(sMeshFile);
@@ -128,22 +128,19 @@ class GLMesh : public GLObject
         virtual void  DrawCanonicalObject()
         {
             if( m_pScene ){
-                glPushAttrib(GL_ENABLE_BIT);
-
-                glColor3f(1,1,1);
-
                 if( m_nDisplayList == -1 ){
                     m_nDisplayList = glGenLists(1);
-                    glNewList( m_nDisplayList, GL_COMPILE );
-
-                    // Recursively render ai_scene's scenegraph
-                    RecursiveRender( m_pScene, m_pScene->mRootNode );
+                    glNewList( m_nDisplayList, GL_COMPILE_AND_EXECUTE );
+                    DrawCanonicalObject();
                     glEndList();
+                }else{
+                    glPushAttrib(GL_ENABLE_BIT);
+
+                    glColor3f(1,1,1);
+                    RecursiveRender( m_pScene, m_pScene->mRootNode );
+
+                    glPopAttrib();
                 }
-
-                glCallList( m_nDisplayList );
-
-                glPopAttrib();
             }
         }
 
@@ -760,7 +757,6 @@ protected:
         }
 
         const struct aiScene*   m_pScene;
-        GLint                   m_nDisplayList;
         float                   m_fAlpha; // render translucent meshes?
         unsigned int            m_iMeshID;
         bool                    m_bShowMeshNormals;

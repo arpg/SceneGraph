@@ -9,14 +9,16 @@ int GLObject::g_nHandleCounter = 1;
 /////////////////////////////////////////////////////////////////////////////////
 GLObject::GLObject()
     : m_sObjectName("unnamed-object"), m_bVisible(true), m_bPerceptable(true),
-      m_T_po(Eigen::Matrix4d::Identity()), m_dScale(1), m_bIsSelectable(false)
+      m_T_po(Eigen::Matrix4d::Identity()), m_dScale(1), m_bIsSelectable(false),
+      m_nDisplayList(-1)
 {
 }
 
 /////////////////////////////////////////////////////////////////////////////////
 GLObject::GLObject( const std::string& name)
     : m_sObjectName(name), m_bVisible(true), m_bPerceptable(true),
-      m_T_po(Eigen::Matrix4d::Identity()), m_dScale(1), m_bIsSelectable(false)
+      m_T_po(Eigen::Matrix4d::Identity()), m_dScale(1), m_bIsSelectable(false),
+      m_nDisplayList(-1)
 {
 }
 
@@ -25,6 +27,15 @@ GLObject::GLObject( const GLObject& rhs )
 {
     *this = rhs;
 }
+
+/////////////////////////////////////////////////////////////////////////////////
+GLObject::~GLObject()
+{
+    if(m_nDisplayList >= 0) {
+        glDeleteLists(m_nDisplayList,1);
+    }
+}
+
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
 int GLObject::AllocSelectionId()
@@ -57,13 +68,26 @@ void GLObject::DrawObjectAndChildren(RenderMode renderMode)
         glMultMatrixd(m_T_po.data());
         glScaled(m_dScale,m_dScale,m_dScale);
 
-        DrawCanonicalObject();
+        if(m_nDisplayList >= 0) {
+            glCallList( m_nDisplayList );
+        }else{
+            DrawCanonicalObject();
+        }
         DrawChildren();
 
         glPopMatrix();
     }
 }
 
+void GLObject::CompileAsGlCallList()
+{
+    if( m_nDisplayList == -1 ){
+        m_nDisplayList = glGenLists(1);
+        glNewList( m_nDisplayList, GL_COMPILE );
+        DrawCanonicalObject();
+        glEndList();
+    }
+}
 
 /////////////////////////////////////////////////////////////////////////////////
 void GLObject::SetVisible(bool visible)

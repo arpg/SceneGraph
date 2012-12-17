@@ -50,7 +50,7 @@ class GLObject
         GLObject( const std::string& name);
         GLObject( const GLObject& rhs );
 
-        virtual ~GLObject() {}
+        virtual ~GLObject();
 
         /////////////////////////////////
         // Drawing methods
@@ -67,6 +67,10 @@ class GLObject
         /// Although virtual, you should NOT overide this method unless you have
         /// a very good reason. Implement DrawCanonicalObject instead.
         virtual void DrawObjectAndChildren(RenderMode renderMode = eRenderVisible);
+
+        /// Compile object as GL Calllist which will be called automatically
+        /// instead of DrawCanonical
+        virtual void CompileAsGlCallList();
 
         /////////////////////////////////
         // Interaction methods: can be overridden
@@ -175,6 +179,8 @@ class GLObject
         // static map of id to objects
         static std::map<int,GLObject*> g_mObjects;
         static int g_nHandleCounter;
+
+        GLint                   m_nDisplayList;
 
 };
 
