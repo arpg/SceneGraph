@@ -178,7 +178,7 @@ public:
     // Useful for bullet collision box shape
     inline Eigen::Vector3d HalfSizeFromOrigin() const
     {
-        return ElementwiseMax(boxmax,(Eigen::Vector3d)(-1.0*boxmin) );
+        return ElementwiseMax( boxmax,(Eigen::Vector3d)(-1.0*boxmin) );
     }
 
 
