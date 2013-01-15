@@ -12,11 +12,23 @@ class GLGrid : public GLObject
 {
     public:
         GLGrid(int numLines = 50, float lineSpacing = 2.0, bool perceptable = false)
-            : GLObject("Grid"), m_iNumLines(numLines), m_fLineSpacing(lineSpacing),
+            : GLObject("Grid"), m_nNumLines(numLines), m_fLineSpacing(lineSpacing),
               m_colorPlane(90,90,90,255), m_colorLines(132,132,132,128)
         {
             m_bPerceptable = perceptable;
             mT_op = Eigen::Matrix4d::Identity();
+            ComputeBounds();
+        }
+
+        void SetNumLines( int nNumLines )
+        {
+            m_nNumLines = nNumLines;
+            ComputeBounds();
+        }
+
+        void SetLineSpacing( float fLineSpacing )
+        {
+            m_fLineSpacing = fLineSpacing;
             ComputeBounds();
         }
 
@@ -78,7 +90,7 @@ class GLGrid : public GLObject
         {
             glPushMatrix();
             glMultMatrixd(mT_op.data());
-            DrawGridZ0(m_bPerceptable, m_iNumLines, m_fLineSpacing, m_colorPlane, m_colorLines);
+            DrawGridZ0(m_bPerceptable, m_nNumLines, m_fLineSpacing, m_colorPlane, m_colorLines);
             glPopMatrix();
         }
 
@@ -105,7 +117,7 @@ class GLGrid : public GLObject
 protected:
         void ComputeBounds()
         {
-            const float halfsize = m_fLineSpacing*m_iNumLines;
+            const float halfsize = m_fLineSpacing*m_nNumLines;
             m_aabb.Clear();
             m_aabb.Insert(mT_op,Eigen::Vector3d(-halfsize,-halfsize,0));
             m_aabb.Insert(mT_op,Eigen::Vector3d(-halfsize,halfsize,0));
@@ -113,7 +125,7 @@ protected:
             m_aabb.Insert(mT_op,Eigen::Vector3d(halfsize,halfsize,0));
         }
 
-        int m_iNumLines;
+        int m_nNumLines;
         float m_fLineSpacing;
 
         GLColor m_colorPlane;

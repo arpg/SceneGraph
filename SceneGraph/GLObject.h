@@ -157,32 +157,32 @@ class GLObject
 
         //! Vector of children whose poses are expressed relative to
         //! this object
-        std::vector<GLObject*>    m_vpChildren;
+        std::vector<GLObject*>         m_vpChildren;
 
         //! Object name
-        std::string               m_sObjectName;
+        std::string                    m_sObjectName;
 
         //! Whether this object should be drawn
-        bool                      m_bVisible;
+        bool                           m_bVisible;
 
         //! can be measured (e.g., not a virtual thing)
-        bool                      m_bPerceptable;
+        bool                           m_bPerceptable;
 
         //! Object to Parent transform. Includes position, rotation (x_p = m_T_po & m_dScale * x_o)
-        Eigen::Matrix4d           m_T_po;
-        Eigen::Vector3d                    m_dScale;
+        Eigen::Matrix4d                m_T_po;
+        Eigen::Vector3d                m_dScale;
 
         // Extent of this GLObject
-        AxisAlignedBoundingBox    m_aabb;
+        AxisAlignedBoundingBox         m_aabb;
 
         //! Can be selected
-        bool                        m_bIsSelectable;
+        bool                           m_bIsSelectable;
 
         // static map of id to objects
         static std::map<int,GLObject*> g_mObjects;
         static int g_nHandleCounter;
 
-        GLint                   m_nDisplayList;
+        GLint                          m_nDisplayList;
 
 };
 

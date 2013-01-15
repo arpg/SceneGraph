@@ -25,6 +25,8 @@ namespace SceneGraph
     
             void SetExtent( double dHalfDepth, double dHalfWidth, double dHalfHeight );
 
+            void SetExtent( Eigen::Vector3d& v );
+
             void DrawCanonicalObject();
 
         protected:
@@ -93,6 +95,12 @@ namespace SceneGraph
         m_aabb.Min() = Eigen::Vector3d( -dHalfDepth/2.0, -dHalfWidth/2.0, -dHalfHeight/2.0 );
         m_aabb.Max() = Eigen::Vector3d(  dHalfDepth/2.0,  dHalfWidth/2.0,  dHalfHeight/2.0 );
     }
+            
+    ///////////////////////////////////////////////////////////////////////////////
+    inline void GLBox::SetExtent( Eigen::Vector3d& v )
+    {
+        SetExtent( v(0), v(1), v(2) );
+    } 
 
     ///////////////////////////////////////////////////////////////////////////////
     inline GLBox::GLBox()

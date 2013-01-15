@@ -133,7 +133,7 @@ void GLObject::AddChild( GLObject* pChild )
 
 bool GLObject::RemoveChild( GLObject* pChild )
 {
-    for(int ii = 0 ; ii < m_vpChildren.size() ; ii++) {
+    for(size_t ii = 0 ; ii < m_vpChildren.size() ; ii++) {
         if(m_vpChildren[ii] == pChild ){
             m_vpChildren.erase(m_vpChildren.begin()+ii);
             return true;
