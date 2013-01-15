@@ -20,6 +20,7 @@ public:
         m_bDirty = false;
         m_bIsSelectable = true;
         m_bClampToPlane = false;
+        m_bActive =false;
 
         m_dVelocity = 1.0;
         m_bPerceptable = false;
@@ -38,7 +39,10 @@ public:
 
     bool Mouse(int button, const Eigen::Vector3d& /*win*/, const Eigen::Vector3d& /*obj*/, const Eigen::Vector3d& /*normal*/, bool /*pressed*/, int /*button_state*/, int /*pickId*/)
     {
-        if(button == MouseWheelUp)
+        if(button == MouseButtonLeft){
+            m_bPendingActive = true;
+        }
+        else if(button == MouseWheelUp)
         {
             m_bDirty = true;
             m_dVelocity *= 1.01;
@@ -95,19 +99,22 @@ public:
     }
         
     void DrawCanonicalObject() {
+        double multiplier = m_bActive ? 1.0 : 0.5;
         glPushAttrib(GL_ENABLE_BIT | GL_DEPTH_BUFFER_BIT);
 
         glDisable(GL_CULL_FACE);
         glDisable(GL_LIGHTING);
         // TODO: loose this glDisable after we fix Nima's heightmap
-        //glDisable(GL_DEPTH_TEST);
+        glDisable(GL_DEPTH_TEST);
         glDepthMask(false);
 
         const double velx = m_dVelocity/(m_dScale[0]*VELOCITY_MULTIPLIER);
 
         // draw velocity line
         glPushName(m_nFrontId);
-        glColor4ub(255, 255, 255, 255);
+
+        glColor4ub(255*multiplier, 255*multiplier, 255*multiplier, 255);
+
         glBegin(GL_LINES);
         glVertex3d(velx, 0, 0);
         glVertex3d(1, 0, 0);
@@ -117,25 +124,29 @@ public:
         // draw axis
         glPushName(m_nBaseId);
         glBegin(GL_LINES);
-        glColor4f(1, 0, 0, 1);
+        glColor4f(1*multiplier, 0, 0, 1);
         glVertex3d(0, 0, 0);
         glVertex3d(1, 0, 0);
 
-        glColor4f(0, 1, 0, 1);
+        glColor4f(0, 1*multiplier, 0, 1);
         glVertex3d(0, 0, 0);
         glVertex3d(0, 1, 0);
 
-        glColor4f(0, 0, 1, 1);
+        glColor4f(0, 0, 1*multiplier, 1);
         glVertex3d(0, 0, 0);
         glVertex3d(0, 0, 1);
         glEnd();
 
         if(m_bAerial) {
-            glColor3ub(0, 0, 255);
+
+                glColor3ub(0, 0, 255*multiplier);
+
         }else{
-            glColor3ub(0, 255, 0);
+
+                glColor3ub(0, 255*multiplier, 0);
+
         }
-        
+
         // draw center point
         glPointSize(5);
         glBegin(GL_POINTS);
@@ -175,8 +186,13 @@ public:
         m_mClampPlaneN_p = N_p;
         m_bClampToPlane = true;
     }
+
+    bool            m_bPendingActive;
+    bool            m_bActive;
     
 private:
+
+
     bool            m_bAerial;
     bool            m_bSelected;
     bool            m_bDirty;

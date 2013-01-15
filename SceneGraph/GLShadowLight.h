@@ -16,7 +16,7 @@ public:
           fb_depth(shadowBufferWidth,shadowBufferHeight,GL_DEPTH_COMPONENT),
           framebuffer(fb_img,fb_depth),
           depth_tex(shadowBufferWidth,shadowBufferHeight,GL_DEPTH_COMPONENT,true,1,GL_DEPTH_COMPONENT,GL_UNSIGNED_BYTE),
-          m_bStatic(bStatic), m_bShadowsComputed(false)
+          m_bStatic(bStatic), m_bShadowsComputed(false), m_bShadowsEnabled(false)
     {
         // Setup border so we don't cast shadows beyond shadow map.
         depth_tex.Bind();
@@ -50,8 +50,10 @@ public:
 
 
     virtual void PreRender(GLSceneGraph& /*scene*/) {
-        SetupLight();
-        ComputeShadows();
+        if(m_bShadowsEnabled){
+            SetupLight();
+            ComputeShadows();
+        }
 
         EnableLight();
         GLfloat ambientLight [] = {0.2*0.5, 0.2*0.5, 0.2*0.5, 1.0};
@@ -61,17 +63,18 @@ public:
     }
 
     virtual void PostRender(GLSceneGraph& /*scene*/) {
-        GLfloat lowAmbient[4] = {0.1f*0.5, 0.1f*0.5, 0.1f*0.5, 1.0f};
-        GLfloat lowDiffuse[4] = {0.2f*0.5, 0.2f*0.5, 0.2f*0.5, 1.0f};
-        glLightfv(m_nLigthId, GL_AMBIENT, lowAmbient);
-        glLightfv(m_nLigthId, GL_DIFFUSE, lowDiffuse);
-        DrawShadows();
+        if(m_bShadowsEnabled){
+            GLfloat lowAmbient[4] = {0.1f*0.5, 0.1f*0.5, 0.1f*0.5, 1.0f};
+            GLfloat lowDiffuse[4] = {0.2f*0.5, 0.2f*0.5, 0.2f*0.5, 1.0f};
+            glLightfv(m_nLigthId, GL_AMBIENT, lowAmbient);
+            glLightfv(m_nLigthId, GL_DIFFUSE, lowDiffuse);
+            DrawShadows();
 
-        GLfloat ambientLight [] = {0.2*0.5, 0.2*0.5, 0.2*0.5, 1.0};
-        GLfloat diffuseLight [] = {0.4*0.5, 0.4*0.5, 0.4*0.5, 1.0};
-        glLightfv(m_nLigthId, GL_AMBIENT, ambientLight);
-        glLightfv(m_nLigthId, GL_DIFFUSE, diffuseLight);
-
+            GLfloat ambientLight [] = {0.2*0.5, 0.2*0.5, 0.2*0.5, 1.0};
+            GLfloat diffuseLight [] = {0.4*0.5, 0.4*0.5, 0.4*0.5, 1.0};
+            glLightfv(m_nLigthId, GL_AMBIENT, ambientLight);
+            glLightfv(m_nLigthId, GL_DIFFUSE, diffuseLight);
+        }
         //DisableLight();
     }
 
@@ -182,6 +185,10 @@ public:
         glPopAttrib();
     }
 
+    void SetShadowsEnabled(bool bEnabled){
+        m_bShadowsEnabled = bEnabled;
+    }
+
     void DrawShadows()
     {
         // TODO: Probably use shader
@@ -268,6 +275,7 @@ protected:
     std::vector<GLObject*> shadow_casters;
     std::vector<GLObject*> shadow_receivers;
 
+    bool m_bShadowsEnabled;
     bool m_bStatic;
     bool m_bShadowsComputed;
 };
