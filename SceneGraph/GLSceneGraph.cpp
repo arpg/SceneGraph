@@ -60,7 +60,7 @@ bool GLSceneGraph::RemoveChild( GLObject* pChild )
 {
     GLObjectPrePostRender* prepost = dynamic_cast<GLObjectPrePostRender*>(pChild);
     if(prepost) {
-        for(int ii = 0 ; ii < m_vpPrePostRender.size() ;ii++ ) {
+        for(size_t ii = 0 ; ii < m_vpPrePostRender.size() ;ii++ ) {
             if(m_vpPrePostRender[ii] == prepost){
                 m_vpPrePostRender.erase(m_vpPrePostRender.begin()+ii);
                 break;
@@ -68,7 +68,7 @@ bool GLSceneGraph::RemoveChild( GLObject* pChild )
         }
     }
 
-    GLObject::RemoveChild(pChild);
+    return GLObject::RemoveChild(pChild);
 }
 
 
@@ -84,7 +84,7 @@ void GLSceneGraph::DrawObjectAndChildren(RenderMode renderMode)
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
     glMultMatrixd(m_T_po.data());
-    glScaled(m_dScale,m_dScale,m_dScale);
+    glScaled(m_dScale[0],m_dScale[1],m_dScale[2]);
 
     glPushAttrib(GL_ENABLE_BIT);
 

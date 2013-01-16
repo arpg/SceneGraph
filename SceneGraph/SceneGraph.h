@@ -4,10 +4,12 @@
 
 #include <SceneGraph/GLSceneGraph.h>
 #include <SceneGraph/GLObject.h>
+#include <SceneGraph/GLGroup.h>
 
 #include <SceneGraph/GLGrid.h>
 #include <SceneGraph/GLAxis.h>
 #include <SceneGraph/GLCube.h>
+#include <SceneGraph/GLBox.h>
 #include <SceneGraph/GLAxisAlignedBox.h>
 #include <SceneGraph/GLMovableAxis.h>
 #include <SceneGraph/GLWaypoint.h>

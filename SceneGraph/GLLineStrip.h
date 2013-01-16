@@ -27,6 +27,7 @@ class GLLineStrip : public GLObject
             glPushAttrib(GL_ENABLE_BIT | GL_DEPTH_BUFFER_BIT);
 
             glDepthMask(false);
+            glDisable(GL_DEPTH_TEST);
 
             m_Color.Apply();
             glBegin( GL_LINE_STRIP );

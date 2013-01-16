@@ -22,8 +22,11 @@ set( SceneGraph_SOURCES
 set( SceneGraph_HEADERS
         config.h.in
         SceneGraph.h
+        GLGroup.h
         GLSLHelpers.h
         GLHelpers.h
+        GLLight.h
+        GLShadowLight.h
         GLColor.h
         GLImage.h
         GLMesh.h

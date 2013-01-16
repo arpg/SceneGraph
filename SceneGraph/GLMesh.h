@@ -60,14 +60,14 @@ class GLMesh : public GLObject
     public:
         ////////////////////////////////////////////////////////////////////////////
         GLMesh()
-            : GLObject("Mesh"), m_nDisplayList(-1), m_fAlpha(1),
+            : GLObject("Mesh"), m_fAlpha(1),
               m_iMeshID(-1), m_bShowMeshNormals(false)
         {
         }
 
         ////////////////////////////////////////////////////////////////////////////
         GLMesh(const std::string& sMeshFile)
-            : GLObject("Mesh"), m_nDisplayList(-1), m_fAlpha(1),
+            : GLObject("Mesh"), m_fAlpha(1),
               m_iMeshID(-1), m_bShowMeshNormals(false)
         {
             Init(sMeshFile);
@@ -128,45 +128,71 @@ class GLMesh : public GLObject
         virtual void  DrawCanonicalObject()
         {
             if( m_pScene ){
-                glPushAttrib(GL_ENABLE_BIT);
-
-                glColor3f(1,1,1);
-
                 if( m_nDisplayList == -1 ){
                     m_nDisplayList = glGenLists(1);
-                    glNewList( m_nDisplayList, GL_COMPILE );
-
-                    // Recursively render ai_scene's scenegraph
-                    RecursiveRender( m_pScene, m_pScene->mRootNode );
+                    glNewList( m_nDisplayList, GL_COMPILE_AND_EXECUTE );
+                    DrawCanonicalObject();
                     glEndList();
+                }else{
+                    glPushAttrib(GL_ENABLE_BIT);
+
+                    glColor3f(1,1,1);
+                    RecursiveRender( m_pScene, m_pScene->mRootNode );
+
+                    glPopAttrib();
                 }
-
-                glCallList( m_nDisplayList );
-
-                glPopAttrib();
             }
         }
+        \
+        void ComputeNodeBounds( const struct aiScene *pAIScene, const struct aiNode *pAINode, AxisAlignedBoundingBox& aabb, aiMatrix4x4 dParentTransform )
+        {
+            aiMesh *pAIMesh;
+
+            for ( unsigned int x = 0; x < pAINode->mNumMeshes; x++ )
+            {
+                pAIMesh = pAIScene->mMeshes[pAINode->mMeshes[x]];
+
+
+
+                for( unsigned int y = 0; y < pAIMesh->mNumVertices; y++ ){
+
+                    aiVector3D pAIVector = dParentTransform * pAIMesh->mVertices[y];
+                    //aiVector3D pAIVector = pAINode->mTransformation * pAIMesh->mVertices[y];
+
+                        const Eigen::Vector3d p = Eigen::Vector3d(pAIVector.x,pAIVector.y,pAIVector.z) ;
+                        m_aabb.Insert(p);
+
+                }
+            }
+
+            for ( unsigned int x = 0; x < pAINode->mNumChildren; x++ ){
+                ComputeNodeBounds( pAIScene, pAINode->mChildren[x], aabb,dParentTransform*pAINode->mChildren[x]->mTransformation);
+            }
+        }
+
+        ///////////////////////////
+        void SetScale(Eigen::Vector3d s)
+        {
+            GLObject::SetScale(s);
+            ComputeDimensions();
+        }
+
+        ///////////////////////////
+        void SetScale(double s)
+        {
+            GLObject::SetScale(s);
+            ComputeDimensions();
+        }
+
 
         ///////////////////////////
         virtual void ComputeDimensions()
         {
             m_aabb.Clear();
-            aiMesh *pAIMesh;
-            aiVector3D *pAIVector;
 
-            for( unsigned int x = 0; x < this->GetScene()->mNumMeshes; x++ ){
-                pAIMesh = this->GetScene()->mMeshes[x];
-                if ( pAIMesh == NULL )
-                    continue;
-
-                for( unsigned int y = 0; y < pAIMesh->mNumVertices; y++ ){
-                    pAIVector = &pAIMesh->mVertices[y];
-                    if ( pAIVector != NULL ){
-                        const Eigen::Vector3d p = Eigen::Vector3d(pAIVector->x,pAIVector->y,pAIVector->z) * this->GetScale();
-                        m_aabb.Insert(p);
-                    }
-                }
-            }
+            ComputeNodeBounds(this->GetScene(),this->GetScene()->mRootNode,m_aabb,this->GetScene()->mRootNode->mTransformation);
+            m_aabb.Min().array() *= GLObject::GetScale().array();
+            m_aabb.Max().array() *= GLObject::GetScale().array();
         }
 
         // Getters and setters
@@ -742,7 +768,7 @@ protected:
             // update transform
             aiTransposeMatrix4( &m );
             glPushMatrix();
-            glMultMatrixf( (float*)&m );
+            glMultMatrixf( &(m.a1) );
 
             // draw all meshes assigned to this node
             for (; n < nd->mNumMeshes; ++n) {
@@ -760,7 +786,6 @@ protected:
         }
 
         const struct aiScene*   m_pScene;
-        GLint                   m_nDisplayList;
         float                   m_fAlpha; // render translucent meshes?
         unsigned int            m_iMeshID;
         bool                    m_bShowMeshNormals;

@@ -111,7 +111,7 @@ struct HandlerSceneGraph : pangolin::Handler3D
         }
     }
 
-    void Special(pangolin::View& view, pangolin::InputSpecial inType, int x, int y, float p1, float p2, float p3, float p4, int button_state)
+    void Special(pangolin::View& view, pangolin::InputSpecial inType, float x, float y, float p1, float p2, float p3, float p4, int button_state)
     {
         // TODO: Implement Special handler for GLObjects too
 

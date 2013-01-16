@@ -12,7 +12,11 @@ class ImageView : public pangolin::View
 {
 public:
     ImageView(bool flipy = true, bool sampling_linear = true )
-        : m_bFlipy(flipy), m_bSamplingLinear(sampling_linear), m_bImageDataDirty(false), m_pImageData(0), m_iImageDataSizeBytes(0)
+        : m_bFlipy(flipy), 
+          m_bSamplingLinear(sampling_linear), 
+          m_bImageDataDirty(false), 
+          m_pImageData(0), 
+          m_iImageDataSizeBytes(0)
     {
     }
 
@@ -63,6 +67,11 @@ public:
         m_bImageDataDirty = true;
     }
 
+    //! Get pointer to image data
+    unsigned char* Data()
+    {
+        return m_pImageData;
+    }
     //! This should only be called from within the OpenGL Thread.
     void UpdateGlTexture()
     {

@@ -4,7 +4,7 @@
 
 #include <pangolin/pangolin.h>
 #include <SceneGraph/SceneGraph.h>
-#include <bullet/btBulletDynamicsCommon.h>
+#include <btBulletDynamicsCommon.h>
 
 using namespace std;
 

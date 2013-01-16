@@ -24,7 +24,7 @@ struct ActivateDrawFunctor
 
 struct ActivateScissorClearDrawFunctor
 {
-    ActivateScissorClearDrawFunctor(SceneGraph::GLObject& glObject, pangolin::OpenGlRenderState& renderState)
+    ActivateScissorClearDrawFunctor(SceneGraph::GLObject& glObject, const pangolin::OpenGlRenderState& renderState)
         :glObject(glObject), renderState(renderState)
     {
     }
@@ -35,7 +35,7 @@ struct ActivateScissorClearDrawFunctor
     }
 
     SceneGraph::GLObject& glObject;
-    pangolin::OpenGlRenderState& renderState;
+    const pangolin::OpenGlRenderState& renderState;
 };
 
 struct ActivateDrawFunctor3d2d

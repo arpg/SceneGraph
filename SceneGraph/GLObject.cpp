@@ -9,14 +9,16 @@ int GLObject::g_nHandleCounter = 1;
 /////////////////////////////////////////////////////////////////////////////////
 GLObject::GLObject()
     : m_sObjectName("unnamed-object"), m_bVisible(true), m_bPerceptable(true),
-      m_T_po(Eigen::Matrix4d::Identity()), m_dScale(1), m_bIsSelectable(false)
+      m_T_po(Eigen::Matrix4d::Identity()), m_dScale(1,1,1), m_bIsSelectable(false),
+      m_nDisplayList(-1)
 {
 }
 
 /////////////////////////////////////////////////////////////////////////////////
 GLObject::GLObject( const std::string& name)
     : m_sObjectName(name), m_bVisible(true), m_bPerceptable(true),
-      m_T_po(Eigen::Matrix4d::Identity()), m_dScale(1), m_bIsSelectable(false)
+      m_T_po(Eigen::Matrix4d::Identity()), m_dScale(1,1,1), m_bIsSelectable(false),
+      m_nDisplayList(-1)
 {
 }
 
@@ -25,6 +27,15 @@ GLObject::GLObject( const GLObject& rhs )
 {
     *this = rhs;
 }
+
+/////////////////////////////////////////////////////////////////////////////////
+GLObject::~GLObject()
+{
+    if(m_nDisplayList >= 0) {
+        glDeleteLists(m_nDisplayList,1);
+    }
+}
+
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
 int GLObject::AllocSelectionId()
@@ -55,15 +66,28 @@ void GLObject::DrawObjectAndChildren(RenderMode renderMode)
         glMatrixMode(GL_MODELVIEW);
         glPushMatrix();
         glMultMatrixd(m_T_po.data());
-        glScaled(m_dScale,m_dScale,m_dScale);
+        glScaled(m_dScale[0],m_dScale[1],m_dScale[2]);
 
-        DrawCanonicalObject();
+        if(m_nDisplayList >= 0) {
+            glCallList( m_nDisplayList );
+        }else{
+            DrawCanonicalObject();
+        }
         DrawChildren();
 
         glPopMatrix();
     }
 }
 
+void GLObject::CompileAsGlCallList()
+{
+    if( m_nDisplayList == -1 ){
+        m_nDisplayList = glGenLists(1);
+        glNewList( m_nDisplayList, GL_COMPILE );
+        DrawCanonicalObject();
+        glEndList();
+    }
+}
 
 /////////////////////////////////////////////////////////////////////////////////
 void GLObject::SetVisible(bool visible)
@@ -109,7 +133,7 @@ void GLObject::AddChild( GLObject* pChild )
 
 bool GLObject::RemoveChild( GLObject* pChild )
 {
-    for(int ii = 0 ; ii < m_vpChildren.size() ; ii++) {
+    for(size_t ii = 0 ; ii < m_vpChildren.size() ; ii++) {
         if(m_vpChildren[ii] == pChild ){
             m_vpChildren.erase(m_vpChildren.begin()+ii);
             return true;
@@ -181,11 +205,16 @@ void GLObject::SetPose(double x, double y, double z, double r, double p, double 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
 void GLObject::SetScale(double s) {
+    m_dScale = Eigen::Vector3d(s,s,s);
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////
+void GLObject::SetScale(const Eigen::Vector3d& s) {
     m_dScale = s;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
-double GLObject::GetScale() {
+Eigen::Vector3d GLObject::GetScale() {
     return m_dScale;
 }
 
