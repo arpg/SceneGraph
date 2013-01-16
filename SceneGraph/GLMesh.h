@@ -86,20 +86,20 @@ class GLMesh : public GLObject
         }
 
         ////////////////////////////////////////////////////////////////////////////
-        void Init( const std::string& sMeshFile )
+        void Init( const std::string& sMeshFile, bool bFlipUVs = false )
         {
             m_pScene = aiImportFile( sMeshFile.c_str(), aiProcess_Triangulate
-													| aiProcess_GenSmoothNormals
-													| aiProcess_JoinIdenticalVertices
+                                                    | aiProcess_GenSmoothNormals
+                                                    | aiProcess_JoinIdenticalVertices
 //													| aiProcess_TransformUVCoords
-													| aiProcess_FlipUVs
+                                                    | ( bFlipUVs == true ? aiProcess_FlipUVs : 0 )
 //													| aiProcess_FlipWindingOrder
-													| aiProcess_OptimizeMeshes
-													| aiProcess_FindInvalidData
+                                                    | aiProcess_OptimizeMeshes
+                                                    | aiProcess_FindInvalidData
 //													| aiProcess_SortByPType
 //													| aiProcess_GenUVCoords
-													| aiProcess_FixInfacingNormals
-									);
+                                                    | aiProcess_FixInfacingNormals
+                                    );
             if( m_pScene == NULL ){
                 throw GLMeshException("Unable to load mesh.");
             }else{
@@ -405,10 +405,10 @@ protected:
 
             GLuint glTexId = 0;
 
-			std::string extension;
-			extension = filename.substr( filename.rfind( "." ) + 1 );
+            std::string extension;
+            extension = filename.substr( filename.rfind( "." ) + 1 );
 
-			glTexId = LoadGLTextureUsingGIL(filename, extension.c_str());
+            glTexId = LoadGLTextureUsingGIL(filename, extension.c_str());
 
 #ifdef HAVE_DEVIL
             if(!glTexId) glTexId = LoadGLTextureFromDevIL(filename);
@@ -553,7 +553,7 @@ protected:
 
             GLenum fill_mode;
             int ret1, ret2;
-			aiColor4D diffuse;
+            aiColor4D diffuse;
             aiColor4D specular;
             aiColor4D ambient;
             aiColor4D emission;
