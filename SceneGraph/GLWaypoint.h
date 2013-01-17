@@ -21,6 +21,7 @@ public:
         m_bIsSelectable = true;
         m_bClampToPlane = false;
         m_bActive =false;
+        m_bLocked = false;
 
         m_dVelocity = 1.0;
         m_bPerceptable = false;
@@ -39,15 +40,15 @@ public:
 
     bool Mouse(int button, const Eigen::Vector3d& /*win*/, const Eigen::Vector3d& /*obj*/, const Eigen::Vector3d& /*normal*/, bool /*pressed*/, int /*button_state*/, int /*pickId*/)
     {
-        if(button == MouseButtonLeft){
+        if(button == MouseButtonLeft && m_bLocked == false){
             m_bPendingActive = true;
         }
-        else if(button == MouseWheelUp)
+        else if(button == MouseWheelUp && m_bLocked == false)
         {
             m_bDirty = true;
             m_dVelocity *= 1.01;
             return true;
-        }else if(button == MouseWheelDown)
+        }else if(button == MouseWheelDown && m_bLocked == false)
         {
             m_bDirty = true;
             m_dVelocity *= 0.99;
@@ -74,7 +75,7 @@ public:
             n_w = -n;
         }
 
-        if (pickId == m_nBaseId ) {
+        if (pickId == m_nBaseId  && m_bLocked == false) {
             Eigen::Vector3d d = -n_w;
 //            d << 0, 0, 1;
             Eigen::Vector3d f = T.block <3,1> (0, 0);
@@ -84,7 +85,7 @@ public:
             T.block<3,1>(0,0) = f;
             T.block<3,1>(0,1) = r;
             T.block<3,1>(0,2) = d;
-        }else if (pickId == m_nFrontId) {
+        }else if (pickId == m_nFrontId && m_bLocked == false) {
             if(glutGetModifiers() & GLUT_ACTIVE_SHIFT){
                 SetAerial(true);
             }
@@ -99,7 +100,7 @@ public:
     }
         
     void DrawCanonicalObject() {
-        double multiplier = m_bActive ? 1.0 : 0.5;
+        double multiplier = m_bActive || m_bLocked ? 1.0 : 0.5;
         glPushAttrib(GL_ENABLE_BIT | GL_DEPTH_BUFFER_BIT);
 
         glDisable(GL_CULL_FACE);
@@ -172,6 +173,8 @@ public:
 
     double GetVelocity() const { return m_dVelocity; }
     void SetVelocity(double vel) { m_dVelocity = vel; }
+    bool GetLocked() { return m_bLocked; }
+    void SetLocked(bool bLocked){ m_bLocked = bLocked; }
 
     const Eigen::Matrix<double,5,1> GetPose5d() const
     {
@@ -189,6 +192,7 @@ public:
 
     bool            m_bPendingActive;
     bool            m_bActive;
+    bool            m_bLocked;
     
 private:
 
