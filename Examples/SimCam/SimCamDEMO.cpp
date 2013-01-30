@@ -30,6 +30,7 @@ bool&            g_bShowFrustum = CVarUtils::CreateCVar( "Cam.ShowFrustum", true
 Eigen::Vector6d& g_vCamPose     = CVarUtils::CreateCVar( "Cam.Pose", Eigen::Vector6d( Eigen::Vector6d::Zero() ),
                                   "Camera's pose. Left is dominant camera." );
 
+
 // Cameras
 sg::GLSimCam glCamLeft;     // reference camera we move
 sg::GLSimCam glCamRight;    // reference camera we move
@@ -175,7 +176,7 @@ int main(
 
     // initialize cameras
     glCamLeft.Init( &glGraph, mvl::Cart2T( g_vCamPose ), K, g_nImgWidth, g_nImgHeight,
-                        sg::eSimCamLuminance );
+                        sg::eSimCamLuminance | SceneGraph::eSimCamDepth );
 
     glCamRight.Init( &glGraph, mvl::Cart2T( RightCamPose() ), K, g_nImgWidth, g_nImgHeight,
                      sg::eSimCamLuminance );
