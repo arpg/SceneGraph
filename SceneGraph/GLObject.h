@@ -12,7 +12,13 @@
 #include <map>
 #include <stdio.h>
 
-
+#ifdef __GNUC__
+#  define SCENEGRAPH_DEPRECATED __attribute__((deprecated))
+#elif defined _MSC_VER
+#  define SCENEGRAPH_DEPRECATED __declspec(deprecated)
+#else
+#  define SCENEGRAPH_DEPRECATED
+#endif
 
 namespace Eigen{
     typedef Matrix<double, 6, 1> Vector6d;

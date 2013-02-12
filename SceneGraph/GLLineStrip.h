@@ -73,7 +73,7 @@ class GLLineStrip : public GLObject
             }
 		}
 
-        // deprecated: set GLLineStrip pose instead.
+        SCENEGRAPH_DEPRECATED
         void SetReference( unsigned int Xref, unsigned int Yref, unsigned int Zref )
 		{
             m_T_po(0,3) = Xref;
