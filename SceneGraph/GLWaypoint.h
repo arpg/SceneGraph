@@ -42,20 +42,18 @@ public:
     {
         if(button == MouseButtonLeft && m_bLocked == false){
             m_bPendingActive = true;
-        }
-        else if(button == MouseWheelUp && m_bLocked == false)
+        }else if(button == MouseWheelUp && m_bLocked == false)
         {
             m_bDirty = true;
             m_dVelocity *= 1.01;
-            return true;
         }else if(button == MouseWheelDown && m_bLocked == false)
         {
             m_bDirty = true;
             m_dVelocity *= 0.99;
-            return true;
         }else {
             return false;
         }
+        return true;
     }
 
     bool MouseMotion(const Eigen::Vector3d& /*win*/, const Eigen::Vector3d &obj, const Eigen::Vector3d& normal, int /*button_state*/, int pickId)

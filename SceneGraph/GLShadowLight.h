@@ -275,9 +275,9 @@ protected:
     std::vector<GLObject*> shadow_casters;
     std::vector<GLObject*> shadow_receivers;
 
-    bool m_bShadowsEnabled;
     bool m_bStatic;
     bool m_bShadowsComputed;
+    bool m_bShadowsEnabled;
 };
 
 }
