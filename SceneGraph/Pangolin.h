@@ -5,3 +5,5 @@
 #include <SceneGraph/PangolinImageView.h>
 #include <SceneGraph/GLShadowLight.h>
 #include <SceneGraph/GLVbo.h>
+#include <SceneGraph/GLPrimitives.h>
+#include <SceneGraph/GLAxisHistory.h>

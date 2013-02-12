@@ -39,6 +39,8 @@ set( SceneGraph_HEADERS
         GLAxisAlignedBox.h
         GLWaypoint.h
         GLLineStrip.h
+        GLPrimitives.h
+        GLAxisHistory.h
         SimCam.h
         Pangolin.h
         PangolinDrawGLObject.h
