@@ -56,7 +56,7 @@ public:
         return true;
     }
 
-    bool MouseMotion(const Eigen::Vector3d& /*win*/, const Eigen::Vector3d &obj, const Eigen::Vector3d& normal, int /*button_state*/, int pickId)
+    bool MouseMotion(const Eigen::Vector3d& /*win*/, const Eigen::Vector3d &obj, const Eigen::Vector3d& normal, int button_state, int pickId)
     {
         m_bDirty = true; // flag for update
         Eigen::Matrix4d& T = m_T_po;
@@ -84,7 +84,7 @@ public:
             T.block<3,1>(0,1) = r;
             T.block<3,1>(0,2) = d;
         }else if (pickId == m_nFrontId && m_bLocked == false) {
-            if(glutGetModifiers() & GLUT_ACTIVE_SHIFT){
+            if(button_state & KeyModifierShift){
                 SetAerial(true);
             }
             Eigen::Vector3d dir = p_w - T.block<3,1>(0,3);

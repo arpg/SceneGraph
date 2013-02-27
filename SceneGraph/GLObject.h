@@ -27,6 +27,7 @@ namespace Eigen{
 
 namespace SceneGraph
 {
+
 enum MouseButton
 {
   MouseButtonLeft = 1,
@@ -34,6 +35,13 @@ enum MouseButton
   MouseButtonRight = 4,
   MouseWheelUp = 8,
   MouseWheelDown = 16
+};
+
+enum KeyModifier
+{
+  KeyModifierShift = 1<<16,
+  KeyModifierCtrl  = 1<<17,
+  KeyModifierAlt   = 1<<18
 };
 
 enum RenderMode
