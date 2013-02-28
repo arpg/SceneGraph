@@ -62,6 +62,16 @@ public:
         Sync();
         pangolin::GlSizeableBuffer::Bind();
     }
+    
+    size_t start() const
+    {
+        return 0;
+    }
+    
+    size_t size() const
+    {
+        return m_num_verts;
+    }    
             
 protected:    
     inline void CheckResize(int num_verts)

@@ -22,6 +22,13 @@ public:
     {
     }
     
+    void Clear()
+    {
+        m_red.Clear();
+        m_green.Clear();
+        m_blue.Clear();
+    }
+    
     void DrawCanonicalObject()
     {        
         glColor3f(1,0,0);
@@ -33,6 +40,11 @@ public:
         glColor3f(0,0,1);
         DrawVbo(m_blue);
     }
+    
+    int Size() const
+    {
+        return m_red.size() / 2;
+    }    
         
     void AddAxis(const Eigen::Matrix<double,3,4>& T_wp, double axis_size = 1.0)
     {
@@ -65,7 +77,7 @@ public:
     }
     
 protected:
-    void DrawVbo(pangolin::GlSizeableBuffer& vbo)
+    void DrawVbo(GlBufferType& vbo)
     {
         vbo.Bind();
         glVertexPointer(vbo.count_per_element, vbo.datatype, 0, 0);
