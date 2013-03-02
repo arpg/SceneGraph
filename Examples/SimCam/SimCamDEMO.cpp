@@ -4,9 +4,9 @@
 #include <SceneGraph/SimCam.h>
 #include <boost/bind.hpp>
 #include <Mvlpp/Mvl.h>
-#include <CVars/CVar.h>
 
 #include "CVarHelpers.h"
+#include <CVars/CVar.h>
 
 using namespace std;
 
