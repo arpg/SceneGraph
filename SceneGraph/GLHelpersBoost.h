@@ -2,6 +2,12 @@
 
 #include "GLHelpers.h"
 
+// Suppress clang unused parameter warnings in boost
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-parameter"
+#endif
+
 #include <boost/gil/gil_all.hpp>
 #ifdef HAVE_PNG
 #define png_infopp_NULL (png_infopp)NULL
@@ -20,6 +26,10 @@
 //#include <boost/gil/extension/io_new/jpeg_io_old.hpp>
 //#include <boost/gil/extension/io_new/tiff_io_old.hpp>
 //#include <boost/gil/extension/io_new/targa_io_old.hpp>
+
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
 
 ////////////////////////////////////////////////////////////////////////////
 // Interface

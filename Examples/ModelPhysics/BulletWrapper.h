@@ -1,9 +1,16 @@
 #ifndef __BULLET_WRAPPER_
 #define __BULLET_WRAPPER_
 
+#include <boost/shared_ptr.hpp>
 #include <pangolin/pangolin.h>
 #include <SceneGraph/SceneGraph.h>
+
+// Suppress Bullet warnings in GCC and Clang
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wignored-qualifiers"
+#pragma GCC diagnostic ignored "-Wextra"
 #include <bullet/btBulletDynamicsCommon.h>
+#pragma GCC diagnostic pop
 
 inline Eigen::Matrix<double,4,4> toEigen(const btTransform& T)
 {
