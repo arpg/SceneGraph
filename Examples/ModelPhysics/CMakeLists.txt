@@ -16,3 +16,9 @@ IF(BULLET_FOUND)
     ADD_EXECUTABLE(ModelPhysics main.cpp)
     ADD_EXECUTABLE( CarDemo CarDemo.cpp )
 ENDIF()
+
+# In your own code, you can ommit these lines
+IF( ${SCENEGRAPH_EXAMPLE} )
+  add_dependencies(ModelPhysics SceneGraph)
+  add_dependencies(CarDemo SceneGraph)
+ENDIF()

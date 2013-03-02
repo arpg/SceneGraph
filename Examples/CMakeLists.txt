@@ -1,5 +1,7 @@
 SET( BuildExamples true CACHE "" force )
 IF(BuildExamples)
+  SET(SCENEGRAPH_EXAMPLE 1)
+
   ADD_SUBDIRECTORY(DisplayModel)
   ADD_SUBDIRECTORY(DisplayImage)
   ADD_SUBDIRECTORY(DisplayShadowTest)
