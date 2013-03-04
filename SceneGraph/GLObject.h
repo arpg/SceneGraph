@@ -1,7 +1,7 @@
 #ifndef _GL_OBJECT_
 #define _GL_OBJECT_
 
-#undef Success
+#undef Success // why ?
 #include <Eigen/Eigen>
 
 #include <SceneGraph/GLHelpers.h>
