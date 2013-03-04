@@ -4,6 +4,10 @@
 #include <SceneGraph/GLObject.h>
 #include <SceneGraph/GLColor.h>
 
+// TODO: Remove this and include GLUT directly here IFF GLUT support enabled.
+//       Must use exactly same GLUT as Pangolin or there be errors.
+#include <pangolin/pangolin.h>
+
 #include <string>
 
 namespace SceneGraph

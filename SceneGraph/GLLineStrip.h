@@ -26,7 +26,8 @@ class GLLineStrip : public GLObject
         {
             glPushAttrib(GL_ENABLE_BIT | GL_DEPTH_BUFFER_BIT);
 
-//            glDepthMask(false);
+            glDepthMask(false);
+            glDisable(GL_DEPTH_TEST);
 
             m_Color.Apply();
             glBegin( GL_LINE_STRIP );
@@ -73,7 +74,7 @@ class GLLineStrip : public GLObject
             }
 		}
 
-        // deprecated: set GLLineStrip pose instead.
+        SCENEGRAPH_DEPRECATED
         void SetReference( unsigned int Xref, unsigned int Yref, unsigned int Zref )
 		{
             m_T_po(0,3) = Xref;

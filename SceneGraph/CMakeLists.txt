@@ -15,8 +15,9 @@ set( SceneGraph_SOURCES
         GLHelpers.cpp
         GLObject.cpp
         GLSceneGraph.cpp
-	FBO.cpp
-	SimCam.cpp
+        GLMesh.cpp
+        FBO.cpp
+        SimCam.cpp
    )
 
 set( SceneGraph_HEADERS
@@ -25,6 +26,9 @@ set( SceneGraph_HEADERS
         GLGroup.h
         GLSLHelpers.h
         GLHelpers.h
+        GLHelpersLoadTextures.h
+        GLHelpersBoost.h
+        GLHelpersDevil.h
         GLLight.h
         GLShadowLight.h
         GLColor.h
@@ -39,6 +43,8 @@ set( SceneGraph_HEADERS
         GLAxisAlignedBox.h
         GLWaypoint.h
         GLLineStrip.h
+        GLPrimitives.h
+        GLAxisHistory.h
         SimCam.h
         Pangolin.h
         PangolinDrawGLObject.h

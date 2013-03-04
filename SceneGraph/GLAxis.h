@@ -43,6 +43,9 @@ public:
         glPopAttrib();
     }
 
+    void SetAxisSize(float size){ m_axisSize = size; }
+    float GetAxisSize() { return m_axisSize; }
+
 protected:
     float m_axisSize;
 };

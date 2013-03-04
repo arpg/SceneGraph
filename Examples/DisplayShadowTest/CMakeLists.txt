@@ -10,3 +10,8 @@ INCLUDE_DIRECTORIES(${SceneGraph_INCLUDE_DIRS})
 LINK_LIBRARIES(${SceneGraph_LIBRARIES})
 
 ADD_EXECUTABLE(DisplayShadowTest main.cpp)
+
+# In your own code, you can ommit these lines
+IF( ${SCENEGRAPH_EXAMPLE} )
+  add_dependencies(DisplayShadowTest SceneGraph)
+ENDIF()

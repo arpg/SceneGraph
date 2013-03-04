@@ -7,9 +7,18 @@
 //#include <SceneGraph/GLCVars.h>
 
 #include <pangolin/pangolin.h>
-#include <unsupported/Eigen/OpenGLSupport>
 
 #include <string>
+
+// Suppress unused function warning in Eigen for clang (can't be isolated for gcc)
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-function"
+#endif
+#include <unsupported/Eigen/OpenGLSupport>
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
 
 #define VISION 1
 

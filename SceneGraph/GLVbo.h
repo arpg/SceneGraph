@@ -26,7 +26,6 @@ public:
 
         pangolin::RenderVboIboCboNbo(
             *m_vbo,*m_ibo,*m_cbo,*m_nbo,
-            m_vbo->width, m_vbo->height,
             m_ibo, m_cbo, m_nbo
         );
 

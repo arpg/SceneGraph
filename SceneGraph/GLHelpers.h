@@ -255,6 +255,28 @@ inline unsigned int GenerateAndBindTextureID(
     return texId;
 }
 
+// TODO: eliminate this in favour of above methods? Or vice versa
+inline GLuint LoadGLTexture(GLint width, GLint height, void* data, GLint internal_format = GL_RGB8, GLenum data_layout = GL_RGB, GLenum data_type = GL_UNSIGNED_BYTE )
+{
+    GLuint glTexId = 0;
+    glGenTextures(1,&glTexId);
+
+    glBindTexture(GL_TEXTURE_2D, glTexId);
+    // load Mipmaps instead of single texture
+    glTexImage2D(GL_TEXTURE_2D, 0, internal_format, width, height, 0, data_layout, data_type, data);
+//            glGenerateMipmap( GL_TEXTURE_2D );
+    gluBuild2DMipmaps(GL_TEXTURE_2D, 3, width, height, data_layout, data_type, data );
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+//            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    return glTexId;
+}
+
 // TODO: Should these really be here?
 inline Eigen::Matrix4d GLCart2T(
                               double x,

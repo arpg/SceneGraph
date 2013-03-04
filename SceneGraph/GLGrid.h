@@ -12,8 +12,9 @@ class GLGrid : public GLObject
 {
     public:
         GLGrid(int numLines = 50, float lineSpacing = 2.0, bool perceptable = false)
+
             : GLObject("Grid"), m_nNumLines(numLines), m_fLineSpacing(lineSpacing),
-              m_colorPlane(90,90,90,255), m_colorLines(132,132,132,128)
+              m_colorPlane(100,100,100,256), m_colorLines(132,132,132,256)
         {
             m_bPerceptable = perceptable;
             mT_op = Eigen::Matrix4d::Identity();
