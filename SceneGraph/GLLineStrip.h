@@ -26,8 +26,8 @@ class GLLineStrip : public GLObject
         {
             glPushAttrib(GL_ENABLE_BIT | GL_DEPTH_BUFFER_BIT);
 
-            glDepthMask(false);
-            glDisable(GL_DEPTH_TEST);
+            glDepthMask(true);
+            glEnable(GL_DEPTH_TEST);
 
             m_Color.Apply();
             glBegin( GL_LINE_STRIP );
@@ -73,6 +73,16 @@ class GLLineStrip : public GLObject
                 m_vPts.push_back( vPts[ii][2] );
             }
 		}
+
+        void SetPointsFromTrajectory( const Eigen::Vector3dAlignedVec& vPts )
+        {
+            m_vPts.clear();
+            for( size_t ii = 0; ii < vPts.size(); ii++ ){
+                m_vPts.push_back( vPts[ii][0] );
+                m_vPts.push_back( vPts[ii][1] );
+                m_vPts.push_back( vPts[ii][2] );
+            }
+        }
 
         // deprecated: set GLLineStrip pose instead.
         void SetReference( unsigned int Xref, unsigned int Yref, unsigned int Zref )

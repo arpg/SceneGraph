@@ -100,7 +100,7 @@ public:
     }
         
     void DrawCanonicalObject() {
-        double multiplier = m_bActive || m_bLocked ? 1.0 : 0.5;
+        double multiplier = m_bActive && !m_bLocked ? 1.0 : 0.5;
         glPushAttrib(GL_ENABLE_BIT | GL_DEPTH_BUFFER_BIT);
 
         glDisable(GL_CULL_FACE);

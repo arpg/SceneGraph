@@ -17,6 +17,7 @@
 namespace Eigen{
     typedef Matrix<double, 6, 1> Vector6d;
     typedef std::vector<Eigen::Vector6d,Eigen::aligned_allocator<Eigen::Vector6d> > Vector6dAlignedVec;
+    typedef std::vector<Eigen::Vector3d,Eigen::aligned_allocator<Eigen::Vector3d> > Vector3dAlignedVec;
 }
 
 namespace SceneGraph
