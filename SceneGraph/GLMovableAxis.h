@@ -21,16 +21,16 @@ public:
         z_label = AllocSelectionId();
     }
 
-    bool Mouse(int button, const Eigen::Vector3d& /*win*/, const Eigen::Vector3d& /*obj*/, const Eigen::Vector3d& /*normal*/, bool /*pressed*/, int /*button_state*/, int pickId)
+    bool Mouse(int button, const Eigen::Vector3d& /*win*/, const Eigen::Vector3d& /*obj*/, const Eigen::Vector3d& /*normal*/, bool /*pressed*/, int button_state, int pickId)
     {
         if((button == MouseWheelUp || button == MouseWheelDown) ) {
             float scale = (button == MouseWheelUp) ? 0.01 : -0.01;
-            if(glutGetModifiers() & GLUT_ACTIVE_SHIFT) scale /= 10;
+            if(button_state & KeyModifierShift) scale /= 10;
 
             Eigen::Matrix<double,6,1> T_po = GetPose();
             Eigen::Matrix<double,6,1> T_on = Eigen::Matrix<double,6,1>::Zero();
 
-            if(glutGetModifiers() & GLUT_ACTIVE_CTRL) {
+            if(button_state & KeyModifierCtrl) {
                 if(m_rotatable) {
                     // rotate
                     if(pickId == x_label) {

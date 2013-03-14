@@ -12,7 +12,13 @@
 #include <map>
 #include <stdio.h>
 
-
+#ifdef __GNUC__
+#  define SCENEGRAPH_DEPRECATED __attribute__((deprecated))
+#elif defined _MSC_VER
+#  define SCENEGRAPH_DEPRECATED __declspec(deprecated)
+#else
+#  define SCENEGRAPH_DEPRECATED
+#endif
 
 namespace Eigen{
     typedef Matrix<double, 6, 1> Vector6d;
@@ -22,6 +28,7 @@ namespace Eigen{
 
 namespace SceneGraph
 {
+
 enum MouseButton
 {
   MouseButtonLeft = 1,
@@ -29,6 +36,13 @@ enum MouseButton
   MouseButtonRight = 4,
   MouseWheelUp = 8,
   MouseWheelDown = 16
+};
+
+enum KeyModifier
+{
+  KeyModifierShift = 1<<16,
+  KeyModifierCtrl  = 1<<17,
+  KeyModifierAlt   = 1<<18
 };
 
 enum RenderMode

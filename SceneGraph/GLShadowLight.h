@@ -16,7 +16,7 @@ public:
           fb_depth(shadowBufferWidth,shadowBufferHeight,GL_DEPTH_COMPONENT),
           framebuffer(fb_img,fb_depth),
           depth_tex(shadowBufferWidth,shadowBufferHeight,GL_DEPTH_COMPONENT,true,1,GL_DEPTH_COMPONENT,GL_UNSIGNED_BYTE),
-          m_bStatic(bStatic), m_bShadowsComputed(false), m_bShadowsEnabled(false)
+          m_bStatic(bStatic), m_bShadowsComputed(false), m_bShadowsEnabled(true)
     {
         // Setup border so we don't cast shadows beyond shadow map.
         depth_tex.Bind();
@@ -275,9 +275,9 @@ protected:
     std::vector<GLObject*> shadow_casters;
     std::vector<GLObject*> shadow_receivers;
 
-    bool m_bShadowsEnabled;
     bool m_bStatic;
     bool m_bShadowsComputed;
+    bool m_bShadowsEnabled;
 };
 
 }

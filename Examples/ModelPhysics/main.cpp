@@ -4,52 +4,9 @@
 
 #include <pangolin/pangolin.h>
 #include <SceneGraph/SceneGraph.h>
-#include <btBulletDynamicsCommon.h>
+#include "BulletWrapper.h"
 
 using namespace std;
-
-inline Eigen::Matrix<double,4,4> toEigen(const btTransform& T)
-{
-    Eigen::Matrix<btScalar,4,4> eT;
-    T.getOpenGLMatrix(eT.data());
-    return eT.cast<double>();
-}
-
-inline btTransform toBullet(const Eigen::Matrix<double,4,4>& T)
-{
-    btTransform bT;
-    Eigen::Matrix<btScalar,4,4> eT = T.cast<btScalar>();
-    bT.setFromOpenGLMatrix(eT.data());
-    return bT;
-}
-
-inline btVector3 toBulletVec3(const Eigen::Vector3d& v)
-{
-    btVector3 bv;
-    bv.setX(v(0));
-    bv.setY(v(1));
-    bv.setZ(v(2));
-    return bv;
-}
-
-class SceneGraphMotionState : public btMotionState {
-public:
-    SceneGraphMotionState(SceneGraph::GLObject& obj)
-        : object(obj)
-    {
-    }
-
-    virtual void getWorldTransform(btTransform &worldTrans) const {
-        worldTrans = toBullet(object.GetPose4x4_po());
-    }
-
-    virtual void setWorldTransform(const btTransform &worldTrans) {
-        object.SetPose(toEigen(worldTrans));
-    }
-
-protected:
-    SceneGraph::GLObject& object;
-};
 
 int main( int /*argc*/, char** /*argv*/ )
 {
