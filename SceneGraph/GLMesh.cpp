@@ -127,6 +127,9 @@ void  GLMesh::DrawCanonicalObject()
         }else{
             glPushAttrib(GL_ENABLE_BIT);
 
+            // Enable Multisample if it is available.
+            glEnable(GL_MULTISAMPLE);                        
+            
             glColor3f(1,1,1);
             RecursiveRender( m_pScene, m_pScene->mRootNode );
 

@@ -37,10 +37,7 @@ public:
 
     void DrawCanonicalObject()
     {
-        glPushAttrib(GL_ENABLE_BIT | GL_LINE_BIT);
-        glDisable( GL_LIGHTING );
         DrawAxis(m_axisSize);
-        glPopAttrib();
     }
 
     void SetAxisSize(float size){ m_axisSize = size; }

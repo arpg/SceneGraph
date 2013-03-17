@@ -117,20 +117,33 @@ void GLSceneGraph::DrawObjectAndChildren(RenderMode renderMode)
 
 void GLSceneGraph::ApplyPreferredGlSettings()
 {
-    glShadeModel(GL_SMOOTH);
-
-    glEnable(GL_LINE_SMOOTH);
+    // Default to transparent white background for better screenshots
+    glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
+    
+    // Disable multisample for general use (it messes up antialiased lines)
+    // Enable individually for particular GLObjects
+    glDisable(GL_MULTISAMPLE);
+    
+//    // GL_POLYGON_SMOOTH is known to be really bad.
+//    glEnable(GL_POLYGON_SMOOTH);
+//    glHint( GL_POLYGON_SMOOTH_HINT, GL_NICEST );
+    
     glEnable(GL_NORMALIZE);
 
+    // Antialiased lines work great, but should be disabled if multisampling is enabled
+    glEnable(GL_LINE_SMOOTH);
     glHint( GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST );
     glHint( GL_LINE_SMOOTH_HINT, GL_NICEST );
-    glHint( GL_POLYGON_SMOOTH_HINT, GL_NICEST );
 
-    glDepthFunc( GL_LEQUAL );
-    glEnable( GL_DEPTH_TEST );
-
+    // Enable alpha blending
     glEnable (GL_BLEND);
     glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    
+    // Shading model to use when lighing is enabled
+    glShadeModel(GL_SMOOTH);
+    
+    glDepthFunc( GL_LEQUAL );
+    glEnable( GL_DEPTH_TEST );
 
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     glPixelStorei(GL_PACK_ALIGNMENT, 1);

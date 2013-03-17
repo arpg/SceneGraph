@@ -47,9 +47,9 @@ int main( int /*argc*/, char** /*argv[]*/ )
     glWaypoint.ClampToPlane(Eigen::Vector4d(0,0,1,0));
 
     // Define 3D spiral using a line strip object
-    SceneGraph::GLLineStrip glLineStrip;
-    for(double t=0; t < 10*M_PI; t+= M_PI/10) {
-        glLineStrip.SetPoint(cos(t)+2, sin(t)+2, -0.2*t);
+    SceneGraph::GLCachedPrimitives glPrimitives(GL_LINE_STRIP, SceneGraph::GLColor(1.0f,0.7f,0.2f));
+    for(double t=0; t < 10*M_PI; t+= M_PI/100) {
+        glPrimitives.AddVertex(Eigen::Vector3d(cos(t)+2, sin(t)+2, -0.2*t) );
     }
 
     // Define 3D floating text object
@@ -68,7 +68,7 @@ int main( int /*argc*/, char** /*argv[]*/ )
     // Add objects to scenegraph
     glGraph.AddChild(&glGrid);
     glGraph.AddChild(&glWaypoint);
-    glGraph.AddChild(&glLineStrip);
+    glGraph.AddChild(&glPrimitives);
     glGraph.AddChild(&glAxis);
     glGraph.AddChild(&glText3d);
     glGraph.AddChild(&glMovableAxis);

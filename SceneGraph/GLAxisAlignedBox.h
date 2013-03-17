@@ -94,10 +94,7 @@ public:
 
     void DrawCanonicalObject()
     {
-        glPushAttrib(GL_ENABLE_BIT | GL_LINE_BIT | GL_DEPTH_BUFFER_BIT);
-        glDisable(GL_LIGHTING);
         DrawAxisAlignedBox(x_min, x_max, y_min, y_max, z_min, z_max);
-        glPopAttrib();
     }
 
     void SetBounds(Eigen::Vector3d boxmin, Eigen::Vector3d boxmax)

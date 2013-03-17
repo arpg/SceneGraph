@@ -67,9 +67,6 @@ public:
 
     void DrawCanonicalObject()
     {
-        glPushAttrib(GL_ENABLE_BIT | GL_LINE_BIT);
-        glDisable( GL_LIGHTING );
-
         // draw axis
         glPushName(x_label);
         glColor4f(1, 0, 0, 1);
@@ -94,8 +91,6 @@ public:
         glVertex3d(0, 0, m_axisSize);
         glEnd();
         glPopName();
-
-        glPopAttrib();
     }
 
 protected:
