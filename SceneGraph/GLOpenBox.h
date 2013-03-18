@@ -16,8 +16,8 @@ class GLOpenBox : public GLObject
               m_box_grow_factor(1,1,1),
               m_interval(interval),
               m_ticks_per_interval(sub_ticks_per_interval),
-              m_ambient(0.9, 0.9, 0.9, 1.0 ),
-              m_diffuse(0.83, 0.85, 0.87, 1.0),
+              m_ambient(1.4, 1.4, 1.4, 1.0 ),
+              m_diffuse(0.63, 0.65, 0.67, 1.0),
               m_linemod(0.686, 0.874, 0.929, 1.0),
               m_specular(0,0,0,1)
         {
@@ -63,9 +63,12 @@ class GLOpenBox : public GLObject
             
             glNormal3fv(n.data());
             
-            for(float intrvl=m_interval, lw=2.0; intrvl >= 0.1; intrvl /= m_ticks_per_interval, lw /= 2)
+            float origLineWidth;
+            glGetFloatv(GL_LINE_WIDTH, &origLineWidth);
+            
+            for(float intrvl=m_interval, ls=1.0; intrvl >= 0.1; intrvl /= m_ticks_per_interval, ls /= 2)
             {
-                glLineWidth(lw);
+                glLineWidth(origLineWidth*ls);
                 glBegin(GL_LINES);
                 for(float xv= intrvl*ceil(bmin(o1) / intrvl); xv < bmax(o1); xv += intrvl)
                 {
@@ -85,7 +88,7 @@ class GLOpenBox : public GLObject
         
         inline void DrawOpenBox(const AxisAlignedBoundingBox& bbox)
         {
-            glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT);
+            glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_LINE_BIT);
             {
                 // Prevent Z-Fighting between plane and lines
                 glPolygonOffset( 1.0, 1.0 );
@@ -111,7 +114,8 @@ class GLOpenBox : public GLObject
                     Eigen::Vector3f nc = T_co.topLeftCorner<3,3>() * n;
                     DrawFace(bmin,bmax,ax,nc(2)>0 ? 1 : -1);
                 }
-                
+
+//                glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_FALSE);
                 glMaterialfv( GL_FRONT_AND_BACK, GL_AMBIENT, m_lambient.data() );
                 glMaterialfv( GL_FRONT_AND_BACK, GL_DIFFUSE, m_ldiffuse.data() );
 
