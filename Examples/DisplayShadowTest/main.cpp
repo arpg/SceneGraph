@@ -18,24 +18,23 @@ int main( int /*argc*/, char** /*argv[]*/ )
     SceneGraph::GLSceneGraph glGraph;
 
     // Define grid object
-    SceneGraph::GLGrid glGrid(50,2.0, true);
+    SceneGraph::GLGrid glGrid(20,1.0, true);
 
     // Define axis object, and set its pose
     SceneGraph::GLAxis glAxis;
     glAxis.SetPose(-1,-2,-0.1, 0, 0, M_PI/4);
     glAxis.SetScale(0.25);
 
-    // Define 3D spiral using a line strip object
-    SceneGraph::GLLineStrip glLineStrip;
-    for(double t=0; t < 10*M_PI; t+= M_PI/10) {
-        glLineStrip.SetPoint(cos(t)+2, sin(t)+2, -0.2*t);
+    // Define 3D spiral using a GLCachedPrimitives object
+    SceneGraph::GLCachedPrimitives glSpiral(GL_LINE_STRIP, SceneGraph::GLColor(1.0f,0.7f,0.2f));
+    for(double t=0; t < 10*M_PI; t+= M_PI/50) {
+        glSpiral.AddVertex(Eigen::Vector3d(cos(t)+2, sin(t)+2, -0.2*t) );
     }
 
     // Define a mesh object and try to load model
     SceneGraph::GLMesh glMesh;
     try {
         glMesh.Init("./model.blend");
-//        glMesh.SetPosition(0,0,-0.15);
         glMesh.SetPosition(0,0,-1);
         glMesh.SetScale(4.0f);
         glGraph.AddChild(&glMesh);
@@ -49,7 +48,7 @@ int main( int /*argc*/, char** /*argv[]*/ )
 
     // Add objects to scenegraph
     glGraph.AddChild(&glGrid);
-    glGraph.AddChild(&glLineStrip);
+    glGraph.AddChild(&glSpiral);
     glGraph.AddChild(&glAxis);
     glGraph.AddChild(&glCube);
 
@@ -98,7 +97,7 @@ int main( int /*argc*/, char** /*argv[]*/ )
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // Animate position of light over time.
-        shadowLight.SetPosition(100*cos(frame/100.0), 100*sin(frame/100.0), -50 );
+        shadowLight.SetPosition(100*cos(frame/100.0), 100*sin(frame/100.0), -100 );
 
         // Swap frames and Process Events
         pangolin::FinishGlutFrame();

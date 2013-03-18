@@ -14,7 +14,7 @@ class GLGrid : public GLObject
         GLGrid(int numLines = 50, float lineSpacing = 2.0, bool perceptable = false)
 
             : GLObject("Grid"), m_nNumLines(numLines), m_fLineSpacing(lineSpacing),
-              m_colorPlane(100,100,100,256), m_colorLines(132,132,132,256)
+              m_colorPlane(0.4f,0.4f,0.4f,1.0f), m_colorLines(0.5f,0.5f,0.5f,1.0)
         {
             m_bPerceptable = perceptable;
             mT_op = Eigen::Matrix4d::Identity();
@@ -36,8 +36,12 @@ class GLGrid : public GLObject
         // from mvl dispview
         static inline void DrawGridZ0(bool filled, int numLines, float lineSpacing, GLColor colorPlane, GLColor colorLines)
         {
-            glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT);
+            glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             {
+                // Prevent Z-Fighting between plane and lines
+                glPolygonOffset( 0.0, 1.0 );
+                glEnable(GL_POLYGON_OFFSET_FILL);
+                
 //                glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT);
 
                 GLfloat ambient[4] = {1,1,1,1};
@@ -62,16 +66,21 @@ class GLGrid : public GLObject
                     glVertex3f( -halfsize , +halfsize, 0.0);
                     glVertex3f( +halfsize , +halfsize, 0.0);
                     glEnd();
+                    
+                    // Don't overwrite this depth when drawing lines:
+                    glDepthMask(GL_FALSE);
                 }
 
                 glBegin(GL_LINES);
                 {
+                    colorLines.Apply();
                     for(int i = -numLines; i < numLines; i++){
-                        colorLines.Apply();
-                        glVertex3f( halfsize, i*lineSpacing, 0.0);
-                        glVertex3f(-halfsize, i*lineSpacing, 0.0);
-                        glVertex3f(i*lineSpacing,  halfsize, 0.0);
-                        glVertex3f(i*lineSpacing, -halfsize, 0.0);
+                        if(i) {
+                            glVertex3f( halfsize, i*lineSpacing, 0.0);
+                            glVertex3f(-halfsize, i*lineSpacing, 0.0);
+                            glVertex3f(i*lineSpacing,  halfsize, 0.0);
+                            glVertex3f(i*lineSpacing, -halfsize, 0.0);
+                        }
                     }
 
                     glColor4ub(255, 0, 0, 128);

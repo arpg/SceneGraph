@@ -13,10 +13,10 @@ public:
 
     GLAxisAlignedBox()
         : GLObject("AxisAlignedBox"),
-          m_resizable(false),
-          x_min(-1), y_min(-1), z_min(-1),
-          x_max(1), y_max(1), z_max(1)
+          m_resizable(false)
     {
+        m_aabb.Min() = Eigen::Vector3d(-1,-1,-1);
+        m_aabb.Max() = Eigen::Vector3d(1,1,1);
         m_bPerceptable = false;
         m_bIsSelectable = true;
         x_label = AllocSelectionId();
@@ -30,38 +30,37 @@ public:
         m_resizable = resizable;
     }
 
-    void DrawAxisAlignedBox(
-            float x_min, float x_max,
-            float y_min, float y_max,
-            float z_min, float z_max
-    ) {
+    void DrawAxisAlignedBox( const AxisAlignedBoundingBox& bbox ) {
+        const Eigen::Vector3d mn = bbox.Min();
+        const Eigen::Vector3d mx = bbox.Max();
+        
         glColor4f(1, 0, 0, 1);
         glPushName(x_label);
         glBegin(GL_LINES);
-        glVertex3d(x_min, y_min, z_min); glVertex3d(x_max, y_min, z_min);
-        glVertex3d(x_min, y_max, z_min); glVertex3d(x_max, y_max, z_min);
-        glVertex3d(x_min, y_max, z_max); glVertex3d(x_max, y_max, z_max);
-        glVertex3d(x_min, y_min, z_max); glVertex3d(x_max, y_min, z_max);
+        glVertex3d(mn(0), mn(1), mn(2)); glVertex3d(mx(0), mn(1), mn(2));
+        glVertex3d(mn(0), mx(1), mn(2)); glVertex3d(mx(0), mx(1), mn(2));
+        glVertex3d(mn(0), mx(1), mx(2)); glVertex3d(mx(0), mx(1), mx(2));
+        glVertex3d(mn(0), mn(1), mx(2)); glVertex3d(mx(0), mn(1), mx(2));
         glEnd();
         glPopName();
 
         glColor4f(0, 1, 0, 1);
         glPushName(y_label);
         glBegin(GL_LINES);
-        glVertex3d(x_min, y_min, z_min); glVertex3d(x_min, y_max, z_min);
-        glVertex3d(x_max, y_min, z_min); glVertex3d(x_max, y_max, z_min);
-        glVertex3d(x_max, y_min, z_max); glVertex3d(x_max, y_max, z_max);
-        glVertex3d(x_min, y_min, z_max); glVertex3d(x_min, y_max, z_max);
+        glVertex3d(mn(0), mn(1), mn(2)); glVertex3d(mn(0), mx(1), mn(2));
+        glVertex3d(mx(0), mn(1), mn(2)); glVertex3d(mx(0), mx(1), mn(2));
+        glVertex3d(mx(0), mn(1), mx(2)); glVertex3d(mx(0), mx(1), mx(2));
+        glVertex3d(mn(0), mn(1), mx(2)); glVertex3d(mn(0), mx(1), mx(2));
         glEnd();
         glPopName();
 
         glColor4f(0, 0, 1, 1);
         glPushName(z_label);
         glBegin(GL_LINES);
-        glVertex3d(x_min, y_min, z_min); glVertex3d(x_min, y_min, z_max);
-        glVertex3d(x_max, y_min, z_min); glVertex3d(x_max, y_min, z_max);
-        glVertex3d(x_max, y_max, z_min); glVertex3d(x_max, y_max, z_max);
-        glVertex3d(x_min, y_max, z_min); glVertex3d(x_min, y_max, z_max);
+        glVertex3d(mn(0), mn(1), mn(2)); glVertex3d(mn(0), mn(1), mx(2));
+        glVertex3d(mx(0), mn(1), mn(2)); glVertex3d(mx(0), mn(1), mx(2));
+        glVertex3d(mx(0), mx(1), mn(2)); glVertex3d(mx(0), mx(1), mx(2));
+        glVertex3d(mn(0), mx(1), mn(2)); glVertex3d(mn(0), mx(1), mx(2));
         glEnd();
         glPopName();
     }
@@ -74,16 +73,16 @@ public:
             if(m_resizable && (button == MouseWheelUp || button == MouseWheelDown) ) {
                 const float mul = (button == MouseWheelUp) ? 1.01 : 0.99;
                 if(pickId == x_label) {
-                    x_min *= mul;
-                    x_max *= mul;
+                    m_aabb.Min()(0) *= mul;
+                    m_aabb.Max()(0) *= mul;
                     return true;
                 }else if(pickId == y_label) {
-                    y_min *= mul;
-                    y_max *= mul;
+                    m_aabb.Min()(1) *= mul;
+                    m_aabb.Max()(1) *= mul;
                     return true;
                 }else if(pickId == z_label) {
-                    z_min *= mul;
-                    z_max *= mul;
+                    m_aabb.Min()(2) *= mul;
+                    m_aabb.Max()(2) *= mul;
                     return true;
                 }
             }
@@ -94,28 +93,22 @@ public:
 
     void DrawCanonicalObject()
     {
-        glPushAttrib(GL_ENABLE_BIT | GL_LINE_BIT | GL_DEPTH_BUFFER_BIT);
-        glDisable(GL_LIGHTING);
-        DrawAxisAlignedBox(x_min, x_max, y_min, y_max, z_min, z_max);
-        glPopAttrib();
+        DrawAxisAlignedBox(m_aabb);
     }
 
     void SetBounds(Eigen::Vector3d boxmin, Eigen::Vector3d boxmax)
     {
-        x_min = boxmin(0); y_min = boxmin(1); z_min = boxmin(2);
-        x_max = boxmax(0); y_max = boxmax(1); z_max = boxmax(2);
+        m_aabb.Min() = boxmin;
+        m_aabb.Max() = boxmax;
     }
 
     void SetBounds(float minx, float miny, float minz, float maxx, float maxy, float maxz)
     {
-        x_min = minx; y_min = miny; z_min = minz;
-        x_max = maxx; y_max = maxy; z_max = maxz;
+        SetBounds(Eigen::Vector3d(minx,miny,minz), Eigen::Vector3d(maxx,maxy,maxz) );
     }
 
 protected:
     bool m_resizable;
-    float x_min,y_min,z_min;
-    float x_max,y_max,z_max;
     int   x_label, y_label, z_label;
 };
 

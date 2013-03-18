@@ -94,6 +94,12 @@ public:
         boxmin = Eigen::Vector3d(std::numeric_limits<float>::max(),std::numeric_limits<float>::max(),std::numeric_limits<float>::max());
         boxmax = Eigen::Vector3d(-std::numeric_limits<float>::max(),-std::numeric_limits<float>::max(),-std::numeric_limits<float>::max());
     }
+    
+    inline void SetZero()
+    {
+        boxmin = Eigen::Vector3d::Zero();
+        boxmax = Eigen::Vector3d::Zero();
+    }
 
     // Expand bounding box to include p
     inline void Insert(const Eigen::Vector3d p)
@@ -180,7 +186,14 @@ public:
     {
         return ElementwiseMax( boxmax,(Eigen::Vector3d)(-1.0*boxmin) );
     }
-
+    
+    inline void ScaleFromCenter(const Eigen::Vector3d& scale)
+    {
+        Eigen::Vector3d center = Center();
+        boxmin.array() = scale.array() * (boxmin - center).array() + center.array();
+        boxmax.array() = scale.array() * (boxmax - center).array() + center.array();
+    }
+    
 
 protected:
     Eigen::Vector3d boxmin;

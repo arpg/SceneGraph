@@ -23,6 +23,7 @@
 namespace Eigen{
     typedef Matrix<double, 6, 1> Vector6d;
     typedef std::vector<Eigen::Vector6d,Eigen::aligned_allocator<Eigen::Vector6d> > Vector6dAlignedVec;
+    typedef std::vector<Eigen::Vector3d,Eigen::aligned_allocator<Eigen::Vector3d> > Vector3dAlignedVec;
 }
 
 namespace SceneGraph
@@ -144,9 +145,12 @@ class GLObject
         /////////////////////////////////
         // Object Size
         /////////////////////////////////
-
+        
         /// Return this Objects axis aligned extent (in object coordinate frame)
         const AxisAlignedBoundingBox& ObjectBounds() const;
+        
+        /// Return this Objects children axis aligned extent (in object coordinate frame)
+        AxisAlignedBoundingBox ChildrenBounds() const;                
 
         /// Return the extent of this object including all visible children
         /// (in object coordinate frame)

@@ -12,6 +12,8 @@ class GLShadowLight : public GLLight
 public:
     GLShadowLight(double x=0, double y=0, double z=0, int shadowBufferWidth = 1024, int shadowBufferHeight = 1024, bool bStatic = false)
         : GLLight(x,y,z),
+          m_ambient_shadow(0.1, 0.1, 0.1, 1.0),
+          m_diffuse_shadow(0.1, 0.1, 0.1, 1.0),          
           fb_img(shadowBufferWidth,shadowBufferHeight),
           fb_depth(shadowBufferWidth,shadowBufferHeight,GL_DEPTH_COMPONENT),
           framebuffer(fb_img,fb_depth),
@@ -56,26 +58,17 @@ public:
         }
 
         EnableLight();
-        GLfloat ambientLight [] = {0.2*0.5, 0.2*0.5, 0.2*0.5, 1.0};
-        GLfloat diffuseLight [] = {0.4*0.5, 0.4*0.5, 0.4*0.5, 1.0};
-        glLightfv(m_nLigthId, GL_AMBIENT, ambientLight);
-        glLightfv(m_nLigthId, GL_DIFFUSE, diffuseLight);
     }
 
     virtual void PostRender(GLSceneGraph& /*scene*/) {
         if(m_bShadowsEnabled){
-            GLfloat lowAmbient[4] = {0.1f*0.5, 0.1f*0.5, 0.1f*0.5, 1.0f};
-            GLfloat lowDiffuse[4] = {0.2f*0.5, 0.2f*0.5, 0.2f*0.5, 1.0f};
-            glLightfv(m_nLigthId, GL_AMBIENT, lowAmbient);
-            glLightfv(m_nLigthId, GL_DIFFUSE, lowDiffuse);
+            glLightfv(m_nLigthId, GL_AMBIENT, m_ambient_shadow.data());
+            glLightfv(m_nLigthId, GL_DIFFUSE, m_diffuse_shadow.data());
             DrawShadows();
-
-            GLfloat ambientLight [] = {0.2*0.5, 0.2*0.5, 0.2*0.5, 1.0};
-            GLfloat diffuseLight [] = {0.4*0.5, 0.4*0.5, 0.4*0.5, 1.0};
-            glLightfv(m_nLigthId, GL_AMBIENT, ambientLight);
-            glLightfv(m_nLigthId, GL_DIFFUSE, diffuseLight);
+            glLightfv(m_nLigthId, GL_AMBIENT, m_ambient.data());
+            glLightfv(m_nLigthId, GL_DIFFUSE, m_diffuse.data());
         }
-        //DisableLight();
+        DisableLight();
     }
 
     void ComputeShadows()
@@ -261,6 +254,9 @@ protected:
         stacks_light.SetProjectionMatrix(pangolin::ProjectionMatrix(fb_img.width,fb_img.height, f, f, fb_img.width/2.0f,fb_img.height/2.0f, std::max(dist-bothrad,0.1), dist+bothrad));
         stacks_light.SetModelViewMatrix(pangolin::ModelViewLookAt(lpos(0), lpos(1), lpos(2), center(0), center(1), center(2), pangolin::AxisNegZ));
     }
+    
+    Eigen::Vector4f m_ambient_shadow;
+    Eigen::Vector4f m_diffuse_shadow;
 
     AxisAlignedBoundingBox m_bboxcasters;
     AxisAlignedBoundingBox m_bboxreceivers;
