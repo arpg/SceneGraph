@@ -39,7 +39,7 @@ class GLGrid : public GLObject
             glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT);
             {
                 // Prevent Z-Fighting between plane and lines
-                glPolygonOffset( 1.0, 1.0 );
+                glPolygonOffset( 0.0, 1.0 );
                 glEnable(GL_POLYGON_OFFSET_FILL);
                 
 //                glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT);

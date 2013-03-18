@@ -231,16 +231,22 @@ const AxisAlignedBoundingBox& GLObject::ObjectBounds() const
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
-AxisAlignedBoundingBox GLObject::ObjectAndChildrenBounds() const
+AxisAlignedBoundingBox GLObject::ChildrenBounds() const
 {
-    AxisAlignedBoundingBox bbox = ObjectBounds();
-
+    AxisAlignedBoundingBox bbox;
     for(std::vector<GLObject*>::const_iterator i=m_vpChildren.begin(); i!= m_vpChildren.end(); ++i) {
         if((*i)->IsVisible()) {
             bbox.Insert((*i)->m_T_po, (*i)->ObjectAndChildrenBounds() );
         }
     }
+    return bbox;    
+}
 
+/////////////////////////////////////////////////////////////////////////////////////////////////
+AxisAlignedBoundingBox GLObject::ObjectAndChildrenBounds() const
+{
+    AxisAlignedBoundingBox bbox = ObjectBounds();
+    bbox.Insert(ChildrenBounds());
     return bbox;
 }
 

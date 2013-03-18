@@ -32,11 +32,13 @@ public:
     
     void AddVertex(Eigen::Vector3d p)
     {
+        GLObject::m_aabb.Insert(p);
         m_vbo.Add(p.cast<float>() );
     }
     
     void Clear()
     {
+        GLObject::m_aabb.Clear();
         m_vbo.Clear();
     }
     

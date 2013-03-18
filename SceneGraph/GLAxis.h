@@ -15,6 +15,7 @@ public:
         : GLObject("Axis"), m_axisSize(axisSize)
     {
         m_bPerceptable = false;
+        m_aabb.SetZero();
     }
 
     static inline void DrawAxis(float size = 1.0f)

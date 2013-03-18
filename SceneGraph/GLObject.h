@@ -144,9 +144,12 @@ class GLObject
         /////////////////////////////////
         // Object Size
         /////////////////////////////////
-
+        
         /// Return this Objects axis aligned extent (in object coordinate frame)
         const AxisAlignedBoundingBox& ObjectBounds() const;
+        
+        /// Return this Objects children axis aligned extent (in object coordinate frame)
+        AxisAlignedBoundingBox ChildrenBounds() const;                
 
         /// Return the extent of this object including all visible children
         /// (in object coordinate frame)
