@@ -45,6 +45,7 @@ set( SceneGraph_HEADERS
         GLLineStrip.h
         GLPrimitives.h
         GLAxisHistory.h
+        GLOpenBox.h
         SimCam.h
         Pangolin.h
         PangolinDrawGLObject.h
