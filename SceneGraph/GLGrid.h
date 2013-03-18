@@ -36,7 +36,7 @@ class GLGrid : public GLObject
         // from mvl dispview
         static inline void DrawGridZ0(bool filled, int numLines, float lineSpacing, GLColor colorPlane, GLColor colorLines)
         {
-            glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT);
+            glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             {
                 // Prevent Z-Fighting between plane and lines
                 glPolygonOffset( 0.0, 1.0 );
@@ -66,6 +66,9 @@ class GLGrid : public GLObject
                     glVertex3f( -halfsize , +halfsize, 0.0);
                     glVertex3f( +halfsize , +halfsize, 0.0);
                     glEnd();
+                    
+                    // Don't overwrite this depth when drawing lines:
+                    glDepthMask(GL_FALSE);
                 }
 
                 glBegin(GL_LINES);
