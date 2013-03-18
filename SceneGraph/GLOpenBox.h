@@ -16,9 +16,13 @@ class GLOpenBox : public GLObject
               m_box_grow_factor(1,1,1),
               m_interval(interval),
               m_ticks_per_interval(sub_ticks_per_interval),
-              m_colorPlane(0.4f,0.4f,0.4f,1.0f),
-              m_colorLines(0.5f,0.5f,0.5f,1.0)
+              m_ambient(0.9, 0.9, 0.9, 1.0 ),
+              m_diffuse(0.83, 0.85, 0.87, 1.0),
+              m_linemod(0.686, 0.874, 0.929, 1.0),
+              m_specular(0,0,0,1)
         {
+            m_lambient = m_ambient.array() * m_linemod;
+            m_ldiffuse = m_diffuse.array() * m_linemod;
         }
         
         inline void DrawFace(const Eigen::Vector3d& bmin, const Eigen::Vector3d& bmax, int axis, double nmag)
@@ -79,7 +83,7 @@ class GLOpenBox : public GLObject
             }
         }
         
-        inline void DrawOpenBox(const AxisAlignedBoundingBox& bbox, GLColor colorPlane, GLColor colorLines)
+        inline void DrawOpenBox(const AxisAlignedBoundingBox& bbox)
         {
             glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT);
             {
@@ -92,26 +96,15 @@ class GLOpenBox : public GLObject
                 
                 const Eigen::Vector3d bmin = bbox.Min();
                 const Eigen::Vector3d bmax = bbox.Max();
-                
+
+                // TODO: use projectmatrix too to cope with different cameras                
                 Eigen::Matrix4f T_co;
-                Eigen::Matrix4f P;
                 glGetFloatv( GL_MODELVIEW_MATRIX, T_co.data() );
-                glGetFloatv( GL_PROJECTION_MATRIX, P.data() );
             
                 glDisable(GL_COLOR_MATERIAL);
-//                glColor3ub(243, 247, 248);
-//                glColor3f(0.953, 0.969, 0.972)
-//                glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT);
-                
-//                glColor3f(1,1,1);
-//                GLfloat ambient[4] = {1,1,1,1};
-                Eigen::Vector4f ambient(0.9, 0.9, 0.9, 1.0 );
-                Eigen::Vector4f diffuse(0.83, 0.85, 0.87, 1.0);
-                
-                GLfloat specular[4] = {0,0,0,1};
-                glMaterialfv( GL_FRONT_AND_BACK, GL_AMBIENT, ambient.data() );
-                glMaterialfv( GL_FRONT_AND_BACK, GL_DIFFUSE, diffuse.data() );
-                glMaterialfv( GL_FRONT_AND_BACK, GL_SPECULAR, specular );
+                glMaterialfv( GL_FRONT_AND_BACK, GL_AMBIENT, m_ambient.data() );
+                glMaterialfv( GL_FRONT_AND_BACK, GL_DIFFUSE, m_diffuse.data() );
+                glMaterialfv( GL_FRONT_AND_BACK, GL_SPECULAR, m_specular.data() );
                 
                 for(int ax=0; ax<3; ++ax) {
                     Eigen::Vector3f n(0,0,0); n(ax) = 1;
@@ -119,15 +112,8 @@ class GLOpenBox : public GLObject
                     DrawFace(bmin,bmax,ax,nc(2)>0 ? 1 : -1);
                 }
                 
-                Eigen::Array4f  papermod(0.686, 0.874, 0.929, 1.0);
-                Eigen::Vector4f lambient = ambient.array() * papermod;
-                Eigen::Vector4f ldiffuse = diffuse.array() * papermod;
-//                GLfloat lambient[4] = {0.2, 0.2, 0.2, 1.0 };
-//                GLfloat ldiffuse[4] = {0.686, 0.874, 0.929, 1.0 };
-                GLfloat lspecular[4] = {0,0,0,1};
-                glMaterialfv( GL_FRONT_AND_BACK, GL_AMBIENT, lambient.data() );
-                glMaterialfv( GL_FRONT_AND_BACK, GL_DIFFUSE, ldiffuse.data() );
-                glMaterialfv( GL_FRONT_AND_BACK, GL_SPECULAR, lspecular );                                
+                glMaterialfv( GL_FRONT_AND_BACK, GL_AMBIENT, m_lambient.data() );
+                glMaterialfv( GL_FRONT_AND_BACK, GL_DIFFUSE, m_ldiffuse.data() );
 
                 for(int ax=0; ax<3; ++ax) {
                     Eigen::Vector3f n(0,0,0); n(ax) = 1;
@@ -146,25 +132,26 @@ class GLOpenBox : public GLObject
         void DrawCanonicalObject(void)
         {
             AxisAlignedBoundingBox bbox = ChildrenBounds();
-            bbox.ScaleFromCenter(m_box_grow_factor);
-            GLObject::m_aabb = bbox;
-            DrawOpenBox(bbox, m_colorPlane, m_colorLines);
-        }
-
-        inline void SetPlaneColor(const GLColor& color) {
-            m_colorPlane = color;
-        }
-
-        inline void SetLineColor(const GLColor& color) {
-            m_colorLines = color;
+            if(!bbox.Empty()) {
+                bbox.ScaleFromCenter(m_box_grow_factor);
+                GLObject::m_aabb = bbox;
+            }else{
+                GLObject::m_aabb = AxisAlignedBoundingBox(Eigen::Vector3d(-1,-1,-1), Eigen::Vector3d(1,1,1) );
+            }
+            DrawOpenBox(GLObject::m_aabb);
         }
 
 protected:
         Eigen::Vector3d m_box_grow_factor;
         double m_interval;
         int m_ticks_per_interval;
-        GLColor m_colorPlane;
-        GLColor m_colorLines;
+        
+        Eigen::Vector4f m_ambient;
+        Eigen::Vector4f m_diffuse;
+        Eigen::Array4f  m_linemod;
+        Eigen::Vector4f m_lambient;
+        Eigen::Vector4f m_ldiffuse;
+        Eigen::Vector4f m_specular;
 };
 
 } // SceneGraph
