@@ -10,7 +10,7 @@ using namespace std;
 int main( int /*argc*/, char** /*argv[]*/ )
 {
     // Create OpenGL window in single line thanks to GLUT
-    pangolin::CreateGlutWindowAndBind("Main",640,480);
+    pangolin::CreateGlutWindowAndBind("Main",640,480, GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH | GLUT_MULTISAMPLE);
     SceneGraph::GLSceneGraph::ApplyPreferredGlSettings();
     glewInit();
 
