@@ -96,12 +96,14 @@ public:
             UpdateGlTexture();
         }
 
-        glPushAttrib(GL_ENABLE_BIT);
+        glPushAttrib(GL_ENABLE_BIT | GL_DEPTH_BUFFER_BIT);
         glDisable(GL_LIGHTING);
         glDisable(GL_COLOR_MATERIAL);
         glDisable(GL_BLEND);
+        glDisable(GL_DEPTH_TEST);
 
         // Activate viewport
+        pangolin::Viewport::DisableScissor();
         this->Activate();
         glColor3f(1,1,1);
 
