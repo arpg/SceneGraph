@@ -4,11 +4,6 @@
 #include <iostream>
 #include <iomanip>
 
-#include <boost/gil/gil_all.hpp>
-#define png_infopp_NULL (png_infopp)NULL
-#define int_p_NULL (int*)NULL
-#include <boost/gil/extension/io/png_io.hpp>
-
 using namespace SceneGraph;
 using namespace pangolin;
 using namespace std;
@@ -19,10 +14,33 @@ void Usage() {
       
 Eigen::Matrix<double,6,1> TrajectoryT_wx(double t)
 {
-    const double r = 7.5 + sin( 4*(M_PI+t/3) - M_PI/2.0)/2.0;
+    const double s = t/3;
+    const double r = 7.5 + sin( 4*(M_PI+s) - M_PI/2.0)/2.0;
     Eigen::Matrix<double,6,1> ret;
-    ret << r * cos(M_PI+t/3.0), r * sin(M_PI+t/3.0), -1.5,    M_PI/2, 0, t/3.0;
+    
+    ret << r * cos(M_PI+s), r * sin(M_PI+s), -1.5 + 0.05*sin(10*t),
+            M_PI/2.0, 0,
+            M_PI/2.0- atan2(
+                (2.0*sin(4.0*(s+M_PI))*sin(s))/3.0+((7.5-cos(4.0*(s+M_PI))/2.0)*cos(s))/3.0,
+                ((7.5-cos(4.0*(s+M_PI))/2.0)*sin(s))/3.0-(2.0*sin(4.0*(s+M_PI))*cos(s))/3.0
+            );
     return ret;
+}
+
+void SavePPM( const std::string& prefix, unsigned char* img_data, int w, int h, int channels, double time )
+{
+    assert(channels == 1 || channels == 3);
+    std::ofstream bFile( (prefix+".pgm").c_str(), std::ios::out | std::ios::binary );
+    bFile << (channels == 1 ? "P5" : "P6") << std::endl;
+    bFile << w << " " << h << '\n';
+    bFile << "255" << '\n';
+    bFile.write( (char *)img_data, w*h*channels);
+    bFile.close();    
+    
+    std::ofstream txtFile( (prefix+".txt").c_str(), std::ios::out );
+    txtFile << "%YAML:1.0" << std::endl;
+    txtFile << "SystemTime: \"" << std::setprecision(20) << time << "\"" << std::endl;
+    txtFile.close();
 }
 
 int main( int argc, char* argv[] )
@@ -32,12 +50,17 @@ int main( int argc, char* argv[] )
         return -1;
     }    
 
-    bool save_files = (argc == 3);
+    const bool save_files = (argc == 3);
     const std::string model_filename(argv[1]);    
     const std::string destination_directory = save_files ? argv[2] : "";
 
-    const int w = 640;
-    const int h = 480;
+    // Camera parameters
+    const int w = 512;
+    const int h = 384;
+    const double fu = 300;
+    const double fv = 300;
+    const double u0 = w/2;
+    const double v0 = h/2;
     
     // Create OpenGL window in single line thanks to GLUT
     pangolin::CreateGlutWindowAndBind("Main",640*2,480);
@@ -64,7 +87,7 @@ int main( int argc, char* argv[] )
 
     // Define Camera Render Object (for view / scene browsing)
     pangolin::OpenGlRenderState stacks3d(
-        ProjectionMatrix(640,480,420,420,320,240,0.1,1000),
+        ProjectionMatrix(w,h,fu,fv,u0,v0,0.1,1000),
         ModelViewLookAt(0,-10,-30, 0,0,-1.5, AxisNegZ)
     );
     
@@ -80,7 +103,7 @@ int main( int argc, char* argv[] )
 
     // We define a special type of view which will accept image data
     // to display and set its bounds on screen.
-    ImageView viewImage(false,true);
+    pangolin::View viewImage;
     viewImage.SetBounds(0.0, 1.0, 1.0/2.0, 1.0, (double)w/h);
 
     // Add our views as children to the base container.
@@ -90,13 +113,14 @@ int main( int argc, char* argv[] )
     
     // Define Camera Render Object for generating synthetic video sequence
     pangolin::OpenGlRenderState stacks_synth(
-        ProjectionMatrixRDF_TopLeft(640,480,420,420,320,240,0.1,1000),
+        ProjectionMatrixRDF_BottomLeft(w,h,fu,fv,u0,v0,0.1,1000),
         ModelViewLookAt(0,-2,-4, 0,1,0, AxisNegZ)
     );
 
     // Offscreen render buffer for synthetic video sequence
+    GLenum synth_format = GL_RED;
     pangolin::GlRenderBuffer synth_depth(w,h);
-    pangolin::GlTexture synth_texture(w,h);
+    pangolin::GlTexture synth_texture(w,h,synth_format);
     pangolin::GlFramebuffer synth_framebuffer(synth_texture, synth_depth);
 
     // Time details
@@ -106,8 +130,7 @@ int main( int argc, char* argv[] )
     int frame = 0;
     double time = 0; 
     
-    boost::gil::rgba8_image_t img(w, h);
-    unsigned char* img_data = boost::gil::interleaved_view_get_raw_data( boost::gil::view( img ) );
+    unsigned char* img_data = new unsigned char[w*h];
     
     // Default hooks for exiting (Esc) and fullscreen (tab).
     while( !pangolin::ShouldQuit() )
@@ -118,27 +141,25 @@ int main( int argc, char* argv[] )
         synth_framebuffer.Bind();
         glViewport(0,0,w,h);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glEnable(GL_SCISSOR_TEST);        
+        
+        glEnable(GL_SCISSOR_TEST); 
         for(int r=0; r<h; ++r) {            
             glScissor(0,r,w,1);
             Eigen::Matrix4d T_wv = GLCart2T(TrajectoryT_wx(time + r*lineTime));
             pangolin::OpenGlMatrix T_vw = OpenGlMatrix(T_wv).Inverse();
             stacks_synth.SetModelViewMatrix(T_vw);
             stacks_synth.Apply();
-//            stacks3d.Apply();
-            glMesh.DrawObjectAndChildren();
+            glGraph.DrawObjectAndChildren(eRenderPerceptable);
         }
         glDisable(GL_SCISSOR_TEST);        
-        glFlush();        
-        
-        // read and save to file.
-        glReadPixels(0,0,w,h, GL_RGBA, GL_UNSIGNED_BYTE, img_data );
-        if(save_files) {
-            std::ostringstream ss;
-            ss << destination_directory << "/0_" << std::setw( 5 ) << std::setfill( '0' ) << frame << ".png";
-            boost::gil::png_write_view(ss.str(), flipped_up_down_view( boost::gil::const_view(img)) );
-        }
         synth_framebuffer.Unbind();
+
+        if(save_files) {
+            synth_texture.Download(img_data, synth_format, GL_UNSIGNED_BYTE);
+            std::ostringstream ss;
+            ss << destination_directory << "/0_" << std::setw( 5 ) << std::setfill( '0' ) << frame;
+            SavePPM(ss.str(), img_data, w, h, synth_format == GL_RGB ? 3 : 1, time );   
+        }
                 
         time += frameTime;
         frame++;
@@ -147,7 +168,8 @@ int main( int argc, char* argv[] )
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // Display our saved image        
-        viewImage.SetImage(img_data, w, h, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE);
+        viewImage.Activate();
+        synth_texture.RenderToViewportFlipY();
 
         // Swap frames and Process Events
         pangolin::FinishGlutFrame();
@@ -155,6 +177,8 @@ int main( int argc, char* argv[] )
         // Pause for 1/60th of a second.
         usleep(1E6 / 60);
     }
+    
+    delete[] img_data;
 
     return 0;
 }
