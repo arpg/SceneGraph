@@ -7,6 +7,12 @@ IF(BuildExamples)
   ADD_SUBDIRECTORY(DisplayShadowTest)
   ADD_SUBDIRECTORY(ModelViewer)
   ADD_SUBDIRECTORY(ModelPhysics)
+
+  FIND_PACKAGE( PNG QUIET )
+  IF(PNG_FOUND)
+      ADD_SUBDIRECTORY(OffscreenRender)
+  ENDIF()
+
   FIND_PACKAGE( MVL QUIET )
   IF( MVL_FOUND )
       ADD_SUBDIRECTORY(SimCam)
