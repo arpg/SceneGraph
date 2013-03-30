@@ -29,7 +29,7 @@ class GLLineStrip : public GLObject
             glDepthMask(true);
             glEnable(GL_DEPTH_TEST);
 
-            glLineWidth(2);
+            //glLineWidth(1);
 
             m_Color.Apply();
             glBegin( GL_LINE_STRIP );
