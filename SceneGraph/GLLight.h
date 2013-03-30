@@ -58,6 +58,14 @@ public:
         DisableLight();
     }
 
+    virtual void SetAmbient(const Eigen::Vector4f& fAmbient){
+        m_ambient = fAmbient;
+    }
+
+    virtual void SetDiffuse(const Eigen::Vector4f& fDiffuse){
+        m_diffuse = fDiffuse;
+    }
+
 protected:
     Eigen::Vector4f m_ambient;
     Eigen::Vector4f m_diffuse;

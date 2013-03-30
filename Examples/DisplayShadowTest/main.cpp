@@ -55,6 +55,7 @@ int main( int /*argc*/, char** /*argv[]*/ )
     SceneGraph::GLShadowLight shadowLight(10,10,-100, 2048,2048);
     //shadowLight.SetVisible();
     shadowLight.AddShadowCaster(&glCube);
+    shadowLight.AddShadowCaster(&glSpiral);
     shadowLight.AddShadowCasterAndReceiver(&glMesh);
     shadowLight.AddShadowReceiver(&glGrid);
     glGraph.AddChild(&shadowLight);

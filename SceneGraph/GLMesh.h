@@ -47,6 +47,8 @@ class GLMesh : public GLObject
 
         void SetScale(double s);
 
+        void SetAlpha(const double a) { m_fAlpha = a; }
+
         // TODO: Ideally we would deprecate this and not make
         // ASSIMP structures public.
         const struct aiScene *GetScene( void );
@@ -61,7 +63,7 @@ class GLMesh : public GLObject
         void RecursiveRender( const struct aiScene *sc, const struct aiNode* nd );
         void RenderMesh( const struct aiMesh* mesh, const struct aiMaterial* mtl );
         void RenderFace( GLenum face_mode, GLenum fill_mode, float fAlpha, const struct aiFace* face,  const struct aiMesh* mesh );
-        void ApplyMaterial( const struct aiMaterial *mtl );
+        void ApplyMaterial(const struct aiMaterial *mtl );
 
         const struct aiScene*   m_pScene;
         float                   m_fAlpha; // render translucent meshes?

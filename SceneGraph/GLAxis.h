@@ -20,6 +20,13 @@ public:
 
     static inline void DrawAxis(float size = 1.0f)
     {
+//        glPushAttrib(GL_ENABLE_BIT | GL_DEPTH_BUFFER_BIT);
+
+//        glDepthMask(false);
+//        glDisable(GL_DEPTH_TEST);
+
+
+
         // draw axis
         glBegin(GL_LINES);
         glColor4f(1, 0, 0, 1);
@@ -34,6 +41,8 @@ public:
         glVertex3d(0, 0, 0);
         glVertex3d(0, 0, size);
         glEnd();
+
+        //glPopAttrib();
     }
 
     void DrawCanonicalObject()

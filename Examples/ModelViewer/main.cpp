@@ -41,6 +41,8 @@ int main( int argc, char* argv[] )
         exit(-1);
     }
 
+    glMesh.SetAlpha(0.5);
+
     const SceneGraph::AxisAlignedBoundingBox bbox = glMesh.ObjectAndChildrenBounds();
     const Eigen::Vector3d center = bbox.Center();
     const double size = bbox.Size().norm();

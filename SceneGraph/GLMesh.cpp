@@ -129,9 +129,14 @@ void  GLMesh::DrawCanonicalObject()
 
             // Enable Multisample if it is available.
             glEnable(GL_MULTISAMPLE);                        
+            glEnable(GL_BLEND);
+            glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
             
-            glColor3f(1,1,1);
+            glColor4f(1,1,1,m_fAlpha);
             RecursiveRender( m_pScene, m_pScene->mRootNode );
+
+            glDisable(GL_BLEND);
 
             glPopAttrib();
         }
@@ -327,24 +332,29 @@ void GLMesh::ApplyMaterial( const struct aiMaterial *mtl )
     if(AI_SUCCESS == aiGetMaterialColor(mtl, AI_MATKEY_COLOR_DIFFUSE, &diffuse)){
         color4_to_float4( &diffuse, c);
     }
+    c[4]*=m_fAlpha;
+
     glMaterialfv( GL_FRONT_AND_BACK, GL_DIFFUSE, c );
 
     set_float4( c, 0.0f, 0.0f, 0.0f, 1.0f );
     if(AI_SUCCESS == aiGetMaterialColor(mtl, AI_MATKEY_COLOR_SPECULAR, &specular)){
         color4_to_float4(&specular, c);
     }
+    c[4]*=m_fAlpha;
     glMaterialfv( GL_FRONT_AND_BACK, GL_SPECULAR, c );
 
     set_float4( c, 0.2f, 0.2f, 0.2f, 1.0f );
     if(AI_SUCCESS == aiGetMaterialColor(mtl, AI_MATKEY_COLOR_AMBIENT, &ambient)){
         color4_to_float4( &ambient, c );
     }
+    c[4]*=m_fAlpha;
     glMaterialfv( GL_FRONT_AND_BACK, GL_AMBIENT, c );
 
     set_float4( c, 0.0f, 0.0f, 0.0f, 1.0f );
     if(AI_SUCCESS == aiGetMaterialColor(mtl, AI_MATKEY_COLOR_EMISSIVE, &emission)){
         color4_to_float4(&emission, c);
     }
+    c[4]*=m_fAlpha;
     glMaterialfv( GL_FRONT_AND_BACK, GL_EMISSION, c );
 
     CheckForGLErrors();
