@@ -318,10 +318,16 @@ unsigned int GLBytesPerPixel( unsigned int nFormat, unsigned int nType )
             nVal = 8;
     }
     switch ( nFormat ) {
-        case GL_LUMINANCE: break;
+        case GL_RED:
+        case GL_R8:
+        case GL_R8UI:
+        case GL_LUMINANCE:
+            break;
         case GL_RGB: nVal*=3; break;
         case GL_RGBA: nVal*=4; break;
-        default: fprintf ( stderr, "GLBytesPerPixel() -- unsupported format\n" ); return 0;
+        default:
+            fprintf ( stderr, "GLBytesPerPixel() -- unsupported format\n" );
+            return 0;
     }
     return nVal;
 }

@@ -10,7 +10,7 @@ using namespace std;
 int main( int /*argc*/, char** /*argv[]*/ )
 {
     // Create OpenGL window in single line thanks to GLUT
-    pangolin::CreateGlutWindowAndBind("Main",640,480);
+    pangolin::CreateGlutWindowAndBind("Main",640,480, GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH | GLUT_MULTISAMPLE);
     SceneGraph::GLSceneGraph::ApplyPreferredGlSettings();
     glewInit();
 
@@ -55,6 +55,7 @@ int main( int /*argc*/, char** /*argv[]*/ )
     SceneGraph::GLShadowLight shadowLight(10,10,-100, 2048,2048);
     //shadowLight.SetVisible();
     shadowLight.AddShadowCaster(&glCube);
+    shadowLight.AddShadowCaster(&glSpiral);
     shadowLight.AddShadowCasterAndReceiver(&glMesh);
     shadowLight.AddShadowReceiver(&glGrid);
     glGraph.AddChild(&shadowLight);

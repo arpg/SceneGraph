@@ -84,6 +84,7 @@ class GLOpenBox : public GLObject
                 }
                 glEnd();
             }
+            glLineWidth(origLineWidth);
         }
         
         inline void DrawOpenBox(const AxisAlignedBoundingBox& bbox)
@@ -115,7 +116,7 @@ class GLOpenBox : public GLObject
                     DrawFace(bmin,bmax,ax,nc(2)>0 ? 1 : -1);
                 }
 
-//                glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_FALSE);
+                glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_FALSE);
                 glMaterialfv( GL_FRONT_AND_BACK, GL_AMBIENT, m_lambient.data() );
                 glMaterialfv( GL_FRONT_AND_BACK, GL_DIFFUSE, m_ldiffuse.data() );
 

@@ -24,6 +24,7 @@ public:
     
     void Clear()
     {
+        GLObject::m_aabb.Clear();        
         m_red.Clear();
         m_green.Clear();
         m_blue.Clear();
@@ -48,6 +49,8 @@ public:
         
     void AddAxis(const Eigen::Matrix<double,3,4>& T_wp, double axis_size = 1.0)
     {
+        GLObject::m_aabb.Insert(T_wp.block<3,1>(0,3));
+        
         Eigen::Matrix<float,3,2> vs;
         
         vs.block<3,1>(0,0) = T_wp.block<3,1>(0,3).cast<float>();

@@ -26,7 +26,7 @@ public:
         }
     }
 
-    void ResizeTexture(GLint width, GLint height, GLint internal_format = GL_RGB8)
+    void ResizeTexture(GLint width, GLint height, GLint internal_format, GLint glformat, GLint gltype)
     {
         this->SetAspect((double)width / (double)height);
 
@@ -36,7 +36,7 @@ public:
             m_ortho = pangolin::ProjectionMatrixOrthographic(-0.5, width-0.5, -0.5, height-0.5, 0, 1E4 );
         }
 
-        tex.Reinitialise(width, height, internal_format, m_bSamplingLinear);
+        tex.Reinitialise(width, height, internal_format, m_bSamplingLinear, 0, glformat, gltype);
     }
 
     //! Set the image data to be used for display.
@@ -76,7 +76,7 @@ public:
     void UpdateGlTexture()
     {
         if(m_iImageWidth != tex.width || m_iImageHeight != tex.height || m_nInternalFormat != tex.internal_format) {
-            ResizeTexture(m_iImageWidth, m_iImageHeight, m_nInternalFormat);
+            ResizeTexture(m_iImageWidth, m_iImageHeight, m_nInternalFormat, m_nFormat, m_nType);
         }
 
         m_bImageDataDirty = false;
@@ -96,12 +96,14 @@ public:
             UpdateGlTexture();
         }
 
-        glPushAttrib(GL_ENABLE_BIT);
+        glPushAttrib(GL_ENABLE_BIT | GL_DEPTH_BUFFER_BIT);
         glDisable(GL_LIGHTING);
         glDisable(GL_COLOR_MATERIAL);
         glDisable(GL_BLEND);
+        glDisable(GL_DEPTH_TEST);
 
         // Activate viewport
+        pangolin::Viewport::DisableScissor();
         this->Activate();
         glColor3f(1,1,1);
 
