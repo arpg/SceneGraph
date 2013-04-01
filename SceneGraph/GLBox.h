@@ -120,7 +120,7 @@ namespace SceneGraph
     {
         SetExtent( 1, 1, 1 );
         static int nColorIdx = -1;
-        nColorIdx = (++nColorIdx)%3;
+        nColorIdx = (nColorIdx+1)%3;
         SetCheckerboard( nColorIdx );
     }
 
