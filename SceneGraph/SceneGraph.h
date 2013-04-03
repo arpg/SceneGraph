@@ -15,6 +15,7 @@
 #include <SceneGraph/GLMovableAxis.h>
 #include <SceneGraph/GLWaypoint.h>
 #include <SceneGraph/GLLineStrip.h>
+#include <SceneGraph/GLCylinder.h>
 
 #ifdef HAVE_ASSIMP
 #include <SceneGraph/GLMesh.h>
