@@ -54,6 +54,8 @@ inline GLCylinder::GLCylinder( GLuint texId )
     m_nTexID = texId;
     m_pQuadric = NULL;
     m_bDrawCaps = true;
+    m_pTopDisk = NULL;
+    m_pBottomDisk = NULL;
     SetCheckerboard();
 }
 
