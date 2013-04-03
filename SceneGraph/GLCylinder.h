@@ -93,13 +93,20 @@ inline void GLCylinder::Init(
     if( m_bDrawCaps ){
         m_pTopDisk = gluNewQuadric();
         gluQuadricNormals( m_pTopDisk, GLU_SMOOTH );
+        gluQuadricDrawStyle( m_pTopDisk, GLU_FILL );
+        gluQuadricTexture( m_pTopDisk, GL_TRUE );
+
         m_pBottomDisk = gluNewQuadric();
         gluQuadricNormals( m_pBottomDisk, GLU_SMOOTH );
+        gluQuadricDrawStyle( m_pBottomDisk, GLU_FILL );
+        gluQuadricTexture( m_pBottomDisk, GL_TRUE );
+
     }
 
 
     m_pQuadric = gluNewQuadric();
     gluQuadricNormals( m_pQuadric, GLU_SMOOTH );
+    gluQuadricDrawStyle( m_pQuadric, GLU_FILL );
     gluQuadricTexture( m_pQuadric, GL_TRUE );
 
     m_dBaseRadius = dBaseRadius;
@@ -139,13 +146,12 @@ inline void GLCylinder::SetCheckerboard()
     m_bOwnsTexture = true;
     glGenTextures( 1, &m_nTexID );
     glBindTexture( GL_TEXTURE_2D, m_nTexID );
-    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+    glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
     glPixelStorei( GL_UNPACK_ALIGNMENT, 1);
     glTexImage2D( GL_TEXTURE_2D, 0,
             GL_RGB, TEX_W, TEX_H, 0, GL_RGB, GL_UNSIGNED_BYTE, &img[0][0][0] );
     glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
     glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-
 }
 
 inline void GLCylinder::SetTexture( GLuint texId )
@@ -157,6 +163,11 @@ inline void GLCylinder::SetTexture( GLuint texId )
 
 inline void GLCylinder::DrawCanonicalObject()
 {
+    if(m_nTexID) {
+        glEnable( GL_TEXTURE_2D );
+        glBindTexture( GL_TEXTURE_2D, m_nTexID );
+    }
+
     if( m_pQuadric ){
         gluCylinder( m_pQuadric, m_dBaseRadius, m_dTopRadius, m_dHeight, m_nSlices, m_nStacks );
 
