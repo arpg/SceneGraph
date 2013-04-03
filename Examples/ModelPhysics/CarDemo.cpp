@@ -101,7 +101,7 @@ struct App
         m_light.AddShadowCasterAndReceiver( &m_ramp1 );
         m_light.AddShadowCasterAndReceiver( &m_ramp2 );
 
-        m_Wheel.Init( 1, 1, 1, 32, 10 );
+        m_Wheel.Init( 1, 1, 1, 32, 1 );
         m_Wheel.SetPose( 0, 0, -5, M_PI/2, 0, 0 );
         m_rSceneGraph.AddChild( &m_Wheel );
 
