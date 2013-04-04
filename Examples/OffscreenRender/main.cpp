@@ -70,6 +70,7 @@ int main( int argc, char* argv[] )
     // Scenegraph to hold GLObjects and relative transformations
     GLSceneGraph glGraph;
             
+#ifdef HAVE_ASSIMP
     // Define a mesh object and try to load model
     SceneGraph::GLMesh glMesh;
     try {
@@ -80,6 +81,7 @@ int main( int argc, char* argv[] )
         cerr << e.what() << endl;
         return -1;
     }
+#endif // HAVE_ASSIMP
     
     // Coordinate axis to visualise trajectory
     GLAxis glCamAxis;

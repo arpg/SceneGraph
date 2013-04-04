@@ -17,20 +17,34 @@ int main( int /*argc*/, char** /*argv[]*/ )
     // Scenegraph to hold GLObjects and relative transformations
     SceneGraph::GLSceneGraph glGraph;
 
+    // Create shadow light to illuminate scene. Shadow casters
+    // and receivers must be set up individually.    
+    SceneGraph::GLShadowLight shadowLight(10,10,-100, 2048,2048);
+    glGraph.AddChild(&shadowLight);    
+
     // Define grid object
     SceneGraph::GLGrid glGrid(20,1.0, true);
+    glGraph.AddChild(&glGrid);
+    shadowLight.AddShadowReceiver(&glGrid);
 
     // Define axis object, and set its pose
     SceneGraph::GLAxis glAxis;
     glAxis.SetPose(-1,-2,-0.1, 0, 0, M_PI/4);
     glAxis.SetScale(0.25);
+    glGraph.AddChild(&glAxis);
 
     // Define 3D spiral using a GLCachedPrimitives object
     SceneGraph::GLCachedPrimitives glSpiral(GL_LINE_STRIP, SceneGraph::GLColor(1.0f,0.7f,0.2f));
     for(double t=0; t < 10*M_PI; t+= M_PI/50) {
         glSpiral.AddVertex(Eigen::Vector3d(cos(t)+2, sin(t)+2, -0.2*t) );
     }
+    glGraph.AddChild(&glSpiral);
 
+    SceneGraph::GLCube glCube;
+    glCube.SetPose(1.5,1.5,-sqrt(3), M_PI/4, M_PI/4, M_PI/4);
+    glGraph.AddChild(&glCube);
+    shadowLight.AddShadowCaster(&glCube);
+    
 #ifdef HAVE_ASSIMP
     // Define a mesh object and try to load model
     SceneGraph::GLMesh glMesh;
@@ -39,28 +53,11 @@ int main( int /*argc*/, char** /*argv[]*/ )
         glMesh.SetPosition(0,0,-1);
         glMesh.SetScale(4.0f);
         glGraph.AddChild(&glMesh);
+        shadowLight.AddShadowCasterAndReceiver(&glMesh);
     }catch(exception e) {
         cerr << "Cannot load mesh. Check file exists" << endl;
     }
 #endif // HAVE_ASSIMP
-
-    SceneGraph::GLCube glCube;
-//    glCube.ClearTexture();
-    glCube.SetPose(1.5,1.5,-sqrt(3), M_PI/4, M_PI/4, M_PI/4);
-
-    // Add objects to scenegraph
-    glGraph.AddChild(&glGrid);
-    glGraph.AddChild(&glSpiral);
-    glGraph.AddChild(&glAxis);
-    glGraph.AddChild(&glCube);
-
-    SceneGraph::GLShadowLight shadowLight(10,10,-100, 2048,2048);
-    //shadowLight.SetVisible();
-    shadowLight.AddShadowCaster(&glCube);
-    shadowLight.AddShadowCaster(&glSpiral);
-    shadowLight.AddShadowCasterAndReceiver(&glMesh);
-    shadowLight.AddShadowReceiver(&glGrid);
-    glGraph.AddChild(&shadowLight);
 
     // Define Camera Render Object (for view / scene browsing)
     pangolin::OpenGlRenderState stacks3d(
