@@ -26,6 +26,7 @@ list(APPEND
     SceneGraph.h
     GLGroup.h
     GLSLHelpers.h
+    GLCylinder.h
     GLHelpers.h
     GLHelpersLoadTextures.h
     GLHelpersBoost.h
