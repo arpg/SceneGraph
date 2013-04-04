@@ -55,6 +55,7 @@ int main( int /*argc*/, char** /*argv[]*/ )
     // Define 3D floating text object
     SceneGraph::GLText glText3d("3D Floating Text", -1, 1, -1);
 
+#ifdef HAVE_ASSIMP
     // Define a mesh object and try to load model
     SceneGraph::GLMesh glMesh;
     try {
@@ -64,6 +65,7 @@ int main( int /*argc*/, char** /*argv[]*/ )
     }catch(exception e) {
         cerr << "Cannot load mesh. Check file exists" << endl;
     }
+#endif
 
     // Add objects to scenegraph
     glGraph.AddChild(&glGrid);
