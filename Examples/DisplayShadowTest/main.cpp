@@ -31,6 +31,7 @@ int main( int /*argc*/, char** /*argv[]*/ )
         glSpiral.AddVertex(Eigen::Vector3d(cos(t)+2, sin(t)+2, -0.2*t) );
     }
 
+#ifdef HAVE_ASSIMP
     // Define a mesh object and try to load model
     SceneGraph::GLMesh glMesh;
     try {
@@ -41,6 +42,7 @@ int main( int /*argc*/, char** /*argv[]*/ )
     }catch(exception e) {
         cerr << "Cannot load mesh. Check file exists" << endl;
     }
+#endif // HAVE_ASSIMP
 
     SceneGraph::GLCube glCube;
 //    glCube.ClearTexture();

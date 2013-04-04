@@ -65,7 +65,7 @@ int main( int /*argc*/, char** /*argv[]*/ )
     }catch(exception e) {
         cerr << "Cannot load mesh. Check file exists" << endl;
     }
-#endif
+#endif // HAVE_ASSIMP
 
     // Add objects to scenegraph
     glGraph.AddChild(&glGrid);

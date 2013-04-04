@@ -2,11 +2,7 @@ ADD_SUBDIRECTORY(DisplayModel)
 ADD_SUBDIRECTORY(DisplayImage)
 ADD_SUBDIRECTORY(DisplayShadowTest)
 ADD_SUBDIRECTORY(ModelPhysics)
-
-find_package( ASSIMP )
-if(ASSIMP_FOUND)
-  ADD_SUBDIRECTORY(ModelViewer)
-endif()
+ADD_SUBDIRECTORY(ModelViewer)
 
 FIND_PACKAGE( PNG QUIET )
 IF(PNG_FOUND)
