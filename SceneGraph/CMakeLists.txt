@@ -11,47 +11,47 @@ find_package( OpenGL REQUIRED )
 find_package( Eigen3 REQUIRED )
 find_package( GLEW REQUIRED )
 
-set( SceneGraph_SOURCES
-        GLHelpers.cpp
-        GLObject.cpp
-        GLSceneGraph.cpp
-        GLMesh.cpp
-        FBO.cpp
-        SimCam.cpp
-   )
+list(APPEND
+    SceneGraph_SOURCES
+    GLHelpers.cpp
+    GLObject.cpp
+    GLSceneGraph.cpp
+    FBO.cpp
+    SimCam.cpp
+)
 
-set( SceneGraph_HEADERS
-        config.h.in
-        SceneGraph.h
-        GLGroup.h
-        GLSLHelpers.h
-        GLHelpers.h
-        GLHelpersLoadTextures.h
-        GLHelpersBoost.h
-        GLHelpersDevil.h
-        GLLight.h
-        GLShadowLight.h
-        GLColor.h
-        GLImage.h
-        GLMesh.h
-        GLVbo.h
-        GLText.h
-        GLGrid.h
-        GLAxis.h
-        GLCube.h
-        GLMovableAxis.h
-        GLAxisAlignedBox.h
-        GLWaypoint.h
-        GLLineStrip.h
-        GLPrimitives.h
-        GLAxisHistory.h
-        GLOpenBox.h
-        SimCam.h
-        Pangolin.h
-        PangolinDrawGLObject.h
-        PangolinSceneGraphHandler.h
-        PangolinImageView.h
-   )
+list(APPEND
+    SceneGraph_HEADERS
+    config.h.in
+    SceneGraph.h
+    GLGroup.h
+    GLSLHelpers.h
+    GLHelpers.h
+    GLHelpersLoadTextures.h
+    GLHelpersBoost.h
+    GLHelpersDevil.h
+    GLLight.h
+    GLShadowLight.h
+    GLColor.h
+    GLImage.h
+    GLVbo.h
+    GLText.h
+    GLGrid.h
+    GLAxis.h
+    GLCube.h
+    GLMovableAxis.h
+    GLAxisAlignedBox.h
+    GLWaypoint.h
+    GLLineStrip.h
+    GLPrimitives.h
+    GLAxisHistory.h
+    GLOpenBox.h
+    SimCam.h
+    Pangolin.h
+    PangolinDrawGLObject.h
+    PangolinSceneGraphHandler.h
+    PangolinImageView.h
+)
 
 # Basic includes / libraries
 set(SceneGraph_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/..;${PROJECT_BINARY_DIR}/..;${OPENGL_INCLUDE_DIR};${GLEW_INCLUDE_DIR};${EIGEN3_INCLUDE_DIR}" )
@@ -62,6 +62,8 @@ if(ASSIMP_FOUND)
   set(HAVE_ASSIMP 1)
   list(APPEND SceneGraph_INCLUDE_DIRS "${ASSIMP_INCLUDE_DIRS}" )
   list(APPEND SceneGraph_LIBRARIES "${ASSIMP_LIBRARIES}" )
+  list(APPEND SceneGraph_SOURCES GLMesh.cpp)
+  list(APPEND SceneGraph_HEADERS GLMesh.h)
 else()
   message(STATUS "ASSIMP Not found, but required for mesh loading.")
 endif()
