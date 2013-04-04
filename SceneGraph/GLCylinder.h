@@ -169,10 +169,11 @@ inline void GLCylinder::DrawCanonicalObject()
     }
 
     if( m_pQuadric ){
+        glTranslatef( 0, 0, -m_dHeight / 2 );
         gluCylinder( m_pQuadric, m_dBaseRadius, m_dTopRadius, m_dHeight, m_nSlices, m_nStacks );
 
         if( m_bDrawCaps ){
-            gluDisk( m_pBottomDisk, 0, m_dBaseRadius, m_nSlices, 2 );
+            gluDisk( m_pBottomDisk, 0, m_dBaseRadius, m_nSlices, 2 );            
             glTranslatef( 0, 0, m_dHeight );
             gluDisk( m_pTopDisk, 0, m_dTopRadius, m_nSlices, 2 );
         }
