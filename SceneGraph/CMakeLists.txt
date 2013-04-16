@@ -1,18 +1,21 @@
 project( SceneGraph )
 cmake_minimum_required( VERSION 2.8 )
 
-# scoop up our macros
-include( Common.cmake )
-
 # Add to module path, so we can find our cmake modules
 set( CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules ${CMAKE_MODULE_PATH} )
+
+################################################################################
+# Find required dependencies
 
 find_package( OpenGL REQUIRED )
 find_package( Eigen3 REQUIRED )
 find_package( GLEW REQUIRED )
 
-list(APPEND
-    SceneGraph_SOURCES
+
+################################################################################
+# Specify source files
+
+list(APPEND SOURCES
     GLHelpers.cpp
     GLObject.cpp
     GLSceneGraph.cpp
@@ -20,8 +23,7 @@ list(APPEND
     SimCam.cpp
 )
 
-list(APPEND
-    SceneGraph_HEADERS
+list(APPEND HEADERS
     config.h.in
     SceneGraph.h
     GLGroup.h
@@ -55,52 +57,56 @@ list(APPEND
 )
 
 # Basic includes / libraries
-set(SceneGraph_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/..;${PROJECT_BINARY_DIR}/..;${OPENGL_INCLUDE_DIR};${GLEW_INCLUDE_DIR};${EIGEN3_INCLUDE_DIR}" )
-set(SceneGraph_LIBRARIES "${OPENGL_LIBRARIES};${GLEW_LIBRARIES}" )
+set(USER_INC "${CMAKE_CURRENT_SOURCE_DIR}/..;${PROJECT_BINARY_DIR}/..;${OPENGL_INCLUDE_DIR};${GLEW_INCLUDE_DIR};${EIGEN3_INCLUDE_DIR}" )
+set(LINK_LIBS "${OPENGL_LIBRARIES};${GLEW_LIBRARIES}" )
+set(LIB_DIRS "" )
 
-find_package( ASSIMP )
+################################################################################
+# Find optional libraries
+
+find_package( ASSIMP QUIET)
 if(ASSIMP_FOUND)
   set(HAVE_ASSIMP 1)
-  list(APPEND SceneGraph_INCLUDE_DIRS "${ASSIMP_INCLUDE_DIRS}" )
-  list(APPEND SceneGraph_LIBRARIES "${ASSIMP_LIBRARIES}" )
-  list(APPEND SceneGraph_SOURCES GLMesh.cpp)
-  list(APPEND SceneGraph_HEADERS GLMesh.h)
+  list(APPEND USER_INC "${ASSIMP_INCLUDE_DIRS}" )
+  list(APPEND LINK_LIBS "${ASSIMP_LIBRARIES}" )
+  list(APPEND SOURCES GLMesh.cpp)
+  list(APPEND HEADERS GLMesh.h)
 else()
   message(STATUS "ASSIMP Not found, but required for mesh loading.")
 endif()
 
-find_package( DevIL )
+find_package( DevIL QUIET)
 if(IL_FOUND)
   set(HAVE_DEVIL 1)
-  list(APPEND SceneGraph_INCLUDE_DIRS "${IL_INCLUDE_DIR};${IL_INCLUDE_DIR}/.." )
-  list(APPEND SceneGraph_LIBRARIES "${IL_LIBRARIES};${ILU_LIBRARIES};${ILUT_LIBRARIES}" )
+  list(APPEND USER_INC "${IL_INCLUDE_DIR};${IL_INCLUDE_DIR}/.." )
+  list(APPEND LINK_LIBS "${IL_LIBRARIES};${ILU_LIBRARIES};${ILUT_LIBRARIES}" )
 else()
   message(STATUS "DevIL not found, but it is only used to load images that boost cannot load")
 endif()
 
-find_package(PNG)
+find_package(PNG QUIET)
 if(PNG_FOUND)
   set(HAVE_PNG 1)
-  list(APPEND SceneGraph_INCLUDE_DIRS ${PNG_INCLUDE_DIR} )
-  list(APPEND SceneGraph_LIBRARIES ${PNG_LIBRARY} )
+  list(APPEND USER_INC ${PNG_INCLUDE_DIR} )
+  list(APPEND LINK_LIBS ${PNG_LIBRARY} )
 else()
   message(STATUS "libpng not found - used to load PNG textures")
 endif()
 
-find_package(JPEG)
+find_package(JPEG QUIET)
 if(JPEG_FOUND)
   set(HAVE_JPEG 1)
-  list(APPEND SceneGraph_INCLUDE_DIRS ${JPEG_INCLUDE_DIR} )
-  list(APPEND SceneGraph_LIBRARIES ${JPEG_LIBRARY} )
+  list(APPEND USER_INC ${JPEG_INCLUDE_DIR} )
+  list(APPEND LINK_LIBS ${JPEG_LIBRARY} )
 else()
   message(STATUS "libjpeg not found - used to load Jpeg textures")
 endif()
 
-find_package(TIFF)
+find_package(TIFF QUIET)
 if(TIFF_FOUND)
   set(HAVE_TIFF 1)
-  list(APPEND SceneGraph_INCLUDE_DIRS ${TIFF_INCLUDE_DIR} )
-  list(APPEND SceneGraph_LIBRARIES ${TIFF_LIBRARY} )
+  list(APPEND USER_INC ${TIFF_INCLUDE_DIR} )
+  list(APPEND LINK_LIBS ${TIFF_LIBRARY} )
 else()
   message(STATUS "libtiff not found - used to load TIFF textures")
 endif()
@@ -109,14 +115,20 @@ endif()
 find_package(Pangolin)
 if(Pangolin_FOUND)
   set(HAVE_PANGOLIN 1)
-  include_directories(${Pangolin_INCLUDE_DIRS})
-  link_directories(${Pangolin_LIBRARY_DIRS})
-  link_libraries(${Pangolin_LIBRARIES})
+  list(APPEND USER_INC ${Pangolin_INCLUDE_DIRS})
+  list(APPEND LINK_LIBS ${Pangolin_LIBRARIES})
+  list(APPEND LINK_DIRS ${Pangolin_LIBRARY_DIRS})
 endif()
 
-include_directories( ${SceneGraph_INCLUDE_DIRS} )
-add_library( SceneGraph ${SceneGraph_SOURCES} ${SceneGraph_HEADERS} )
-target_link_libraries( SceneGraph ${SceneGraph_LIBRARIES} )
+################################################################################
+# Include collected includes / libraries
+
+include_directories( ${USER_INC} )
+add_library( SceneGraph ${SOURCES} ${HEADERS} )
+target_link_libraries( SceneGraph ${LINK_LIBS} )
+
+################################################################################
+# Platform tests for config.h
 
 # Test platform type
 IF(WIN32 OR WIN64)
@@ -141,7 +153,12 @@ CONFIGURE_FILE(
   "${CMAKE_CURRENT_BINARY_DIR}/config.h"
 )
 
-# If set, this will use global variables SceneGraph_INCLUDE_DIRS and SceneGraph_LIBRARIES
-# and will write a SceneGraphConfig.cmake file with these values filled in.
-export_library( SceneGraph )
+################################################################################
+# Export library using cmake package mechanism.
 
+# Create SceneGraphConfig.cmake from SceneGraphConfig.cmake.in
+# to export USER_INC, LINK_LIBS etc.
+get_target_property( LIB_LOC SceneGraph LOCATION )
+configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/SceneGraphConfig.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/SceneGraphConfig.cmake @ONLY IMMEDIATE )
+export( PACKAGE SceneGraph )

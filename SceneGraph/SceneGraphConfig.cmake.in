@@ -1,5 +1,8 @@
-# automatically generated SceneGraph.cmake.in file
-SET( SceneGraph_LIBRARIES  @SceneGraph_LIBRARIES@ CACHE INTERNAL "SceneGraph libraries" FORCE )
-mark_as_advanced( SceneGraph_LIBRARIES )
-SET( SceneGraph_INCLUDE_DIRS  @SceneGraph_INCLUDE_DIRS@ CACHE INTERNAL "SceneGraph include directories" FORCE )
-mark_as_advanced( SceneGraph_INCLUDE_DIRS )
+SET( SceneGraph_LIBRARIES    "@LIB_LOC@;@LINK_LIBS@" )
+SET( SceneGraph_LIBRARY      "@LIB_LOC@;@LINK_LIBS@" )
+
+SET( SceneGraph_INCLUDE_DIRS "@USER_INC@" )
+SET( SceneGraph_INCLUDE_DIR  "@USER_INC@" )
+
+SET( SceneGraph_LIBRARY_DIRS "@LIB_DIRS@" )
+SET( SceneGraph_LIBRARY_DIR  "@LIB_DIRS@" )

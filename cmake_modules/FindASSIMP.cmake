@@ -1,7 +1,3 @@
-#-------------------------------------------------------------------
-#
-#-------------------------------------------------------------------
-
 # - Try to find Assimp
 # Once done, this will define
 #
@@ -9,33 +5,30 @@
 #  ASSIMP_INCLUDE_DIRS - the Assimp include directories
 #  ASSIMP_LIBRARIES - link these to use Assimp
 
-    include(FindPkgMacros)
-findpkg_begin(ASSIMP)
+FIND_PATH( ASSIMP_INCLUDE_DIR assimp/mesh.h
+  /usr/include
+  /usr/local/include
+  /opt/local/include
+)
 
-# Get path, convert backslashes as ${ENV_${var}}
-getenv_path(ASSIMP_HOME)
+FIND_LIBRARY( ASSIMP_LIBRARY assimp
+  /usr/lib64
+  /usr/lib
+  /usr/local/lib
+  /opt/local/lib
+)
 
-# construct search paths
-set(ASSIMP_PREFIX_PATH ${ASSIMP_HOME} ${ENV_ASSIMP_HOME} /usr/local /usr/local/include /usr/local/lib /usr/include /usr/lib /usr/local/include/assimp /usr/include/assimp /usr/lib/assimp /usr/local/lib/assimp /opt/local /opt/local/include/assimp /opt/local/lib)
-create_search_paths(ASSIMP)
-# redo search if prefix path changed
-    clear_if_changed(ASSIMP_PREFIX_PATH
-            ASSIMP_LIBRARY_REL
-            ASSIMP_LIBRARY_DBG
-            ASSIMP_INCLUDE_DIR
-            )
+IF(ASSIMP_INCLUDE_DIR AND ASSIMP_LIBRARY)
+  SET( ASSIMP_FOUND TRUE )
+  SET( ASSIMP_LIBRARIES ${ASSIMP_LIBRARY} )
+ENDIF(ASSIMP_INCLUDE_DIR AND ASSIMP_LIBRARY)
 
-    set(ASSIMP_LIBRARY_NAMES assimp)
-get_debug_names(ASSIMP_LIBRARY_NAMES)
-
-use_pkgconfig(ASSIMP_PKGC ASSIMP)
-
-findpkg_framework(ASSIMP)
-
-find_path(ASSIMP_INCLUDE_DIR NAMES assimp/cimport.h HINTS ${ASSIMP_INC_SEARCH_PATH} ${ASSIMP_PKGC_INCLUDE_DIRS} PATH_SUFFIXES assimp)
-    find_library(ASSIMP_LIBRARY_REL NAMES ${ASSIMP_LIBRARY_NAMES} HINTS ${ASSIMP_LIB_SEARCH_PATH} ${ASSIMP_PKGC_LIBRARY_DIRS} PATH_SUFFIXES "" release relwithdebinfo minsizerel)
-    find_library(ASSIMP_LIBRARY_DBG NAMES ${ASSIMP_LIBRARY_NAMES_DBG} HINTS ${ASSIMP_LIB_SEARCH_PATH} ${ASSIMP_PKGC_LIBRARY_DIRS} PATH_SUFFIXES "" debug)
-make_library_set(ASSIMP_LIBRARY)
-
-    findpkg_finish(ASSIMP)
-add_parent_dir(ASSIMP_INCLUDE_DIRS ASSIMP_INCLUDE_DIR)
+IF(ASSIMP_FOUND)
+   IF(NOT ASSIMP_FIND_QUIETLY)
+      MESSAGE(STATUS "Found ASSIMP: ${ASSIMP_LIBRARY}")
+   ENDIF(NOT ASSIMP_FIND_QUIETLY)
+ELSE(ASSIMP_FOUND)
+   IF(ASSIMP_FIND_REQUIRED)
+      MESSAGE(FATAL_ERROR "Could not find libASSIMP")
+   ENDIF(ASSIMP_FIND_REQUIRED)
+ENDIF(ASSIMP_FOUND)
