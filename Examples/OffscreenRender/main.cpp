@@ -120,11 +120,10 @@ int main( int argc, char* argv[] )
     );
 
     // Offscreen render buffer for synthetic video sequence
-    GLenum synth_format = GL_RED;
     pangolin::GlRenderBuffer synth_depth(w,h);
-    pangolin::GlTexture synth_texture(w,h,synth_format);
+    pangolin::GlTexture synth_texture(w,h,GL_RGBA);
     pangolin::GlFramebuffer synth_framebuffer(synth_texture, synth_depth);
-
+    
     // Time details
     const double LoopTime = 3*2*M_PI;
     const double frameTime = LoopTime / 200;
@@ -157,10 +156,10 @@ int main( int argc, char* argv[] )
         synth_framebuffer.Unbind();
 
         if(save_files) {
-            synth_texture.Download(img_data, synth_format, GL_UNSIGNED_BYTE);
+            synth_texture.Download(img_data, GL_RED, GL_UNSIGNED_BYTE);
             std::ostringstream ss;
             ss << destination_directory << "/0_" << std::setw( 5 ) << std::setfill( '0' ) << frame;
-            SavePPM(ss.str(), img_data, w, h, synth_format == GL_RGB ? 3 : 1, time );   
+            SavePPM(ss.str(), img_data, w, h, 1, time );   
         }
                 
         time += frameTime;
