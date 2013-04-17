@@ -83,6 +83,7 @@ class GLSimCam
             m_pSceneGraph = NULL;
             m_pFbo = FBO::Instance();
             m_pRGBMode = NULL;
+            m_pGreyMode = NULL;
             m_pDepthMode = NULL;
             m_pNormalsMode = NULL;
             m_bOrthoCam = false;
@@ -556,8 +557,9 @@ class GLSimCam
 #endif
         /////////////////////////////////////////////////////////////////////////////////////////
         void RenderToTexture()
-        {
+        {            
             Begin();
+
             if( m_pRGBMode ){
                 m_pRGBMode->RenderToTexture();
             }
