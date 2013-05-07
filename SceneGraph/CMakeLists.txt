@@ -11,54 +11,58 @@ find_package( OpenGL REQUIRED )
 find_package( Eigen3 REQUIRED )
 find_package( GLEW REQUIRED )
 
-set( SceneGraph_SOURCES
-        GLHelpers.cpp
-        GLObject.cpp
-        GLSceneGraph.cpp
-        FBO.cpp
-        SimCam.cpp
-        ../Widgets/nvGlutWidgets.cpp
-        ../Widgets/nvGLWidgets.cpp
-        ../Widgets/nvWidgets.cpp
-   )
 
-set( SceneGraph_HEADERS
-        config.h.in
-        SceneGraph.h
-        GLGroup.h
-        GLSLHelpers.h
-        GLHelpers.h
-        GLHelpersLoadTextures.h
-        GLHelpersBoost.h
-        GLHelpersDevil.h
-        GLLight.h
-        GLShadowLight.h
-        GLColor.h
-        GLImage.h
-        GLVbo.h
-        GLText.h
-        GLGrid.h
-        GLAxis.h
-        GLCube.h
-        GLMovableAxis.h
-        GLAxisAlignedBox.h
-        GLWaypoint.h
-        GLLineStrip.h
-        GLPrimitives.h
-        GLAxisHistory.h
-        GLOpenBox.h
-        SimCam.h
-        Pangolin.h
-        PangolinDrawGLObject.h
-        PangolinSceneGraphHandler.h
-        PangolinImageView.h
-        ../Widgets/nvWidgets.h
-        ../Widgets/nvGlutWidgets.h
-        ../Widgets/nvGLWidgets.h
-        ../Widgets/nvShaderUtils.h
-        ../Widgets/GLWidgetView.h
-   )
+################################################################################
+# Specify source files
 
+list(APPEND SOURCES
+    GLHelpers.cpp
+    GLObject.cpp
+    GLSceneGraph.cpp
+    FBO.cpp
+    SimCam.cpp
+    ../Widgets/nvGlutWidgets.cpp
+    ../Widgets/nvGLWidgets.cpp
+    ../Widgets/nvWidgets.cpp
+)
+
+list(APPEND HEADERS
+    config.h.in
+    SceneGraph.h
+    GLGroup.h
+    GLSLHelpers.h
+    GLCylinder.h
+    GLHelpers.h
+    GLHelpersLoadTextures.h
+    GLHelpersBoost.h
+    GLHelpersDevil.h
+    GLLight.h
+    GLShadowLight.h
+    GLColor.h
+    GLImage.h
+    GLVbo.h
+    GLText.h
+    GLGrid.h
+    GLAxis.h
+    GLCube.h
+    GLMovableAxis.h
+    GLAxisAlignedBox.h
+    GLWaypoint.h
+    GLLineStrip.h
+    GLPrimitives.h
+    GLAxisHistory.h
+    GLOpenBox.h
+    SimCam.h
+    Pangolin.h
+    PangolinDrawGLObject.h
+    PangolinSceneGraphHandler.h
+    PangolinImageView.h
+    ../Widgets/nvWidgets.h
+    ../Widgets/nvGlutWidgets.h
+    ../Widgets/nvGLWidgets.h
+    ../Widgets/nvShaderUtils.h
+    ../Widgets/GLWidgetView.h
+)
 
 # Basic includes / libraries
 set(USER_INC "${CMAKE_CURRENT_SOURCE_DIR}/..;${PROJECT_BINARY_DIR}/..;${OPENGL_INCLUDE_DIR};${GLEW_INCLUDE_DIR};${EIGEN3_INCLUDE_DIR}" )
