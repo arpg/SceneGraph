@@ -27,7 +27,7 @@ class GLLineStrip : public GLObject
             glPushAttrib(GL_ENABLE_BIT | GL_DEPTH_BUFFER_BIT | GL_LINE_WIDTH);
 
             glDepthMask(true);
-            glEnable(GL_DEPTH_TEST);
+            glDisable(GL_DEPTH_TEST);
 
             //glLineWidth(1);
 

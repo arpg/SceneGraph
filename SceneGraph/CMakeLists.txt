@@ -18,6 +18,9 @@ set( SceneGraph_SOURCES
         GLMesh.cpp
         FBO.cpp
         SimCam.cpp
+        ../Widgets/nvGlutWidgets.cpp
+        ../Widgets/nvGLWidgets.cpp
+        ../Widgets/nvWidgets.cpp
    )
 
 set( SceneGraph_HEADERS
@@ -51,6 +54,11 @@ set( SceneGraph_HEADERS
         PangolinDrawGLObject.h
         PangolinSceneGraphHandler.h
         PangolinImageView.h
+        ../Widgets/nvWidgets.h
+        ../Widgets/nvGlutWidgets.h
+        ../Widgets/nvGLWidgets.h
+        ../Widgets/nvShaderUtils.h
+        ../Widgets/GLWidgetView.h
    )
 
 # Basic includes / libraries

@@ -20,10 +20,10 @@ public:
 
     static inline void DrawAxis(float size = 1.0f)
     {
-//        glPushAttrib(GL_ENABLE_BIT | GL_DEPTH_BUFFER_BIT);
+        glPushAttrib(GL_ENABLE_BIT | GL_DEPTH_BUFFER_BIT);
 
-//        glDepthMask(false);
-//        glDisable(GL_DEPTH_TEST);
+        glDepthMask(false);
+        glDisable(GL_DEPTH_TEST);
 
 
 
@@ -42,7 +42,7 @@ public:
         glVertex3d(0, 0, size);
         glEnd();
 
-        //glPopAttrib();
+        glPopAttrib();
     }
 
     void DrawCanonicalObject()
