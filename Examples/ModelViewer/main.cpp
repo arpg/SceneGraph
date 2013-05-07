@@ -31,19 +31,23 @@ int main( int argc, char* argv[] )
     SceneGraph::GLLight light(10,10,-100);
     glGraph.AddChild(&light);
 
+    SceneGraph::AxisAlignedBoundingBox bbox;
+    
+#ifdef HAVE_ASSIMP
     // Define a mesh object and try to load model
     SceneGraph::GLMesh glMesh;
     try {
         glMesh.Init(model_filename);
         glGraph.AddChild(&glMesh);
+        bbox = glMesh.ObjectAndChildrenBounds();
     }catch(exception e) {
         cerr << "Cannot load mesh. Check file exists" << endl;
+        cerr << e.what() << std::endl;
         exit(-1);
     }
+#endif // HAVE_ASSIMP
 
-    glMesh.SetAlpha(1.0);
-
-    const SceneGraph::AxisAlignedBoundingBox bbox = glMesh.ObjectAndChildrenBounds();
+     
     const Eigen::Vector3d center = bbox.Center();
     const double size = bbox.Size().norm();
     const double far = 10*size;

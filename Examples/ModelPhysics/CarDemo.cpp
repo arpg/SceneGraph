@@ -36,6 +36,8 @@ struct App
     SceneGraph::GLGrid          m_grid;
     SceneGraph::GLSceneGraph&   m_rSceneGraph;
 
+    SceneGraph::GLCylinder      m_Wheel;
+
     Eigen::Vector6d             m_dRamp1Pose;
     Eigen::Vector3d             m_dRamp1Extent;
 
@@ -98,6 +100,12 @@ struct App
         m_light.AddShadowCasterAndReceiver( &m_cube );
         m_light.AddShadowCasterAndReceiver( &m_ramp1 );
         m_light.AddShadowCasterAndReceiver( &m_ramp2 );
+
+        m_Wheel.Init( 1, 1, 1, 32, 1 );
+        m_Wheel.SetPose( 0, 0, -5, M_PI/2, 0, 0 );
+        m_rSceneGraph.AddChild( &m_Wheel );
+
+        m_light.AddShadowCasterAndReceiver( &m_Wheel );
 
         // Send our GLObjects to the simulator.
         // NB: Sim keeps a pointer to our objects, so we can't delete them

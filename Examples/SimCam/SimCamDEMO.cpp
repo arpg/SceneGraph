@@ -150,29 +150,25 @@ int main(
     // Scenegraph to hold GLObjects and relative transformations
     sg::GLSceneGraph glGraph;
 
+#ifdef HAVE_ASSIMP
     // set up mesh
     sg::GLMesh glMesh;
-
-    try
-    {
+    try {
         glMesh.Init( sMesh );
         glMesh.SetPerceptable( true );
         glGraph.AddChild( &glMesh );
-
         cout << "MeshLogger: Mesh '" << sMesh << "' loaded." << endl;
-    }
-    catch( exception e )
-    {
+    } catch( exception e ) {
         cerr << "SimCamDEMO: Cannot load mesh. Check file exists." << endl;
 
         exit( 0 );
     }
+#endif // HAVE_ASSIMP
 
     // define grid object
     sg::GLGrid glGrid;
     glGrid.SetPose( 0, 0, 1, 0, 0, 0 );
     glGraph.AddChild( &glGrid );
-
 
     // initialize cameras
     glCamLeft.Init( &glGraph, mvl::Cart2T( g_vCamPose ), K, g_nImgWidth, g_nImgHeight,

@@ -19,7 +19,7 @@ namespace SceneGraph
 
             void ClearTexture();
 
-            void SetCheckerboard();
+            void SetCheckerboard( int nColorIndex = 0 );
 
             void SetTexture(GLuint texId);
     
@@ -50,18 +50,30 @@ namespace SceneGraph
     }
 
     ///////////////////////////////////////////////////////////////////////////////
-    inline void GLBox::SetCheckerboard()
+
+    inline void GLBox::SetCheckerboard( int nColorIdx )
     {
         ClearTexture();
+
+        SceneGraph::GLColor vCheckerColors[3][2];
+
+        vCheckerColors[0][0] = GLColor( 0.7f, 0.5f, 0.9f ); // light
+        vCheckerColors[0][1] = GLColor( 0.2f, 0.2f, 0.4f ); // dark
+
+        vCheckerColors[1][0] = GLColor( 0.5f, 0.9f, 0.7f ); // light
+        vCheckerColors[1][1] = GLColor( 0.2f, 0.4f, 0.2f ); // dark
+
+        vCheckerColors[2][0] = GLColor( 0.9f, 0.7f, 0.5f ); // light
+        vCheckerColors[2][1] = GLColor( 0.4f, 0.2f, 0.2f ); // dark
 
         // Texture Map Init
         GLubyte img[TEX_W][TEX_H][3]; // after glTexImage2D(), array is no longer needed
         for (int x=0; x<TEX_W; x++) {
             for (int y=0; y<TEX_H; y++) {
-                GLubyte c = ((x&16)^(y&16)) ? 255 : 100; // checkerboard
-                img[x][y][0] = 0.8*c;
-                img[x][y][1] = 0.6*c;
-                img[x][y][2] = 1.0*c;
+                int nIdx = bool( ((x&16)^(y&16)) );
+                img[x][y][0] = 220*vCheckerColors[nColorIdx][nIdx].r;
+                img[x][y][1] = 220*vCheckerColors[nColorIdx][nIdx].g;
+                img[x][y][2] = 220*vCheckerColors[nColorIdx][nIdx].b;
             }
         }
 
@@ -107,7 +119,9 @@ namespace SceneGraph
         : m_bOwnsTexture(false), m_nTexID(0)
     {
         SetExtent( 1, 1, 1 );
-        SetCheckerboard();
+        static int nColorIdx = -1;
+        nColorIdx = (nColorIdx+1)%3;
+        SetCheckerboard( nColorIdx );
     }
 
     ///////////////////////////////////////////////////////////////////////////////
