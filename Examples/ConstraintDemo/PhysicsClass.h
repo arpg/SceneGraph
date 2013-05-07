@@ -588,8 +588,13 @@ class Phys
                 btTransform TransformA = toBulletTransform( pSlider->m_TransformA );   // Transform from A
                 btTransform TransformB = toBulletTransform( pSlider->m_TransformB );   // Transform from B
 
+                std::cout<<"TransformA: "<<std::endl<<pSlider->m_TransformA<<std::endl;
+
                 btSliderConstraint* spSlider = new btSliderConstraint(*pBodyA, *pBodyB, TransformA, TransformB, pSlider->UseLinear());
-                spSlider->setDampingDirLin(1);
+
+
+                spSlider->setLowerLinLimit(btScalar(pSlider->LowerLinLimit));
+                spSlider->setUpperLinLimit(btScalar(pSlider->UpperLinLimit));
 
                 // add constraint to world
                 m_pDynamicsWorld->addConstraint(spSlider, true);

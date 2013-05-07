@@ -84,10 +84,8 @@ class App
 
             Eigen::Vector6d Ta, Tb;
 
-            Ta << 0, 0, 2, 0, 0, 0;
-            Tb << 0, 0, 2, 0, 0, 0;
-
-//            SliderJoint* pSlider = new SliderJoint( "plunger", pChassis, pMass, Ta, Tb, true);
+            Ta << 0, 0, 13.5, 0, M_PI / 2, 0;
+            Tb << 0, 0, 13.5, 0, M_PI / 2, 0;
 
             BoxShape box = BoxShape(2,1,3);
             Body* pChassis = new Body( std::string("Chassis"), box, 1.0f );
@@ -138,6 +136,8 @@ class App
             UpperAngleLimit << 1, 0, 0;
 
             SliderJoint* pSlider = new SliderJoint( "Neck", pChassis, pHead, Ta, Tb, true);
+            pSlider->setLowerLimit(5);
+            pSlider->setUpperLimit(6);
 //            Hinge2Joint* pNeck = new Hinge2Joint( "Neck", pChassis, pHead, axis1, axis2, anchor, 0.2, 0.2, LowerLinearLimit, UpperLinearLimit, LowerAngleLimit, UpperAngleLimit);
         }
 
