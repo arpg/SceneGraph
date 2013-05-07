@@ -12,6 +12,11 @@ LINK_LIBRARIES(${SceneGraph_LIBRARIES})
 find_package(RPG REQUIRED)
 include_directories(${RPG_INCLUDE_DIRS})
 
+find_package( Bullet REQUIRED )
+include_directories(${BULLET_INCLUDE_DIRS})
+link_libraries(${BULLET_LIBRARIES})
+
+
 ADD_EXECUTABLE(ContsraintDemo main.cpp)
 
 # In your own code, you can ommit these lines

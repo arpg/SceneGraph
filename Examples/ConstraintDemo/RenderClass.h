@@ -2,9 +2,9 @@
 #define RENDERCLASS_H
 
 #include <SceneGraph/SceneGraph.h>
-#include <RobotGames/Shape.h>
-#include <RobotGames/Models.h>
-#include <RobotGames/SE3.h>
+#include <RPG/ModelGraph/Shape.h>
+#include <RPG/ModelGraph/Models.h>
+#include <RPG/ModelGraph/SE3.h>
 #include <map>
 
 class SceneEntity {

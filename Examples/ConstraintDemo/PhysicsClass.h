@@ -3,8 +3,8 @@
 
 #include <boost/shared_ptr.hpp>
 #include <bullet/btBulletDynamicsCommon.h>
-#include <RobotGames/Models.h>
-#include <RobotGames/SE3.h>
+#include <RPG/ModelGraph/Models.h>
+#include <RPG/ModelGraph/SE3.h>
 #include <bullet/LinearMath/btIDebugDraw.h>
 
 using namespace std;
