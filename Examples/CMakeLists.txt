@@ -1,4 +1,5 @@
 ADD_SUBDIRECTORY(DisplayModel)
+ADD_SUBDIRECTORY(ConstraintDemo)
 ADD_SUBDIRECTORY(DisplayImage)
 ADD_SUBDIRECTORY(DisplayShadowTest)
 ADD_SUBDIRECTORY(ModelPhysics)
