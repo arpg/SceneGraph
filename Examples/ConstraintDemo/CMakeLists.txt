@@ -9,7 +9,7 @@ FIND_PACKAGE(SceneGraph REQUIRED)
 INCLUDE_DIRECTORIES(${SceneGraph_INCLUDE_DIRS})
 LINK_LIBRARIES(${SceneGraph_LIBRARIES})
 
-find_package(RPG REQUIRED)
+find_package(ModelGraph REQUIRED)
 include_directories(${RPG_INCLUDE_DIRS})
 
 find_package( Bullet REQUIRED )

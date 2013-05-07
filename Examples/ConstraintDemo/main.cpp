@@ -7,7 +7,7 @@
 #include "GetPot"                             // for command line parsing
 #include "CVarHelpers.h"                      // for parsing Eigen vars as CVars
 #include <CVars/CVar.h>                       // for glconsole
-#include <RPG/ModelGraph/Models.h>            // Include the ModelGraph
+#include <ModelGraph/Models.h>            // Include the ModelGraph
 #include "RenderClass.h"
 #include "PhysicsClass.h"
 

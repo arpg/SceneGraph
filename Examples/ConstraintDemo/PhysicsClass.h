@@ -56,6 +56,15 @@ inline btTransform toBullet(const Eigen::Matrix<double,4,4>& T)
     return bT;
 }
 
+inline btTransform toBulletTransform(const Eigen::Vector6d& t)
+{
+    Eigen::Matrix4d transform;
+    transform = _Cart2T(t);
+    btMatrix3x3 rot(transform(0, 0), transform(0, 1), transform(0, 2), transform(1, 0), transform(1, 1), transform(1, 2), transform(2, 0), transform(2, 1), transform(2, 2));
+    btTransform bt(rot, btVector3(btScalar(t[0]), btScalar(t[1]), btScalar(t[1])));
+    return bt;
+}
+
 inline btVector3 toBulletVec3(const Eigen::Vector3d& v)
 {
     btVector3 bv;
@@ -534,6 +543,58 @@ class Phys
 
                 // draw constraint frames and limits for debugging
                 spHingeDynAB->setDbgDrawSize(btScalar(5.f));
+            }
+            else if (dynamic_cast<Point2Point*>(pItem) != NULL) {
+                std::cout<<"Associating physics with a Point2Point Joint!"<<std::endl;
+                Point2Point* pP2P = (Point2Point*) pItem;
+
+                boost::shared_ptr<Entity> pParent = m_mEntities[pP2P->m_pParentBody->GetName()];
+                btRigidBody* pBodyA =  pParent->m_pRigidBody.get(); //localCreateRigidBody( 1.0f, tr, shape);
+
+                boost::shared_ptr<Entity> pChild = m_mEntities[pP2P->m_pChildBody->GetName()];
+                btRigidBody* pBodyB = pChild->m_pRigidBody.get();
+
+
+                pBodyA->setActivationState(DISABLE_DEACTIVATION);
+                pBodyB->setActivationState(DISABLE_DEACTIVATION);
+
+
+                btVector3 axis1 = toBulletVec3( pP2P->m_Axis1 );   // Pivot in A
+                btVector3 axis2 = toBulletVec3( pP2P->m_Axis2 );   // Pivot in B
+
+                btPoint2PointConstraint* spP2PDynAB = new btPoint2PointConstraint(*pBodyA, *pBodyB, axis1, axis2);
+
+                // add constraint to world
+                m_pDynamicsWorld->addConstraint(spP2PDynAB, true);
+
+                // draw constraint frames and limits for debugging
+                spP2PDynAB->setDbgDrawSize(btScalar(5.f));
+            }
+            else if (dynamic_cast<Slider*>(pItem) != NULL) {
+                std::cout<<"Associating physics with a Point2Point Joint!"<<std::endl;
+                Slider* pSlider = (Slider*) pItem;
+
+                boost::shared_ptr<Entity> pParent = m_mEntities[pSlider->m_pParentBody->GetName()];
+                btRigidBody* pBodyA =  pParent->m_pRigidBody.get(); //localCreateRigidBody( 1.0f, tr, shape);
+
+                boost::shared_ptr<Entity> pChild = m_mEntities[pSlider->m_pChildBody->GetName()];
+                btRigidBody* pBodyB = pChild->m_pRigidBody.get();
+
+
+                pBodyA->setActivationState(DISABLE_DEACTIVATION);
+                pBodyB->setActivationState(DISABLE_DEACTIVATION);
+
+
+                btTransform TransformA = toBulletTransform( pSlider->m_TransformA );   // Transform from A
+                btTransform TransformB = toBulletTransform( pSlider->m_TransformB );   // Transform from B
+
+                btSliderConstraint* spSlider = new btSliderConstraint(*pBodyA, *pBodyB, TransformA, TransformB, pSlider->UseLinear());
+
+                // add constraint to world
+                m_pDynamicsWorld->addConstraint(spSlider, true);
+
+                // draw constraint frames and limits for debugging
+                spSlider->setDbgDrawSize(btScalar(5.f));
             }
 
             return;
