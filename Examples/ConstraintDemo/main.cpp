@@ -142,8 +142,8 @@ class App
             pSlider->setUpperLimit(6);
 //            Hinge2Joint* pNeck = new Hinge2Joint( "Neck", pChassis, pHead, axis1, axis2, anchor, 0.2, 0.2, LowerLinearLimit, UpperLinearLimit, LowerAngleLimit, UpperAngleLimit);
 
-            axis1 << 0, 0, 1.75;
-            axis2 << 0, 0, -0.75;
+            axis1 << 0, 0, 2.5;
+            axis2 << 0, 0, 1;
             Point2Point* pP2P = new Point2Point("RWrist", pUpperRArm, pRHand, axis1, axis2);
         }
 

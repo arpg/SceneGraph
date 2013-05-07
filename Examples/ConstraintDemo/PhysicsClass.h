@@ -559,13 +559,31 @@ class Phys
                 pBodyB->setActivationState(DISABLE_DEACTIVATION);
 
 
-//                btVector3 axis1 = toBulletVec3( (pP2P->m_pParentBody->GetPoseMatrix().topLeftCorner(3, 3))*pP2P->m_Axis1 );   // Pivot in A
-//                btVector3 axis2 = toBulletVec3( (pP2P->m_pChildBody->GetPoseMatrix().topLeftCorner(3, 3).inverse())*pP2P->m_Axis2 );   // Pivot in B
+                // add some data to build constraint frames
+                Eigen::Vector6d v = pP2P->GetPose();
+                Eigen::Vector3d v3;
 
-                btVector3 axis1 = toBulletVec3( pP2P->m_Axis1 );   // Pivot in A
-                btVector3 axis2 = (pBodyB->getCenterOfMassTransform().getBasis().inverse())*(pBodyA->getCenterOfMassTransform().getBasis())*toBulletVec3(pP2P->m_Axis2 );   // Pivot in B
+                v3 = pP2P->m_Axis1;
+                printf("pivotA = (%f, %f, %f)\r\n", v3[0], v3[1], v3[2]);
+                btVector3 pivotA = toBulletVec3( v3 );  // The pivotA is the pivoting point in the A frame
 
-                btPoint2PointConstraint* spP2PDynAB = new btPoint2PointConstraint(*pBodyA, *pBodyB, axis1, axis2);
+                // Now convert the pivot axis in A to the pivot axis in B [pB = pA - vAB]
+                Eigen::Vector6d vAB6 = pP2P->m_pChildBody->GetPose();
+                v3[0] -= vAB6[0];
+                v3[1] -= vAB6[1];
+                v3[2] -= vAB6[2];
+                btVector3 pivotB = toBulletVec3( v3 );  // The pivotB is the pivoting in the B frame
+
+                printf("pivotB = (%f, %f, %f)\r\n", pivotB[0], pivotB[1], pivotB[2]);
+
+
+//                btVector3 axis1 = toBulletVec3( pP2P->m_Axis1 );   // Pivot in A
+//                btVector3 axis2 = toBulletVec3( pP2P->m_Axis2 );   // Pivot in B
+
+//                btVector3 axis1 = toBulletVec3( pP2P->m_Axis1 );   // Pivot in A
+//                btVector3 axis2 = (pBodyB->getCenterOfMassTransform().getBasis().inverse())*(pBodyA->getCenterOfMassTransform().getBasis())*toBulletVec3(pP2P->m_Axis2 );   // Pivot in B
+
+                btPoint2PointConstraint* spP2PDynAB = new btPoint2PointConstraint(*pBodyA, *pBodyB, pivotA, pivotB);
 
                 // add constraint to world
                 m_pDynamicsWorld->addConstraint(spP2PDynAB, true);
