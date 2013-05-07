@@ -17,6 +17,6 @@ IF( MVL_FOUND )
 ENDIF()
 
 FIND_PACKAGE( ModelGraph QUIET )
-IF( ModelGrapoh_FOUND )
+IF( ModelGraph_FOUND )
     ADD_SUBDIRECTORY(ConstraintDemo)
 ENDIF()

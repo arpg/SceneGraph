@@ -559,8 +559,11 @@ class Phys
                 pBodyB->setActivationState(DISABLE_DEACTIVATION);
 
 
+//                btVector3 axis1 = toBulletVec3( (pP2P->m_pParentBody->GetPoseMatrix().topLeftCorner(3, 3))*pP2P->m_Axis1 );   // Pivot in A
+//                btVector3 axis2 = toBulletVec3( (pP2P->m_pChildBody->GetPoseMatrix().topLeftCorner(3, 3).inverse())*pP2P->m_Axis2 );   // Pivot in B
+
                 btVector3 axis1 = toBulletVec3( pP2P->m_Axis1 );   // Pivot in A
-                btVector3 axis2 = toBulletVec3( pP2P->m_Axis2 );   // Pivot in B
+                btVector3 axis2 = (pBodyB->getCenterOfMassTransform().getBasis().inverse())*(pBodyA->getCenterOfMassTransform().getBasis())*toBulletVec3(pP2P->m_Axis2 );   // Pivot in B
 
                 btPoint2PointConstraint* spP2PDynAB = new btPoint2PointConstraint(*pBodyA, *pBodyB, axis1, axis2);
 
@@ -568,7 +571,7 @@ class Phys
                 m_pDynamicsWorld->addConstraint(spP2PDynAB, true);
 
                 // draw constraint frames and limits for debugging
-                spP2PDynAB->setDbgDrawSize(btScalar(5.f));
+                spP2PDynAB->setDbgDrawSize(btScalar(2.f));
             }
             else if (dynamic_cast<SliderJoint*>(pItem) != NULL) {
                 std::cout<<"Associating physics with a Slider Joint!"<<std::endl;
@@ -591,7 +594,6 @@ class Phys
                 std::cout<<"TransformA: "<<std::endl<<pSlider->m_TransformA<<std::endl;
 
                 btSliderConstraint* spSlider = new btSliderConstraint(*pBodyA, *pBodyB, TransformA, TransformB, pSlider->UseLinear());
-
 
                 spSlider->setLowerLinLimit(btScalar(pSlider->LowerLinLimit));
                 spSlider->setUpperLinLimit(btScalar(pSlider->UpperLinLimit));

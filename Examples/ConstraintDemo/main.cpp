@@ -113,6 +113,10 @@ class App
             Body* pLWheel = new Body("LWheel", cylinder, 1);
             pLWheel->SetPose(-2.5, 0, 2.8, 0, M_PI / 2, 0);
 
+            box = BoxShape(0.5, 0.5, 0.5);
+            Body* pRHand = new Body("RHand", box, 1);
+            pRHand->SetPose(0, 0, 2.5, 0, 0, 0);
+
 
             // create a joint connecting two bodies
             HingeJoint* pRHinge = new HingeJoint( "RArmJoint", pChassis, pUpperRArm, 2, 0, -2.8, 1,0,0 );
@@ -127,8 +131,6 @@ class App
             Eigen::Vector3d UpperLinearLimit;
             Eigen::Vector3d LowerAngleLimit;
             Eigen::Vector3d UpperAngleLimit;
-            axis1 << 1, 0, 0;
-            axis2 << 0, 0, -1;
             anchor << 0, 0, -13.5;
             LowerLinearLimit << 0, 0, -3;
             UpperLinearLimit << 0, 0, -5;
@@ -139,6 +141,10 @@ class App
             pSlider->setLowerLimit(5);
             pSlider->setUpperLimit(6);
 //            Hinge2Joint* pNeck = new Hinge2Joint( "Neck", pChassis, pHead, axis1, axis2, anchor, 0.2, 0.2, LowerLinearLimit, UpperLinearLimit, LowerAngleLimit, UpperAngleLimit);
+
+            axis1 << 0, 0, 1.75;
+            axis2 << 0, 0, -0.75;
+            Point2Point* pP2P = new Point2Point("RWrist", pUpperRArm, pRHand, axis1, axis2);
         }
 
         ///////////////////////////////////////////////////////////////////
