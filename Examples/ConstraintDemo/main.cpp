@@ -72,6 +72,23 @@ class App
         void BuildRobot( void )
         {
             //  First enter the root node to build off of
+//            BoxShape box = BoxShape(1,1,1);
+//            Body* pChassis = new Body( std::string("Anchor"), box, 0 );
+//            pChassis->SetPose( 0,0,0,0,0,0 );
+//            m_RobotModel.SetName("SlideTest");
+//            m_RobotModel.m_pParent = NULL;
+//            m_RobotModel.SetBase( pChassis );
+
+//            Body* pMass = new Body( std::string("Bob"), box, 1 );
+//            pMass->SetPose( 0,0,4,0,0,0 );
+
+            Eigen::Vector6d Ta, Tb;
+
+            Ta << 0, 0, 2, 0, 0, 0;
+            Tb << 0, 0, 2, 0, 0, 0;
+
+//            SliderJoint* pSlider = new SliderJoint( "plunger", pChassis, pMass, Ta, Tb, true);
+
             BoxShape box = BoxShape(2,1,3);
             Body* pChassis = new Body( std::string("Chassis"), box, 1.0f );
             pChassis->SetPose( 0,0,0,0,0,0 );
@@ -119,7 +136,9 @@ class App
             UpperLinearLimit << 0, 0, -5;
             LowerAngleLimit << 0, 0, 0;
             UpperAngleLimit << 1, 0, 0;
-            Hinge2Joint* pNeck = new Hinge2Joint( "Neck", pChassis, pHead, axis1, axis2, anchor, 0.2, 0.2, LowerLinearLimit, UpperLinearLimit, LowerAngleLimit, UpperAngleLimit);
+
+            SliderJoint* pSlider = new SliderJoint( "Neck", pChassis, pHead, Ta, Tb, true);
+//            Hinge2Joint* pNeck = new Hinge2Joint( "Neck", pChassis, pHead, axis1, axis2, anchor, 0.2, 0.2, LowerLinearLimit, UpperLinearLimit, LowerAngleLimit, UpperAngleLimit);
         }
 
         ///////////////////////////////////////////////////////////////////
@@ -372,7 +391,7 @@ int main( int argc, char** argv )
         // optionally, draw info for a human to look at
 
         app.m_Phys->DebugDrawWorld();
-        app.m_Phys->StepSimulation();
+//        app.m_Phys->StepSimulation();
 //        app.m_Render.UpdateScene();
 
         // loop through robot graph and for each body update the associated GL object pose

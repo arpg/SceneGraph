@@ -570,9 +570,9 @@ class Phys
                 // draw constraint frames and limits for debugging
                 spP2PDynAB->setDbgDrawSize(btScalar(5.f));
             }
-            else if (dynamic_cast<Slider*>(pItem) != NULL) {
-                std::cout<<"Associating physics with a Point2Point Joint!"<<std::endl;
-                Slider* pSlider = (Slider*) pItem;
+            else if (dynamic_cast<SliderJoint*>(pItem) != NULL) {
+                std::cout<<"Associating physics with a Slider Joint!"<<std::endl;
+                SliderJoint* pSlider = (SliderJoint*) pItem;
 
                 boost::shared_ptr<Entity> pParent = m_mEntities[pSlider->m_pParentBody->GetName()];
                 btRigidBody* pBodyA =  pParent->m_pRigidBody.get(); //localCreateRigidBody( 1.0f, tr, shape);
@@ -589,6 +589,7 @@ class Phys
                 btTransform TransformB = toBulletTransform( pSlider->m_TransformB );   // Transform from B
 
                 btSliderConstraint* spSlider = new btSliderConstraint(*pBodyA, *pBodyB, TransformA, TransformB, pSlider->UseLinear());
+                spSlider->setDampingDirLin(1);
 
                 // add constraint to world
                 m_pDynamicsWorld->addConstraint(spSlider, true);
@@ -596,7 +597,58 @@ class Phys
                 // draw constraint frames and limits for debugging
                 spSlider->setDbgDrawSize(btScalar(5.f));
             }
+            else if (dynamic_cast<GenericJoint*>(pItem) != NULL) {
+                std::cout<<"Associating physics with a Generic Joint!"<<std::endl;
+                GenericJoint* pGeneric = (GenericJoint*) pItem;
 
+                boost::shared_ptr<Entity> pParent = m_mEntities[pGeneric->m_pParentBody->GetName()];
+                btRigidBody* pBodyA =  pParent->m_pRigidBody.get(); //localCreateRigidBody( 1.0f, tr, shape);
+
+                boost::shared_ptr<Entity> pChild = m_mEntities[pGeneric->m_pChildBody->GetName()];
+                btRigidBody* pBodyB = pChild->m_pRigidBody.get();
+
+
+                pBodyA->setActivationState(DISABLE_DEACTIVATION);
+                pBodyB->setActivationState(DISABLE_DEACTIVATION);
+
+
+                btTransform TransformA = toBulletTransform( pGeneric->m_TransformA );   // Transform from A
+                btTransform TransformB = toBulletTransform( pGeneric->m_TransformB );   // Transform from B
+
+                btGeneric6DofConstraint* spGeneric = new btGeneric6DofConstraint(*pBodyA, *pBodyB, TransformA, TransformB, pGeneric->UseLinear());
+
+                // add constraint to world
+                m_pDynamicsWorld->addConstraint(spGeneric, true);
+
+                // draw constraint frames and limits for debugging
+                spGeneric->setDbgDrawSize(btScalar(5.f));
+            }
+            else if (dynamic_cast<ConeTwist*>(pItem) != NULL) {
+                std::cout<<"Associating physics with a ConeTwist Joint!"<<std::endl;
+                ConeTwist* pConeTwist = (ConeTwist*) pItem;
+
+                boost::shared_ptr<Entity> pParent = m_mEntities[pConeTwist->m_pParentBody->GetName()];
+                btRigidBody* pBodyA =  pParent->m_pRigidBody.get(); //localCreateRigidBody( 1.0f, tr, shape);
+
+                boost::shared_ptr<Entity> pChild = m_mEntities[pConeTwist->m_pChildBody->GetName()];
+                btRigidBody* pBodyB = pChild->m_pRigidBody.get();
+
+
+                pBodyA->setActivationState(DISABLE_DEACTIVATION);
+                pBodyB->setActivationState(DISABLE_DEACTIVATION);
+
+
+                btTransform TransformA = toBulletTransform( pConeTwist->m_TransformA );   // Transform from A
+                btTransform TransformB = toBulletTransform( pConeTwist->m_TransformB );   // Transform from B
+
+                btConeTwistConstraint* spConeTwist = new btConeTwistConstraint(*pBodyA, *pBodyB, TransformA, TransformB);
+
+                // add constraint to world
+                m_pDynamicsWorld->addConstraint(spConeTwist, true);
+
+                // draw constraint frames and limits for debugging
+                spConeTwist->setDbgDrawSize(btScalar(5.f));
+            }
             return;
         }
 
