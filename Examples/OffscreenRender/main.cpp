@@ -125,18 +125,20 @@ int main( int argc, char* argv[] )
     pangolin::GlFramebuffer synth_framebuffer(synth_texture, synth_depth);
     
     // Time details
-    const double LoopTime = 3*2*M_PI;
-    const double frameTime = LoopTime / 200;
-    const double lineTime = frameTime / h;
+    const double LoopDuration = 3*2*M_PI;
+    const double frameDuration = LoopDuration / 200;
+    const double lineDuration = frameDuration / h;
     int frame = 0;
-    double time = 0; 
+    
+    // frameStartTime is middle of first row in image.
+    double frameStartTime = 0; 
     
     unsigned char* img_data = new unsigned char[w*h];
     
     // Default hooks for exiting (Esc) and fullscreen (tab).
     while( !pangolin::ShouldQuit() )
     {        
-        glCamAxis.SetPose(GLCart2T(TrajectoryT_wx(time)));
+        glCamAxis.SetPose(GLCart2T(TrajectoryT_wx(frameStartTime)));
         
         // Render synthetic rolling shutter scene
         synth_framebuffer.Bind();
@@ -146,7 +148,7 @@ int main( int argc, char* argv[] )
         glEnable(GL_SCISSOR_TEST); 
         for(int r=0; r<h; ++r) {            
             glScissor(0,r,w,1);
-            Eigen::Matrix4d T_wv = GLCart2T(TrajectoryT_wx(time + r*lineTime));
+            Eigen::Matrix4d T_wv = GLCart2T(TrajectoryT_wx(frameStartTime + r*lineDuration));
             pangolin::OpenGlMatrix T_vw = OpenGlMatrix(T_wv).Inverse();
             stacks_synth.SetModelViewMatrix(T_vw);
             stacks_synth.Apply();
@@ -156,13 +158,14 @@ int main( int argc, char* argv[] )
         synth_framebuffer.Unbind();
 
         if(save_files) {
+            const double frameEndTime = frameStartTime + frameDuration;
             synth_texture.Download(img_data, GL_RED, GL_UNSIGNED_BYTE);
             std::ostringstream ss;
             ss << destination_directory << "/0_" << std::setw( 5 ) << std::setfill( '0' ) << frame;
-            SavePPM(ss.str(), img_data, w, h, 1, time );   
+            SavePPM(ss.str(), img_data, w, h, 1, frameEndTime );   
         }
                 
-        time += frameTime;
+        frameStartTime += frameDuration;
         frame++;
         
         // Clear whole screen
