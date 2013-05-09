@@ -117,7 +117,7 @@ int main( int argc, char* argv[] )
 
 
     GLWidgetView panel;
-    panel.Init(0,0,UI_PANEL_WIDTH,UI_PANEL_HEIGHT,&WidgetDrawFunction);
+    panel.Init(0,1,0,Attach::Pix(200),&WidgetDrawFunction);
 
     container.AddDisplay(panel);
 
