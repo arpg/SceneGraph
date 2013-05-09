@@ -61,7 +61,7 @@ inline btTransform toBulletTransform(const Eigen::Vector6d& t)
     Eigen::Matrix4d transform;
     transform = _Cart2T(t);
     btMatrix3x3 rot(transform(0, 0), transform(0, 1), transform(0, 2), transform(1, 0), transform(1, 1), transform(1, 2), transform(2, 0), transform(2, 1), transform(2, 2));
-    btTransform bt(rot, btVector3(btScalar(t[0]), btScalar(t[1]), btScalar(t[1])));
+    btTransform bt(rot, btVector3(btScalar(t[0]), btScalar(t[1]), btScalar(t[2])));
     return bt;
 }
 
@@ -672,7 +672,7 @@ class Phys
                 m_pDynamicsWorld->addConstraint(spConeTwist, true);
 
                 // draw constraint frames and limits for debugging
-                spConeTwist->setDbgDrawSize(btScalar(5.f));
+                spConeTwist->setDbgDrawSize(btScalar(10.f));
             }
             return;
         }

@@ -117,6 +117,10 @@ class App
             Body* pRHand = new Body("RHand", box, 1);
             pRHand->SetPose(0, 0, 2.5, 0, 0, 0);
 
+            box = BoxShape(0.5, 0.5, 0.5);
+            Body* pLHand = new Body("LHand", box, 1);
+            pLHand->SetPose(0, 0, 2.5, 0, 0, 0);
+
 
             // create a joint connecting two bodies
             HingeJoint* pRHinge = new HingeJoint( "RArmJoint", pChassis, pUpperRArm, 2, 0, -2.8, 1,0,0 );
@@ -145,6 +149,11 @@ class App
             axis1 << 0, 0, 2.5;
             axis2 << 0, 0, 1;
             Point2Point* pP2P = new Point2Point("RWrist", pUpperRArm, pRHand, axis1, axis2);
+
+            Ta << 0, 0, 2.5, 0, 0, 0;
+            Tb << 0, 0, 0, 0, 0, 0;
+//            ConeTwist* pCT = new ConeTwist("LWrist", pUpperLArm, pLHand, Ta, Tb, false);
+            GenericJoint* pGJ = new GenericJoint("LWrist", pUpperLArm, pLHand, Ta, Tb, false);
         }
 
         ///////////////////////////////////////////////////////////////////
