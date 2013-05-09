@@ -36,7 +36,18 @@ public:
         // Allocate extra picking id for front point
         m_nBaseId = AllocSelectionId();
         m_nFrontId = AllocSelectionId();
+
+        m_pQuadric = gluNewQuadric();
+        gluQuadricNormals( m_pQuadric, GLU_SMOOTH );
+        gluQuadricDrawStyle( m_pQuadric, GLU_FILL );
+        gluQuadricTexture( m_pQuadric, GL_TRUE );
     }
+
+    ~GLWayPoint()
+    {
+        gluDeleteQuadric( m_pQuadric );
+    }
+
 
     bool Mouse(int button, const Eigen::Vector3d& /*win*/, const Eigen::Vector3d& /*obj*/, const Eigen::Vector3d& /*normal*/, bool /*pressed*/, int /*button_state*/, int /*pickId*/)
     {
@@ -97,29 +108,66 @@ public:
         return true;
     }
         
-    void DrawCanonicalObject() {
-        double multiplier = m_bActive && !m_bLocked ? 1.0 : 0.5;
-        glPushAttrib(GL_ENABLE_BIT | GL_DEPTH_BUFFER_BIT);
+    void DrawSolidAxis( float fScale = 1.0f )
+    {
+        double multiplier = m_bActive && !m_bLocked ? 1.0 : 0.8;
 
-        glDisable(GL_CULL_FACE);
+        // draw axis
+        glScalef( fScale, fScale, fScale );
+       
+        // for picking 
+        glPushName( m_nBaseId );
+
+        // x
+        glPushMatrix();
+        glColor4f( 1*multiplier, 0, 0, 1 );
+        glRotatef( 90, 0, 1, 0 );
+        gluCylinder( m_pQuadric, 0.04, 0.04, 1.0, 16, 16 );
+        glTranslatef( 0, 0, 1 );
+        gluCylinder( m_pQuadric, 0.07, 0.0, 0.2, 16, 16 );
+        glPopMatrix();
+
+        // y
+        glPushMatrix();
+        glColor4f( 0, 1*multiplier, 0, 1 );
+        glRotatef( -90, 1, 0, 0 );
+        gluCylinder( m_pQuadric, 0.04, 0.04, 1.0, 16, 16 );
+        glTranslatef( 0, 0, 1 );
+        gluCylinder( m_pQuadric, 0.07, 0.0, 0.2, 16, 16 );
+        glPopMatrix();
+
+        // z
+        glPushMatrix();
+        glColor4f( 0, 0, 1*multiplier, 1 );
+        gluCylinder( m_pQuadric, 0.04, 0.04, 1.0, 16, 16 );
+        glTranslatef( 0, 0, 1 );
+        gluCylinder( m_pQuadric, 0.07, 0.0, 0.2, 16, 16 );
+        glPopMatrix();
+
+    }
+
+
+    void DrawCanonicalObject() 
+    {
+        double multiplier = m_bActive && !m_bLocked ? 1.0 : 0.8;
+        glPushAttrib( GL_ENABLE_BIT | GL_DEPTH_BUFFER_BIT );
+
         glDisable(GL_LIGHTING);
-        // TODO: loose this glDisable after we fix Nima's heightmap
-        glDisable(GL_DEPTH_TEST);
-        glDepthMask(false);
 
         const double velx = m_dVelocity/(m_dScale[0]*VELOCITY_MULTIPLIER);
 
         // draw velocity line
         glPushName(m_nFrontId);
 
-        glColor4ub(255*multiplier, 255*multiplier, 255*multiplier, 255);
+        glColor4ub( 255*multiplier, 255*multiplier, 255*multiplier, 255 );
 
-        glBegin(GL_LINES);
-        glVertex3d(velx, 0, 0);
-        glVertex3d(1, 0, 0);
+        glBegin( GL_LINES );
+        glVertex3d( velx, 0, 0 );
+        glVertex3d( 1, 0, 0 );
         glEnd();
         glPopName();
-
+        
+        /*
         // draw axis
         glPushName(m_nBaseId);
         glBegin(GL_LINES);
@@ -135,15 +183,16 @@ public:
         glVertex3d(0, 0, 0);
         glVertex3d(0, 0, 1);
         glEnd();
+        */
+        
+        DrawSolidAxis( 1 );
 
         if(m_bAerial) {
+            glColor3ub(0, 0, 255*multiplier);
 
-                glColor3ub(0, 0, 255*multiplier);
-
-        }else{
-
-                glColor3ub(0, 255*multiplier, 0);
-
+        }
+        else{
+            glColor3ub(0, 255*multiplier, 0);
         }
 
         // draw center point
@@ -205,6 +254,8 @@ private:
 
     bool            m_bClampToPlane;
     Eigen::Vector4d m_mClampPlaneN_p;
+        
+    GLUquadric*     m_pQuadric;
 
 //    double          m_dScale;
 //    std::string     m_sLabel;

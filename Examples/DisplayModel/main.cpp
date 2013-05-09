@@ -25,23 +25,24 @@ int main( int /*argc*/, char** /*argv[]*/ )
     SceneGraph::GLLight light(10,10,-100);
     glGraph.AddChild(&light);
 
-    // Define grid object
-    SceneGraph::GLGrid glGrid(50,2.0, true);
-
     // Define axis object, and set its pose
     SceneGraph::GLAxis glAxis;
-    glAxis.SetPose(-1,-2,-0.1, 0, 0, M_PI/4);
+    glAxis.SetPose( 0, 0, 0, 0, 0, 0);
     glAxis.SetScale(0.25);
+    glGraph.AddChild(&glAxis);
 
     SceneGraph::GLMovableAxis glMovableAxis;
     glMovableAxis.SetPosition(-3,3,-1);
+    glGraph.AddChild(&glMovableAxis);
 
     SceneGraph::GLAxisAlignedBox glBox;
     glBox.SetResizable();
+    glMovableAxis.AddChild(&glBox);
 
-    // Define movable waypoint object with velocity
+  // Define movable waypoint object with velocity
     SceneGraph::GLWayPoint glWaypoint;
     glWaypoint.SetPose(0.5,0.5,-0.1,0,0,0);
+    glGraph.AddChild(&glWaypoint);
 
     // Optionally clamp waypoint to specific plane
     glWaypoint.ClampToPlane(Eigen::Vector4d(0,0,1,0));
@@ -51,9 +52,11 @@ int main( int /*argc*/, char** /*argv[]*/ )
     for(double t=0; t < 10*M_PI; t+= M_PI/50) {
         glSpiral.AddVertex(Eigen::Vector3d(cos(t)+2, sin(t)+2, -0.1*t) );
     }
+    glGraph.AddChild(&glSpiral);
 
     // Define 3D floating text object
     SceneGraph::GLText glText3d("3D Floating Text", -1, 1, -1);
+    glGraph.AddChild(&glText3d);
 
 #ifdef HAVE_ASSIMP
     // Define a mesh object and try to load model
@@ -67,14 +70,12 @@ int main( int /*argc*/, char** /*argv[]*/ )
     }
 #endif // HAVE_ASSIMP
 
-    // Add objects to scenegraph
+    // Define grid object -- this will be alpha transparent; add it last to
+    // draw it last.  TODO have SceneGraph check alpha on GLObjects and order
+    // their rendering.
+    SceneGraph::GLGrid glGrid( 50, 2.0, true );
     glGraph.AddChild(&glGrid);
-    glGraph.AddChild(&glWaypoint);
-    glGraph.AddChild(&glSpiral);
-    glGraph.AddChild(&glAxis);
-    glGraph.AddChild(&glText3d);
-    glGraph.AddChild(&glMovableAxis);
-    glMovableAxis.AddChild(&glBox);
+
 
     // We can have more than one scenegraph. This 2d scenegraph will
     // be rendered with an orthographic projection. This is useful
@@ -136,6 +137,11 @@ int main( int /*argc*/, char** /*argv[]*/ )
 
     // Add keyhook to save a particular view (including alpha) at 4 times the resolution of the screen. This creates an FBO and renders into it straight away.
     pangolin::RegisterKeyPressCallback( 'r', boost::bind(&pangolin::View::SaveRenderNow, &view3d, "view3d_RenderNow", 4 ) );
+
+    glClearColor( 0, 0, 0, 0 );
+    glEnable( GL_BLEND );
+    glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+
 
     // Default hooks for exiting (Esc) and fullscreen (tab).
     while( !pangolin::ShouldQuit() )
