@@ -19,13 +19,9 @@ public:
         SetHandler(this);
     }
 
-    void Init(const int top, const int left,
-              const int width, const int height,
-              boost::function<void(nv::GlutUIContext&,nv::Rect&)> func) {
-        m_nWidth = width;
-        m_nHeight = height;
-        m_Ui.init(width, height);
-        SetBounds(Attach::Pix(top+height),Attach::Pix(top),Attach::Pix(left),Attach::Pix(left+width));
+    void Init(const Attach bottom,const Attach top,const Attach left, const Attach right,
+              boost::function<void(nv::GlutUIContext&,nv::Rect&)> func) {        
+        SetBounds(bottom,top,left,right);
         m_DrawFunc = func;
     }
 
@@ -57,6 +53,14 @@ public:
         m_Ui.begin();
         m_DrawFunc(m_Ui,m_Rect);
         m_Ui.end();
+    }
+
+    void Resize(const Viewport &parent)
+    {
+        View::Resize(parent);
+        m_nWidth = v.w;
+        m_nHeight = v.h;
+        m_Ui.init(m_nWidth, m_nHeight);
     }
 
     template<typename T>
