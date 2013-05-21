@@ -11,16 +11,22 @@ class GLAxis : public GLObject
 {
     public:
 
-        GLAxis(float axisSize = 1.0f)
-            : GLObject("Axis"), m_fAxisScale(axisSize)
+        ///////////////////////////////////////////////////////////////////////////
+        GLAxis(const float axisSize = 1.0f, const bool bPretty = false)
+            : GLObject("Axis"), m_fAxisScale(axisSize), m_bPretty(bPretty)
         {
             m_bPerceptable = false;
             m_aabb.SetZero();
 
-            m_pQuadric = gluNewQuadric();
-            gluQuadricNormals( m_pQuadric, GLU_SMOOTH );
-            gluQuadricDrawStyle( m_pQuadric, GLU_FILL );
-            gluQuadricTexture( m_pQuadric, GL_TRUE );
+            // this crashes if glu isn't initialized, which is often the case when
+            // GlAxis is a member variable of some class. Potentially call this in Draw
+            // if not initialized.
+            if(bPretty){
+                m_pQuadric = gluNewQuadric();
+                gluQuadricNormals( m_pQuadric, GLU_SMOOTH );
+                gluQuadricDrawStyle( m_pQuadric, GLU_FILL );
+                gluQuadricTexture( m_pQuadric, GL_TRUE );
+            }
         }
 
         ~GLAxis()
@@ -30,6 +36,7 @@ class GLAxis : public GLObject
             }
         }
 
+        ///////////////////////////////////////////////////////////////////////////
         static inline void DrawAxis( float  fScale  = 1.0f )
         {
             glPushAttrib(GL_ENABLE_BIT | GL_DEPTH_BUFFER_BIT);
@@ -57,6 +64,7 @@ class GLAxis : public GLObject
             glPopAttrib();
         }
 
+        ///////////////////////////////////////////////////////////////////////////
         void DrawSolidAxis( float fScale = 1.0f )
         {
             // draw axis
@@ -90,11 +98,14 @@ class GLAxis : public GLObject
 
         }
 
-
+        ///////////////////////////////////////////////////////////////////////////
         void DrawCanonicalObject()
         {
-            //        DrawAxis(m_fAxisScale);
-            DrawSolidAxis( m_fAxisScale );
+            if(m_bPretty){
+                DrawSolidAxis( m_fAxisScale );
+            }else{
+                DrawAxis(m_fAxisScale);
+            }
         }
 
         void SetAxisSize(float  fScale ){ m_fAxisScale =  fScale ; }
@@ -102,6 +113,7 @@ class GLAxis : public GLObject
 
     protected:
         float m_fAxisScale;
+        bool m_bPretty;
         GLUquadric*   m_pQuadric;
 };
 
