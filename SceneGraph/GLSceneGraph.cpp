@@ -83,15 +83,25 @@ void GLSceneGraph::DrawObjectAndChildren(RenderMode renderMode)
 {
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
+    // TODO: This is expensive, think of a better way
+#ifdef _ANDROID_
+    Eigen::Matrix4f T_po = m_T_po.cast<float>();
+    glMultMatrixf(T_po.data());
+    glScalef(m_dScale[0],m_dScale[1],m_dScale[2]);
+#else
     glMultMatrixd(m_T_po.data());
     glScaled(m_dScale[0],m_dScale[1],m_dScale[2]);
+#endif //_ANDROID_
 
-    glPushAttrib(GL_ENABLE_BIT);
+
+    //glPushAttrib(GL_ENABLE_BIT);
 
     if(m_bEnableLighting) {
         glEnable( GL_LIGHTING );
         glEnable( GL_COLOR_MATERIAL );
+#ifndef _ANDROID_
         glColorMaterial( GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE );
+#endif
         glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
     }else{
         glDisable( GL_LIGHTING );
@@ -111,7 +121,15 @@ void GLSceneGraph::DrawObjectAndChildren(RenderMode renderMode)
         }
     }
 
-    glPopAttrib();
+    if(m_bEnableLighting) {
+        glDisable( GL_LIGHTING );
+        glDisable( GL_COLOR_MATERIAL );
+    }else{
+        glEnable( GL_LIGHTING );
+        glEnable( GL_COLOR_MATERIAL );
+    }
+
+    //glPopAttrib();
     glPopMatrix();
 }
 

@@ -2,15 +2,14 @@
 #define _GL_OBJECT_
 
 #undef Success // why ?
-#include <Eigen/Eigen>
-
 #include <SceneGraph/GLHelpers.h>
 #include <SceneGraph/AxisAlignedBoundingBox.h>
-
+#include <Eigen/Eigen>
 #include <string>
 #include <vector>
 #include <map>
 #include <stdio.h>
+
 
 #ifdef __GNUC__
 #  define SCENEGRAPH_DEPRECATED __attribute__((deprecated))
@@ -47,8 +46,13 @@ enum KeyModifier
 
 enum RenderMode
 {
-	eRenderVisible = GL_RENDER,
+#ifdef _ANDROID_
+    eRenderVisible = 1,
+    eRenderSelectable = 0,
+#else
+	eRenderVisible = GL_RENDER,    
 	eRenderSelectable = GL_SELECT,
+#endif
     eRenderPerceptable,
     eRenderNoPrePostHooks
 };

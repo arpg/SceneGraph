@@ -31,9 +31,6 @@ GLObject::GLObject( const GLObject& rhs )
 /////////////////////////////////////////////////////////////////////////////////
 GLObject::~GLObject()
 {
-    if(m_nDisplayList >= 0) {
-        glDeleteLists(m_nDisplayList,1);
-    }
 }
 
 
@@ -65,14 +62,18 @@ void GLObject::DrawObjectAndChildren(RenderMode renderMode)
 	) {
         glMatrixMode(GL_MODELVIEW);
         glPushMatrix();
+
+#ifdef _ANDROID_
+        Eigen::Matrix4f T_po = m_T_po.cast<float>();
+        glMultMatrixf(T_po.data());
+        glScalef(m_dScale[0],m_dScale[1],m_dScale[2]);
+#else
         glMultMatrixd(m_T_po.data());
         glScaled(m_dScale[0],m_dScale[1],m_dScale[2]);
+#endif //_ANDROID_
 
-        if(m_nDisplayList >= 0) {
-            glCallList( m_nDisplayList );
-        }else{
-            DrawCanonicalObject();
-        }
+        DrawCanonicalObject();
+
         DrawChildren();
 
         glPopMatrix();
@@ -81,12 +82,12 @@ void GLObject::DrawObjectAndChildren(RenderMode renderMode)
 
 void GLObject::CompileAsGlCallList()
 {
-    if( m_nDisplayList == -1 ){
-        m_nDisplayList = glGenLists(1);
-        glNewList( m_nDisplayList, GL_COMPILE );
-        DrawCanonicalObject();
-        glEndList();
-    }
+//    if( m_nDisplayList == -1 ){
+//        m_nDisplayList = glGenLists(1);
+//        glNewList( m_nDisplayList, GL_COMPILE );
+//        DrawCanonicalObject();
+//        glEndList();
+//    }
 }
 
 /////////////////////////////////////////////////////////////////////////////////

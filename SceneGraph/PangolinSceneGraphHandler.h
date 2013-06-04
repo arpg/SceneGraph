@@ -55,10 +55,12 @@ struct HandlerSceneGraph : pangolin::Handler3D
         mv.Load();
 
         // Render scenegraph in 'select' mode
+#ifndef _ANDROID
         glRenderMode( GL_SELECT );
         glInitNames();
         m_scenegraph.DrawObjectAndChildren(eRenderSelectable);
         glFlush();
+#endif
 
         GLint nHits = glRenderMode( eRenderVisible );
         if( nHits > 0 ){

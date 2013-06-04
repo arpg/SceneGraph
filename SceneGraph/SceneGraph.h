@@ -2,8 +2,19 @@
 
 #include <SceneGraph/config.h>
 
-#include <SceneGraph/GLSceneGraph.h>
+//opengl defines are in here
+#include <SceneGraph/GLHelpers.h>
 #include <SceneGraph/GLObject.h>
+#include <SceneGraph/GLSceneGraph.h>
+#include <SceneGraph/AxisAlignedBoundingBox.h>
+#include <SceneGraph/GLLight.h>
+
+#ifndef _ANDROID_
+#include <SceneGraph/GLHelpers.h>
+
+
+
+
 #include <SceneGraph/GLGroup.h>
 
 #include <SceneGraph/GLGrid.h>
@@ -24,3 +35,5 @@
 #ifdef HAVE_PANGOLIN
 #include <SceneGraph/Pangolin.h>
 #endif // HAVE_PANGOLIN
+
+#endif // _ANDROID

@@ -9,17 +9,27 @@
 
 #include <SceneGraph/config.h>
 
-#include <GL/glew.h>
 
-#ifdef _OSX_
-#include <OpenGL/glext.h>
-#include <OpenGL/gl.h>
-#include <OpenGL/glu.h>
+#ifdef HAVE_GLES
+    #include <EGL/egl.h>
+    #include <GLES/gl.h>
+    #include <glues/glu.h>
+
+    #define GL_GLEXT_PROTOTYPES
+    #include <GLES/glext.h>
+    #include <pangolin/gl_es_compat.h>
 #else
-#include <GL/glext.h>
-#include <GL/gl.h>
-#include <GL/glu.h>
-#endif
+    #include <GL/glew.h>
+    #ifdef _OSX_
+        #include <OpenGL/glext.h>
+        #include <OpenGL/gl.h>
+        #include <OpenGL/glu.h>
+    #else
+        #include <GL/glext.h>
+        #include <GL/gl.h>
+        #include <GL/glu.h>
+    #endif
+#endif // HAVE_GLES
 
 #include <iostream>
 #include <unistd.h>
@@ -145,137 +155,6 @@ void Perspective( double fovy, double aspect, double zNear, double zFar);
 /// Reshape viewport whenever window changes size.
 void ReshapeViewport( int w, int h );
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-void DrawCamera(
-        int nTexWidth,
-        int nTexHeight,
-        int nTexId,
-        Eigen::Matrix4d dModelViewMatrix,
-        Eigen::Matrix4d dProjectionMatrix
-        );
-
-/// 1) Generate a texutre ID
-//  2) Bind texture to memory
-//  3) Load texture into memory
-inline void BindRectTextureID(
-        const unsigned int texId,
-        const unsigned int nWidth,
-        const unsigned int nHeight,
-        const unsigned int nFormat,
-        const unsigned int nType,
-        const unsigned char* pData
-        )
-{
-    glBindTexture( GL_TEXTURE_RECTANGLE_ARB, texId );
-    glTexImage2D( GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB, nWidth, nHeight, 0, nFormat, nType, pData );
-}
-
-/// 1) Generate a texutre ID
-//  2) Bind texture to memory
-//  3) Load texture into memory
-inline unsigned int GenerateAndBindRectTextureID(
-        const unsigned int nWidth,
-        const unsigned int nHeight,
-        const unsigned int nFormat,
-        const unsigned int nType,
-        const unsigned char* pData
-        )
-{
-    GLuint texId;
-    glGenTextures( 1, &texId );
-    glBindTexture( GL_TEXTURE_RECTANGLE_ARB, texId );
-    glTexImage2D( GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB, nWidth, nHeight, 0, nFormat, nType, pData );
-    return texId;
-}
-
-
-
-/// 1) Generate a texutre ID
-//  2) Bind texture to memory
-//  3) Load texture into memory
-inline unsigned int GenerateAndBindTextureID(
-        const unsigned int nWidth,
-        const unsigned int nHeight,
-        const unsigned int nFormat,
-        const unsigned int nType,
-        const unsigned char* pData
-        )
-{
-    GLuint texId;
-
-    /// Ask for an ID
-    glGenTextures( 1, &texId );
-
-    /// Associate that ID with the next thing we upload.
-    glBindTexture( GL_TEXTURE_2D, texId );
-
-    /// Texture Mapping Mode:
-    // GL_DECAL: use actual texture colors
-    // GL_MODULATE: texture colors affected by poly's color (this is the default).
-//    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL );
-
-    // GL_UNPACK_ALIGNMENT Specifies the alignment requirements for the start of each
-    //  pixel row in memory.  1 specifies byte-alignment.
-    glPixelStorei( GL_UNPACK_ALIGNMENT, 1);
-
-    // Actually copy the texture into opengl
-    glTexImage2D(
-            GL_TEXTURE_2D,  // texture target
-            0,              // mipmap level
-            GL_RGB,         // internal format
-            nWidth,         // texture widht
-            nHeight,        // texture height
-            0,              // width of the border (0 or 1)
-            nFormat,        // pixel data format
-            nType,          // pixel data type
-            pData           // pixel data
-            );
-
-    glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
-    glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-
-    /*
-    //
-    glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
-
-    //
-    glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP );
-
-    //
-    glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP );
-
-    //
-    glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
-
-    //
-    glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
-    //    glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE );
-     */
-
-    return texId;
-}
-
-// TODO: eliminate this in favour of above methods? Or vice versa
-inline GLuint LoadGLTexture(GLint width, GLint height, void* data, GLint internal_format = GL_RGB8, GLenum data_layout = GL_RGB, GLenum data_type = GL_UNSIGNED_BYTE )
-{
-    GLuint glTexId = 0;
-    glGenTextures(1,&glTexId);
-
-    glBindTexture(GL_TEXTURE_2D, glTexId);
-    // load Mipmaps instead of single texture
-    glTexImage2D(GL_TEXTURE_2D, 0, internal_format, width, height, 0, data_layout, data_type, data);
-//            glGenerateMipmap( GL_TEXTURE_2D );
-    gluBuild2DMipmaps(GL_TEXTURE_2D, 3, width, height, data_layout, data_type, data );
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-//            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-    glBindTexture(GL_TEXTURE_2D, 0);
-
-    return glTexId;
-}
 
 // TODO: Should these really be here?
 inline Eigen::Matrix4d GLCart2T(
@@ -421,6 +300,141 @@ inline Eigen::Matrix3d Rotation_a2b(const Eigen::Vector3d& a, const Eigen::Vecto
     M = M * R1.transpose();
     return M;
 }
+
+#ifndef _ANDROID_
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+void DrawCamera(
+        int nTexWidth,
+        int nTexHeight,
+        int nTexId,
+        Eigen::Matrix4d dModelViewMatrix,
+        Eigen::Matrix4d dProjectionMatrix
+        );
+
+/// 1) Generate a texutre ID
+//  2) Bind texture to memory
+//  3) Load texture into memory
+inline void BindRectTextureID(
+        const unsigned int texId,
+        const unsigned int nWidth,
+        const unsigned int nHeight,
+        const unsigned int nFormat,
+        const unsigned int nType,
+        const unsigned char* pData
+        )
+{
+    glBindTexture( GL_TEXTURE_RECTANGLE_ARB, texId );
+    glTexImage2D( GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB, nWidth, nHeight, 0, nFormat, nType, pData );
+}
+
+/// 1) Generate a texutre ID
+//  2) Bind texture to memory
+//  3) Load texture into memory
+inline unsigned int GenerateAndBindRectTextureID(
+        const unsigned int nWidth,
+        const unsigned int nHeight,
+        const unsigned int nFormat,
+        const unsigned int nType,
+        const unsigned char* pData
+        )
+{
+    GLuint texId;
+    glGenTextures( 1, &texId );
+    glBindTexture( GL_TEXTURE_RECTANGLE_ARB, texId );
+    glTexImage2D( GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB, nWidth, nHeight, 0, nFormat, nType, pData );
+    return texId;
+}
+
+
+
+/// 1) Generate a texutre ID
+//  2) Bind texture to memory
+//  3) Load texture into memory
+inline unsigned int GenerateAndBindTextureID(
+        const unsigned int nWidth,
+        const unsigned int nHeight,
+        const unsigned int nFormat,
+        const unsigned int nType,
+        const unsigned char* pData
+        )
+{
+    GLuint texId;
+
+    /// Ask for an ID
+    glGenTextures( 1, &texId );
+
+    /// Associate that ID with the next thing we upload.
+    glBindTexture( GL_TEXTURE_2D, texId );
+
+    /// Texture Mapping Mode:
+    // GL_DECAL: use actual texture colors
+    // GL_MODULATE: texture colors affected by poly's color (this is the default).
+//    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL );
+
+    // GL_UNPACK_ALIGNMENT Specifies the alignment requirements for the start of each
+    //  pixel row in memory.  1 specifies byte-alignment.
+    glPixelStorei( GL_UNPACK_ALIGNMENT, 1);
+
+    // Actually copy the texture into opengl
+    glTexImage2D(
+            GL_TEXTURE_2D,  // texture target
+            0,              // mipmap level
+            GL_RGB,         // internal format
+            nWidth,         // texture widht
+            nHeight,        // texture height
+            0,              // width of the border (0 or 1)
+            nFormat,        // pixel data format
+            nType,          // pixel data type
+            pData           // pixel data
+            );
+
+    glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+    glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+
+    /*
+    //
+    glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
+
+    //
+    glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP );
+
+    //
+    glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP );
+
+    //
+    glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+
+    //
+    glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+    //    glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE );
+     */
+
+    return texId;
+}
+
+// TODO: eliminate this in favour of above methods? Or vice versa
+inline GLuint LoadGLTexture(GLint width, GLint height, void* data, GLint internal_format = GL_RGB8, GLenum data_layout = GL_RGB, GLenum data_type = GL_UNSIGNED_BYTE )
+{
+    GLuint glTexId = 0;
+    glGenTextures(1,&glTexId);
+
+    glBindTexture(GL_TEXTURE_2D, glTexId);
+    // load Mipmaps instead of single texture
+    glTexImage2D(GL_TEXTURE_2D, 0, internal_format, width, height, 0, data_layout, data_type, data);
+//            glGenerateMipmap( GL_TEXTURE_2D );
+    gluBuild2DMipmaps(GL_TEXTURE_2D, 3, width, height, data_layout, data_type, data );
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+//            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    return glTexId;
+}
+#endif // _ANDROID_
 
 
 } // SceneGraph

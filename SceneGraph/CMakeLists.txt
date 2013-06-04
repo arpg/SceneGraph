@@ -7,28 +7,57 @@ set( CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules ${CMAKE_MODULE_
 ################################################################################
 # Find required dependencies
 
-find_package( OpenGL REQUIRED )
+
 find_package( Eigen3 REQUIRED )
-find_package( GLEW REQUIRED )
+
+
+# Basic includes / libraries
+#set(USER_INC "${CMAKE_CURRENT_SOURCE_DIR}/..;${PROJECT_BINARY_DIR}/..;${OPENGL_INCLUDE_DIR};${GLEW_INCLUDE_DIR};${EIGEN3_INCLUDE_DIR}" )
+#set(LINK_LIBS "${OPENGL_LIBRARIES};${GLEW_LIBRARIES}" )
+#set(LIB_DIRS "" )
+set(USER_INC "${CMAKE_CURRENT_SOURCE_DIR}/..;${PROJECT_BINARY_DIR}/..;${EIGEN3_INCLUDE_DIR}" )
+set(LINK_LIBS "" )
+set(LIB_DIRS "" )
+
+if(NOT _ANDROID_)
+    find_package( OpenGL REQUIRED )
+    find_package( GLEW REQUIRED )
+    list(APPEND USER_INC  "${OPENGL_INCLUDE_DIR};${GLEW_INCLUDE_DIR}" )
+    list(APPEND LINK_LIBS "${OPENGL_LIBRARIES};${GLEW_LIBRARY}" )
+else()
+  find_package(GLUES REQUIRED)
+  list(APPEND LINK_LIBS "${GLUES_LIBRARY}" )
+  list(APPEND LINK_LIBS "-lEGL;-lGLESv2;-lGLESv1_CM" )
+  set(HAVE_GLES 1)
+endif()
 
 
 ################################################################################
 # Specify source files
 
-list(APPEND SOURCES
-    GLHelpers.cpp
-    GLObject.cpp
+list(APPEND SOURCES    
     GLSceneGraph.cpp
+    GLObject.cpp
+)
+
+if( NOT _ANDROID_ )
+list(APPEND HEADERS
+    GLHelpers.cpp
     FBO.cpp
     SimCam.cpp
     ../Widgets/nvGlutWidgets.cpp
     ../Widgets/nvGLWidgets.cpp
     ../Widgets/nvWidgets.cpp
 )
+endif()
 
 list(APPEND HEADERS
     config.h.in
-    SceneGraph.h
+    SceneGraph.h    
+)
+
+if( NOT _ANDROID_ )
+list(APPEND HEADERS
     GLGroup.h
     GLSLHelpers.h
     GLCylinder.h
@@ -63,11 +92,8 @@ list(APPEND HEADERS
     ../Widgets/nvShaderUtils.h
     ../Widgets/GLWidgetView.h
 )
+endif()
 
-# Basic includes / libraries
-set(USER_INC "${CMAKE_CURRENT_SOURCE_DIR}/..;${PROJECT_BINARY_DIR}/..;${OPENGL_INCLUDE_DIR};${GLEW_INCLUDE_DIR};${EIGEN3_INCLUDE_DIR}" )
-set(LINK_LIBS "${OPENGL_LIBRARIES};${GLEW_LIBRARIES}" )
-set(LIB_DIRS "" )
 
 ################################################################################
 # Find optional libraries
@@ -135,26 +161,6 @@ include_directories( ${USER_INC} )
 add_library( SceneGraph ${SOURCES} ${HEADERS} )
 target_link_libraries( SceneGraph ${LINK_LIBS} )
 
-################################################################################
-# Platform tests for config.h
-
-# Test platform type
-IF(WIN32 OR WIN64)
-  SET(_WIN_ 1)
-ENDIF()
-
-IF(UNIX)
-  SET(_UNIX_ 1)
-ENDIF()
-
-IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-   SET(_OSX_ 1)
-ENDIF()
-
-IF(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-   SET(_LINUX_ 1)
-ENDIF()
-
 # Generate config file for use in headers
 CONFIGURE_FILE(
   "${CMAKE_CURRENT_SOURCE_DIR}/config.h.in"
@@ -169,4 +175,9 @@ CONFIGURE_FILE(
 get_target_property( LIB_LOC SceneGraph LOCATION )
 configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/SceneGraphConfig.cmake.in
     ${CMAKE_CURRENT_BINARY_DIR}/SceneGraphConfig.cmake @ONLY IMMEDIATE )
-export( PACKAGE SceneGraph )
+
+if(NOT _ANDROID_)
+    # Add package to CMake package registery for use from the build tree
+    export( PACKAGE SceneGraph )
+endif()
+

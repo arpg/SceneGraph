@@ -6,8 +6,10 @@
 #cmakedefine _WIN_
 #cmakedefine _OSX_
 #cmakedefine _LINUX_
+#cmakedefine _ANDROID_
 
 /// Configured libraries
+#cmakedefine HAVE_GLES
 #cmakedefine HAVE_PANGOLIN
 #cmakedefine HAVE_ASSIMP
 #cmakedefine HAVE_DEVIL
