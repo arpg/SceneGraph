@@ -1,5 +1,9 @@
-project( SceneGraph )
 cmake_minimum_required( VERSION 2.8 )
+project( SceneGraph )
+set(VERSION_MAJOR 0)
+set(VERSION_MINOR 1)
+set(VERSION ${VERSION_MAJOR}.${VERSION_MINOR})
+string( TOLOWER ${PROJECT_NAME} LIBRARY_NAME )
 
 # Add to module path, so we can find our cmake modules
 set( CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules ${CMAKE_MODULE_PATH} )
@@ -7,14 +11,11 @@ set( CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules ${CMAKE_MODULE_
 ################################################################################
 # Find required dependencies
 
-
 find_package( Eigen3 REQUIRED )
 
-
 # Basic includes / libraries
-set(USER_INC "${CMAKE_CURRENT_SOURCE_DIR}/..;${PROJECT_BINARY_DIR}/..;${EIGEN3_INCLUDE_DIR}" )
-set(LINK_LIBS "" )
-set(LIB_DIRS "" )
+list( APPEND LIB_INC_DIR "${CMAKE_CURRENT_BINARY_DIR}/..;${CMAKE_CURRENT_SOURCE_DIR}/.." )
+list( APPEND USER_INC    ${EIGEN3_INCLUDE_DIR} )
 
 if(NOT _ANDROID_)
     find_package( OpenGL REQUIRED )
@@ -37,58 +38,56 @@ list(APPEND SOURCES
     GLObject.cpp
 )
 
-if( NOT _ANDROID_ )
-list(APPEND HEADERS
-    GLHelpers.cpp
-    FBO.cpp
-    SimCam.cpp
-    ../Widgets/nvGlutWidgets.cpp
-    ../Widgets/nvGLWidgets.cpp
-    ../Widgets/nvWidgets.cpp
-)
-endif()
-
 list(APPEND HEADERS
     config.h.in
     SceneGraph.h    
 )
 
-if( NOT _ANDROID_ )
-list(APPEND HEADERS
-    GLGroup.h
-    GLSLHelpers.h
-    GLCylinder.h
-    GLHelpers.h
-    GLHelpersLoadTextures.h
-    GLHelpersBoost.h
-    GLHelpersDevil.h
-    GLLight.h
-    GLShadowLight.h
-    GLColor.h
-    GLImage.h
-    GLVbo.h
-    GLText.h
-    GLGrid.h
-    GLAxis.h
-    GLCube.h
-    GLMovableAxis.h
-    GLAxisAlignedBox.h
-    GLWaypoint.h
-    GLLineStrip.h
-    GLPrimitives.h
-    GLAxisHistory.h
-    GLOpenBox.h
-    SimCam.h
-    Pangolin.h
-    PangolinDrawGLObject.h
-    PangolinSceneGraphHandler.h
-    PangolinImageView.h
-    ../Widgets/nvWidgets.h
-    ../Widgets/nvGlutWidgets.h
-    ../Widgets/nvGLWidgets.h
-    ../Widgets/nvShaderUtils.h
-    ../Widgets/GLWidgetView.h
-)
+if( NOT ANDROID )
+    list(APPEND SOURCES
+        GLHelpers.cpp
+        FBO.cpp
+        SimCam.cpp
+        ../Widgets/nvGlutWidgets.cpp
+        ../Widgets/nvGLWidgets.cpp
+        ../Widgets/nvWidgets.cpp
+    )
+
+    list(APPEND HEADERS
+        GLGroup.h
+        GLSLHelpers.h
+        GLCylinder.h
+        GLHelpers.h
+        GLHelpersLoadTextures.h
+        GLHelpersBoost.h
+        GLHelpersDevil.h
+        GLLight.h
+        GLShadowLight.h
+        GLColor.h
+        GLImage.h
+        GLVbo.h
+        GLText.h
+        GLGrid.h
+        GLAxis.h
+        GLCube.h
+        GLMovableAxis.h
+        GLAxisAlignedBox.h
+        GLWaypoint.h
+        GLLineStrip.h
+        GLPrimitives.h
+        GLAxisHistory.h
+        GLOpenBox.h
+        SimCam.h
+        Pangolin.h
+        PangolinDrawGLObject.h
+        PangolinSceneGraphHandler.h
+        PangolinImageView.h
+        ../Widgets/nvWidgets.h
+        ../Widgets/nvGlutWidgets.h
+        ../Widgets/nvGLWidgets.h
+        ../Widgets/nvShaderUtils.h
+        ../Widgets/GLWidgetView.h
+    )
 endif()
 
 
@@ -148,33 +147,75 @@ if(Pangolin_FOUND)
   set(HAVE_PANGOLIN 1)
   list(APPEND USER_INC ${Pangolin_INCLUDE_DIRS})
   list(APPEND LINK_LIBS ${Pangolin_LIBRARIES})
-  list(APPEND LINK_DIRS ${Pangolin_LIBRARY_DIRS})
 endif()
 
 ################################################################################
 # Include collected includes / libraries
 
+include_directories( ${LIB_INC_DIR} )
 include_directories( ${USER_INC} )
-add_library( SceneGraph ${SOURCES} ${HEADERS} )
-target_link_libraries( SceneGraph ${LINK_LIBS} )
+add_library( ${LIBRARY_NAME} ${SOURCES} ${HEADERS} )
+target_link_libraries( ${LIBRARY_NAME} ${LINK_LIBS} )
 
-# Generate config file for use in headers
+#######################################################
+## Create configure file for inclusion in library
+
 CONFIGURE_FILE(
   "${CMAKE_CURRENT_SOURCE_DIR}/config.h.in"
   "${CMAKE_CURRENT_BINARY_DIR}/config.h"
 )
 
-################################################################################
-# Export library using cmake package mechanism.
+#######################################################
 
-# Create SceneGraphConfig.cmake from SceneGraphConfig.cmake.in
-# to export USER_INC, LINK_LIBS etc.
-get_target_property( LIB_LOC SceneGraph LOCATION )
-configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/SceneGraphConfig.cmake.in
-    ${CMAKE_CURRENT_BINARY_DIR}/SceneGraphConfig.cmake @ONLY IMMEDIATE )
+# This relative path allows installed files to be relocatable.
+set( CMAKECONFIG_INSTALL_DIR "lib/cmake/${PROJECT_NAME}" )
+file( RELATIVE_PATH REL_INCLUDE_DIR
+    "${CMAKE_INSTALL_PREFIX}/${CMAKECONFIG_INSTALL_DIR}"
+    "${CMAKE_INSTALL_PREFIX}/include" )
 
-if(NOT _ANDROID_)
-    # Add package to CMake package registery for use from the build tree
-    export( PACKAGE SceneGraph )
-endif()
+# Export library for easy inclusion from other cmake projects.
+export( TARGETS ${LIBRARY_NAME}
+        FILE "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Targets.cmake" )
 
+# Version information
+configure_file("${PROJECT_NAME}ConfigVersion.cmake.in"
+  "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake" @ONLY)
+
+# Build tree config
+set( EXPORT_LIB_INC_DIR "${LIB_INC_DIR}" )
+CONFIGURE_FILE( "${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_NAME}Config.cmake.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake" @ONLY IMMEDIATE )
+
+# Install tree config
+set( EXPORT_LIB_INC_DIR "\${${PROJECT_NAME}_CMAKE_DIR}/${REL_INCLUDE_DIR}" )
+configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_NAME}Config.cmake.in"
+    "${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${PROJECT_NAME}Config.cmake" @ONLY )
+
+# Add package to CMake package registery for use from the build tree
+export( PACKAGE ${PROJECT_NAME} )
+
+#######################################################
+## Install headers / targets
+
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/config.h"
+  DESTINATION ${CMAKE_INSTALL_PREFIX}/include/${PROJECT_NAME}
+)
+install(FILES ${HEADERS}
+  DESTINATION ${CMAKE_INSTALL_PREFIX}/include/${PROJECT_NAME}
+)
+install(TARGETS ${LIBRARY_NAME}
+  EXPORT "${PROJECT_NAME}Targets"
+  RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/bin
+  LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/lib
+)
+
+#######################################################
+## Install CMake config
+
+INSTALL(
+    FILES "${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${PROJECT_NAME}Config.cmake"
+          "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake"
+    DESTINATION ${CMAKECONFIG_INSTALL_DIR} )
+
+install( EXPORT "${PROJECT_NAME}Targets" DESTINATION ${CMAKECONFIG_INSTALL_DIR} )

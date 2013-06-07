@@ -5,13 +5,8 @@ LINK_DIRECTORIES(${Pangolin_LIBRARY_DIRS})
 LINK_LIBRARIES(${Pangolin_LIBRARIES})
 
 # Find Scenegraph
-FIND_PACKAGE(SceneGraph REQUIRED)
+FIND_PACKAGE(SceneGraph 0.1 REQUIRED)
 INCLUDE_DIRECTORIES(${SceneGraph_INCLUDE_DIRS})
 LINK_LIBRARIES(${SceneGraph_LIBRARIES})
 
 ADD_EXECUTABLE(DisplayModel main.cpp)
-
-# In your own code, you can ommit these lines
-IF( ${SCENEGRAPH_EXAMPLE} )
-  add_dependencies(DisplayModel SceneGraph)
-ENDIF()
