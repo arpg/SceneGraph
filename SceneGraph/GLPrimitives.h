@@ -11,11 +11,20 @@ class GLPrimitives
   : public GLObject
 {
 public:
-    GLPrimitives(GLenum mode = GL_LINE_STRIP, SceneGraph::GLColor color = SceneGraph::GLColor(), int initial_vert_buffer_size = 1024)
+    GLPrimitives(GLenum mode = GL_LINE_STRIP, SceneGraph::GLColor color = SceneGraph::GLColor(), int initial_vert_buffer_elements = 1024)
         : m_mode(mode), m_color(color),
-          m_vbo(pangolin::GlArrayBuffer, initial_vert_buffer_size, GL_FLOAT, 3, GL_DYNAMIC_DRAW)
+          m_vbo(pangolin::GlArrayBuffer, initial_vert_buffer_elements, GL_FLOAT, 3, GL_DYNAMIC_DRAW)
     {
         
+    }
+
+    GLPrimitives(const std::vector<Eigen::Vector3d,Eigen::aligned_allocator<Eigen::Vector3d> >& vArray, GLenum mode = GL_LINE_STRIP, SceneGraph::GLColor color = SceneGraph::GLColor())
+        : m_mode(mode), m_color(color),
+          m_vbo(pangolin::GlArrayBuffer, vArray.size()*3, GL_FLOAT, 3, GL_DYNAMIC_DRAW)
+    {
+        for( int ii = 0; ii < vArray.size() ; ++ii ){
+            AddVertex(vArray[ii]);
+        }
     }
     
     void DrawCanonicalObject()

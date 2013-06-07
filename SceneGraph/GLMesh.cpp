@@ -8,6 +8,47 @@
 namespace SceneGraph
 {
 
+GLMesh::Mesh::Mesh()
+{
+    m_uVB = 0;
+    m_uIB = 0;
+    m_uNumIndices  = 0;
+    m_uMaterialIndex = -1;
+};
+
+GLMesh::Mesh::~Mesh()
+{
+    if (m_uVB != 0)
+    {
+        glDeleteBuffers(1, &m_uVB);
+    }
+
+    if (m_uIB != 0)
+    {
+        glDeleteBuffers(1, &m_uIB);
+    }
+}
+
+GLvoid GLMesh::Mesh::Init(const std::vector<Vertex>& vVertices,
+                               const std::vector<unsigned int>& vIndices,
+                                const aiMatrix4x4 &mTrans)
+{
+    m_Transformation = mTrans;
+
+    m_uNumIndices = vIndices.size();
+    int nVertexSize = sizeof(Vertex);
+
+    glGenBuffers(1, &m_uVB);
+    glBindBuffer(GL_ARRAY_BUFFER, m_uVB);
+    glBufferData(GL_ARRAY_BUFFER, nVertexSize * vVertices.size(), &vVertices[0], GL_DYNAMIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    glGenBuffers(1, &m_uIB);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_uIB);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * m_uNumIndices, &vIndices[0], GL_DYNAMIC_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+}
+
 ////////////////////////////////////////////////////////////////////////////
 // Simple inline utilities for this class
 ////////////////////////////////////////////////////////////////////////////
@@ -51,14 +92,14 @@ inline GLenum GLWrapFromAiMapMode(aiTextureMapMode mode)
 ////////////////////////////////////////////////////////////////////////////
 GLMesh::GLMesh()
     : GLObject("Mesh"), m_fAlpha(1),
-      m_iMeshID(-1), m_bShowMeshNormals(false)
+      m_iMeshID(-1), m_bShowMeshNormals(false),m_uMeshCount(0)
 {
 }
 
 ////////////////////////////////////////////////////////////////////////////
 GLMesh::GLMesh(const std::string& sMeshFile)
     : GLObject("Mesh"), m_fAlpha(1),
-      m_iMeshID(-1), m_bShowMeshNormals(false)
+      m_iMeshID(-1), m_bShowMeshNormals(false),m_uMeshCount(0)
 {
     Init(sMeshFile);
 }
@@ -77,7 +118,8 @@ GLMesh::~GLMesh()
 }
 
 ////////////////////////////////////////////////////////////////////////////
-void GLMesh::Init( const std::string& sMeshFile, bool bFlipUVs )
+void GLMesh::Init( const std::string& sMeshFile,
+                   bool bFlipUVs /*= false*/ )
 {
     m_pScene = aiImportFile( sMeshFile.c_str(), aiProcess_Triangulate
                                             | aiProcess_GenSmoothNormals
@@ -102,11 +144,59 @@ void GLMesh::Init( const std::string& sMeshFile, bool bFlipUVs )
 void GLMesh::Init( const struct aiScene* pScene )
 {
     m_pScene = pScene;
+    m_Meshes.resize(pScene->mNumMeshes);
+    InitNode(m_pScene,m_pScene->mRootNode,m_pScene->mRootNode->mTransformation);
+    LoadMeshTextures();
+}
 
-    if(m_pScene != NULL ) {
-        LoadMeshTextures();
-        ComputeDimensions();
+////////////////////////////////////////////////////////////////////////////
+void GLMesh::InitNode( const struct aiScene *sc, const struct aiNode* nd, const aiMatrix4x4& mTransformation )
+{
+    aiMatrix4x4 trans = mTransformation * nd->mTransformation;
+    // draw all meshes assigned to this node
+    for (unsigned int n = 0; n < nd->mNumMeshes; ++n) {
+        const struct aiMesh* mesh = m_pScene->mMeshes[nd->mMeshes[n]];
+        InitMesh(m_uMeshCount, mesh, trans);
+        m_uMeshCount++;
     }
+
+    // draw all children
+    for(unsigned int n = 0; n < nd->mNumChildren; ++n ) {
+        InitNode( sc, nd->mChildren[n], trans );
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////
+void GLMesh::InitMesh(unsigned int Index, const aiMesh* paiMesh, const aiMatrix4x4 &mTransformation)
+{
+    m_Meshes[Index].m_uMaterialIndex = paiMesh->mMaterialIndex;
+
+    std::vector<Vertex> Vertices;
+    std::vector<unsigned int> Indices;
+
+    const aiVector3D Zero3D(0.0f, 0.0f, 0.0f);
+
+    for (unsigned int i = 0 ; i < paiMesh->mNumVertices ; i++) {
+        const aiVector3D* pPos      = &(paiMesh->mVertices[i]);
+        const aiVector3D* pNormal   = &(paiMesh->mNormals[i]);
+        const aiVector3D* pTexCoord = paiMesh->HasTextureCoords(0) ? &(paiMesh->mTextureCoords[0][i]) : &Zero3D;
+
+        Vertex v(pPos->x, pPos->y, pPos->z,
+                 pTexCoord->x, pTexCoord->y,
+                 pNormal->x, pNormal->y, pNormal->z);
+
+        Vertices.push_back(v);
+    }
+
+    for (unsigned int i = 0 ; i < paiMesh->mNumFaces ; i++) {
+        const aiFace& Face = paiMesh->mFaces[i];
+        assert(Face.mNumIndices == 3);
+        Indices.push_back(Face.mIndices[0]);
+        Indices.push_back(Face.mIndices[1]);
+        Indices.push_back(Face.mIndices[2]);
+    }
+
+    m_Meshes[Index].Init(Vertices, Indices, mTransformation);
 }
 
 ////////////////////////////////////////////////////////////////////////////
@@ -119,27 +209,73 @@ void GLMesh::ShowNormals(bool showNormals )
 void  GLMesh::DrawCanonicalObject()
 {
     if( m_pScene ){
-        if( m_nDisplayList == -1 ){
-            m_nDisplayList = glGenLists(1);
-            glNewList( m_nDisplayList, GL_COMPILE_AND_EXECUTE );
-            DrawCanonicalObject();
-            glEndList();
-        }else{
-            glPushAttrib(GL_ENABLE_BIT);
+        for (unsigned int i = 0 ; i < m_Meshes.size() ; i++) {
+            glBindBuffer(GL_ARRAY_BUFFER, m_Meshes[i].m_uVB);
+            glVertexPointer(3, GL_FLOAT, sizeof(Vertex), 0);
+            glEnableClientState(GL_VERTEX_ARRAY);
+            size_t uNormalOffset = 3*sizeof(float);
+            glNormalPointer(GL_FLOAT, sizeof(Vertex),(GLvoid*)uNormalOffset);
+            glEnableClientState(GL_NORMAL_ARRAY);
+            size_t uTexOffset = 6*sizeof(float);
+            glTexCoordPointer(2,GL_FLOAT,sizeof(Vertex),(GLvoid*)uTexOffset);
+            glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
-            // Enable Multisample if it is available.
-            glEnable(GL_MULTISAMPLE);                        
-            glEnable(GL_BLEND);
-            glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_Meshes[i].m_uIB);
 
-            
-            glColor4f(1,1,1,m_fAlpha);
-            RecursiveRender( m_pScene, m_pScene->mRootNode );
+            const unsigned int MaterialIndex = m_Meshes[i].m_uMaterialIndex;
+            const aiMaterial* pMaterial = m_pScene->mMaterials[MaterialIndex];
+            ApplyMaterial( pMaterial );
 
-            glDisable(GL_BLEND);
+            // WARNING: A relatively arbitrary list of texture types to
+            // try and load. In the future these should be dealt with properly
+            const size_t numTexTypesToLoad = 4;
+            static aiTextureType texTypesToLoad[numTexTypesToLoad] = {
+                aiTextureType_DIFFUSE, aiTextureType_AMBIENT,
+                aiTextureType_EMISSIVE, aiTextureType_LIGHTMAP
+            };
 
-            glPopAttrib();
+            int totaltex = 0;
+
+            for(size_t tti=0; tti < numTexTypesToLoad; ++tti ) {
+                const aiTextureType tt = texTypesToLoad[tti];
+                const unsigned int numTex = pMaterial->GetTextureCount(tt);
+                totaltex += numTex;
+                for(unsigned int dt=0; dt < numTex; ++dt ) {
+                    aiString path;
+                    if( pMaterial->GetTexture(tt, dt, &path) == AI_SUCCESS ) {
+                        std::map<std::string,GLuint>::iterator ix = m_mapPathToGLTex.find(path.data);
+                        if( ix != m_mapPathToGLTex.end() ) {
+                            glEnable(GL_TEXTURE_2D);
+                            glBindTexture(GL_TEXTURE_2D, ix->second);
+                            // Only bind first one for now.
+                            goto endoftextures;
+                        }
+                    }
+                }
+            }
+        endoftextures:
+
+            aiMatrix4x4 m = m_Meshes[i].m_Transformation;
+            aiTransposeMatrix4( &m );
+            glPushMatrix();
+            glMultMatrixf( &(m.a1) );
+
+            glDrawElements(GL_TRIANGLES, m_Meshes[i].m_uNumIndices, GL_UNSIGNED_INT, 0);
+
+            glPopMatrix();
+
+            if( totaltex > 0 ) {
+                glDisable(GL_TEXTURE_2D);
+            }
+
+            glDisableClientState(GL_VERTEX_ARRAY);
+            glDisableClientState(GL_NORMAL_ARRAY);
+            glDisableClientState(GL_TEXTURE_COORD_ARRAY);
         }
+
+
+        glBindBuffer(GL_ARRAY_BUFFER,0);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,0);
     }
 }
 \
@@ -403,130 +539,6 @@ void GLMesh::ApplyMaterial( const struct aiMaterial *mtl )
         CheckForGLErrors();
     }
 
-}
-
-////////////////////////////////////////////////////////////////////////////
-void GLMesh::RenderFace( GLenum face_mode, GLenum fill_mode, float fAlpha, const struct aiFace* face,  const struct aiMesh* mesh )
-{
-    glPolygonMode( GL_FRONT_AND_BACK, fill_mode );
-    glBegin( face_mode );
-    for( unsigned int ii = 0; ii < face->mNumIndices; ii++ ) {
-        int index = face->mIndices[ii];
-        if( mesh->mColors[0] != NULL ){
-            float *c = (float*)&mesh->mColors[0][index];
-            glColor4f( c[0], c[1], c[2], fAlpha*c[3] );
-        }
-        if( mesh->mTextureCoords[0] != NULL ){
-            glTexCoord3fv( &mesh->mTextureCoords[0][index].x );
-        }
-        if( mesh->mNormals != NULL ){
-            glNormal3fv( &mesh->mNormals[index].x );
-        }
-        glVertex3fv( &mesh->mVertices[index].x );
-    }
-    glEnd();
-
-    // show normals for debugging
-    if( m_bShowMeshNormals ){
-        float s = 0.1;
-        glBegin( GL_LINES );
-        for( unsigned int ii = 0; ii < face->mNumIndices; ii++ ) {
-            int index = face->mIndices[ii];
-            float* p = &mesh->mVertices[index].x;
-            float* n = &mesh->mNormals[index].x;
-            glVertex3f( p[0], p[1], p[2] );
-            glVertex3f( p[0]+s*n[0], p[1]+s*n[1], p[2]+s*n[2] );
-        }
-        glEnd();
-    }
-
-}
-
-////////////////////////////////////////////////////////////////////////////
-void GLMesh::RenderMesh(
-        const struct aiMesh* mesh,
-        const struct aiMaterial* mtl
-        )
-{
-    ApplyMaterial( mtl );
-    if( mesh->mNormals == NULL ) {
-        glDisable(GL_LIGHTING);
-    } else {
-        glEnable(GL_LIGHTING);
-    }
-
-    // WARNING: A relatively arbitrary list of texture types to
-    // try and load. In the future these should be dealt with properly
-    const size_t numTexTypesToLoad = 4;
-    static aiTextureType texTypesToLoad[numTexTypesToLoad] = {
-        aiTextureType_DIFFUSE, aiTextureType_AMBIENT,
-        aiTextureType_EMISSIVE, aiTextureType_LIGHTMAP
-    };
-
-    int totaltex = 0;
-
-    for(size_t tti=0; tti < numTexTypesToLoad; ++tti ) {
-        const aiTextureType tt = texTypesToLoad[tti];
-        const unsigned int numTex = mtl->GetTextureCount(tt);
-        totaltex += numTex;
-        for(unsigned int dt=0; dt < numTex; ++dt ) {
-            aiString path;
-            if( mtl->GetTexture(tt, dt, &path) == AI_SUCCESS ) {
-                std::map<std::string,GLuint>::iterator ix = m_mapPathToGLTex.find(path.data);
-                if( ix != m_mapPathToGLTex.end() ) {
-                    glEnable(GL_TEXTURE_2D);
-                    glBindTexture(GL_TEXTURE_2D, ix->second);
-                    // Only bind first one for now.
-                    goto endoftextures;
-                }
-            }
-        }
-    }
-endoftextures:
-
-    for( unsigned int t = 0; t < mesh->mNumFaces; ++t) {
-        const struct aiFace* face = &mesh->mFaces[t];
-        GLenum face_mode;
-
-        switch(face->mNumIndices) {
-            case 1: face_mode = GL_POINTS; break;
-            case 2: face_mode = GL_LINES; break;
-            case 3: face_mode = GL_TRIANGLES; break;
-            default: face_mode = GL_POLYGON; break;
-        }
-        RenderFace( face_mode, GL_FILL, m_fAlpha, face, mesh );
-    }
-
-    if( totaltex > 0 ) {
-        glDisable(GL_TEXTURE_2D);
-    }
-}
-
-////////////////////////////////////////////////////////////////////////////
-
-void GLMesh::RecursiveRender( const struct aiScene *sc, const struct aiNode* nd )
-{
-    unsigned int n = 0;
-    aiMatrix4x4 m = nd->mTransformation;
-
-    // update transform
-    aiTransposeMatrix4( &m );
-    glPushMatrix();
-    glMultMatrixf( &(m.a1) );
-
-    // draw all meshes assigned to this node
-    for (; n < nd->mNumMeshes; ++n) {
-        const struct aiMesh* mesh = m_pScene->mMeshes[nd->mMeshes[n]];
-        RenderMesh( mesh, sc->mMaterials[mesh->mMaterialIndex] );
-    }
-
-
-    // draw all children
-    for( n = 0; n < nd->mNumChildren; ++n ) {
-        RecursiveRender( sc, nd->mChildren[n] );
-    }
-
-    glPopMatrix();
 }
 
 } // namespace SceneGraph

@@ -62,7 +62,7 @@ int main( int /*argc*/, char** /*argv[]*/ )
     // Define a mesh object and try to load model
     SceneGraph::GLMesh glMesh;
     try {
-        glMesh.Init("./model.blend");
+        glMesh.Init("./herbie/herbie.blend");
         glMesh.SetPosition(0,0,-0.15);
         glGraph.AddChild(&glMesh);
     }catch(exception e) {
