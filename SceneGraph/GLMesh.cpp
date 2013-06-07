@@ -91,14 +91,14 @@ inline GLenum GLWrapFromAiMapMode(aiTextureMapMode mode)
 
 ////////////////////////////////////////////////////////////////////////////
 GLMesh::GLMesh()
-    : GLObject("Mesh"), m_fAlpha(1),
+    : GLObject("Mesh"), m_pScene(0), m_fAlpha(1),
       m_iMeshID(-1), m_bShowMeshNormals(false),m_uMeshCount(0)
 {
 }
 
 ////////////////////////////////////////////////////////////////////////////
 GLMesh::GLMesh(const std::string& sMeshFile)
-    : GLObject("Mesh"), m_fAlpha(1),
+    : GLObject("Mesh"), m_pScene(0), m_fAlpha(1),
       m_iMeshID(-1), m_bShowMeshNormals(false),m_uMeshCount(0)
 {
     Init(sMeshFile);
@@ -114,7 +114,9 @@ GLMesh::~GLMesh()
     }
 
     // Free scene
-    aiReleaseImport(m_pScene);
+    if(m_pScene) {
+        aiReleaseImport(m_pScene);
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////

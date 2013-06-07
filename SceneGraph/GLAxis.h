@@ -13,7 +13,8 @@ class GLAxis : public GLObject
 
         ///////////////////////////////////////////////////////////////////////////
         GLAxis(const float axisSize = 1.0f, const bool bPretty = false)
-            : GLObject("Axis"), m_fAxisScale(axisSize), m_bPretty(bPretty)
+            : GLObject("Axis"), m_fAxisScale(axisSize), m_bPretty(bPretty),
+              m_pQuadric(0)
         {
             m_bPerceptable = false;
             m_aabb.SetZero();

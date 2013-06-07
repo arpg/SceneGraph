@@ -119,8 +119,8 @@ protected:
         const struct aiScene*   m_pScene;
         float                   m_fAlpha; // render translucent meshes?
         unsigned int            m_iMeshID;
-        unsigned int            m_uMeshCount;
         bool                    m_bShowMeshNormals;
+        unsigned int            m_uMeshCount;
         std::map<std::string,GLuint> m_mapPathToGLTex;
         std::vector<Mesh> m_Meshes;
 };

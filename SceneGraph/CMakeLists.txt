@@ -12,9 +12,6 @@ find_package( Eigen3 REQUIRED )
 
 
 # Basic includes / libraries
-#set(USER_INC "${CMAKE_CURRENT_SOURCE_DIR}/..;${PROJECT_BINARY_DIR}/..;${OPENGL_INCLUDE_DIR};${GLEW_INCLUDE_DIR};${EIGEN3_INCLUDE_DIR}" )
-#set(LINK_LIBS "${OPENGL_LIBRARIES};${GLEW_LIBRARIES}" )
-#set(LIB_DIRS "" )
 set(USER_INC "${CMAKE_CURRENT_SOURCE_DIR}/..;${PROJECT_BINARY_DIR}/..;${EIGEN3_INCLUDE_DIR}" )
 set(LINK_LIBS "" )
 set(LIB_DIRS "" )
@@ -25,10 +22,10 @@ if(NOT _ANDROID_)
     list(APPEND USER_INC  "${OPENGL_INCLUDE_DIR};${GLEW_INCLUDE_DIR}" )
     list(APPEND LINK_LIBS "${OPENGL_LIBRARIES};${GLEW_LIBRARY}" )
 else()
-  find_package(GLUES REQUIRED)
-  list(APPEND LINK_LIBS "${GLUES_LIBRARY}" )
-  list(APPEND LINK_LIBS "-lEGL;-lGLESv2;-lGLESv1_CM" )
-  set(HAVE_GLES 1)
+    find_package(GLUES REQUIRED)
+    list(APPEND LINK_LIBS "${GLUES_LIBRARY}" )
+    list(APPEND LINK_LIBS "-lEGL;-lGLESv2;-lGLESv1_CM" )
+    set(HAVE_GLES 1)
 endif()
 
 
@@ -146,7 +143,7 @@ else()
 endif()
 
 # Find Pangolin (https://github.com/stevenlovegrove/Pangolin)
-find_package(Pangolin)
+find_package(Pangolin 0.1)
 if(Pangolin_FOUND)
   set(HAVE_PANGOLIN 1)
   list(APPEND USER_INC ${Pangolin_INCLUDE_DIRS})
