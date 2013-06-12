@@ -128,7 +128,7 @@ struct App
 int main( int /*argc*/, char** /*argv*/ )
 {
     // Create OpenGL window in single line thanks to GLUT
-    pangolin::CreateGlutWindowAndBind("Main",640,480);
+    pangolin::CreateWindowAndBind("Main",640,480);
     SceneGraph::GLSceneGraph::ApplyPreferredGlSettings();
     glewInit();
 
@@ -175,7 +175,7 @@ int main( int /*argc*/, char** /*argv*/ )
         glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
         // Swap frames and Process Events
-        pangolin::FinishGlutFrame();
+        pangolin::FinishFrame();
 
         // step the simulator
         app.m_pSim->StepSimulation();

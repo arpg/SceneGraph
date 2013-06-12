@@ -144,7 +144,7 @@ int main(
     g_mTvr = RightCamModel.GetPose();
 
     // Create OpenGL window in single line thanks to GLUT
-    pango::CreateGlutWindowAndBind( "SimCamDEMO", 1280, 640 );
+    pango::CreateWindowAndBind( "SimCamDEMO", 1280, 640 );
     sg::GLSceneGraph::ApplyPreferredGlSettings();
 
     // Scenegraph to hold GLObjects and relative transformations
@@ -254,7 +254,7 @@ int main(
         }
 
         // Swap frames and Process Events
-        pango::FinishGlutFrame();
+        pango::FinishFrame();
 
         // Pause for 1/60th of a second.
         usleep( 1E6 / 60 );

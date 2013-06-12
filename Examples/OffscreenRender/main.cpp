@@ -63,7 +63,7 @@ int main( int argc, char* argv[] )
     const double v0 = h/2;
     
     // Create OpenGL window in single line thanks to GLUT
-    pangolin::CreateGlutWindowAndBind("Main",640*2,480);
+    pangolin::CreateWindowAndBind("Main",640*2,480);
     GLSceneGraph::ApplyPreferredGlSettings();
     glewInit();
 
@@ -176,7 +176,7 @@ int main( int argc, char* argv[] )
         synth_texture.RenderToViewportFlipY();
 
         // Swap frames and Process Events
-        pangolin::FinishGlutFrame();
+        pangolin::FinishFrame();
 
         // Pause for 1/60th of a second.
         usleep(1E6 / 60);

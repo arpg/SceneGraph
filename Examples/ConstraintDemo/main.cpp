@@ -329,7 +329,7 @@ int main( int argc, char** argv )
 //    }
 
     // Create OpenGL window in single line thanks to GLUT
-    pangolin::CreateGlutWindowAndBind("Main",640,480);
+    pangolin::CreateWindowAndBind("Main",640,480);
     SceneGraph::GLSceneGraph::ApplyPreferredGlSettings();
     glClearColor(0, 0, 0, 0);
     glewInit();
@@ -412,7 +412,7 @@ int main( int argc, char** argv )
         // loop through robot graph and for each body update the associated GL object pose
 
 
-        pangolin::FinishGlutFrame();
+        pangolin::FinishFrame();
     }
 
     return 0;

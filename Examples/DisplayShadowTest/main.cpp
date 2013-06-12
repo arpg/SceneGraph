@@ -100,7 +100,7 @@ int main( int /*argc*/, char** /*argv[]*/ )
         shadowLight.SetPosition(100*cos(frame/100.0), 100*sin(frame/100.0), -100 );
 
         // Swap frames and Process Events
-        pangolin::FinishGlutFrame();
+        pangolin::FinishFrame();
 
         // Pause for 1/60th of a second.
         usleep(1E6 / 60);

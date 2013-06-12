@@ -39,7 +39,7 @@ void GlobalKeyHook(std::string str)
 int main( int /*argc*/, char** /*argv[]*/ )
 {
     // Create OpenGL window in single line thanks to GLUT
-    pangolin::CreateGlutWindowAndBind("Main",640*2,480);
+    pangolin::CreateWindowAndBind("Main",640*2,480);
     GLSceneGraph::ApplyPreferredGlSettings();
 
     // Scenegraph to hold GLObjects and relative transformations
@@ -123,7 +123,7 @@ int main( int /*argc*/, char** /*argv[]*/ )
         viewImage.SetImage(uImage, w,h, GL_RGB8, GL_RGB, GL_UNSIGNED_BYTE);
 
         // Swap frames and Process Events
-        pangolin::FinishGlutFrame();
+        pangolin::FinishFrame();
 
         // Pause for 1/60th of a second.
         usleep(1E6 / 60);
