@@ -46,7 +46,7 @@ enum KeyModifier
 
 enum RenderMode
 {
-#ifdef _ANDROID_
+#ifdef HAVE_GLES
     eRenderVisible = 1,
     eRenderSelectable = 0,
 #else
@@ -205,7 +205,6 @@ class GLObject
         static int g_nHandleCounter;
 
         GLint                          m_nDisplayList;
-
 };
 
 inline bool GLObject::Mouse(int, const Eigen::Vector3d&, const Eigen::Vector3d&, const Eigen::Vector3d&, bool, int, int) {

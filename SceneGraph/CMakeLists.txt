@@ -36,11 +36,18 @@ endif()
 list(APPEND SOURCES    
     GLSceneGraph.cpp
     GLObject.cpp
+    GLLight.cpp
 )
 
 list(APPEND HEADERS
     config.h.in
-    SceneGraph.h    
+    SceneGraph.h
+    GLSceneGraph.h
+    GLObject.h
+    GLHelpers.h
+    GLGroup.h
+    PangolinDrawGLObject.h
+    PangolinSceneGraphHandler.h
 )
 
 if( NOT ANDROID )
@@ -54,10 +61,8 @@ if( NOT ANDROID )
     )
 
     list(APPEND HEADERS
-        GLGroup.h
         GLSLHelpers.h
         GLCylinder.h
-        GLHelpers.h
         GLHelpersLoadTextures.h
         GLHelpersBoost.h
         GLHelpersDevil.h
@@ -78,9 +83,6 @@ if( NOT ANDROID )
         GLAxisHistory.h
         GLOpenBox.h
         SimCam.h
-        Pangolin.h
-        PangolinDrawGLObject.h
-        PangolinSceneGraphHandler.h
         PangolinImageView.h
         ../Widgets/nvWidgets.h
         ../Widgets/nvGlutWidgets.h

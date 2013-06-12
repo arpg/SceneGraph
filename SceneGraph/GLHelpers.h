@@ -9,7 +9,6 @@
 
 #include <SceneGraph/config.h>
 
-
 #ifdef HAVE_GLES
     #include <EGL/egl.h>
     #include <GLES/gl.h>
@@ -301,7 +300,7 @@ inline Eigen::Matrix3d Rotation_a2b(const Eigen::Vector3d& a, const Eigen::Vecto
     return M;
 }
 
-#ifndef _ANDROID_
+#ifndef HAVE_GLES
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 void DrawCamera(
@@ -434,7 +433,7 @@ inline GLuint LoadGLTexture(GLint width, GLint height, void* data, GLint interna
 
     return glTexId;
 }
-#endif // _ANDROID_
+#endif // HAVE_GLES
 
 
 } // SceneGraph

@@ -42,7 +42,7 @@ public:
     //! Set the image data to be used for display.
     //! The OpenGL Texture associated with this display will be
     //! updated before drawing from within the OpenGL thread.
-    void SetImage(const void* pImageData, GLint w, GLint h, GLint internal_format = GL_RGB8, GLenum nFormat = GL_RGB, GLenum nType = GL_UNSIGNED_BYTE)
+    void SetImage(const void* pImageData, GLint w, GLint h, GLint internal_format = GL_RGB, GLenum nFormat = GL_RGB, GLenum nType = GL_UNSIGNED_BYTE)
     {
         const size_t nMemSize = w * h * GLBytesPerPixel( nFormat, nType );
 
