@@ -5,6 +5,7 @@ set(VERSION_MINOR 1)
 set(VERSION ${VERSION_MAJOR}.${VERSION_MINOR})
 string( TOLOWER ${PROJECT_NAME} LIBRARY_NAME )
 
+
 # Add to module path, so we can find our cmake modules
 set( CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules ${CMAKE_MODULE_PATH} )
 
@@ -149,6 +150,7 @@ if(Pangolin_FOUND)
   set(HAVE_PANGOLIN 1)
   list(APPEND USER_INC ${Pangolin_INCLUDE_DIRS})
   list(APPEND LINK_LIBS ${Pangolin_LIBRARIES})
+  list(APPEND TARGETS_TO_EXPORT ${Pangolin_LIBRARIES})
 endif()
 
 ################################################################################
@@ -157,6 +159,7 @@ endif()
 include_directories( ${LIB_INC_DIR} )
 include_directories( ${USER_INC} )
 add_library( ${LIBRARY_NAME} ${SOURCES} ${HEADERS} )
+list( APPEND TARGETS_TO_EXPORT ${LIBRARY_NAME} )
 target_link_libraries( ${LIBRARY_NAME} ${LINK_LIBS} )
 
 #######################################################
@@ -176,7 +179,7 @@ file( RELATIVE_PATH REL_INCLUDE_DIR
     "${CMAKE_INSTALL_PREFIX}/include" )
 
 # Export library for easy inclusion from other cmake projects.
-export( TARGETS ${LIBRARY_NAME}
+export( TARGETS ${TARGETS_TO_EXPORT}
         FILE "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Targets.cmake" )
 
 # Version information
