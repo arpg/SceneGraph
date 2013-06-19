@@ -62,11 +62,11 @@ int main( int /*argc*/, char** /*argv[]*/ )
     // Define a mesh object and try to load model
     SceneGraph::GLMesh glMesh;
     try {
-        glMesh.Init("./herbie/herbie.blend");
+        glMesh.Init("herbie/herbie.blend");
         glMesh.SetPosition(0,0,-0.15);
         glGraph.AddChild(&glMesh);
     }catch(exception e) {
-        cerr << "Cannot load mesh. Check file exists" << endl;
+        cerr << "Cannot load mesh. Error message:" << e.what() << endl;
     }
 #endif // HAVE_ASSIMP
 

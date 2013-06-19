@@ -123,6 +123,7 @@ GLMesh::~GLMesh()
 void GLMesh::Init( const std::string& sMeshFile,
                    bool bFlipUVs /*= false*/ )
 {
+    SetObjectName("mesh");
     m_pScene = aiImportFile( sMeshFile.c_str(), aiProcess_Triangulate
                                             | aiProcess_GenSmoothNormals
                                             | aiProcess_JoinIdenticalVertices
@@ -179,8 +180,8 @@ void GLMesh::InitMesh(unsigned int Index, const aiMesh* paiMesh, const aiMatrix4
     const aiVector3D Zero3D(0.0f, 0.0f, 0.0f);
 
     for (unsigned int i = 0 ; i < paiMesh->mNumVertices ; i++) {
-        const aiVector3D* pPos      = &(paiMesh->mVertices[i]);
-        const aiVector3D* pNormal   = &(paiMesh->mNormals[i]);
+        const aiVector3D* pPos      = paiMesh->HasPositions() ? &(paiMesh->mVertices[i]) : &Zero3D;
+        const aiVector3D* pNormal   = paiMesh->HasNormals() ? &(paiMesh->mNormals[i]) : &Zero3D;
         const aiVector3D* pTexCoord = paiMesh->HasTextureCoords(0) ? &(paiMesh->mTextureCoords[0][i]) : &Zero3D;
 
         Vertex v(pPos->x, pPos->y, pPos->z,
@@ -192,10 +193,11 @@ void GLMesh::InitMesh(unsigned int Index, const aiMesh* paiMesh, const aiMatrix4
 
     for (unsigned int i = 0 ; i < paiMesh->mNumFaces ; i++) {
         const aiFace& Face = paiMesh->mFaces[i];
-        assert(Face.mNumIndices == 3);
-        Indices.push_back(Face.mIndices[0]);
-        Indices.push_back(Face.mIndices[1]);
-        Indices.push_back(Face.mIndices[2]);
+        if(Face.mNumIndices == 3){
+            Indices.push_back(Face.mIndices[0]);
+            Indices.push_back(Face.mIndices[1]);
+            Indices.push_back(Face.mIndices[2]);
+        }
     }
 
     m_Meshes[Index].Init(Vertices, Indices, mTransformation);
@@ -444,7 +446,14 @@ GLuint GLMesh::LoadGLTextureResource(aiString& path)
         }
     }else{
         // Texture in file resource
+        try {
         glTex = LoadGLTextureFromFile(path.data, path.length);
+        }catch(std::exception e) {
+            std::stringstream ss;
+            ss << "Could not load texture: " << path.C_Str();
+            std::cerr << ss.str() << std::endl;
+//            throw std::runtime_error(ss.str());
+        }
     }
 
     return glTex;

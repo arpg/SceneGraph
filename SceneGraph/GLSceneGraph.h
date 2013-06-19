@@ -33,6 +33,8 @@ class GLSceneGraph : public GLObject
 
         static void ApplyPreferredGlSettings();
 
+
+
     private:
         void PreDraw();
         void PostDraw();
@@ -41,6 +43,7 @@ class GLSceneGraph : public GLObject
         std::vector<GLObjectPrePostRender*> m_vpPrePostRender;
 
         bool m_bEnableLighting;
+
 };
 
 class GLObjectPrePostRender : public GLObject

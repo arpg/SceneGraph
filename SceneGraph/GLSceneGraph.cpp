@@ -180,4 +180,8 @@ GLObject* GLSceneGraph::GetObject( unsigned int nId )
     return it->second;
 }
 
+/////////////////////////////////////////////////////////////////////////////////
+
+
+
 } // SceneGraph
