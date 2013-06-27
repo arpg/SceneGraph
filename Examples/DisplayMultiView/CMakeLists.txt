@@ -9,4 +9,4 @@ FIND_PACKAGE(SceneGraph 0.1 REQUIRED)
 INCLUDE_DIRECTORIES(${SceneGraph_INCLUDE_DIRS})
 LINK_LIBRARIES(${SceneGraph_LIBRARIES})
 
-ADD_EXECUTABLE(DisplayModel main.cpp)
+ADD_EXECUTABLE(DisplayMultiView main.cpp)

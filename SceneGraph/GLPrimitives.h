@@ -1,7 +1,7 @@
 #pragma once
 
 #include <SceneGraph/SceneGraph.h>
-#include <pangolin/gl.h>
+#include <SceneGraph/PangolinGlCachedSizeableBuffer.h>
 
 namespace SceneGraph
 {
@@ -12,7 +12,7 @@ class GLPrimitives
 {
 public:
     GLPrimitives(GLenum mode = GL_LINE_STRIP, SceneGraph::GLColor color = SceneGraph::GLColor(), int initial_vert_buffer_elements = 1024)
-        : m_mode(mode), m_color(color),
+        : GLObject("GLPrimitives"), m_mode(mode), m_color(color),
           m_vbo(pangolin::GlArrayBuffer, initial_vert_buffer_elements, GL_FLOAT, 3, GL_DYNAMIC_DRAW)
     {
         
@@ -50,6 +50,11 @@ public:
         GLObject::m_aabb.Clear();
         m_vbo.Clear();
     }
+    
+    void SetColor( const GLColor& c )
+    {
+        m_color = c;
+    }     
     
 protected:
     GLenum m_mode;

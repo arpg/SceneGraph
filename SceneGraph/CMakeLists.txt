@@ -42,12 +42,31 @@ list(APPEND SOURCES
 list(APPEND HEADERS
     config.h.in
     SceneGraph.h
+    GLHelpers.h
+    GLSLHelpers.h
     GLSceneGraph.h
     GLObject.h
-    GLHelpers.h
     GLGroup.h
+    GLCylinder.h
+    GLLight.h
+    GLShadowLight.h
+    GLColor.h
+    GLImage.h
+    GLVbo.h
+    GLText.h
+    GLGrid.h
+    GLAxis.h
+    GLCube.h
+    GLLineStrip.h
+    GLPrimitives.h
+    GLAxisHistory.h
+    GLOpenBox.h
+    GLHelpersLoadTextures.h
+    GLHelpersBoost.h
+    GLHelpersDevil.h
     PangolinDrawGLObject.h
     PangolinSceneGraphHandler.h
+    PangolinImageView.h
 )
 
 if( NOT ANDROID )
@@ -61,29 +80,11 @@ if( NOT ANDROID )
     )
 
     list(APPEND HEADERS
-        GLSLHelpers.h
-        GLCylinder.h
-        GLHelpersLoadTextures.h
-        GLHelpersBoost.h
-        GLHelpersDevil.h
-        GLLight.h
-        GLShadowLight.h
-        GLColor.h
-        GLImage.h
-        GLVbo.h
-        GLText.h
-        GLGrid.h
-        GLAxis.h
-        GLCube.h
         GLMovableAxis.h
         GLAxisAlignedBox.h
         GLWaypoint.h
-        GLLineStrip.h
-        GLPrimitives.h
-        GLAxisHistory.h
-        GLOpenBox.h
+        FBO.h
         SimCam.h
-        PangolinImageView.h
         ../Widgets/nvWidgets.h
         ../Widgets/nvGlutWidgets.h
         ../Widgets/nvGLWidgets.h
@@ -144,7 +145,7 @@ else()
 endif()
 
 # Find Pangolin (https://github.com/stevenlovegrove/Pangolin)
-find_package(Pangolin 0.1)
+find_package(Pangolin 0.1 REQUIRED)
 if(Pangolin_FOUND)
   set(HAVE_PANGOLIN 1)
   list(APPEND USER_INC ${Pangolin_INCLUDE_DIRS})

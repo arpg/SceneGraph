@@ -17,7 +17,10 @@ int main( int /*argc*/, char** /*argv[]*/ )
     // Create OpenGL window in single line thanks to GLUT
     pangolin::CreateWindowAndBind("Main",640*2,480);
     SceneGraph::GLSceneGraph::ApplyPreferredGlSettings();
-    glewInit();
+    
+    // Disable line smooth so that we can have transparent objects without
+    // far-to-near ordered rendering.
+    glDisable(GL_LINE_SMOOTH);    
 
     // Scenegraph to hold GLObjects and relative transformations
     SceneGraph::GLSceneGraph glGraph;
@@ -31,21 +34,16 @@ int main( int /*argc*/, char** /*argv[]*/ )
     glAxis.SetScale(0.25);
     glGraph.AddChild(&glAxis);
 
-    SceneGraph::GLMovableAxis glMovableAxis;
-    glMovableAxis.SetPosition(-3,3,-1);
-    glGraph.AddChild(&glMovableAxis);
-
-    SceneGraph::GLAxisAlignedBox glBox;
-    glBox.SetResizable();
-    glMovableAxis.AddChild(&glBox);
-
-  // Define movable waypoint object with velocity
+#ifndef HAVE_GLES
+    // Define movable waypoint object with velocity
     SceneGraph::GLWayPoint glWaypoint;
     glWaypoint.SetPose(0.5,0.5,-0.1,0,0,0);
     glGraph.AddChild(&glWaypoint);
 
     // Optionally clamp waypoint to specific plane
     glWaypoint.ClampToPlane(Eigen::Vector4d(0,0,1,0));
+#endif
+
 
     // Define 3D spiral using a GLCachedPrimitives object
     SceneGraph::GLCachedPrimitives glSpiral(GL_LINE_STRIP, SceneGraph::GLColor(1.0f,0.7f,0.2f));
@@ -54,36 +52,14 @@ int main( int /*argc*/, char** /*argv[]*/ )
     }
     glGraph.AddChild(&glSpiral);
 
-    // Define 3D floating text object
-    SceneGraph::GLText glText3d("3D Floating Text", -1, 1, -1);
-    glGraph.AddChild(&glText3d);
-
-#ifdef HAVE_ASSIMP
-    // Define a mesh object and try to load model
-    SceneGraph::GLMesh glMesh;
-    try {
-        glMesh.Init("herbie/herbie.blend");
-        glMesh.SetPosition(0,0,-0.15);
-        glGraph.AddChild(&glMesh);
-    }catch(exception e) {
-        cerr << "Cannot load mesh. Error message:" << e.what() << endl;
-    }
-#endif // HAVE_ASSIMP
-
-    // Define grid object -- this will be alpha transparent; add it last to
-    // draw it last.  TODO have SceneGraph check alpha on GLObjects and order
-    // their rendering.
+    // Define grid object -- this will be alpha transparent;
+    // TODO: Always render near to far.
     SceneGraph::GLGrid glGrid( 50, 2.0, true );
+    glGrid.SetColors(
+                SceneGraph::GLColor(1.0f, 1.0f, 1.0f, 0.3f),
+                SceneGraph::GLColor(0.5f, 0.5f, 0.5f, 1.0f)
+                );
     glGraph.AddChild(&glGrid);
-
-
-    // We can have more than one scenegraph. This 2d scenegraph will
-    // be rendered with an orthographic projection. This is useful
-    // for text overlays.
-    SceneGraph::GLSceneGraph glGraph2d;
-
-    SceneGraph::GLText glText2d("2D Overlay Text", 10, 460);
-    glGraph2d.AddChild(&glText2d);
 
     // Define Camera Render Object (for view / scene browsing)
     pangolin::OpenGlRenderState stacks3d(
@@ -95,12 +71,6 @@ int main( int /*argc*/, char** /*argv[]*/ )
     pangolin::OpenGlRenderState stacks3d_2(
         pangolin::ProjectionMatrix(640,480,420,420,320,240,0.1,1000),
         pangolin::ModelViewLookAt(2,-1,-2, 0,1,0, pangolin::AxisNegZ)
-    );
-
-    // Use different orthographic render state for 2D drawing.
-    // Virtualise screen resolution to 640x480
-    pangolin::OpenGlRenderState stacks2d(
-        pangolin::ProjectionMatrixOrthographic(0,640,0,480,0,1000)
     );
 
     // Pangolin abstracts the OpenGL viewport as a View.
@@ -123,7 +93,7 @@ int main( int /*argc*/, char** /*argv[]*/ )
     pangolin::View view3d_2d;
     view3d_2d.SetBounds(0.0,1.0, 1.0/2.0, 1.0, 640.0f/480.0f)
           .SetHandler(new SceneGraph::HandlerSceneGraph(glGraph,stacks3d_2,pangolin::AxisNegZ))
-          .SetDrawFunction(SceneGraph::ActivateDrawFunctor3d2d(glGraph, stacks3d_2, glGraph2d, stacks2d));
+          .SetDrawFunction(SceneGraph::ActivateDrawFunctor(glGraph, stacks3d_2));
 
     // Add our views as children to the base container.
     container.AddDisplay(view3d);

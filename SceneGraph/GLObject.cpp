@@ -9,6 +9,7 @@ int GLObject::g_nHandleCounter = 1;
 /////////////////////////////////////////////////////////////////////////////////
 GLObject::GLObject()
     : m_sObjectName("unnamed-object"), m_bVisible(true), m_bPerceptable(true),
+      m_bIgnoreDepth(false),
       m_T_po(Eigen::Matrix4d::Identity()), m_dScale(1,1,1), m_bIsSelectable(false),
       m_nDisplayList(-1)
 {
@@ -17,6 +18,7 @@ GLObject::GLObject()
 /////////////////////////////////////////////////////////////////////////////////
 GLObject::GLObject( const std::string& name)
     : m_sObjectName(name), m_bVisible(true), m_bPerceptable(true),
+      m_bIgnoreDepth(false),
       m_T_po(Eigen::Matrix4d::Identity()), m_dScale(1,1,1), m_bIsSelectable(false),
       m_nDisplayList(-1)
 {
@@ -67,6 +69,11 @@ void GLObject::DrawObjectAndChildren(RenderMode renderMode)
 	) {
         glMatrixMode(GL_MODELVIEW);
         glPushMatrix();
+        
+        if(m_bIgnoreDepth) {
+            glDepthMask(false);
+            glDisable(GL_DEPTH_TEST);            
+        }
 
 #ifdef HAVE_GLES
         Eigen::Matrix4f T_po = m_T_po.cast<float>();
@@ -82,6 +89,11 @@ void GLObject::DrawObjectAndChildren(RenderMode renderMode)
             DrawCanonicalObject();
         }
 #endif //HAVE_GLES
+
+        if(m_bIgnoreDepth) {
+            glDepthMask(true);
+            glEnable(GL_DEPTH_TEST);
+        }
 
         DrawChildren();
 
@@ -123,6 +135,12 @@ bool GLObject::IsPerceptable() const
 void GLObject::SetPerceptable( bool bPerceptable )
 {
     m_bPerceptable = bPerceptable;
+}
+
+/////////////////////////////////////////////////////////////////////////////////
+void GLObject::SetIgnoreDepth( bool bIgnoreDepth )
+{
+    m_bIgnoreDepth = bIgnoreDepth;
 }
 
 /////////////////////////////////////////////////////////////////////////////////

@@ -10,6 +10,10 @@
 #include <map>
 #include <stdio.h>
 
+#ifdef _ANDROID_
+#include <SceneGraph/GLES_compat.h>
+#endif // _ANDROID_
+
 
 #ifdef __GNUC__
 #  define SCENEGRAPH_DEPRECATED __attribute__((deprecated))
@@ -114,6 +118,8 @@ class GLObject
         bool IsPerceptable() const;
         void SetPerceptable( bool bPerceptable );
 
+        /// Ignore depth buffer when rendering this object
+        void SetIgnoreDepth( bool bIgnoreDepth );
 
         /////////////////////////////////
         // Object Pose
@@ -186,10 +192,13 @@ class GLObject
 
         //! Whether this object should be drawn
         bool                           m_bVisible;
-
+        
         //! can be measured (e.g., not a virtual thing)
         bool                           m_bPerceptable;
 
+        //! Whether we should ignore depth tests for this object
+        bool                           m_bIgnoreDepth;
+        
         //! Object to Parent transform. Includes position, rotation (x_p = m_T_po & m_dScale * x_o)
         Eigen::Matrix4d                m_T_po;
         Eigen::Vector3d                m_dScale;

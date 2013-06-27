@@ -118,12 +118,27 @@ public:
         // Render texture
         tex.Bind();
         glEnable(GL_TEXTURE_2D);
-        glBegin(GL_QUADS);
-        glTexCoord2f(0, 0); glVertex2d(-0.5,-0.5);
-        glTexCoord2f(1, 0); glVertex2d(tex.width-0.5,-0.5);
-        glTexCoord2f(1, 1); glVertex2d(tex.width-0.5,tex.height-0.5);
-        glTexCoord2f(0, 1); glVertex2d(-0.5,tex.height-0.5);
-        glEnd();
+        
+        const GLfloat sq_vert[] = {
+            -0.5f, -0.5f,
+            -0.5f, (float)tex.height-0.5f,
+            (float)tex.width-0.5f, (float)tex.height-0.5f,  
+            (float)tex.width-0.5f, -0.5f
+        };
+        glVertexPointer(2, GL_FLOAT, 0, sq_vert);
+        glEnableClientState(GL_VERTEX_ARRAY);   
+    
+//        const GLfloat sq_tex[]  = { 0,0,  0,1,  1,1,  1,0  }; // normal
+        const GLfloat sq_tex[]  = { 0,1,  0,0,  1,0,  1,1  }; // flipped
+        glTexCoordPointer(2, GL_FLOAT, 0, sq_tex);
+        glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+             
+        glColor4f(1,1,1,1);
+        glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+    
+        glDisableClientState(GL_VERTEX_ARRAY);
+        glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+    
         glDisable(GL_TEXTURE_2D);
 
         // Call base View implementation

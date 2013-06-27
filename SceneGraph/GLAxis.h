@@ -40,53 +40,29 @@ class GLAxis : public GLObject
         ///////////////////////////////////////////////////////////////////////////
         static inline void DrawAxis( float  fScale  = 1.0f )
         {
-            //glPushAttrib(GL_ENABLE_BIT | GL_DEPTH_BUFFER_BIT);
-
-            glDepthMask(false);
-            glDisable(GL_DEPTH_TEST);
-
+            // Draw axis
+            glEnableClientState(GL_VERTEX_ARRAY);
+            
             GLfloat axis[] = {
                 0.0, 0.0, 0.0,
                 fScale , 0, 0 };
             glColor4f(1, 0, 0, 1);
             glVertexPointer(3, GL_FLOAT, 0, axis);
-            glEnableClientState(GL_VERTEX_ARRAY);
             glDrawArrays(GL_LINE_STRIP, 0, 2);
 
             axis[3] = 0.0;
             axis[4] = fScale;
             glColor4f(0, 1, 0, 1);
             glVertexPointer(3, GL_FLOAT, 0, axis);
-            glEnableClientState(GL_VERTEX_ARRAY);
             glDrawArrays(GL_LINE_STRIP, 0, 2);
 
             axis[4] = 0.0;
             axis[5] = fScale;
             glColor4f(0, 0, 1, 1);
             glVertexPointer(3, GL_FLOAT, 0, axis);
-            glEnableClientState(GL_VERTEX_ARRAY);
             glDrawArrays(GL_LINE_STRIP, 0, 2);
 
-
-            // draw axis
-//            glBegin(GL_LINES);
-//            glColor4f(1, 0, 0, 1);
-//            glVertex3d(0, 0, 0);
-//            glVertex3d( fScale , 0, 0);
-
-//            glColor4f(0, 1, 0, 1);
-//            glVertex3d(0, 0, 0);
-//            glVertex3d(0,  fScale , 0);
-
-//            glColor4f(0, 0, 1, 1);
-//            glVertex3d(0, 0, 0);
-//            glVertex3d(0, 0,  fScale );
-//            glEnd();
-
-            glDepthMask(true);
-            glEnable(GL_DEPTH_TEST);
-
-            //glPopAttrib();
+            glDisableClientState(GL_VERTEX_ARRAY);
         }
 
         ///////////////////////////////////////////////////////////////////////////
@@ -125,7 +101,7 @@ class GLAxis : public GLObject
 
         ///////////////////////////////////////////////////////////////////////////
         void DrawCanonicalObject()
-        {
+        {            
             if(m_bPretty){
                 DrawSolidAxis( m_fAxisScale );
             }else{

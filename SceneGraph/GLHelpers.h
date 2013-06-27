@@ -123,7 +123,52 @@ void DrawTexture(
         );
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-unsigned int GLBytesPerPixel( unsigned int nFormat, unsigned int nType );
+inline unsigned int GLBytesPerPixel( unsigned int nFormat, unsigned int nType )
+{
+    unsigned nVal = 0;
+    switch ( nType ) {
+        case GL_BYTE:
+        case GL_UNSIGNED_BYTE:
+            nVal = 1;
+            break;
+        case GL_SHORT:
+        case GL_UNSIGNED_SHORT:
+            nVal = 2;
+            break;
+#ifndef HAVE_GLES
+        case GL_2_BYTES:
+            nVal = 2;
+            break;
+        case GL_3_BYTES:
+            nVal = 3;
+            break;
+        case GL_INT:
+        case GL_UNSIGNED_INT:
+        case GL_4_BYTES:
+        case GL_FLOAT:
+            nVal = 4;
+            break;
+        case GL_DOUBLE:
+            nVal = 8;
+#endif
+    }
+    
+    switch ( nFormat ) {
+#ifndef HAVE_GLES
+        case GL_RED:
+        case GL_R8:
+        case GL_R8UI:
+#endif
+        case GL_LUMINANCE:
+            break;
+        case GL_RGB: nVal*=3; break;
+        case GL_RGBA: nVal*=4; break;
+        default:
+            fprintf ( stderr, "GLBytesPerPixel() -- unsupported format\n" );
+            return 0;
+    }
+    return nVal;    
+}
 
 //////////////////////////////////////////////////////////////////////////////
 // read from opengl buffer into our own vector
