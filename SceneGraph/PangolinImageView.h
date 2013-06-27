@@ -128,8 +128,8 @@ public:
         glVertexPointer(2, GL_FLOAT, 0, sq_vert);
         glEnableClientState(GL_VERTEX_ARRAY);   
     
-//        const GLfloat sq_tex[]  = { 0,0,  0,1,  1,1,  1,0  }; // normal
-        const GLfloat sq_tex[]  = { 0,1,  0,0,  1,0,  1,1  }; // flipped
+        const GLfloat sq_tex[]  = { 0,0,  0,1,  1,1,  1,0  }; // normal
+//        const GLfloat sq_tex[]  = { 0,1,  0,0,  1,0,  1,1  }; // flipped
         glTexCoordPointer(2, GL_FLOAT, 0, sq_tex);
         glEnableClientState(GL_TEXTURE_COORD_ARRAY);
              

@@ -74,7 +74,7 @@ class GLGrid : public GLObject
 
                 {
                     colorLines.Apply();
-                    for(int i = -numLines; i < numLines; i++){
+                    for(int i = -numLines; i <= numLines; i++){
                         if(i) {
                             pangolin::glDrawLine(
                                         halfsize, i*lineSpacing, 0.0,
