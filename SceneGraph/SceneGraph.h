@@ -14,6 +14,7 @@
 #include <SceneGraph/GLGrid.h>
 #include <SceneGraph/GLAxis.h>
 #include <SceneGraph/GLLight.h>
+#include <SceneGraph/GLText.h>
 
 // GLObjects that use pangolin
 #include <SceneGraph/GLLineStrip.h>
@@ -36,7 +37,6 @@
     #include <SceneGraph/GLShadowLight.h>
     #include <SceneGraph/GLVbo.h>
     #include <SceneGraph/GLAxisHistory.h>
-    #include <SceneGraph/GLText.h>
 
 #ifdef HAVE_ASSIMP
     #include <SceneGraph/GLMesh.h>

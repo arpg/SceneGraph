@@ -13,6 +13,16 @@
 namespace SceneGraph
 {
 
+#ifdef HAVE_GLES
+// TODO: Implement these!
+inline void glutBitmapCharacter(void */*font*/, int /*character*/) {}
+inline void glRasterPos3f(GLfloat /*x*/, GLfloat /*y*/, GLfloat /*z*/) {}
+inline int glutBitmapLength(void */*font*/, const unsigned char */*string*/) { return 0; }
+#define GLUT_BITMAP_HELVETICA_10 ((void*)0)
+#define GLUT_BITMAP_HELVETICA_12 ((void*)0)
+#define GLUT_BITMAP_HELVETICA_18 ((void*)0)
+#endif
+
 static void* GLTextDefaultFont = GLUT_BITMAP_HELVETICA_10;
 
 class GLText : public GLObject
