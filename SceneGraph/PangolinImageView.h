@@ -11,12 +11,13 @@ namespace SceneGraph
 class ImageView : public pangolin::View
 {
 public:
-    ImageView(bool flipy = true, bool sampling_linear = true )
+    ImageView(bool flipy = true, bool sampling_linear = true, bool use_image_aspect = true )
         : m_bFlipy(flipy), 
           m_bSamplingLinear(sampling_linear), 
           m_bImageDataDirty(false), 
           m_pImageData(0), 
-          m_iImageDataSizeBytes(0)
+          m_iImageDataSizeBytes(0),
+          m_bUseImageAspect(use_image_aspect)
     {
     }
 
@@ -28,7 +29,9 @@ public:
 
     void ResizeTexture(GLint width, GLint height, GLint internal_format, GLint glformat, GLint gltype)
     {
-        this->SetAspect((double)width / (double)height);
+        if(m_bUseImageAspect) {
+            this->SetAspect((double)width / (double)height);
+        }
 
         if(m_bFlipy) {
             m_ortho = pangolin::ProjectionMatrixOrthographic(-0.5, width-0.5, height-0.5, -0.5, 0, 1E4 );
@@ -147,6 +150,18 @@ public:
         glPopAttrib();
     }
 
+    void ImageToWindowCoords(const Eigen::Vector2d& p_pix, Eigen::Vector2d& p_win)
+    {
+        p_win(0) = v.l + v.w * p_pix(0) / m_iImageWidth;
+        p_win(1) = v.b + v.h * (float)(m_iImageHeight - p_pix(1)) / m_iImageHeight;
+    }
+
+    void WindowToImageCoords(const Eigen::Vector2d& p_win, Eigen::Vector2d& p_pix)
+    {
+        p_pix(0) =  m_iImageWidth * (p_win(0) - v.l)/v.w ;
+        p_pix(1) = m_iImageHeight - m_iImageHeight* (p_win(1) - v.b) / v.h;
+    }
+
 protected:
     // OpenGL Texture
     pangolin::GlTexture tex;
@@ -166,6 +181,7 @@ protected:
     GLint m_iImageHeight;
     unsigned char*  m_pImageData;
     size_t m_iImageDataSizeBytes;
+    bool m_bUseImageAspect;
     GLint m_nInternalFormat;
     GLenum m_nFormat;
     GLenum m_nType;
