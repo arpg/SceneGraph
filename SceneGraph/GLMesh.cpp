@@ -148,7 +148,7 @@ void GLMesh::Init( const struct aiScene* pScene )
 {
     m_pScene = pScene;
     m_Meshes.resize(pScene->mNumMeshes);
-    InitNode(m_pScene,m_pScene->mRootNode,m_pScene->mRootNode->mTransformation);
+    InitNode(m_pScene,m_pScene->mRootNode,aiMatrix4x4());
     LoadMeshTextures();
 }
 
