@@ -1,7 +1,6 @@
 #pragma once
 
-#ifndef GLSTATE_H
-#define GLSTATE_H
+#include <stack>
 
 class GLState {
 
@@ -113,13 +112,10 @@ class GLState {
     inline void glViewport(GLint x, GLint y, GLsizei width, GLsizei height)
     {
         glGetIntegerv(GL_VIEWPORT, m_OriginalViewport);
-        gluViewport(x, y, width, height);
+        glViewport(x, y, width, height);
     }
 
 
     std::stack<CapabilityEnabled> m_history;
 
 };
-
-
-#endif // GLSTATE_H
