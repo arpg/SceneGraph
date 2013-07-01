@@ -1,6 +1,6 @@
 #pragma once
 
-#include <pangolin/glinclude.h>
+#include <pangolin/gl_es_compat.h>
 #include <Eigen/Eigen>
 
 #define GL_ENABLE_BIT 0
