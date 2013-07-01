@@ -8,27 +8,7 @@
 #define _GL_HELPERS_H_
 
 #include <SceneGraph/config.h>
-
-#ifdef HAVE_GLES
-    #include <EGL/egl.h>
-    #include <GLES/gl.h>
-    #include <glues/glu.h>
-
-    #define GL_GLEXT_PROTOTYPES
-    #include <GLES/glext.h>
-    #include <pangolin/gl_es_compat.h>
-#else
-    #include <GL/glew.h>
-    #ifdef _OSX_
-        #include <OpenGL/glext.h>
-        #include <OpenGL/gl.h>
-        #include <OpenGL/glu.h>
-    #else
-        #include <GL/glext.h>
-        #include <GL/gl.h>
-        #include <GL/glu.h>
-    #endif
-#endif // HAVE_GLES
+#include <SceneGraph/GLinclude.h>
 
 #include <iostream>
 #include <unistd.h>
@@ -41,8 +21,6 @@
 
 namespace SceneGraph
 {
-
-
 
 #define CheckForGLErrors() SceneGraph::_CheckForGLErrors( __FILE__, __LINE__ );
 

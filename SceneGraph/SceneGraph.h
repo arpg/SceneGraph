@@ -1,6 +1,7 @@
 #pragma once
 
 #include <SceneGraph/config.h>
+#include <SceneGraph/GLinclude.h>
 
 // OpenGL defines are in here
 #include <pangolin/pangolin.h>
