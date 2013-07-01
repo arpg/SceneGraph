@@ -2,6 +2,7 @@
 
 #include <pangolin/glinclude.h>
 #include <Eigen/Eigen>
+#include <stack>
 
 #define GL_ENABLE_BIT 0
 #define GL_LUMINANCE8 GL_LUMINANCE 

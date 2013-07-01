@@ -6,6 +6,7 @@
 #include <pangolin/pangolin.h>
 #include <pangolin/gldraw.h>
 
+#include <SceneGraph/GLState.h>
 #include <SceneGraph/AxisAlignedBoundingBox.h>
 #include <SceneGraph/GLHelpers.h>
 #include <SceneGraph/GLObject.h>
