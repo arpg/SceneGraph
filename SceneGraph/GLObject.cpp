@@ -83,6 +83,7 @@ void GLObject::DrawObjectAndChildren(RenderMode renderMode)
 #else
         glMultMatrixd(m_T_po.data());
         glScaled(m_dScale[0],m_dScale[1],m_dScale[2]);
+
         if(m_nDisplayList >= 0) {
             glCallList( m_nDisplayList );
         }else{

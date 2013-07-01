@@ -93,8 +93,7 @@ void GLSceneGraph::DrawObjectAndChildren(RenderMode renderMode)
     glScaled(m_dScale[0],m_dScale[1],m_dScale[2]);
 #endif //HAVE_GLES
 
-
-    //glPushAttrib(GL_ENABLE_BIT);
+    glPushAttrib(GL_ENABLE_BIT);
 
     if(m_bEnableLighting) {
         glEnable( GL_LIGHTING );
@@ -106,7 +105,7 @@ void GLSceneGraph::DrawObjectAndChildren(RenderMode renderMode)
     }else{
         glDisable( GL_LIGHTING );
         glDisable( GL_COLOR_MATERIAL );
-        glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL );
+        glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE );
     }
 
     if(renderMode == eRenderNoPrePostHooks || renderMode == eRenderSelectable) {
@@ -129,7 +128,7 @@ void GLSceneGraph::DrawObjectAndChildren(RenderMode renderMode)
         glEnable( GL_COLOR_MATERIAL );
     }
 
-    //glPopAttrib();
+    glPopAttrib();
     glPopMatrix();
 }
 
