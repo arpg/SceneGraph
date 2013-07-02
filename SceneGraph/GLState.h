@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stack>
+#include <pangolin/pangolin.h>
 
 class GLState {
 
@@ -70,7 +71,7 @@ public:
     {
         if(!EnableValue(cap)) {
             m_history.push(CapabilityEnabled(cap,false));
-            glEnable(cap);
+            ::glEnable(cap);
         }
     }
 
@@ -79,7 +80,7 @@ public:
     {
         if(EnableValue(cap)) {
             m_history.push(CapabilityEnabled(cap,true));
-            glDisable(cap);
+           ::glDisable(cap);
         }
     }
 
@@ -88,35 +89,36 @@ public:
     inline void glDepthMask(GLboolean flag)
     {
         m_DepthMaskCalled = true;
-        glDepthMask(flag);
         glGetBooleanv(GL_DEPTH_WRITEMASK, &m_OriginalDepthMask);
+        ::glDepthMask(flag);
     }
 
     GLboolean m_ShadeModelCalled;
-    GLboolean m_OriginalShadeModel;
-    inline void glShadeModel(GLenum mode)
+    GLint m_OriginalShadeModel;
+    inline void glShadeModel(GLint mode)
     {
-        glGetBooleanv(GL_SHADE_MODEL, &m_OriginalShadeModel);
-        glShadeModel(mode);
+        m_ShadeModelCalled = true;
+        glGetIntegerv(GL_SHADE_MODEL, &m_OriginalShadeModel);
+        ::glShadeModel(mode);
     }
 
     GLboolean m_ColorMaskCalled;
     GLboolean m_OriginalColorMask[4];
     inline void glColorMask(GLboolean red, GLboolean green, GLboolean blue, GLboolean alpha)
     {
+        m_ColorMaskCalled = true;
         glGetBooleanv(GL_COLOR_WRITEMASK,  m_OriginalColorMask);
-        glColorMask(red, green, blue, alpha);
+        ::glColorMask(red, green, blue, alpha);
     }
 
     GLboolean m_ViewportCalled;
     GLint m_OriginalViewport[4];
     inline void glViewport(GLint x, GLint y, GLsizei width, GLsizei height)
     {
+        m_ViewportCalled = true;
         glGetIntegerv(GL_VIEWPORT, m_OriginalViewport);
-        glViewport(x, y, width, height);
+        ::glViewport(x, y, width, height);
     }
 
-
     std::stack<CapabilityEnabled> m_history;
-
 };

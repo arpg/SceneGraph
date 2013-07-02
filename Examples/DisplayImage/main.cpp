@@ -10,29 +10,48 @@ using namespace std;
 template<typename T>
 void setRandomImageData(T* imageArray, int width, int height, int channels){
   for(int i = 0 ; i < channels*width*height;i++) {
-    imageArray[i] = std::numeric_limits<T>::max() * ((float)rand()/RAND_MAX);
+    imageArray[i] = 0; //std::numeric_limits<T>::max() * ((float)rand()/RAND_MAX);
   }
 }
 
 // Draw in pixel units (center of image pixels)
 struct ExampleDrawSomethingInPixelCoords
 {
+    void doTest( void )
+    {
+        GLState test;
+        test.glShadeModel(GL_FLAT);
+        GLfloat verts[] = {0, 0, 0,20, 20, 20};
+        GLfloat colors[] = {1, 0, 0, 0, 1, 0, 0, 0, 1};
+        glEnableClientState(GL_VERTEX_ARRAY);
+        glEnableClientState(GL_COLOR_ARRAY);
+        glVertexPointer(2, GL_FLOAT, 0, verts);
+        glColorPointer(3, GL_FLOAT, 0, colors);
+        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glDisableClientState(GL_VERTEX_ARRAY);
+        glDisableClientState(GL_COLOR_ARRAY);
+    }
+
+    void doTest2( void )
+    {
+        GLfloat verts[] = {0, 0, 20,0, 20, 20};
+        GLfloat colors[] = {1, 0, 0, 0, 1, 0, 0, 0, 1};
+        glEnableClientState(GL_VERTEX_ARRAY);
+        glEnableClientState(GL_COLOR_ARRAY);
+        glVertexPointer(2, GL_FLOAT, 0, verts);
+        glColorPointer(3, GL_FLOAT, 0, colors);
+        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glDisableClientState(GL_VERTEX_ARRAY);
+        glDisableClientState(GL_COLOR_ARRAY);
+    }
+
     void operator()(pangolin::View&) {
         glColor3f(1,1,1);
         pangolin::glDrawRectPerimeter(10,10, 40,40);
+        doTest();
+        doTest2();
     }
 };
-
-void doTest( void )
-{
-    GLState test;
-    test.glEnable(GL_BLEND);
-    GLfloat verts[] = {0, 0, 1,1, 2, 2, 0, 0};
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glVertexPointer(2, GL_FLOAT, 0, verts);
-    glDrawArrays(GL_LINE_LOOP, 0, 4);
-    glDisableClientState(GL_VERTEX_ARRAY);
-}
 
 void GlobalKeyHook(std::string str)
 {
@@ -44,6 +63,9 @@ int main( int /*argc*/, char** /*argv[]*/ )
     // Create OpenGL window in single line thanks to GLUT
     pangolin::CreateWindowAndBind("Main",640*2,480);
     SceneGraph::GLSceneGraph::ApplyPreferredGlSettings();
+    glClearColor(0, 0, 0, 0);
+
+    glShadeModel(GL_SMOOTH);
 
     // Scenegraph to hold GLObjects and relative transformations
     SceneGraph::GLSceneGraph glGraph;
@@ -113,22 +135,20 @@ int main( int /*argc*/, char** /*argv[]*/ )
     // Demonstration of how we can register a keyboard hook to trigger a method
     pangolin::RegisterKeyPressCallback( pangolin::PANGO_CTRL + 'r', boost::bind(GlobalKeyHook, "You Pushed ctrl-r!" ) );
 
-    doTest();
-
-    // Default hooks for exiting (Esc) and fullscreen (tab).
+//    // Default hooks for exiting (Esc) and fullscreen (tab).
     while( !pangolin::ShouldQuit() )
     {
         // Clear whole screen
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // These calls can safely be made outside of the OpenGL thread.
-        setRandomImageData(uImage,w,h,3);
+//        setRandomImageData(uImage,w,h,3);
         viewImage.SetImage(uImage, w,h, GL_RGB, GL_RGB, GL_UNSIGNED_BYTE);
 
         // Swap frames and Process Events
         pangolin::FinishFrame();
 
-        // Pause for 1/60th of a second.
+//        // Pause for 1/60th of a second.
         usleep(1E6 / 60);
     }
 
