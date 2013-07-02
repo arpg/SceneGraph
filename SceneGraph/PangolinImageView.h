@@ -150,16 +150,22 @@ public:
         glPopAttrib();
     }
 
-    void ImageToWindowCoords(const Eigen::Vector2d& p_pix, Eigen::Vector2d& p_win)
+    template<class T>
+    Eigen::Matrix<T,2,1> ImageToWindowCoords(const Eigen::Matrix<T,2,1>& p_pix )
     {
+        Eigen::Matrix<T,2,1> p_win;
         p_win(0) = v.l + v.w * p_pix(0) / m_iImageWidth;
         p_win(1) = v.b + v.h * (float)(m_iImageHeight - p_pix(1)) / m_iImageHeight;
+        return p_win;
     }
 
-    void WindowToImageCoords(const Eigen::Vector2d& p_win, Eigen::Vector2d& p_pix)
+    template<class T>
+    Eigen::Matrix<T,2,1> WindowToImageCoords( const Eigen::Matrix<T,2,1>& p_win )
     {
+        Eigen::Matrix<T,2,1> p_pix;
         p_pix(0) =  m_iImageWidth * (p_win(0) - v.l)/v.w ;
         p_pix(1) = m_iImageHeight - m_iImageHeight* (p_win(1) - v.b) / v.h;
+        return p_pix;
     }
 
 protected:
