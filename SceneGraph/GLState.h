@@ -34,6 +34,7 @@ class GLState {
         GLboolean m_enable;
     };
 
+public:
     ~GLState() {
         //  Restore original state
         while (!m_history.empty()) {

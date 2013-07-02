@@ -23,6 +23,17 @@ struct ExampleDrawSomethingInPixelCoords
     }
 };
 
+void doTest( void )
+{
+    GLState test;
+    test.glEnable(GL_BLEND);
+    GLfloat verts[] = {0, 0, 1,1, 2, 2, 0, 0};
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glVertexPointer(2, GL_FLOAT, 0, verts);
+    glDrawArrays(GL_LINE_LOOP, 0, 4);
+    glDisableClientState(GL_VERTEX_ARRAY);
+}
+
 void GlobalKeyHook(std::string str)
 {
     cout << str << endl;
@@ -101,6 +112,8 @@ int main( int /*argc*/, char** /*argv[]*/ )
 
     // Demonstration of how we can register a keyboard hook to trigger a method
     pangolin::RegisterKeyPressCallback( pangolin::PANGO_CTRL + 'r', boost::bind(GlobalKeyHook, "You Pushed ctrl-r!" ) );
+
+    doTest();
 
     // Default hooks for exiting (Esc) and fullscreen (tab).
     while( !pangolin::ShouldQuit() )
