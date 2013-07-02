@@ -10,7 +10,7 @@ using namespace std;
 template<typename T>
 void setRandomImageData(T* imageArray, int width, int height, int channels){
   for(int i = 0 ; i < channels*width*height;i++) {
-    imageArray[i] = 0; //std::numeric_limits<T>::max() * ((float)rand()/RAND_MAX);
+    imageArray[i] = std::numeric_limits<T>::max() * ((float)rand()/RAND_MAX);
   }
 }
 
@@ -142,7 +142,7 @@ int main( int /*argc*/, char** /*argv[]*/ )
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // These calls can safely be made outside of the OpenGL thread.
-//        setRandomImageData(uImage,w,h,3);
+        setRandomImageData(uImage,w,h,3);
         viewImage.SetImage(uImage, w,h, GL_RGB, GL_RGB, GL_UNSIGNED_BYTE);
 
         // Swap frames and Process Events

@@ -36,6 +36,14 @@ class GLState {
     };
 
 public:
+    GLState()
+    {
+        m_DepthMaskCalled = false;
+        m_ShadeModelCalled = false;
+        m_ColorMaskCalled = false;
+        m_ViewportCalled = false;
+    }
+
     ~GLState() {
         //  Restore original state
         while (!m_history.empty()) {
@@ -84,7 +92,7 @@ public:
         }
     }
 
-    GLboolean m_DepthMaskCalled;
+    bool m_DepthMaskCalled;
     GLboolean m_OriginalDepthMask;
     inline void glDepthMask(GLboolean flag)
     {
@@ -93,7 +101,7 @@ public:
         ::glDepthMask(flag);
     }
 
-    GLboolean m_ShadeModelCalled;
+    bool m_ShadeModelCalled;
     GLint m_OriginalShadeModel;
     inline void glShadeModel(GLint mode)
     {
@@ -102,7 +110,7 @@ public:
         ::glShadeModel(mode);
     }
 
-    GLboolean m_ColorMaskCalled;
+    bool m_ColorMaskCalled;
     GLboolean m_OriginalColorMask[4];
     inline void glColorMask(GLboolean red, GLboolean green, GLboolean blue, GLboolean alpha)
     {
@@ -111,7 +119,7 @@ public:
         ::glColorMask(red, green, blue, alpha);
     }
 
-    GLboolean m_ViewportCalled;
+    bool m_ViewportCalled;
     GLint m_OriginalViewport[4];
     inline void glViewport(GLint x, GLint y, GLsizei width, GLsizei height)
     {
