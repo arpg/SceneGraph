@@ -34,7 +34,7 @@ struct ExampleDrawSomethingInPixelCoords
 
     void doTest2( void )
     {
-        GLfloat verts[] = {0, 0, 20,0, 20, 20};
+        GLfloat verts[] = {20, 20, 20,0, 0, 0};
         GLfloat colors[] = {1, 0, 0, 0, 1, 0, 0, 0, 1};
         glEnableClientState(GL_VERTEX_ARRAY);
         glEnableClientState(GL_COLOR_ARRAY);
@@ -66,6 +66,8 @@ int main( int /*argc*/, char** /*argv[]*/ )
     glClearColor(0, 0, 0, 0);
 
     glShadeModel(GL_SMOOTH);
+    glCullFace(GL_BACK);
+    glEnable(GL_CULL_FACE);
 
     // Scenegraph to hold GLObjects and relative transformations
     SceneGraph::GLSceneGraph glGraph;
@@ -144,6 +146,11 @@ int main( int /*argc*/, char** /*argv[]*/ )
         // These calls can safely be made outside of the OpenGL thread.
         setRandomImageData(uImage,w,h,3);
         viewImage.SetImage(uImage, w,h, GL_RGB, GL_RGB, GL_UNSIGNED_BYTE);
+
+        view3d.Activate(stacks3d);
+        ExampleDrawSomethingInPixelCoords test;
+        test.doTest();
+        test.doTest2();
 
         // Swap frames and Process Events
         pangolin::FinishFrame();
