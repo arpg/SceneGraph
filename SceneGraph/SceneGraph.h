@@ -17,6 +17,7 @@
 #include <SceneGraph/GLAxis.h>
 #include <SceneGraph/GLLight.h>
 #include <SceneGraph/GLText.h>
+#include <SceneGraph/GLWireSphere.h>
 
 // GLObjects that use pangolin
 #include <SceneGraph/GLLineStrip.h>

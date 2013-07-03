@@ -39,12 +39,27 @@ public:
         m_vbo.Unbind();        
     }    
     
-    void AddVertex(Eigen::Vector3d p)
+    template<typename Derived> inline
+    void AddVertex( const Eigen::DenseBase<Derived>& vec)
+    {
+        GLObject::m_aabb.Insert(vec);
+        m_vbo.Add(vec.template cast<float>() );
+    }
+
+    void AddVertex(const Eigen::Vector3d& p)
     {
         GLObject::m_aabb.Insert(p);
         m_vbo.Add(p.cast<float>() );
     }
-    
+
+    void AddVertex(const Eigen::Vector3f& p)
+    {
+        Eigen::Vector3d temp;
+        temp = p.cast<double>();
+        GLObject::m_aabb.Insert(temp);
+        m_vbo.Add( p );
+    }
+
     void Clear()
     {
         GLObject::m_aabb.Clear();

@@ -92,6 +92,12 @@ int main( int /*argc*/, char** /*argv[]*/ )
     }
     glGraph.AddChild(&glSpiral);
 
+    SceneGraph::GLWireSphere sphere(5);
+    sphere.SetPose(5, 6, -7, M_PI / 3, M_PI / 3, M_PI / 3);
+
+    glGraph.AddChild(&sphere);
+
+
 #ifndef HAVE_GLES
     // Define 3D floating text object
     SceneGraph::GLText glText3d("3D Floating Text", -1, 1, -1);
@@ -146,11 +152,6 @@ int main( int /*argc*/, char** /*argv[]*/ )
         // These calls can safely be made outside of the OpenGL thread.
         setRandomImageData(uImage,w,h,3);
         viewImage.SetImage(uImage, w,h, GL_RGB, GL_RGB, GL_UNSIGNED_BYTE);
-
-        view3d.Activate(stacks3d);
-        ExampleDrawSomethingInPixelCoords test;
-        test.doTest();
-        test.doTest2();
 
         // Swap frames and Process Events
         pangolin::FinishFrame();

@@ -65,6 +65,7 @@ list(APPEND HEADERS
     GLHelpersLoadTextures.h
     GLHelpersBoost.h
     GLHelpersDevil.h
+    GLWireSphere.h
     PangolinDrawGLObject.h
     PangolinSceneGraphHandler.h
     PangolinImageView.h
