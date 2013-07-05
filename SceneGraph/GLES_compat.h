@@ -2,10 +2,14 @@
 
 #include <pangolin/gl_es_compat.h>
 #include <Eigen/Eigen>
-#include <stack>
 
 #define GL_ENABLE_BIT 0
 #define GL_LUMINANCE8 GL_LUMINANCE 
+#define GL_DEPTH_COMPONENT GL_DEPTH_COMPONENT24
+
+#define glActiveTextureARB glActiveTexture
+#define GL_TEXTURE1_ARB GL_TEXTURE1
+#define GL_TEXTURE0_ARB GL_TEXTURE0
 
 inline void glMultMatrixd( double *m )
 {

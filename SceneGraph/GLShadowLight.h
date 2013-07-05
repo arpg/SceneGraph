@@ -22,10 +22,15 @@ public:
     {
         // Setup border so we don't cast shadows beyond shadow map.
         depth_tex.Bind();
+#ifndef HAVE_GLES
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
         GLfloat color[4] = {1,1,1,1};
         glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, color);
+#else
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+#endif
         CheckForGLErrors();
     }
 
@@ -133,46 +138,45 @@ public:
         gl.glDisable(GL_LIGHTING);
         gl.glDisable( GL_DEPTH_TEST );
         
-        glBegin( GL_LINE_STRIP );
-        Eigen::Vector3d bmin = aabb.Min();
-        Eigen::Vector3d bmax = aabb.Max();
+        Eigen::Vector3f bmin = aabb.Min().cast<float>();
+        Eigen::Vector3f bmax = aabb.Max().cast<float>();
 
-        glVertex3f(bmin(0), bmax(1), bmax(2));
-        glVertex3f(bmax(0), bmax(1), bmax(2));
-        glVertex3f(bmax(0), bmin(1), bmax(2));
-        glVertex3f(bmin(0), bmin(1), bmax(2));
-
-
-        glVertex3f(bmax(0), bmax(1), bmin(2));
-        glVertex3f(bmin(0), bmax(1), bmin(2));
-        glVertex3f(bmin(0), bmin(1), bmin(2));
-        glVertex3f(bmax(0), bmin(1), bmin(2));
-
-
-        glVertex3f(bmin(0), bmax(1), bmin(2));
-        glVertex3f(bmax(0), bmax(1), bmin(2));
-        glVertex3f(bmax(0), bmax(1), bmax(2));
-        glVertex3f(bmin(0), bmax(1), bmax(2));
-
-
-        glVertex3f(bmax(0), bmin(1), bmin(2));
-        glVertex3f(bmin(0), bmin(1), bmin(2));
-        glVertex3f(bmin(0), bmin(1), bmax(2));
-        glVertex3f(bmax(0), bmin(1), bmax(2));
-
-
-        glVertex3f(bmax(0), bmax(1), bmax(2));
-        glVertex3f(bmax(0), bmax(1), bmin(2));
-        glVertex3f(bmax(0), bmin(1), bmin(2));
-        glVertex3f(bmax(0), bmin(1), bmax(2));
-
-
-        glVertex3f(bmin(0), bmax(1), bmin(2));
-        glVertex3f(bmin(0), bmax(1), bmax(2));
-        glVertex3f(bmin(0), bmin(1), bmax(2));
-        glVertex3f(bmin(0), bmin(1), bmin(2));
-
-        glEnd();
+        GLfloat vs[] = {
+            bmin(0), bmax(1), bmax(2),
+            bmax(0), bmax(1), bmax(2),
+            bmax(0), bmin(1), bmax(2),
+            bmin(0), bmin(1), bmax(2),
+        
+            bmax(0), bmax(1), bmin(2),
+            bmin(0), bmax(1), bmin(2),
+            bmin(0), bmin(1), bmin(2),
+            bmax(0), bmin(1), bmin(2),
+        
+            bmin(0), bmax(1), bmin(2),
+            bmax(0), bmax(1), bmin(2),
+            bmax(0), bmax(1), bmax(2),
+            bmin(0), bmax(1), bmax(2),
+        
+            bmax(0), bmin(1), bmin(2),
+            bmin(0), bmin(1), bmin(2),
+            bmin(0), bmin(1), bmax(2),
+            bmax(0), bmin(1), bmax(2),
+        
+            bmax(0), bmax(1), bmax(2),
+            bmax(0), bmax(1), bmin(2),
+            bmax(0), bmin(1), bmin(2),
+            bmax(0), bmin(1), bmax(2),
+        
+            bmin(0), bmax(1), bmin(2),
+            bmin(0), bmax(1), bmax(2),
+            bmin(0), bmin(1), bmax(2),
+            bmin(0), bmin(1), bmin(2)
+        };
+        
+        glEnableClientState(GL_VERTEX_ARRAY);
+        glVertexPointer(3, GL_FLOAT, 0, vs);
+        glDrawArrays(GL_LINE_STRIP, 0, 24);
+        glDisableClientState(GL_VERTEX_ARRAY);
     }
 
     void SetShadowsEnabled(bool bEnabled){
@@ -194,9 +198,11 @@ public:
         depth_tex.Bind();
 
         glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+#ifndef HAVE_GLES
         glTexParameteri(GL_TEXTURE_2D, GL_DEPTH_TEXTURE_MODE, GL_INTENSITY);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE_ARB, GL_COMPARE_R_TO_TEXTURE );
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC_ARB, GL_GEQUAL );
+#endif
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 //        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FAIL_VALUE_ARB, 0.5f);
