@@ -33,6 +33,10 @@ int main( int /*argc*/, char** /*argv[]*/ )
     }
     glGraph.AddChild(&glSpiral);    
 
+    // Define 3D floating text object
+    SceneGraph::GLText glText3d("3D Floating Text", -1, 1, -1);
+    glGraph.AddChild(&glText3d);    
+
 #ifndef HAVE_GLES
     SceneGraph::GLMovableAxis glMovableAxis;
     glMovableAxis.SetPosition(-3,3,-1);
@@ -49,10 +53,6 @@ int main( int /*argc*/, char** /*argv[]*/ )
 
     // Optionally clamp waypoint to specific plane
     glWaypoint.ClampToPlane(Eigen::Vector4d(0,0,1,0));
-    
-    // Define 3D floating text object
-    SceneGraph::GLText glText3d("3D Floating Text", -1, 1, -1);
-    glGraph.AddChild(&glText3d);    
 #endif
 
     // Define Camera Render Object (for view / scene browsing)

@@ -1,34 +1,28 @@
 #ifndef _GL_TEXT_H_
 #define _GL_TEXT_H_
 
+#include <pangolin/glinclude.h>
+#include <pangolin/glfont.h>
+
 #include <SceneGraph/GLObject.h>
 #include <SceneGraph/GLColor.h>
-//#include <SceneGraph/GLFont.h>
-
-// TODO: Remove this and include GLUT directly here IFF GLUT support enabled.
-//       Must use exactly same GLUT as Pangolin or there be errors.
-#include <pangolin/pangolin.h>
 
 #include <string>
 
 namespace SceneGraph
 {
 
-#ifdef HAVE_GLES
-// TODO: Implement these!
-inline void glutBitmapCharacter(void */*font*/, int /*character*/) {}
-inline void glRasterPos3f(GLfloat /*x*/, GLfloat /*y*/, GLfloat /*z*/) {}
-inline int glutBitmapLength(void */*font*/, const unsigned char */*string*/) { return 0; }
-#define GLUT_BITMAP_HELVETICA_10 ((void*)0)
-#define GLUT_BITMAP_HELVETICA_12 ((void*)0)
-#define GLUT_BITMAP_HELVETICA_18 ((void*)0)
-#endif
-
-static void* GLTextDefaultFont = GLUT_BITMAP_HELVETICA_10;
+const static int GLTextDefaultFont = 0;
 
 class GLText : public GLObject
 {
 public:
+    
+    static pangolin::GlFont& GetFont()
+    {
+        static pangolin::GlFont s_font;
+        return s_font;
+    }
 
     /////////////////////////////////
     // Static Utilities for drawing text
@@ -40,22 +34,22 @@ public:
     /// Render text at current glRasterPos
     static void Draw(const std::string& text, void* font = GLTextDefaultFont )
     {
-        for(const unsigned char* s = (unsigned char*)text.c_str(); *s != 0; ++s) {
-            glutBitmapCharacter(font, *s);
-        }
+        pangolin::GlText txt = GetFont().Text(text.c_str());
+        txt.Draw();
     }
 
     /// Render text at (x,y,z)
     static void Draw(const std::string& text, float x, float y, float z = 0, void* font = GLTextDefaultFont)
     {
-        glRasterPos3f(x,y,z);
-        Draw(text, font);
+        pangolin::GlText txt = GetFont().Text(text.c_str());
+        txt.Draw(x,y,z);
     }
 
     /// Return width (in pixels) of text
     static int Width(const std::string& text, void* font = GLTextDefaultFont )
     {
-        return glutBitmapLength(font, (unsigned char*)text.c_str());
+        pangolin::GlText txt = GetFont().Text(text.c_str());
+        return txt.Width();
     }
 
     /////////////////////////////////
@@ -63,7 +57,7 @@ public:
     /////////////////////////////////
 
     GLText(std::string text="", double x = 0, double y = 0, double z = 0)
-        : GLObject("Text: " + text), m_font(GLTextDefaultFont), m_sText(text)
+        : GLObject("Text: " + text), m_sText(text)
     {
         m_bPerceptable = false;
         SetPosition(x,y,z);
@@ -75,8 +69,12 @@ public:
 
     void DrawCanonicalObject()
     {
+        if(m_gltext.Text() != m_sText ) {
+            // Reinitialise text
+            m_gltext = GetFont().Text(m_sText.c_str());
+        }
+        
         m_Color.Apply();
-
         pangolin::GlState gl;
         gl.glDisable(GL_DEPTH_TEST);
         gl.glDisable(GL_LIGHTING);
@@ -96,23 +94,13 @@ public:
     void SetSize( int nFontSize )
     {
         assert(nFontSize > 0);
-
-        // TODO: Make this better somehow?
-        if(nFontSize<=10) {
-            m_font = GLUT_BITMAP_HELVETICA_10;
-        }else if(nFontSize <= 12) {
-            m_font = GLUT_BITMAP_HELVETICA_12;
-        }else{
-            m_font = GLUT_BITMAP_HELVETICA_18;
-        }
-
-        //			m_nFontSize = nFontSize;
+        // TODO: support multiple sized.
     }
 
 private:
-    void*           m_font;
-    std::string 	m_sText;
-    GLColor         m_Color;
+    std::string 	 m_sText;
+    pangolin::GlText m_gltext;
+    GLColor          m_Color;
 };
 
 } // SceneGraph
