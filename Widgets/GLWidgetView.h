@@ -40,12 +40,7 @@ public:
         ActivateAndScissor(m_RenderState2d);
 
         glColor4f(0.0,0.0,0.0,0.5);
-        glBegin(GL_QUADS);
-            glVertex3f(-1.0f, 1.0f, 0.0f);              // Top Left
-            glVertex3f( 1.0f, 1.0f, 0.0f);              // Top Right
-            glVertex3f( 1.0f,-1.0f, 0.0f);              // Bottom Right
-            glVertex3f(-1.0f,-1.0f, 0.0f);              // Bottom Left
-        glEnd();
+        pangolin::glDrawRect(-1.0f,-1.0f,1.0f,1.0f);
 
         m_Rect = nv::Rect(0,0,m_nWidth,0);
         m_Ui.begin();

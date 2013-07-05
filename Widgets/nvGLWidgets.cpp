@@ -133,9 +133,9 @@ const char* cTexViewWidgetFSSource = {
     void main()\n\
     {\n\
         vec4 texel;\n\
-        if (mipLevel > 0)\n\
-            texel = texture2DLod( samp, gl_TexCoord[0].xy, mipLevel);\n\
-        else\n\
+        //if (mipLevel > 0)\n\
+        //    texel = texture2DLod( samp, gl_TexCoord[0].xy, mipLevel);\n\
+        //else\n\
             texel = texture2D( samp, gl_TexCoord[0].xy);\n\
         texel = texel * texelScale + texelOffset;\n\
         gl_FragColor  = texel.x * vec4( texelSwizzling.x == 0, texelSwizzling.y == 0, texelSwizzling.z == 0, texelSwizzling.w == 0 );\n\
