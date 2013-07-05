@@ -12,7 +12,7 @@ inline void glMultMatrixd( double *m )
     glMultMatrixf( ((Eigen::Matrix4f) (Eigen::Map<Eigen::Matrix4d>(m).cast<float>())).data() );
 }
 
-inline void glScalef( double x, double y, double z)
+inline void glScaled( double x, double y, double z)
 {
     glScalef( (GLfloat)x, (GLfloat)y, (GLfloat)z);
 }

@@ -22,11 +22,11 @@ struct ExampleDrawSomethingInPixelCoords
         pangolin::GlState glstate;
         glstate.glShadeModel(GL_FLAT);
         GLfloat verts[] = {0, 0, 0,20, 20, 20};
-        GLfloat colors[] = {1, 0, 0, 0, 1, 0, 0, 0, 1};
+        GLfloat colors[] = {1,0,0,1, 0,1,0,1, 0,0,1,1};
         glEnableClientState(GL_VERTEX_ARRAY);
         glEnableClientState(GL_COLOR_ARRAY);
         glVertexPointer(2, GL_FLOAT, 0, verts);
-        glColorPointer(3, GL_FLOAT, 0, colors);
+        glColorPointer(4, GL_FLOAT, 0, colors);
         glDrawArrays(GL_TRIANGLES, 0, 3);
         glDisableClientState(GL_VERTEX_ARRAY);
         glDisableClientState(GL_COLOR_ARRAY);
@@ -35,11 +35,11 @@ struct ExampleDrawSomethingInPixelCoords
     void doTest2( void )
     {
         GLfloat verts[] = {20, 20, 20,0, 0, 0};
-        GLfloat colors[] = {1, 0, 0, 0, 1, 0, 0, 0, 1};
+        GLfloat colors[] = {1,0,0,1, 0,1,0,1, 0,0,1,1};
         glEnableClientState(GL_VERTEX_ARRAY);
         glEnableClientState(GL_COLOR_ARRAY);
         glVertexPointer(2, GL_FLOAT, 0, verts);
-        glColorPointer(3, GL_FLOAT, 0, colors);
+        glColorPointer(4, GL_FLOAT, 0, colors);
         glDrawArrays(GL_TRIANGLES, 0, 3);
         glDisableClientState(GL_VERTEX_ARRAY);
         glDisableClientState(GL_COLOR_ARRAY);
