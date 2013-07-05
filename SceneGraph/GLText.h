@@ -12,8 +12,6 @@
 namespace SceneGraph
 {
 
-const static int GLTextDefaultFont = 0;
-
 class GLText : public GLObject
 {
 public:
@@ -28,25 +26,22 @@ public:
     // Static Utilities for drawing text
     /////////////////////////////////
 
-    // These offer wrappers around e.g. glut so we can change the backend later
-    // if we need to
-
     /// Render text at current glRasterPos
-    static void Draw(const std::string& text, void* font = GLTextDefaultFont )
+    static void Draw(const std::string& text )
     {
         pangolin::GlText txt = GetFont().Text(text.c_str());
         txt.Draw();
     }
 
     /// Render text at (x,y,z)
-    static void Draw(const std::string& text, float x, float y, float z = 0, void* font = GLTextDefaultFont)
+    static void Draw(const std::string& text, float x, float y, float z = 0 )
     {
         pangolin::GlText txt = GetFont().Text(text.c_str());
         txt.Draw(x,y,z);
     }
 
     /// Return width (in pixels) of text
-    static int Width(const std::string& text, void* font = GLTextDefaultFont )
+    static int Width(const std::string& text )
     {
         pangolin::GlText txt = GetFont().Text(text.c_str());
         return txt.Width();
