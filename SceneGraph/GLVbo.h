@@ -19,19 +19,16 @@ public:
 
     void DrawCanonicalObject()
     {
+        pangolin::GlState gl;
+        
         if(!m_nbo) {
-            glPushAttrib(GL_ENABLE_BIT);
-            glDisable(GL_LIGHTING);
+            gl.glDisable(GL_LIGHTING);
         }
 
         pangolin::RenderVboIboCboNbo(
             *m_vbo,*m_ibo,*m_cbo,*m_nbo,
             m_ibo, m_cbo, m_nbo
         );
-
-        if(!m_nbo) {
-            glPopAttrib();
-        }
     }
 
 protected:

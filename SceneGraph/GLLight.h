@@ -28,10 +28,9 @@ public:
     virtual void DrawCanonicalObject()
     {
         // TODO: Draw something that better resembles a light
-//        glPushAttrib(GL_ENABLE_BIT | GL_LINE_BIT);
-        glDisable( GL_LIGHTING );
+        pangolin::GlState gl;
+        gl.glDisable( GL_LIGHTING );
         GLAxis::DrawAxis(1.0);
-        glEnable( GL_LIGHTING );
     }
 
     void EnableLight()

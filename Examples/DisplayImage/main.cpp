@@ -19,8 +19,8 @@ struct ExampleDrawSomethingInPixelCoords
 {
     void doTest( void )
     {
-        GLState test;
-        test.glShadeModel(GL_FLAT);
+        pangolin::GlState glstate;
+        glstate.glShadeModel(GL_FLAT);
         GLfloat verts[] = {0, 0, 0,20, 20, 20};
         GLfloat colors[] = {1, 0, 0, 0, 1, 0, 0, 0, 1};
         glEnableClientState(GL_VERTEX_ARRAY);
@@ -65,10 +65,6 @@ int main( int /*argc*/, char** /*argv[]*/ )
     SceneGraph::GLSceneGraph::ApplyPreferredGlSettings();
     glClearColor(0, 0, 0, 0);
 
-    glShadeModel(GL_SMOOTH);
-    glCullFace(GL_BACK);
-    glEnable(GL_CULL_FACE);
-
     // Scenegraph to hold GLObjects and relative transformations
     SceneGraph::GLSceneGraph glGraph;
     
@@ -94,7 +90,6 @@ int main( int /*argc*/, char** /*argv[]*/ )
 
     SceneGraph::GLWireSphere sphere(5);
     sphere.SetPose(5, 6, -7, M_PI / 3, M_PI / 3, M_PI / 3);
-
     glGraph.AddChild(&sphere);
 
 
@@ -156,7 +151,7 @@ int main( int /*argc*/, char** /*argv[]*/ )
         // Swap frames and Process Events
         pangolin::FinishFrame();
 
-//        // Pause for 1/60th of a second.
+        // Pause for 1/60th of a second.
         usleep(1E6 / 60);
     }
 

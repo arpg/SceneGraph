@@ -475,12 +475,7 @@ class GLSimCam
         /////////////////////////////////////////////////////////////////////////////////////////
         void Begin()
         {
-
 #if VISION
-			// 0) push some attribs
-			glPushAttrib( GL_COLOR_BUFFER_BIT );
-			CheckForGLErrors( );
-
 			// 1) setup off-screen "camera" we will render to:
 			glMatrixMode( GL_PROJECTION ); // change mode to save projection matrix
 			glPushMatrix( ); // push proj mat
@@ -491,10 +486,6 @@ class GLSimCam
 			glLoadMatrix( m_dPose.inverse() ); // orig
 
 #else
-
-            // 0) push some attribs
-            glPushAttrib( GL_COLOR_BUFFER_BIT );
-			CheckForGLErrors();
 
             // 1) setup off-screen "camera" we will render to:
             glMatrixMode( GL_PROJECTION ); // change mode to save projection matrix
@@ -539,7 +530,6 @@ class GLSimCam
             glPopMatrix(); // pop projection marix
             glMatrixMode( GL_MODELVIEW );
             glPopMatrix(); // pop model view marix
-            glPopAttrib();
         }
 
 #if VISION == 0
@@ -599,16 +589,16 @@ class GLSimCam
         /////////////////////////////////////////////////////////////////////////////////////////
         void DrawCamera()
         {
+            pangolin::GlState gl;
+            
 #if VISION
-			glPushAttrib( GL_ENABLE_BIT );
-
 			glMatrixMode( GL_MODELVIEW );
 			glPushMatrix( );
 //			glMultMatrix( m_dPose.inverse() ); // orig
 			glMultMatrix( m_dPose );
 			glColor4f( 1, 1, 1, 1 );
 
-			glDisable( GL_LIGHTING );
+			gl.glDisable( GL_LIGHTING );
 
 			glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
 			glBegin( GL_TRIANGLE_FAN );
@@ -623,11 +613,7 @@ class GLSimCam
 
 			glPopMatrix();
 
-			glPopAttrib( );
 #else
-            glPushAttrib(GL_ENABLE_BIT);
-			//glDisable(GL_LIGHTING);
-
             // OK
             Eigen::Matrix4d M = m_dM.inverse();
             Eigen::Matrix4d T = m_dT.inverse();
@@ -783,8 +769,6 @@ class GLSimCam
             glVertex3dv( lbn.data() );
 
             glEnd();
-
-            glPopAttrib();
 #endif
         }
 

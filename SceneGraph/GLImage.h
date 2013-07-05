@@ -129,23 +129,19 @@ inline void GLImage::DrawCanonicalObject()
     int nBottom = m_fPercentBottom * WindowHeight();
     int nRight = m_fPercentRight * WindowWidth();
 
-    glPushAttrib(GL_ENABLE_BIT | GL_TEXTURE_BIT | GL_CURRENT_BIT | GL_LINE_BIT);
-
-    InitTexture(); // initialize texture if necessary.
+    // initialize texture if necessary.
+    InitTexture();
     CheckForGLErrors();
-
- //  glPushAttrib( GL_TEXTURE_BIT | GL_CURRENT_BIT | GL_LINE_BIT ); // this solves a glconsole bug.
 
     PushOrtho( WindowWidth(), WindowHeight() );
 
-    glDisable(GL_BLEND);
-    glDisable( GL_LIGHTING );
-    glDisable( GL_DEPTH_TEST );
+    pangolin::GlState gl;
+    gl.glDisable(GL_BLEND);
+    gl.glDisable( GL_LIGHTING );
+    gl.glDisable( GL_DEPTH_TEST );
+    gl.glEnable( GL_TEXTURE_RECTANGLE_ARB );
 
-    glEnable( GL_TEXTURE_RECTANGLE_ARB );
-//    glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL );
     glBindTexture( GL_TEXTURE_RECTANGLE_ARB, m_nTex );
-//    glTexParameteri(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
 //    OrthoQuad( m_nImageWidth, m_nImageHeight, nTop, nLeft, nBottom, nRight );
 
@@ -175,9 +171,6 @@ inline void GLImage::DrawCanonicalObject()
         glEnd();
     }
     PopOrtho();
-
-    glPopAttrib();
-
 }
 
 

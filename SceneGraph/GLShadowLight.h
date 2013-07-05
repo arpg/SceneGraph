@@ -75,24 +75,22 @@ public:
     {
         if(m_bShadowsComputed == false || m_bStatic == false){
             // Save ModelView and Projection
-            glMatrixMode(GL_MODELVIEW);
-            glPushMatrix();
             glMatrixMode(GL_PROJECTION);
             glPushMatrix();
             glMatrixMode(GL_MODELVIEW);
+            glPushMatrix();
 
-            // Put depthmap from light into depth_tex
-            glPushAttrib(GL_ENABLE_BIT | GL_LIGHTING_BIT | GL_COLOR_BUFFER_BIT | GL_VIEWPORT_BIT);
+            pangolin::GlState gl;
             framebuffer.Bind();
-            glShadeModel(GL_FLAT);
-            glDisable(GL_LIGHTING);
-            glDisable(GL_COLOR_MATERIAL);
-            glDisable(GL_NORMALIZE);
-            glColorMask(0, 0, 0, 0);
-            glEnable(GL_POLYGON_OFFSET_FILL);
+            gl.glShadeModel(GL_FLAT);
+            gl.glDisable(GL_LIGHTING);
+            gl.glDisable(GL_COLOR_MATERIAL);
+            gl.glDisable(GL_NORMALIZE);
+            gl.glColorMask(0, 0, 0, 0);
+            gl.glEnable(GL_POLYGON_OFFSET_FILL);
             glPolygonOffset(2.0, 4.0);
 
-            glViewport(0,0,fb_img.width,fb_img.height);
+            gl.glViewport(0,0,fb_img.width,fb_img.height);
             glScissor(0,0,fb_img.width,fb_img.height);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             stacks_light.Apply();
@@ -104,15 +102,14 @@ public:
             glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, 0, 0, fb_img.width, fb_img.height, 0);
 
             framebuffer.Unbind();
-            glPopAttrib();
             CheckForGLErrors();
 
             // Restore ModelView and Projection matrices
-            glMatrixMode(GL_MODELVIEW);
-            glPopMatrix();
             glMatrixMode(GL_PROJECTION);
             glPopMatrix();
             glMatrixMode(GL_MODELVIEW);
+            glPopMatrix();
+            
             m_bShadowsComputed = true;
         }
     }
@@ -131,10 +128,11 @@ public:
 
     void DrawAABB(AxisAlignedBoundingBox& aabb)
     {
-        glPushAttrib(GL_ENABLE_BIT);
+        pangolin::GlState gl;
 
-        glDisable(GL_LIGHTING);
-        glDisable( GL_DEPTH_TEST );
+        gl.glDisable(GL_LIGHTING);
+        gl.glDisable( GL_DEPTH_TEST );
+        
         glBegin( GL_LINE_STRIP );
         Eigen::Vector3d bmin = aabb.Min();
         Eigen::Vector3d bmax = aabb.Max();
@@ -175,7 +173,6 @@ public:
         glVertex3f(bmin(0), bmin(1), bmin(2));
 
         glEnd();
-        glPopAttrib();
     }
 
     void SetShadowsEnabled(bool bEnabled){
@@ -186,13 +183,13 @@ public:
     {
         // TODO: Probably use shader
         // e.g. http://fabiensanglard.net/shadowmapping/index.php
-
-        glPushAttrib(GL_ENABLE_BIT | GL_LIGHTING_BIT | GL_COLOR_BUFFER_BIT);
+        
+        pangolin::GlState gl;
 
         glActiveTextureARB(GL_TEXTURE1_ARB);
         stacks_light.EnableProjectiveTexturing();
 
-        glEnable(GL_DEPTH_TEST);
+        gl.glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LEQUAL);
         depth_tex.Bind();
 
@@ -205,7 +202,7 @@ public:
 //        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FAIL_VALUE_ARB, 0.5f);
 
         glAlphaFunc(GL_GREATER, 0.9f);
-        glEnable(GL_ALPHA_TEST);
+        gl.glEnable(GL_ALPHA_TEST);
 
         glEnable(GL_TEXTURE_2D);
         glActiveTextureARB(GL_TEXTURE0_ARB);
@@ -218,8 +215,7 @@ public:
         glActiveTextureARB(GL_TEXTURE1_ARB);
         glDisable(GL_TEXTURE_2D);
         glActiveTextureARB(GL_TEXTURE0_ARB);
-
-        glPopAttrib();
+        
         CheckForGLErrors();
     }
 

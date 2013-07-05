@@ -149,10 +149,11 @@ public:
 
     void DrawCanonicalObject() 
     {
+        pangolin::GlState gl;
+        
         double multiplier = m_bActive && !m_bLocked ? 1.0 : 0.8;
-        glPushAttrib( GL_ENABLE_BIT | GL_DEPTH_BUFFER_BIT );
 
-        glDisable(GL_LIGHTING);
+        gl.glDisable(GL_LIGHTING);
 
         const double velx = m_dVelocity/(m_dScale[0]*VELOCITY_MULTIPLIER);
 
@@ -209,8 +210,6 @@ public:
         glVertex3d(velx, 0, 0);
         glEnd();
         glPopName();
-
-        glPopAttrib();
     }
 
     void SetAerial(bool bVal) { m_bAerial = bVal; }

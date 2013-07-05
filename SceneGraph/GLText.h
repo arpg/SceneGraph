@@ -77,14 +77,10 @@ public:
     {
         m_Color.Apply();
 
-        //            gl_font( m_nFontID, m_nFontSize );
-        //            gl_draw( m_sText.c_str(), m_sText.length() );
-
-        glPushAttrib(GL_ENABLE_BIT);
-        glDisable(GL_DEPTH_TEST);
-        glDisable(GL_LIGHTING);
+        pangolin::GlState gl;
+        gl.glDisable(GL_DEPTH_TEST);
+        gl.glDisable(GL_LIGHTING);
         Draw(m_sText, 0,0,0);
-        glPopAttrib();
     }
 
     void SetText( const std::string& sText )

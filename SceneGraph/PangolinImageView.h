@@ -99,11 +99,11 @@ public:
             UpdateGlTexture();
         }
 
-        glPushAttrib(GL_ENABLE_BIT | GL_DEPTH_BUFFER_BIT);
-        glDisable(GL_LIGHTING);
-        glDisable(GL_COLOR_MATERIAL);
-        glDisable(GL_BLEND);
-        glDisable(GL_DEPTH_TEST);
+        pangolin::GlState gl;
+        gl.glDisable(GL_LIGHTING);
+        gl.glDisable(GL_COLOR_MATERIAL);
+        gl.glDisable(GL_BLEND);
+        gl.glDisable(GL_DEPTH_TEST);
 
         // Activate viewport
         pangolin::Viewport::DisableScissor();
@@ -146,8 +146,6 @@ public:
 
         // Call base View implementation
         pangolin::View::Render();
-
-        glPopAttrib();
     }
 
     template<class T>

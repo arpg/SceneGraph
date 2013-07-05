@@ -45,69 +45,60 @@ class GLGrid : public GLObject
         // from mvl dispview
         static inline void DrawGridZ0( bool filled, int numLines, float lineSpacing, GLColor colorPlane, GLColor colorLines)
         {
-            glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            {
-                // Prevent Z-Fighting between plane and lines
-                glPolygonOffset( 1.0, 1.0 );
-                glEnable(GL_POLYGON_OFFSET_FILL);
-               
-//                glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT);
-                GLfloat ambient[4] = {1,1,1,1};
-//                GLfloat diffuse[4] = {0.1,0.1,0.1,1};
-                GLfloat diffuse[4] = {0,0,0,1};
-                GLfloat specular[4] = {0,0,0,1};
-                glMaterialfv( GL_FRONT_AND_BACK, GL_AMBIENT, ambient );
-                glMaterialfv( GL_FRONT_AND_BACK, GL_DIFFUSE, diffuse );
-                glMaterialfv( GL_FRONT_AND_BACK, GL_SPECULAR, specular );
+            pangolin::GlState gl;
+            
+            // Prevent Z-Fighting between plane and lines
+            glPolygonOffset( 1.0, 1.0 );
+            gl.glEnable(GL_POLYGON_OFFSET_FILL);
+            gl.glDisable(GL_CULL_FACE);
+           
+//            glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT);
+            GLfloat ambient[4] = {1,1,1,1};
+            GLfloat diffuse[4] = {0,0,0,1};
+            GLfloat specular[4] = {0,0,0,1};
+            glMaterialfv( GL_FRONT_AND_BACK, GL_AMBIENT, ambient );
+            glMaterialfv( GL_FRONT_AND_BACK, GL_DIFFUSE, diffuse );
+            glMaterialfv( GL_FRONT_AND_BACK, GL_SPECULAR, specular );
 
-                glNormal3f( 0,0,-1 );
+            glNormal3f( 0,0,-1 );
 
-                const float halfsize = lineSpacing*numLines;
+            const float halfsize = lineSpacing*numLines;
 
-                if( filled ) {
-                    colorPlane.Apply();
-                    glRectf(-halfsize, -halfsize, halfsize, halfsize);
-                    
-                    // Don't overwrite this depth when drawing lines:
-                    glDepthMask(GL_FALSE);
-                }
-
-                {
-                    colorLines.Apply();
-                    for(int i = -numLines; i <= numLines; i++){
-                        if(i) {
-                            pangolin::glDrawLine(
-                                        halfsize, i*lineSpacing, 0.0,
-                                        -halfsize, i*lineSpacing, 0.0
-                                        );
-                            pangolin::glDrawLine(
-                                        i*lineSpacing,  halfsize, 0.0,
-                                        i*lineSpacing, -halfsize, 0.0
-                                        );
-                        }
-                    }
-
-                    glColor4ub(255, 0, 0, 128);
-                    pangolin::glDrawLine( halfsize , 0.0, 0.0, -halfsize , 0.0, 0.0);
-
-                    glColor4ub(0, 255, 0, 128);
-                    pangolin::glDrawLine( 0.0,  halfsize, 0.0,  0.0, -halfsize, 0.0);
-                }
+            if( filled ) {
+                colorPlane.Apply();
+                glRectf(-halfsize, -halfsize, halfsize, halfsize);
+                
+                // Don't overwrite this depth when drawing lines:
+                gl.glDepthMask(GL_FALSE);
             }
-            glPopAttrib();
+
+            {
+                colorLines.Apply();
+                for(int i = -numLines; i <= numLines; i++){
+                    if(i) {
+                        pangolin::glDrawLine(
+                                    halfsize, i*lineSpacing, 0.0,
+                                    -halfsize, i*lineSpacing, 0.0
+                                    );
+                        pangolin::glDrawLine(
+                                    i*lineSpacing,  halfsize, 0.0,
+                                    i*lineSpacing, -halfsize, 0.0
+                                    );
+                    }
+                }
+
+                glColor4ub(255, 0, 0, 128);
+                pangolin::glDrawLine( halfsize , 0.0, 0.0, -halfsize , 0.0, 0.0);
+
+                glColor4ub(0, 255, 0, 128);
+                pangolin::glDrawLine( 0.0,  halfsize, 0.0,  0.0, -halfsize, 0.0);
+            }
         }
 
         void DrawCanonicalObject(void)
         {
-            glEnable( GL_BLEND );
-            glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-
             glPushMatrix();
-#ifdef HAVE_GLES
-            glMultMatrixf( ((Eigen::Matrix4f)(mT_op.cast<float>())).data() );
-#else
             glMultMatrixd( mT_op.data() );
-#endif
             DrawGridZ0( m_bPerceptable, m_nNumLines, m_fLineSpacing, m_colorPlane, m_colorLines);
             glPopMatrix();
         }

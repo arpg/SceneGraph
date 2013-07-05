@@ -55,7 +55,6 @@ list(APPEND HEADERS
     GLVbo.h
     GLText.h
     GLGrid.h
-    GLState.h
     GLAxis.h
     GLCube.h
     GLLineStrip.h
