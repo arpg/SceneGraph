@@ -1,12 +1,11 @@
 # Find Pangolin (https://github.com/stevenlovegrove/Pangolin)
-FIND_PACKAGE(Pangolin 0.1 REQUIRED)
-INCLUDE_DIRECTORIES(${Pangolin_INCLUDE_DIRS})
-LINK_DIRECTORIES(${Pangolin_LIBRARY_DIRS})
-LINK_LIBRARIES(${Pangolin_LIBRARIES})
+find_package(Pangolin 0.1 REQUIRED)
+include_directories(${Pangolin_INCLUDE_DIRS})
 
 # Find Scenegraph
-FIND_PACKAGE(SceneGraph 0.1 REQUIRED)
-INCLUDE_DIRECTORIES(${SceneGraph_INCLUDE_DIRS})
-LINK_LIBRARIES(${SceneGraph_LIBRARIES})
+find_package(SceneGraph 0.1 REQUIRED)
+include_directories(${SceneGraph_INCLUDE_DIRS})
 
-ADD_EXECUTABLE(Display main.cpp)
+add_executable(Display main.cpp)
+target_link_libraries(Display ${Pangolin_LIBRARIES})
+target_link_libraries(Display ${SceneGraph_LIBRARIES})
