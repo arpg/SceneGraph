@@ -1,9 +1,12 @@
 # Configure build environment to automatically generate APK's instead of executables.
 if(ANDROID)
     # virtual targets which we'll add apks and push actions to.
-    add_custom_target( apk )
-    add_custom_target( push )
-    add_custom_target( run )
+    if(NOT apk)
+      # Create these virtual targets if they don't already exist
+      add_custom_target( apk )
+      add_custom_target( push )
+      add_custom_target( run )
+    endif()
 
     # Reset output directories to be in binary folder (rather than source)
     set(LIBRARY_OUTPUT_PATH_ROOT ${CMAKE_CURRENT_BINARY_DIR})
