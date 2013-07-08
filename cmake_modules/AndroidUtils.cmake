@@ -1,12 +1,13 @@
+if(NOT ANDROID_PACKAGE_NAME)
+  set(ANDROID_PACKAGE_NAME "edu.gwu.robotics")
+endif()
+
 # Configure build environment to automatically generate APK's instead of executables.
-if(ANDROID)
+if(ANDROID AND NOT TARGET apk)
     # virtual targets which we'll add apks and push actions to.
-    if(NOT apk)
-      # Create these virtual targets if they don't already exist
-      add_custom_target( apk )
-      add_custom_target( push )
-      add_custom_target( run )
-    endif()
+    add_custom_target( apk )
+    add_custom_target( push )
+    add_custom_target( run )
 
     # Reset output directories to be in binary folder (rather than source)
     set(LIBRARY_OUTPUT_PATH_ROOT ${CMAKE_CURRENT_BINARY_DIR})
@@ -19,7 +20,7 @@ if(ANDROID)
 "<?xml version=\"1.0\" encoding=\"utf-8\"?>
 <!-- BEGIN_INCLUDE(manifest) -->
 <manifest xmlns:android=\"http://schemas.android.com/apk/res/android\"
-        package=\"${package_name}\"
+        package=\"${package_name}.${prog_name}\"
         android:versionCode=\"1\"
         android:versionName=\"1.0\">
 
@@ -66,7 +67,7 @@ if(ANDROID)
 #include <cstdio>
 
 #define LOGE(...) ((void)__android_log_print(ANDROID_LOG_ERROR, \"AndroidUtils.cmake\", __VA_ARGS__))
-#define LIB_PATH \"/data/data/${package_name}/lib/\"
+#define LIB_PATH \"/data/data/${package_name}.${prog_name}/lib/\"
 
 void * load_lib(const char * l) {
     void * handle = dlopen(l, RTLD_NOW | RTLD_GLOBAL);
@@ -108,7 +109,6 @@ void ANativeActivity_onCreate(ANativeActivity * app, void * ud, size_t udsize) {
         target_link_libraries(${prog_name} log android )
 
         # Create manifest required for APK
-        set(ANDROID_PACKAGE_NAME "edu.gwu.robotics.scenegraph.${prog_name}")
         create_android_manifest_xml(
             "${CMAKE_CURRENT_BINARY_DIR}/AndroidManifest.xml" "${prog_name}"
             "${ANDROID_PACKAGE_NAME}" "${prog_name}"
@@ -144,7 +144,7 @@ void ANativeActivity_onCreate(ANativeActivity * app, void * ud, size_t udsize) {
 
         # install and run on device
         add_custom_target( ${prog_name}-run
-            COMMAND adb shell am start -n ${ANDROID_PACKAGE_NAME}/android.app.NativeActivity
+            COMMAND adb shell am start -n ${ANDROID_PACKAGE_NAME}.${prog_name}/android.app.NativeActivity
             DEPENDS ${prog_name}-push
             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
         )
