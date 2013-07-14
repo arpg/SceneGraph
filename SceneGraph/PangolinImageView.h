@@ -166,6 +166,16 @@ public:
         return p_pix;
     }
 
+    unsigned int Width()
+    {
+        return m_iImageWidth;
+    }
+
+    unsigned int Height()
+    {
+        return m_iImageHeight;
+    }
+
 protected:
     // OpenGL Texture
     pangolin::GlTexture tex;
