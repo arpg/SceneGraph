@@ -15,8 +15,17 @@ class GLWireSphere : public GLObject
 
 public:
 
-    GLWireSphere( float Radius, int Lines = 10, int ElemsPerDiv = 10, GLColor color = GLColor() ) : GLObject("Wire Sphere"),
-          m_nLines(Lines), m_nElemsPerDiv(ElemsPerDiv), m_fRadius(Radius)
+    GLWireSphere(
+            float Radius,
+            int Lines = 10,
+            int ElemsPerDiv = 10,
+            GLColor color = GLColor()
+            )
+        : GLObject("Wire Sphere"),
+          m_nLines(Lines),
+          m_nElemsPerDiv(ElemsPerDiv),
+          m_fRadius(Radius),
+          m_Color(color)
     {
         initSphere();
     }
@@ -92,9 +101,9 @@ public:
 private:
     int                           m_nLines;
     int                           m_nElemsPerDiv;
-    float                        m_fRadius;
-    std::vector< float > m_vVerts;
-    GLColor                 m_Color;
+    float                         m_fRadius;
+    std::vector< float >          m_vVerts;
+    GLColor                       m_Color;
 };
 
 }
