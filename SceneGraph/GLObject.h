@@ -129,6 +129,10 @@ class GLObject
         /// (as used by OpenGL) such that x_p = GetPose4x4_po() * x_o;
         Eigen::Matrix4d GetPose4x4_po() const;
 
+        /// Return Parent (p) to Object (o) 4x4 transformation matrix
+        /// (inverse of above) such that x_o = GetPose4x4_op() * x_p;
+        Eigen::Matrix4d GetPose4x4_op() const;
+        
         /// Return pose as (x,y,z,roll,pitch,yaw) vector
         Eigen::Vector6d GetPose() const;
 

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <pangolin/simple_math.h>
 #include <pangolin/pangolin.h>
 #include <SceneGraph/SceneGraph.h>
 
@@ -11,6 +12,58 @@ struct HandlerSceneGraph : pangolin::Handler3D
     HandlerSceneGraph(SceneGraph::GLSceneGraph& graph, pangolin::OpenGlRenderState& cam_state, pangolin::AxisDirection enforce_up=pangolin::AxisNone, float trans_scale=0.01f)
         : pangolin::Handler3D(cam_state,enforce_up, trans_scale), m_scenegraph(graph), m_grab_width(15) {}
 
+#ifdef HAVE_GLES
+    // Return lambda parameter of ray intersection with obj.
+    // returns numeric_limits<GLdouble>::max() when no intersection.
+    GLdouble Intersect(const GLObject& obj, LineSegment<GLdouble> ray)
+    {
+        GLdouble bestl = std::numeric_limits<GLdouble>::max();
+        
+        const LineSegment<GLdouble> ray_o = obj.GetPose4x4_op().cast<GLdouble>() * ray;
+        GLdouble l = obj.ObjectBounds().RayIntersect(ray_o);
+        if(l < bestl) bestl = l;
+        
+        for(size_t c=0; c < obj.NumChildren(); ++c) {
+            l = Intersect(obj[c], ray_o);
+            if(l < bestl) bestl = l;
+        }
+        
+        return bestl;
+    }
+
+    // Override GetPosNormal in pangolin::Handler3D since it is useless on Android.
+    void GetPosNormal(pangolin::View& view, int x, int y, GLdouble p[3], GLdouble Pw[3], GLdouble Pc[3], GLdouble n[3], GLdouble default_z = 1.0)
+    {
+        CheckGlDieOnError();
+        
+        const GLint viewport[4] = {view.v.l,view.v.b,view.v.w,view.v.h};
+        const pangolin::OpenGlMatrix proj = cam_state->GetProjectionMatrix();
+        const pangolin::OpenGlMatrix mv = cam_state->GetModelViewMatrix();
+        const pangolin::OpenGlMatrix mvinv = mv.Inverse();
+        
+        Eigen::Matrix<GLdouble,3,1> Pw1( mvinv.m[12], mvinv.m[13], mvinv.m[14]);
+        Eigen::Matrix<GLdouble,3,1> Pw2;
+        gluUnProject(x, y, 0.1f, mv.m, proj.m, viewport, &Pw2[0], &Pw2[1], &Pw2[2]);
+        
+        LineSegment<GLdouble> ray(Pw1, Pw2);        
+        GLdouble lambda = Intersect(m_scenegraph, ray);
+        
+        if( lambda < std::numeric_limits<GLdouble>::max() ) {
+            Eigen::Map<Eigen::Matrix<GLdouble,3,1> > ePw(Pw);
+            ePw = ray(lambda);
+        }else{
+            gluUnProject(x, y, default_z, mv.m, proj.m, viewport, &Pw[0], &Pw[1], &Pw[2]);
+        }
+
+        gluProject(Pw[0], Pw[1], Pw[2], mv.m, proj.m, viewport, &p[0], &p[1], &p[2]);
+        pangolin::LieApplySE34x4vec3(Pc, mv.m, Pw);        
+               
+        // TODO: Compute normal
+        n[0] = 0.0; n[1] = 0.0; n[2] = 0.0;
+    }
+#endif
+    
+    
     void ProcessHitBuffer (GLint hits, GLuint* buf, std::map<int,SceneGraph::GLObject*>& objects )
     {
         GLuint* closestNames = 0;

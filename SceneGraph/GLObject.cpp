@@ -199,6 +199,16 @@ Eigen::Matrix4d GLObject::GetPose4x4_po() const
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
+Eigen::Matrix4d GLObject::GetPose4x4_op() const
+{
+    Eigen::Matrix4d T_op;
+    T_op.block<3,3>(0,0) = m_T_po.block<3,3>(0,0).transpose();
+    T_op.block<3,1>(0,3) = - T_op.block<3,3>(0,0) * m_T_po.block<3,1>(0,3);
+    T_op.block<1,4>(3,0) << 0.0, 0.0, 0.0, 1.0;
+    return T_op;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////
 Eigen::Vector6d GLObject::GetPose() const
 {
     return GLT2Cart(m_T_po);

@@ -2,6 +2,8 @@
 
 #include <Eigen/Eigen>
 
+#include "LineSegment.h"
+
 namespace SceneGraph
 {
 
@@ -169,6 +171,25 @@ public:
         Eigen::Vector3d center = Center();
         boxmin.array() = scale.array() * (boxmin - center).array() + center.array();
         boxmax.array() = scale.array() * (boxmax - center).array() + center.array();
+    }
+    
+    // Returns lambda ray parameter of intersection, or max val if no intersection
+    template <typename T>
+    T RayIntersect(const LineSegment<T>& ray) const
+    {
+        if( !Empty() ) {
+            // http://www.cs.utah.edu/~awilliam/box/box.pdf
+            const Eigen::Matrix<T,3,1> tminbound = (boxmin.cast<T>() - ray.P()).array() / ray.Dir().array();
+            const Eigen::Matrix<T,3,1> tmaxbound = (boxmax.cast<T>() - ray.P()).array() / ray.Dir().array();
+            const Eigen::Matrix<T,3,1> tmin = tminbound.cwiseMin(tmaxbound);
+            const Eigen::Matrix<T,3,1> tmax = tminbound.cwiseMax(tmaxbound);
+            const T max_tmin = tmin.maxCoeff();
+            const T min_tmax = tmax.minCoeff();
+            if(max_tmin <= min_tmax ) {
+                return max_tmin;
+            }
+        }
+        return std::numeric_limits<GLdouble>::max();
     }
     
 

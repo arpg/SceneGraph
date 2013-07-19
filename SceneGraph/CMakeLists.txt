@@ -65,6 +65,8 @@ list(APPEND HEADERS
     GLHelpersBoost.h
     GLHelpersDevil.h
     GLWireSphere.h
+    AxisAlignedBoundingBox.h
+    LineSegment.h
     PangolinDrawGLObject.h
     PangolinSceneGraphHandler.h
     PangolinImageView.h
