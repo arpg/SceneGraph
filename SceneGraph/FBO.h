@@ -223,10 +223,10 @@ class FBO
     private:
 
         ///////////////////////////////////////////////////////////////////////////////
-	FBO(){
-	    m_vColorTextureIds.resize(8); // should lookup max number...
-	}
-	static FBO*                m_pInstance;
+    FBO(){
+        m_vColorTextureIds.resize(8); // should lookup max number...
+    }
+    static FBO*                m_pInstance;
 };
 
 } // SceneGraph

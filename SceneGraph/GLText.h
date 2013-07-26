@@ -15,7 +15,7 @@ namespace SceneGraph
 class GLText : public GLObject
 {
 public:
-    
+
     static pangolin::GlFont& GetFont()
     {
         static pangolin::GlFont s_font;
@@ -68,7 +68,7 @@ public:
             // Reinitialise text
             m_gltext = GetFont().Text(m_sText.c_str());
         }
-        
+
         m_Color.Apply();
         pangolin::GlState gl;
         gl.glDisable(GL_DEPTH_TEST);
