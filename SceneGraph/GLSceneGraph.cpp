@@ -81,32 +81,23 @@ void GLSceneGraph::DrawCanonicalObject()
 
 void GLSceneGraph::DrawObjectAndChildren(RenderMode renderMode)
 {
-    glMatrixMode(GL_MODELVIEW);
+    pangolin::GlState gl;
+    
     glPushMatrix();
-    // TODO: This is expensive, think of a better way
-#ifdef HAVE_GLES
-    Eigen::Matrix4f T_po = m_T_po.cast<float>();
-    glMultMatrixf(T_po.data());
-    glScalef(m_dScale[0],m_dScale[1],m_dScale[2]);
-#else
     glMultMatrixd(m_T_po.data());
     glScaled(m_dScale[0],m_dScale[1],m_dScale[2]);
-#endif //HAVE_GLES
-
-
-    //glPushAttrib(GL_ENABLE_BIT);
 
     if(m_bEnableLighting) {
-        glEnable( GL_LIGHTING );
-        glEnable( GL_COLOR_MATERIAL );
+        gl.glEnable( GL_LIGHTING );
+        gl.glEnable( GL_COLOR_MATERIAL );
 #ifndef HAVE_GLES
         glColorMaterial( GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE );
 #endif
         glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
     }else{
-        glDisable( GL_LIGHTING );
-        glDisable( GL_COLOR_MATERIAL );
-        glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL );
+        gl.glDisable( GL_LIGHTING );
+        gl.glDisable( GL_COLOR_MATERIAL );
+        glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE );
     }
 
     if(renderMode == eRenderNoPrePostHooks || renderMode == eRenderSelectable) {
@@ -121,15 +112,6 @@ void GLSceneGraph::DrawObjectAndChildren(RenderMode renderMode)
         }
     }
 
-    if(m_bEnableLighting) {
-        glDisable( GL_LIGHTING );
-        glDisable( GL_COLOR_MATERIAL );
-    }else{
-        glEnable( GL_LIGHTING );
-        glEnable( GL_COLOR_MATERIAL );
-    }
-
-    //glPopAttrib();
     glPopMatrix();
 }
 
@@ -156,6 +138,9 @@ void GLSceneGraph::ApplyPreferredGlSettings()
     // Enable alpha blending
     glEnable (GL_BLEND);
     glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    
+    // Enable back face culling by default. Rendering quality and speed is improved
+    glEnable(GL_CULL_FACE);
     
     // Shading model to use when lighing is enabled
     glShadeModel(GL_SMOOTH);

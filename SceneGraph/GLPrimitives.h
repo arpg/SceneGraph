@@ -1,7 +1,7 @@
 #pragma once
 
 #include <SceneGraph/SceneGraph.h>
-#include <pangolin/gl.h>
+#include <SceneGraph/PangolinGlCachedSizeableBuffer.h>
 
 namespace SceneGraph
 {
@@ -12,7 +12,7 @@ class GLPrimitives
 {
 public:
     GLPrimitives(GLenum mode = GL_LINE_STRIP, SceneGraph::GLColor color = SceneGraph::GLColor(), int initial_vert_buffer_elements = 1024)
-        : m_mode(mode), m_color(color),
+        : GLObject("GLPrimitives"), m_mode(mode), m_color(color),
           m_vbo(pangolin::GlArrayBuffer, initial_vert_buffer_elements, GL_FLOAT, 3, GL_DYNAMIC_DRAW)
     {
         
@@ -39,17 +39,37 @@ public:
         m_vbo.Unbind();        
     }    
     
-    void AddVertex(Eigen::Vector3d p)
+    template<typename Derived> inline
+    void AddVertex( const Eigen::DenseBase<Derived>& vec)
+    {
+        GLObject::m_aabb.Insert(vec);
+        m_vbo.Add(vec.template cast<float>() );
+    }
+
+    void AddVertex(const Eigen::Vector3d& p)
     {
         GLObject::m_aabb.Insert(p);
         m_vbo.Add(p.cast<float>() );
     }
-    
+
+    void AddVertex(const Eigen::Vector3f& p)
+    {
+        Eigen::Vector3d temp;
+        temp = p.cast<double>();
+        GLObject::m_aabb.Insert(temp);
+        m_vbo.Add( p );
+    }
+
     void Clear()
     {
         GLObject::m_aabb.Clear();
         m_vbo.Clear();
     }
+    
+    void SetColor( const GLColor& c )
+    {
+        m_color = c;
+    }     
     
 protected:
     GLenum m_mode;

@@ -11,12 +11,13 @@ namespace SceneGraph
 class ImageView : public pangolin::View
 {
 public:
-    ImageView(bool flipy = true, bool sampling_linear = true )
+    ImageView(bool flipy = true, bool sampling_linear = true, bool use_image_aspect = true )
         : m_bFlipy(flipy), 
           m_bSamplingLinear(sampling_linear), 
           m_bImageDataDirty(false), 
           m_pImageData(0), 
-          m_iImageDataSizeBytes(0)
+          m_iImageDataSizeBytes(0),
+          m_bUseImageAspect(use_image_aspect)
     {
     }
 
@@ -28,7 +29,9 @@ public:
 
     void ResizeTexture(GLint width, GLint height, GLint internal_format, GLint glformat, GLint gltype)
     {
-        this->SetAspect((double)width / (double)height);
+        if(m_bUseImageAspect) {
+            this->SetAspect((double)width / (double)height);
+        }
 
         if(m_bFlipy) {
             m_ortho = pangolin::ProjectionMatrixOrthographic(-0.5, width-0.5, height-0.5, -0.5, 0, 1E4 );
@@ -96,11 +99,11 @@ public:
             UpdateGlTexture();
         }
 
-        glPushAttrib(GL_ENABLE_BIT | GL_DEPTH_BUFFER_BIT);
-        glDisable(GL_LIGHTING);
-        glDisable(GL_COLOR_MATERIAL);
-        glDisable(GL_BLEND);
-        glDisable(GL_DEPTH_TEST);
+        pangolin::GlState gl;
+        gl.glDisable(GL_LIGHTING);
+        gl.glDisable(GL_COLOR_MATERIAL);
+        gl.glDisable(GL_BLEND);
+        gl.glDisable(GL_DEPTH_TEST);
 
         // Activate viewport
         pangolin::Viewport::DisableScissor();
@@ -118,18 +121,59 @@ public:
         // Render texture
         tex.Bind();
         glEnable(GL_TEXTURE_2D);
-        glBegin(GL_QUADS);
-        glTexCoord2f(0, 0); glVertex2d(-0.5,-0.5);
-        glTexCoord2f(1, 0); glVertex2d(tex.width-0.5,-0.5);
-        glTexCoord2f(1, 1); glVertex2d(tex.width-0.5,tex.height-0.5);
-        glTexCoord2f(0, 1); glVertex2d(-0.5,tex.height-0.5);
-        glEnd();
+        
+        const GLfloat sq_vert[] = {
+            -0.5f, -0.5f,
+            -0.5f, (float)tex.height-0.5f,
+            (float)tex.width-0.5f, (float)tex.height-0.5f,  
+            (float)tex.width-0.5f, -0.5f
+        };
+        glVertexPointer(2, GL_FLOAT, 0, sq_vert);
+        glEnableClientState(GL_VERTEX_ARRAY);   
+    
+        const GLfloat sq_tex[]  = { 0,0,  0,1,  1,1,  1,0  }; // normal
+//        const GLfloat sq_tex[]  = { 0,1,  0,0,  1,0,  1,1  }; // flipped
+        glTexCoordPointer(2, GL_FLOAT, 0, sq_tex);
+        glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+             
+        glColor4f(1,1,1,1);
+        glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+    
+        glDisableClientState(GL_VERTEX_ARRAY);
+        glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+    
         glDisable(GL_TEXTURE_2D);
 
         // Call base View implementation
         pangolin::View::Render();
+    }
 
-        glPopAttrib();
+    template<class T>
+    Eigen::Matrix<T,2,1> ImageToWindowCoords(const Eigen::Matrix<T,2,1>& p_pix )
+    {
+        Eigen::Matrix<T,2,1> p_win;
+        p_win(0) = v.l + v.w * p_pix(0) / m_iImageWidth;
+        p_win(1) = v.b + v.h * (float)(m_iImageHeight - p_pix(1)) / m_iImageHeight;
+        return p_win;
+    }
+
+    template<class T>
+    Eigen::Matrix<T,2,1> WindowToImageCoords( const Eigen::Matrix<T,2,1>& p_win )
+    {
+        Eigen::Matrix<T,2,1> p_pix;
+        p_pix(0) =  m_iImageWidth * (p_win(0) - v.l)/v.w ;
+        p_pix(1) = m_iImageHeight - m_iImageHeight* (p_win(1) - v.b) / v.h;
+        return p_pix;
+    }
+
+    unsigned int Width()
+    {
+        return m_iImageWidth;
+    }
+
+    unsigned int Height()
+    {
+        return m_iImageHeight;
     }
 
 protected:
@@ -151,6 +195,7 @@ protected:
     GLint m_iImageHeight;
     unsigned char*  m_pImageData;
     size_t m_iImageDataSizeBytes;
+    bool m_bUseImageAspect;
     GLint m_nInternalFormat;
     GLenum m_nFormat;
     GLenum m_nType;

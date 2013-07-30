@@ -12,6 +12,8 @@ if(NOT ANDROID)
    option(BUILD_SHARED_LIBS "Build Shared Library" ON)
 else()
    set(BUILD_SHARED_LIBS OFF)
+   set(ANDROID_PACKAGE_NAME "edu.gwu.robotics.scenegraph")
+   include(AndroidUtils)
 endif()
 
 # Overide with cmake -DCMAKE_BUILD_TYPE=Debug {dir}

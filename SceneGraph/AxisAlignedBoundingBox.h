@@ -2,32 +2,10 @@
 
 #include <Eigen/Eigen>
 
+#include "LineSegment.h"
+
 namespace SceneGraph
 {
-
-template<typename T, int R, int C>
-inline Eigen::Matrix<T,R,C> ElementwiseMin(const Eigen::Matrix<T,R,C>& m1, const Eigen::Matrix<T,R,C>& m2)
-{
-    Eigen::Matrix<T,R,C> ret;
-    for(int r=0; r<m1.rows(); ++r) {
-        for(int c=0; c<m1.cols(); ++c) {
-            ret(r,c) = std::min(m1(r,c),m2(r,c));
-        }
-    }
-    return ret;
-}
-
-template<typename T, int R, int C>
-inline Eigen::Matrix<T,R,C> ElementwiseMax(const Eigen::Matrix<T,R,C>& m1, const Eigen::Matrix<T,R,C>& m2)
-{
-    Eigen::Matrix<T,R,C> ret;
-    for(int r=0; r<m1.rows(); ++r) {
-        for(int c=0; c<m1.cols(); ++c) {
-            ret(r,c) = std::max(m1(r,c),m2(r,c));
-        }
-    }
-    return ret;
-}
 
 class AxisAlignedBoundingBox
 {
@@ -102,25 +80,26 @@ public:
     }
 
     // Expand bounding box to include p
-    inline void Insert(const Eigen::Vector3d p)
+    template<typename Derived> inline
+    void Insert( const Eigen::MatrixBase<Derived>& p)
     {
-        boxmax = ElementwiseMax(p,boxmax);
-        boxmin = ElementwiseMin(p,boxmin);
+        boxmax = p.cwiseMax(boxmax);
+        boxmin = p.cwiseMin(boxmin);
     }
 
     // Expand bounding box to include p
     inline void Insert(const Eigen::Matrix4d& T_ba, const Eigen::Vector3d p_a)
     {
         const Eigen::Vector3d p_b = T_ba.block<3,3>(0,0) * p_a + T_ba.block<3,1>(0,3);
-        boxmax = ElementwiseMax(p_b,boxmax);
-        boxmin = ElementwiseMin(p_b,boxmin);
+        boxmax = p_b.cwiseMax(boxmax);
+        boxmin = p_b.cwiseMin(boxmin);
     }
 
     // Expand bounding box to include bb
     inline void Insert(const AxisAlignedBoundingBox& bb)
     {
-        boxmin = ElementwiseMin(bb.boxmin,boxmin);
-        boxmax = ElementwiseMax(bb.boxmax,boxmax);
+        boxmax = bb.boxmax.cwiseMax(boxmax);
+        boxmin = bb.boxmin.cwiseMin(boxmin);
     }
 
     // Expand bounding box to include p
@@ -166,8 +145,8 @@ public:
     // between this and bb
     inline void Intersect(const AxisAlignedBoundingBox& bb)
     {
-        boxmin = ElementwiseMax(bb.boxmin,boxmin);
-        boxmax = ElementwiseMin(bb.boxmax,boxmax);
+        boxmin = bb.boxmin.cwiseMax(boxmin);
+        boxmax = bb.boxmax.cwiseMin(boxmax);
     }
 
     inline Eigen::Vector3d Size() const
@@ -184,7 +163,7 @@ public:
     // Useful for bullet collision box shape
     inline Eigen::Vector3d HalfSizeFromOrigin() const
     {
-        return ElementwiseMax( boxmax,(Eigen::Vector3d)(-1.0*boxmin) );
+        return boxmax.cwiseMax((Eigen::Vector3d)(-1.0*boxmin) );
     }
     
     inline void ScaleFromCenter(const Eigen::Vector3d& scale)
@@ -192,6 +171,25 @@ public:
         Eigen::Vector3d center = Center();
         boxmin.array() = scale.array() * (boxmin - center).array() + center.array();
         boxmax.array() = scale.array() * (boxmax - center).array() + center.array();
+    }
+    
+    // Returns lambda ray parameter of intersection, or max val if no intersection
+    template <typename T>
+    T RayIntersect(const LineSegment<T>& ray) const
+    {
+        if( !Empty() ) {
+            // http://www.cs.utah.edu/~awilliam/box/box.pdf
+            const Eigen::Matrix<T,3,1> tminbound = (boxmin.cast<T>() - ray.P()).array() / ray.Dir().array();
+            const Eigen::Matrix<T,3,1> tmaxbound = (boxmax.cast<T>() - ray.P()).array() / ray.Dir().array();
+            const Eigen::Matrix<T,3,1> tmin = tminbound.cwiseMin(tmaxbound);
+            const Eigen::Matrix<T,3,1> tmax = tminbound.cwiseMax(tmaxbound);
+            const T max_tmin = tmin.maxCoeff();
+            const T min_tmax = tmax.minCoeff();
+            if(max_tmin <= min_tmax ) {
+                return max_tmin;
+            }
+        }
+        return std::numeric_limits<GLdouble>::max();
     }
     
 

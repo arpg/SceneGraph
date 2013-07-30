@@ -89,44 +89,42 @@ class GLOpenBox : public GLObject
         
         inline void DrawOpenBox(const AxisAlignedBoundingBox& bbox)
         {
-            glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_LINE_BIT);
-            {
-                // Prevent Z-Fighting between plane and lines
-                glPolygonOffset( 1.0, 1.0 );
-                glEnable(GL_POLYGON_OFFSET_FILL);
-                
-                glEnable(GL_CULL_FACE);
-                glCullFace(GL_BACK);
-                
-                const Eigen::Vector3d bmin = bbox.Min();
-                const Eigen::Vector3d bmax = bbox.Max();
-
-                // TODO: use projectmatrix too to cope with different cameras                
-                Eigen::Matrix4f T_co;
-                glGetFloatv( GL_MODELVIEW_MATRIX, T_co.data() );
+            pangolin::GlState gl;
             
-                glDisable(GL_COLOR_MATERIAL);
-                glMaterialfv( GL_FRONT_AND_BACK, GL_AMBIENT, m_ambient.data() );
-                glMaterialfv( GL_FRONT_AND_BACK, GL_DIFFUSE, m_diffuse.data() );
-                glMaterialfv( GL_FRONT_AND_BACK, GL_SPECULAR, m_specular.data() );
-                
-                for(int ax=0; ax<3; ++ax) {
-                    Eigen::Vector3f n(0,0,0); n(ax) = 1;
-                    Eigen::Vector3f nc = T_co.topLeftCorner<3,3>() * n;
-                    DrawFace(bmin,bmax,ax,nc(2)>0 ? 1 : -1);
-                }
+            // Prevent Z-Fighting between plane and lines
+            glPolygonOffset( 1.0, 1.0 );
+            gl.glEnable(GL_POLYGON_OFFSET_FILL);
+            
+            gl.glEnable(GL_CULL_FACE);
+            gl.glCullFace(GL_BACK);
+            
+            const Eigen::Vector3d bmin = bbox.Min();
+            const Eigen::Vector3d bmax = bbox.Max();
 
-                glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_FALSE);
-                glMaterialfv( GL_FRONT_AND_BACK, GL_AMBIENT, m_lambient.data() );
-                glMaterialfv( GL_FRONT_AND_BACK, GL_DIFFUSE, m_ldiffuse.data() );
-
-                for(int ax=0; ax<3; ++ax) {
-                    Eigen::Vector3f n(0,0,0); n(ax) = 1;
-                    Eigen::Vector3f nc = T_co.topLeftCorner<3,3>() * n;
-                    DrawFaceLines(bmin,bmax,ax,nc(2)>0 ? 1 : -1);
-                }
+            // TODO: use projectmatrix too to cope with different cameras                
+            Eigen::Matrix4f T_co;
+            glGetFloatv( GL_MODELVIEW_MATRIX, T_co.data() );
+        
+            gl.glDisable(GL_COLOR_MATERIAL);
+            glMaterialfv( GL_FRONT_AND_BACK, GL_AMBIENT, m_ambient.data() );
+            glMaterialfv( GL_FRONT_AND_BACK, GL_DIFFUSE, m_diffuse.data() );
+            glMaterialfv( GL_FRONT_AND_BACK, GL_SPECULAR, m_specular.data() );
+            
+            for(int ax=0; ax<3; ++ax) {
+                Eigen::Vector3f n(0,0,0); n(ax) = 1;
+                Eigen::Vector3f nc = T_co.topLeftCorner<3,3>() * n;
+                DrawFace(bmin,bmax,ax,nc(2)>0 ? 1 : -1);
             }
-            glPopAttrib();
+
+            gl.glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_FALSE);
+            glMaterialfv( GL_FRONT_AND_BACK, GL_AMBIENT, m_lambient.data() );
+            glMaterialfv( GL_FRONT_AND_BACK, GL_DIFFUSE, m_ldiffuse.data() );
+
+            for(int ax=0; ax<3; ++ax) {
+                Eigen::Vector3f n(0,0,0); n(ax) = 1;
+                Eigen::Vector3f nc = T_co.topLeftCorner<3,3>() * n;
+                DrawFaceLines(bmin,bmax,ax,nc(2)>0 ? 1 : -1);
+            }
         }
         
         Eigen::Vector3d& SizeFactor()

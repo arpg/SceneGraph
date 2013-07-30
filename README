@@ -1,23 +1,16 @@
 
-SimpleGui is just that, as simple OpenGL GUI class.
+SceneGraph is a rudimentary scene graph, the nodes of which are C++ classes
+inherited from "GLObject".  These objects must have a "DrawCanonicalObject()"
+funciton.
 
-It has a rudimentary scene graph, the nodes of which are C++ classes inherited
-from "GLObject".  These objects must have a "draw()" funciton.
+Presently, SceneGraph is used with Pangolin.
 
-A GLObject, o, is registred with a GLWindow, g, via g.AddChild( &o ).
-
-See Example/Demo.cpp to see how easy it is to create a simple opengl scene with a
-mesh and a "grid" GLObject.
-
-The code in the SimpleGui directory is stand-alone and exported so other cmake
-projects can just call find_package( SimpleGui ) to set SimpleGui_INCLUDE_DIRS
-and SimpleGui_LIBRARIES (which includes all of SimpleGui's dependencies as 
-well).
 
 Dependencies:
-FLTK
 CVARS (svn co https://glconsole.svn.sourceforge.net/svnroot/glconsole glconsole)
 OpenGL
 ASSIMP
 Eigen3
 ZeroMQ
+Pangolin
+

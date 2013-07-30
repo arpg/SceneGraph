@@ -1,3 +1,5 @@
+#pragma once
+
 #include <SceneGraph/SceneGraph.h>
 #include <pangolin/gl.h>
 
@@ -30,7 +32,7 @@ public:
     template<typename Derived> inline
     void Add(const Eigen::DenseBase<Derived>& vec)
     {
-        assert(vec.rows() == pangolin::GlSizeableBuffer::count_per_element);
+        assert(vec.rows() == (int)pangolin::GlSizeableBuffer::count_per_element);
         CheckResize(m_num_verts + vec.cols() );
         m_vs.block(0,m_num_verts,vec.rows(),vec.cols()) = vec;
         m_num_verts += vec.cols();

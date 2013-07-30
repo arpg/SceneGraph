@@ -3,6 +3,7 @@
 
 #include <SceneGraph/GLObject.h>
 #include <SceneGraph/GLColor.h>
+#include <pangolin/gldraw.h>
 
 namespace SceneGraph
 {
@@ -12,8 +13,7 @@ class GLGrid : public GLObject
 {
     public:
         GLGrid(int numLines = 50, float lineSpacing = 2.0, bool perceptable = false)
-            :
-                GLObject("Grid"),
+            :   GLObject("Grid"),
                 m_nNumLines( numLines ),
                 m_fLineSpacing( lineSpacing ),
                 m_colorPlane( 0.4f, 0.4f, 0.4f, 1.0f ),
@@ -35,86 +35,68 @@ class GLGrid : public GLObject
             m_fLineSpacing = fLineSpacing;
             ComputeBounds();
         }
+        
+        void SetColors(const GLColor& planeColor, const GLColor& lineColor)
+        {
+            m_colorPlane = planeColor;
+            m_colorLines = lineColor;
+        }
 
         // from mvl dispview
         static inline void DrawGridZ0( bool filled, int numLines, float lineSpacing, GLColor colorPlane, GLColor colorLines)
         {
-            glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            {
-                // Prevent Z-Fighting between plane and lines
-                glPolygonOffset( 0.0, 1.0 );
-                glEnable(GL_POLYGON_OFFSET_FILL);
-               
-               /* 
-//                glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT);
+            pangolin::GlState gl;
+            
+            // Prevent Z-Fighting between plane and lines
+            glPolygonOffset( 1.0, 1.0 );
+            gl.glEnable(GL_POLYGON_OFFSET_FILL);
+            gl.glDisable(GL_CULL_FACE);
+           
+//            glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT);
+            GLfloat ambient[4] = {1,1,1,1};
+            GLfloat diffuse[4] = {0,0,0,1};
+            GLfloat specular[4] = {0,0,0,1};
+            glMaterialfv( GL_FRONT_AND_BACK, GL_AMBIENT, ambient );
+            glMaterialfv( GL_FRONT_AND_BACK, GL_DIFFUSE, diffuse );
+            glMaterialfv( GL_FRONT_AND_BACK, GL_SPECULAR, specular );
 
-                GLfloat ambient[4] = {1,1,1,1};
-//                GLfloat diffuse[4] = {0.1,0.1,0.1,1};
-                GLfloat diffuse[4] = {0,0,0,1};
-                GLfloat specular[4] = {0,0,0,1};
-                glMaterialfv( GL_FRONT_AND_BACK, GL_AMBIENT, ambient );
-                glMaterialfv( GL_FRONT_AND_BACK, GL_DIFFUSE, diffuse );
-                glMaterialfv( GL_FRONT_AND_BACK, GL_SPECULAR, specular );
-                */
+            glNormal3f( 0,0,-1 );
 
-//               glDisable(GL_LIGHTING);
-//                glEnable( GL_LIGHTING );
+            const float halfsize = lineSpacing*numLines;
 
-//                glEnable( GL_DEPTH_TEST );
-//                glDepthFunc( GL_LEQUAL );
-
-                glNormal3f( 0,0,-1 );
-
-                const float halfsize = lineSpacing*numLines;
-
-                glEnable( GL_BLEND );
-                glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-
-                if( filled ) {
-
-                    //colorPlane.Apply();
-                    glColor4f( 1, 1, 1, 0.3 );
-                    glBegin( GL_TRIANGLE_STRIP );
-                    glVertex3f( -halfsize , -halfsize, 0.0);
-                    glVertex3f( +halfsize , -halfsize, 0.0);
-                    glVertex3f( -halfsize , +halfsize, 0.0);
-                    glVertex3f( +halfsize , +halfsize, 0.0);
-                    glEnd();
-                    
-                    // Don't overwrite this depth when drawing lines:
-                    //glDepthMask(GL_FALSE);
-                }
-
-                glBegin(GL_LINES);
-                {
-                    colorLines.Apply();
-                    for(int i = -numLines; i < numLines; i++){
-                        if(i) {
-                            glVertex3f( halfsize, i*lineSpacing, 0.0);
-                            glVertex3f(-halfsize, i*lineSpacing, 0.0);
-                            glVertex3f(i*lineSpacing,  halfsize, 0.0);
-                            glVertex3f(i*lineSpacing, -halfsize, 0.0);
-                        }
-                    }
-
-                    glColor4ub(255, 0, 0, 128);
-                    glVertex3f( halfsize , 0.0, 0.0);
-                    glVertex3f(-halfsize , 0.0, 0.0);
-
-                    glColor4ub(0, 255, 0, 128);
-                    glVertex3f( 0.0,  halfsize, 0.0);
-                    glVertex3f( 0.0, -halfsize, 0.0);
-                }
-                glEnd();
+            if( filled ) {
+                colorPlane.Apply();
+                glRectf(-halfsize, -halfsize, halfsize, halfsize);
+                
+                // Don't overwrite this depth when drawing lines:
+                gl.glDepthMask(GL_FALSE);
             }
-            glPopAttrib();
+
+            {
+                colorLines.Apply();
+                for(int i = -numLines; i <= numLines; i++){
+                    if(i) {
+                        pangolin::glDrawLine(
+                                    halfsize, i*lineSpacing, 0.0,
+                                    -halfsize, i*lineSpacing, 0.0
+                                    );
+                        pangolin::glDrawLine(
+                                    i*lineSpacing,  halfsize, 0.0,
+                                    i*lineSpacing, -halfsize, 0.0
+                                    );
+                    }
+                }
+
+                glColor4ub(255, 0, 0, 128);
+                pangolin::glDrawLine( halfsize , 0.0, 0.0, -halfsize , 0.0, 0.0);
+
+                glColor4ub(0, 255, 0, 128);
+                pangolin::glDrawLine( 0.0,  halfsize, 0.0,  0.0, -halfsize, 0.0);
+            }
         }
 
         void DrawCanonicalObject(void)
         {
-            glEnable( GL_BLEND );
-            glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-
             glPushMatrix();
             glMultMatrixd( mT_op.data() );
             DrawGridZ0( m_bPerceptable, m_nNumLines, m_fLineSpacing, m_colorPlane, m_colorLines);

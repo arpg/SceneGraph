@@ -3,6 +3,7 @@
 
 #include <SceneGraph/GLObject.h>
 #include <SceneGraph/GLColor.h>
+#include <SceneGraph/PangolinGlCachedSizeableBuffer.h>
 
 namespace SceneGraph
 {
@@ -12,7 +13,8 @@ class GLLineStrip : public GLObject
     public:
 
 		GLLineStrip()
-            :GLObject("LineStrip")
+            : GLObject("LineStrip"),
+              m_buffer(pangolin::GlArrayBuffer, 100, GL_FLOAT, 3, GL_DYNAMIC_DRAW)
 		{
             m_bPerceptable = false;
 		}
@@ -24,65 +26,51 @@ class GLLineStrip : public GLObject
 
         void DrawCanonicalObject()
         {
-            glPushAttrib(GL_ENABLE_BIT | GL_DEPTH_BUFFER_BIT | GL_LINE_WIDTH);
-
-            glDepthMask(true);
-            glDisable(GL_DEPTH_TEST);
-
-            //glLineWidth(1);
-
             m_Color.Apply();
-            glBegin( GL_LINE_STRIP );
-            for( unsigned int ii = 0; ii < m_vPts.size(); ii+=3 ) {
-                  glVertex3d( m_vPts[ii], m_vPts[ii+1], m_vPts[ii+2] );
-            }
-            glEnd();
-            glPopAttrib();
+            m_buffer.Bind();
+            glVertexPointer(m_buffer.count_per_element, m_buffer.datatype, 0, 0);
+            glEnableClientState(GL_VERTEX_ARRAY);
+            glDrawArrays(GL_LINE_STRIP, m_buffer.start(), m_buffer.size() );
+            glDisableClientState(GL_VERTEX_ARRAY);
+            m_buffer.Unbind();        
         }
 
         void SetPoint( Eigen::Vector3d Point )
 		{
-			m_vPts.push_back( Point(0) );
-			m_vPts.push_back( Point(1) );
-			m_vPts.push_back( Point(2) );
+            m_buffer.Add(Point.cast<float>() );
         }
 
-        void SetPoint( double Point[3] )
+        void SetPoint( double P[3] )
 		{
-			m_vPts.push_back( Point[0] );
-			m_vPts.push_back( Point[1] );
-			m_vPts.push_back( Point[2] );
+            m_buffer.Add( Eigen::Vector3f(P[0],P[1],P[2]) );
         }
 
 		void SetPoint( double X = 0, double Y = 0, double Z = 0 )
 		{
-			m_vPts.push_back( X );
-			m_vPts.push_back( Y );
-			m_vPts.push_back( Z );
+            m_buffer.Add( Eigen::Vector3f(X,Y,Z) );
         }
 
 		void SetPoints( const std::vector<double>& vPts )
 		{
-			m_vPts = vPts;
+            m_buffer.Clear();
+            for(size_t i=0; i<vPts.size(); i+=3) {
+                SetPoint(vPts[i],vPts[i+1],vPts[i+2]);
+            }
 		}
 
         void SetPointsFromTrajectory( const Eigen::Vector6dAlignedVec& vPts )
 		{
-            m_vPts.clear();
-            for( size_t ii = 0; ii < vPts.size(); ii++ ){
-                m_vPts.push_back( vPts[ii][0] );
-                m_vPts.push_back( vPts[ii][1] );
-                m_vPts.push_back( vPts[ii][2] );
+            m_buffer.Clear();
+            for(size_t i=0; i<vPts.size(); ++i) {
+                SetPoint(vPts[i][0],vPts[i][1],vPts[i][2]);
             }
 		}
 
         void SetPointsFromTrajectory( const Eigen::Vector3dAlignedVec& vPts )
         {
-            m_vPts.clear();
-            for( size_t ii = 0; ii < vPts.size(); ii++ ){
-                m_vPts.push_back( vPts[ii][0] );
-                m_vPts.push_back( vPts[ii][1] );
-                m_vPts.push_back( vPts[ii][2] );
+            m_buffer.Clear();
+            for(size_t i=0; i<vPts.size(); ++i) {
+                SetPoint(vPts[i][0],vPts[i][1],vPts[i][2]);
             }
         }
 
@@ -96,7 +84,7 @@ class GLLineStrip : public GLObject
 
         void ClearLines()
 		{
-        	m_vPts.clear();
+            m_buffer.Clear();
         }
 
         void SetColor( const GLColor& c )
@@ -105,8 +93,8 @@ class GLLineStrip : public GLObject
         } 
 
     private:
-        std::vector< double >						m_vPts;
-        GLColor         				   			m_Color;
+        GlCachedSizeableBuffer  m_buffer;
+        GLColor                 m_Color;
 };
 
 }

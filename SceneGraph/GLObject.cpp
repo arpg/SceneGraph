@@ -9,6 +9,7 @@ int GLObject::g_nHandleCounter = 1;
 /////////////////////////////////////////////////////////////////////////////////
 GLObject::GLObject()
     : m_sObjectName("unnamed-object"), m_bVisible(true), m_bPerceptable(true),
+      m_bIgnoreDepth(false),
       m_T_po(Eigen::Matrix4d::Identity()), m_dScale(1,1,1), m_bIsSelectable(false),
       m_nDisplayList(-1)
 {
@@ -17,6 +18,7 @@ GLObject::GLObject()
 /////////////////////////////////////////////////////////////////////////////////
 GLObject::GLObject( const std::string& name)
     : m_sObjectName(name), m_bVisible(true), m_bPerceptable(true),
+      m_bIgnoreDepth(false),
       m_T_po(Eigen::Matrix4d::Identity()), m_dScale(1,1,1), m_bIsSelectable(false),
       m_nDisplayList(-1)
 {
@@ -67,6 +69,11 @@ void GLObject::DrawObjectAndChildren(RenderMode renderMode)
 	) {
         glMatrixMode(GL_MODELVIEW);
         glPushMatrix();
+        
+        if(m_bIgnoreDepth) {
+            glDepthMask(false);
+            glDisable(GL_DEPTH_TEST);            
+        }
 
 #ifdef HAVE_GLES
         Eigen::Matrix4f T_po = m_T_po.cast<float>();
@@ -76,12 +83,18 @@ void GLObject::DrawObjectAndChildren(RenderMode renderMode)
 #else
         glMultMatrixd(m_T_po.data());
         glScaled(m_dScale[0],m_dScale[1],m_dScale[2]);
+
         if(m_nDisplayList >= 0) {
             glCallList( m_nDisplayList );
         }else{
             DrawCanonicalObject();
         }
 #endif //HAVE_GLES
+
+        if(m_bIgnoreDepth) {
+            glDepthMask(true);
+            glEnable(GL_DEPTH_TEST);
+        }
 
         DrawChildren();
 
@@ -123,6 +136,12 @@ bool GLObject::IsPerceptable() const
 void GLObject::SetPerceptable( bool bPerceptable )
 {
     m_bPerceptable = bPerceptable;
+}
+
+/////////////////////////////////////////////////////////////////////////////////
+void GLObject::SetIgnoreDepth( bool bIgnoreDepth )
+{
+    m_bIgnoreDepth = bIgnoreDepth;
 }
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -177,6 +196,16 @@ const GLObject& GLObject::operator[](int i) const
 Eigen::Matrix4d GLObject::GetPose4x4_po() const
 {
     return m_T_po;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////
+Eigen::Matrix4d GLObject::GetPose4x4_op() const
+{
+    Eigen::Matrix4d T_op;
+    T_op.block<3,3>(0,0) = m_T_po.block<3,3>(0,0).transpose();
+    T_op.block<3,1>(0,3) = - T_op.block<3,3>(0,0) * m_T_po.block<3,1>(0,3);
+    T_op.block<1,4>(3,0) << 0.0, 0.0, 0.0, 1.0;
+    return T_op;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////

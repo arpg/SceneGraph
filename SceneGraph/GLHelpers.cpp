@@ -287,47 +287,6 @@ void DrawTexture(
     PopOrtho();
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-unsigned int GLBytesPerPixel( unsigned int nFormat, unsigned int nType )
-{
-    unsigned nVal = 0;
-    switch ( nType ) {
-        case GL_BYTE:
-        case GL_UNSIGNED_BYTE:
-            nVal = 1;
-            break;
-        case GL_SHORT:
-        case GL_UNSIGNED_SHORT:
-        case GL_2_BYTES:
-            nVal = 2;
-            break;
-        case GL_3_BYTES:
-            nVal = 3;
-            break;
-        case GL_INT:
-        case GL_UNSIGNED_INT:
-        case GL_4_BYTES:
-        case GL_FLOAT:
-            nVal = 4;
-            break;
-        case GL_DOUBLE:
-            nVal = 8;
-    }
-    switch ( nFormat ) {
-        case GL_RED:
-        case GL_R8:
-        case GL_R8UI:
-        case GL_LUMINANCE:
-            break;
-        case GL_RGB: nVal*=3; break;
-        case GL_RGBA: nVal*=4; break;
-        default:
-            fprintf ( stderr, "GLBytesPerPixel() -- unsupported format\n" );
-            return 0;
-    }
-    return nVal;
-}
-
 //////////////////////////////////////////////////////////////////////////////
 // read from opengl buffer into our own vector
 void ReadPixels( 
