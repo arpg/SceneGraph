@@ -86,7 +86,7 @@ public:
         m_sText.clear();
     }
 
-    void SetSize( int nFontSize )
+    void SetSize( int /*nFontSize*/ )
     {
         assert(nFontSize > 0);
         // TODO: support multiple sized.
