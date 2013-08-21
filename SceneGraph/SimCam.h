@@ -10,16 +10,6 @@
 
 #include <string>
 
-// Suppress unused function warning in Eigen for clang (can't be isolated for gcc)
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-function"
-#endif
-#include <unsupported/Eigen/OpenGLSupport>
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif
-
 #define VISION 1
 
 namespace SceneGraph
@@ -35,6 +25,20 @@ enum eSimCamType{
     eSimCamNormals = 8
 };
 
+void glLoadMatrix(const Eigen::Matrix4d& M)
+{
+    glLoadMatrixd(M.data());
+}
+
+void glMultMatrix(const Eigen::Matrix4d& M)
+{
+    glMultMatrixd(M.data());
+}
+
+void glVertex(const Eigen::Vector3d& v)
+{
+    glVertex3dv(v.data());
+}
 
 class SimCamMode
 {
