@@ -88,7 +88,8 @@ public:
 
     void SetSize( int /*nFontSize*/ )
     {
-        assert(nFontSize > 0);
+        // uncomment this assertion again when variable is used
+        // assert(nFontSize > 0);
         // TODO: support multiple sized.
     }
 
