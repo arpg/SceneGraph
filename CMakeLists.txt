@@ -30,5 +30,6 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wno-unused-parameter")
 add_subdirectory( SceneGraph )
 
 if(BUILD_EXAMPLES)
-    add_subdirectory( Examples )
+  set(SceneGraph_DIR ${SceneGraph_BINARY_DIR})
+  add_subdirectory( Examples )
 endif()
