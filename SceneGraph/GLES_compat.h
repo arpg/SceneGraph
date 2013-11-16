@@ -14,9 +14,10 @@
 #define GL_TEXTURE1_ARB GL_TEXTURE1
 #define GL_TEXTURE0_ARB GL_TEXTURE0
 
-inline void glMultMatrixd( double *m )
+inline void glMultMatrixd(const double *m )
 {
-    glMultMatrixf( ((Eigen::Matrix4f) (Eigen::Map<Eigen::Matrix4d>(m).cast<float>())).data() );
+  glMultMatrixf(static_cast<Eigen::Matrix4f>(
+      Eigen::Map<const Eigen::Matrix4d>(m).cast<float>()).data());
 }
 
 inline void glScaled( double x, double y, double z)
