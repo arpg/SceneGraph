@@ -140,7 +140,7 @@ void GLSceneGraph::ApplyPreferredGlSettings()
     glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     
     // Enable back face culling by default. Rendering quality and speed is improved
-    glEnable(GL_CULL_FACE);
+//    glEnable(GL_CULL_FACE);
     
     // Shading model to use when lighing is enabled
     glShadeModel(GL_SMOOTH);
