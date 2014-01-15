@@ -25,17 +25,17 @@ enum eSimCamType{
     eSimCamNormals = 8
 };
 
-void glLoadMatrix(const Eigen::Matrix4d& M)
+inline void glLoadMatrix(const Eigen::Matrix4d& M)
 {
     glLoadMatrixd(M.data());
 }
 
-void glMultMatrix(const Eigen::Matrix4d& M)
+inline void glMultMatrix(const Eigen::Matrix4d& M)
 {
     glMultMatrixd(M.data());
 }
 
-void glVertex(const Eigen::Vector3d& v)
+inline void glVertex(const Eigen::Vector3d& v)
 {
     glVertex3dv(v.data());
 }
