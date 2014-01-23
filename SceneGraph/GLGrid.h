@@ -35,7 +35,7 @@ class GLGrid : public GLObject
             m_fLineSpacing = fLineSpacing;
             ComputeBounds();
         }
-        
+
         void SetColors(const GLColor& planeColor, const GLColor& lineColor)
         {
             m_colorPlane = planeColor;
@@ -46,12 +46,15 @@ class GLGrid : public GLObject
         static inline void DrawGridZ0( bool filled, int numLines, float lineSpacing, GLColor colorPlane, GLColor colorLines)
         {
             pangolin::GlState gl;
-            
+#ifdef ANDROID
+            state.glDisable(GL_LINE_SMOOTH);
+#endif
+
             // Prevent Z-Fighting between plane and lines
             glPolygonOffset( 1.0, 1.0 );
             gl.glEnable(GL_POLYGON_OFFSET_FILL);
             gl.glDisable(GL_CULL_FACE);
-           
+
 //            glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT);
             GLfloat ambient[4] = {1,1,1,1};
             GLfloat diffuse[4] = {0,0,0,1};
@@ -67,7 +70,7 @@ class GLGrid : public GLObject
             if( filled ) {
                 colorPlane.Apply();
                 glRectf(-halfsize, -halfsize, halfsize, halfsize);
-                
+
                 // Don't overwrite this depth when drawing lines:
                 gl.glDepthMask(GL_FALSE);
             }
@@ -147,4 +150,3 @@ protected:
 } // SceneGraph
 
 #endif
-
