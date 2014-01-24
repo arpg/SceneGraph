@@ -47,7 +47,7 @@ class GLGrid : public GLObject
         {
             pangolin::GlState gl;
 #ifdef ANDROID
-            state.glDisable(GL_LINE_SMOOTH);
+            gl.glDisable(GL_LINE_SMOOTH);
 #endif
 
             // Prevent Z-Fighting between plane and lines
