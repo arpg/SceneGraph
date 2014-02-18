@@ -50,7 +50,7 @@ class ImageView : public pangolin::View {
   //! Set the image data to be used for display.
   //! The OpenGL Texture associated with this display will be
   //! updated before drawing from within the OpenGL thread.
-  void SetImage(const void* pImageData, GLint w, GLint h, GLint internal_format = GL_RGB, GLenum nFormat = GL_RGB, GLenum nType = GL_UNSIGNED_BYTE)
+  void SetImage(const void* pImageData, GLint w, GLint h, GLint internal_format = GL_RGB, GLenum nFormat = GL_RGB, GLenum nType = GL_UNSIGNED_BYTE, bool bNormalize = false)
   {
     const size_t nMemSize = w * h * GLBytesPerPixel( nFormat, nType );
 
@@ -70,6 +70,17 @@ class ImageView : public pangolin::View {
     m_nInternalFormat = internal_format;
     m_nFormat = nFormat;
     m_nType = nType;
+
+    if ((bNormalize) && (nType == GL_FLOAT)) {
+        float* pfImageData = (float *) m_pImageData;
+        float max = *std::max_element(pfImageData, pfImageData + w*h);
+        float min = *std::min_element(pfImageData, pfImageData + w*h);
+        for (int jj = 0; jj < h; jj++) {
+            for (int ii = 0; ii < w; ii++) {
+                pfImageData[ii + w*jj] = 1 - (pfImageData[ii + w*jj] - min) / (max - min);
+            }
+        }
+    }
 
     // Set gl texture as dirty
     m_bImageDataDirty = true;
