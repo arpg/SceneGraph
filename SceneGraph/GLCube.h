@@ -111,6 +111,7 @@ inline GLCube::GLCube(GLuint texId)
 
 inline void GLCube::DrawCanonicalObject()
 {
+#ifndef ANDROID
     if(m_nTexID) {
         glEnable( GL_TEXTURE_2D );
         glBindTexture( GL_TEXTURE_2D, m_nTexID );
@@ -160,13 +161,13 @@ inline void GLCube::DrawCanonicalObject()
     glTexCoord2f(1.0, 0.0); glVertex3f(bmin(0), bmin(1), bmax(2));
     glTexCoord2f(0.0, 0.0); glVertex3f(bmin(0), bmin(1), bmin(2));
     glEnd();
-    
+
     if(m_nTexID) {
         glDisable( GL_TEXTURE_2D );
     }
+#endif  // ANDROID
 }
 
 }
 
 #endif //_GLCube_H_
-
