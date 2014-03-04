@@ -37,6 +37,7 @@ list(APPEND SOURCES
     GLSceneGraph.cpp
     GLObject.cpp
     GLLight.cpp
+    GLAxis.cpp
 )
 
 list(APPEND HEADERS
