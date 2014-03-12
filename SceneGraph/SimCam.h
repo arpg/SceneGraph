@@ -40,7 +40,7 @@ inline void glVertex(const Eigen::Vector3d& v)
     glVertex3dv(v.data());
 }
 
-class SimCamMode
+class SCENEGRAPH_EXPORT SimCamMode
 {
     friend class GLSimCam; // only SimCam can have a "SimCamMode"
     private:
@@ -76,7 +76,7 @@ class SimCamMode
         int                 m_nDataSize;
 };
 
-class GLSimCam
+class SCENEGRAPH_EXPORT GLSimCam
 {
     public:
 

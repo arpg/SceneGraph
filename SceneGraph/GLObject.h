@@ -61,7 +61,7 @@ enum RenderMode
     eRenderNoPrePostHooks
 };
 
-class GLObject
+class SCENEGRAPH_EXPORT GLObject
 {
     public:
 

@@ -11,17 +11,11 @@
 #ifndef NV_WIDGETS_H
 #define NV_WIDGETS_H
 
-#include <time.h> // time_t
+// Use Scenegraphs export annotation.
+#include <SceneGraph/GLinclude.h>
+#define NVSDKENTRY SCENEGRAPH_EXPORT
 
-#ifdef RANDOM_NOT_DEFINED_STRING //WIN32
-#ifdef NVWIDGETS_EXPORTS
-#define NVSDKENTRY __declspec(dllexport)
-#else
-#define NVSDKENTRY __declspec(dllimport)
-#endif
-#else
-#define NVSDKENTRY
-#endif
+#include <time.h>
 
 namespace nv
 {

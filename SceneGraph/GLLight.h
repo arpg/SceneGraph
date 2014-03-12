@@ -7,7 +7,7 @@
 namespace SceneGraph
 {
 
-class GLLight : public GLObjectPrePostRender
+class SCENEGRAPH_EXPORT GLLight : public GLObjectPrePostRender
 {
 public:
     GLLight(double x = 0, double y = 0, double z = 0)

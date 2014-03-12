@@ -26,39 +26,48 @@ namespace SceneGraph
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///  If a GL error has occured, this function outputs "msg" and the
 //   programme exits. To avoid exiting @see WarnForGLErrors.
+SCENEGRAPH_EXPORT
 void _CheckForGLErrors( const char *sFile = NULL, const int nLine = -1 );
 
 //////////////////////////////////////////////////////////////////////////////
 // Extract current camera pose from opengl in the Robotics Coordinate frame convention
+SCENEGRAPH_EXPORT
 Eigen::Matrix4d GLGetCameraPose();
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Convert opengl projection matrix into computer vision K matrix
+SCENEGRAPH_EXPORT
 Eigen::Matrix3d GLGetProjectionMatrix();
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// If a GL error has occured, this function outputs "msg" and  automatically sets
 //  the gl error state back to normal.
+SCENEGRAPH_EXPORT
 void WarnForGLErrors( const char * msg = NULL );
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Given a particular OpenGL Format, return the appropriate number of image channels.
+SCENEGRAPH_EXPORT
 unsigned int NumChannels( unsigned int nFormat );
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Given an OpenGL Type, return the associated number of bits used.
+SCENEGRAPH_EXPORT
 unsigned int BitsPerChannel( unsigned int nType );
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Change to orthographic projection (for image drawing, etc)
+SCENEGRAPH_EXPORT
 void PushOrtho( const unsigned int nWidth, const unsigned int nHeight );
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Set projection matrix
+SCENEGRAPH_EXPORT
 void PopOrtho();
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Set projection matrix
+SCENEGRAPH_EXPORT
 void OrthoQuad(
         const int nTexWidth,    //< Input:
         const int nTexHeight,   //< Input:
@@ -69,6 +78,7 @@ void OrthoQuad(
         );
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+SCENEGRAPH_EXPORT
 void DrawBorderAsWindowPercentage(
         const float fTop,
         const float fLeft,
@@ -77,6 +87,7 @@ void DrawBorderAsWindowPercentage(
         );
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+SCENEGRAPH_EXPORT
 void DrawTextureAsWindowPercentage(
         const unsigned int nTexId,      //< Input:
         const unsigned int nTexWidth, //< Input:
@@ -89,6 +100,7 @@ void DrawTextureAsWindowPercentage(
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+SCENEGRAPH_EXPORT
 void DrawTexture(
         const unsigned int nTexId,      //< Input:
         const unsigned int nTexWidth, //< Input:
@@ -149,6 +161,7 @@ inline unsigned int GLBytesPerPixel( unsigned int nFormat, unsigned int nType )
 
 //////////////////////////////////////////////////////////////////////////////
 // read from opengl buffer into our own vector
+SCENEGRAPH_EXPORT
 void ReadPixels(
         std::vector<unsigned char>& vPixels,
         int nWidth,
@@ -158,6 +171,7 @@ void ReadPixels(
 
 //////////////////////////////////////////////////////////////////////////////
 // read from opengl buffer into our own vector
+SCENEGRAPH_EXPORT
 void ReadDepthPixels(
         std::vector<float>& vPixels,
         int nWidth,
@@ -166,14 +180,17 @@ void ReadDepthPixels(
         );
 
 //////////////////////////////////////////////////////////////////////////////
+SCENEGRAPH_EXPORT
 void CheckFBOStatus();
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// set perspective view.  same as gluperspective().
+SCENEGRAPH_EXPORT
 void Perspective( double fovy, double aspect, double zNear, double zFar);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Reshape viewport whenever window changes size.
+SCENEGRAPH_EXPORT
 void ReshapeViewport( int w, int h );
 
 
@@ -325,6 +342,7 @@ inline Eigen::Matrix3d Rotation_a2b(const Eigen::Vector3d& a, const Eigen::Vecto
 #ifndef HAVE_GLES
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+SCENEGRAPH_EXPORT
 void DrawCamera(
         int nTexWidth,
         int nTexHeight,

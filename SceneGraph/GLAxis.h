@@ -4,7 +4,8 @@
 #include <SceneGraph/GLObject.h>
 
 namespace SceneGraph {
-class GLAxis : public GLObject {
+
+class SCENEGRAPH_EXPORT GLAxis : public GLObject {
  public:
   GLAxis(const float axisSize = 1.0f, const bool bPretty = false);
   virtual ~GLAxis();
