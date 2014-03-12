@@ -24,8 +24,11 @@ endif()
 # Platform configuration vars (to generate config.h)
 include(SetPlatformVars)
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Wno-unused-parameter")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wno-unused-parameter -std=c++11")
+if( NOT MSVC )
+  # Set GCC style compiler flags
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Wno-unused-parameter")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wno-unused-parameter -std=c++11")
+endif()
 
 add_subdirectory( SceneGraph )
 

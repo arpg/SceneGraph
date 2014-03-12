@@ -1,5 +1,8 @@
 #include <iostream>
-#include <boost/bind.hpp>
+#include <functional>
+#include <chrono>
+#include <thread>
+
 #include <Eigen/Eigen>
 
 #include <pangolin/pangolin.h>
@@ -136,7 +139,7 @@ int main( int /*argc*/, char** /*argv[]*/ )
     container.AddDisplay(viewImage);
 
     // Demonstration of how we can register a keyboard hook to trigger a method
-    pangolin::RegisterKeyPressCallback( pangolin::PANGO_CTRL + 'r', boost::bind(GlobalKeyHook, "You Pushed ctrl-r!" ) );
+    pangolin::RegisterKeyPressCallback( pangolin::PANGO_CTRL + 'r', std::bind(GlobalKeyHook, "You Pushed ctrl-r!" ) );
 
 //    // Default hooks for exiting (Esc) and fullscreen (tab).
     while( !pangolin::ShouldQuit() )
@@ -152,7 +155,7 @@ int main( int /*argc*/, char** /*argv[]*/ )
         pangolin::FinishFrame();
 
         // Pause for 1/60th of a second.
-        usleep(1E6 / 60);
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000 / 60));
     }
 
     return 0;

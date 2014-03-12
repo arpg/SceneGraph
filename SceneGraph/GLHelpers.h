@@ -11,7 +11,6 @@
 #include <SceneGraph/GLinclude.h>
 
 #include <iostream>
-#include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
@@ -218,7 +217,7 @@ inline Eigen::Matrix4d GLCart2T(
     return T;
 }
 
-inline Eigen::Matrix4d GLCart2T( Eigen::Matrix<double,6,1> x)
+inline Eigen::Matrix4d GLCart2T( const Eigen::Matrix<double,6,1>& x)
 {
     return GLCart2T(x(0),x(1),x(2),x(3),x(4),x(5));
 }
@@ -330,8 +329,8 @@ void DrawCamera(
         int nTexWidth,
         int nTexHeight,
         int nTexId,
-        Eigen::Matrix4d dModelViewMatrix,
-        Eigen::Matrix4d dProjectionMatrix
+        const Eigen::Matrix4d& dModelViewMatrix,
+        const Eigen::Matrix4d& dProjectionMatrix
         );
 
 /// 1) Generate a texutre ID

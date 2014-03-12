@@ -5,7 +5,6 @@
  */ 
 
 #include <SceneGraph/GLHelpers.h>
-#include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
@@ -436,8 +435,8 @@ void DrawCamera(
         int nTexWidth,
         int nTexHeight,
         int nTexId,
-        Eigen::Matrix4d dModelViewMatrix,
-        Eigen::Matrix4d dProjectionMatrix
+        const Eigen::Matrix4d& dModelViewMatrix,
+        const Eigen::Matrix4d& dProjectionMatrix
         )
 {
     // OK 

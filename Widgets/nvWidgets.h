@@ -13,7 +13,7 @@
 
 #include <time.h> // time_t
 
-#ifdef WIN32
+#ifdef RANDOM_NOT_DEFINED_STRING //WIN32
 #ifdef NVWIDGETS_EXPORTS
 #define NVSDKENTRY __declspec(dllexport)
 #else

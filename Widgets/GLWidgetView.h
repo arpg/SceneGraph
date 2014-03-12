@@ -1,8 +1,9 @@
 #ifndef GLWIDGETPANEL_H
 #define GLWIDGETPANEL_H
 
-#include "pangolin/pangolin.h"
-#include "SceneGraph/SceneGraph.h"
+#include <functional>
+#include <pangolin/pangolin.h>
+#include <SceneGraph/SceneGraph.h>
 #include "nvGlutWidgets.h"
 
 using namespace SceneGraph;
@@ -20,7 +21,7 @@ public:
     }
 
     void Init(const Attach bottom,const Attach top,const Attach left, const Attach right,
-              boost::function<void(nv::GlutUIContext&,nv::Rect&)> func) {        
+              std::function<void(nv::GlutUIContext&,nv::Rect&)> func) {        
         SetBounds(bottom,top,left,right);
         m_DrawFunc = func;
     }
@@ -99,7 +100,7 @@ protected:
     nv::Rect m_Rect;
     nv::GlutUIContext m_Ui;
     std::map<std::string,void *> m_mVars;
-    boost::function<void(nv::GlutUIContext&,nv::Rect&)> m_DrawFunc;
+    std::function<void(nv::GlutUIContext&,nv::Rect&)> m_DrawFunc;
     pangolin::OpenGlRenderState m_RenderState2d;
 
 };

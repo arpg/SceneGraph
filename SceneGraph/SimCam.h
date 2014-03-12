@@ -175,8 +175,8 @@ class GLSimCam
         /// Init shaders. Given K matrix, compute the corresponding GL_PROJECTION_MATRIX.
         void Init(
                 GLSceneGraph* pSceneGraph,       //< Input: pointer to scene graph we should render
-                const Eigen::Matrix4d dPose,     //< Input: initial camera pose
-                const Eigen::Matrix3d dK,        //< Input: computer vision K matrix
+                const Eigen::Matrix4d& dPose,     //< Input: initial camera pose
+                const Eigen::Matrix3d& dK,        //< Input: computer vision K matrix
                 const unsigned int nSensorWidth, //< Input: sensor width in pixels
                 const unsigned int nSensorHeight,//< Input: sensor height in pixels
                 int nModes = eSimCamRGB,         //< Input:
