@@ -59,6 +59,7 @@ list(APPEND HEADERS
     GLGrid.h
     GLAxis.h
     GLCube.h
+    GLTeapot.h
     GLLineStrip.h
     GLPrimitives.h
     GLAxisHistory.h
