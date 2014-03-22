@@ -38,6 +38,7 @@ list(APPEND SOURCES
     GLObject.cpp
     GLLight.cpp
     GLAxis.cpp
+    GLCube.cpp
 )
 
 list(APPEND HEADERS
