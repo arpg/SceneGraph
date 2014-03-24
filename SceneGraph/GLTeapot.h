@@ -12,7 +12,7 @@ class GLTeapot : public GLObject {
   GLTeapot() {}
 
   void DrawCanonicalObject() {
-    glutSolidTeapot(m_dScale[0]);
+    glutSolidTeapot(1);
   }
 };
 }  // namespace SceneGraph
