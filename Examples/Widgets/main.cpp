@@ -1,5 +1,4 @@
 #include <iostream>
-#include <boost/bind.hpp>
 #include <Eigen/Eigen>
 
 #include <pangolin/pangolin.h>
@@ -122,13 +121,13 @@ int main( int argc, char* argv[] )
     container.AddDisplay(panel);
 
     // Demonstration of how we can register a keyboard hook to trigger a method
-    pangolin::RegisterKeyPressCallback( pangolin::PANGO_CTRL + 'r', boost::bind(GlobalKeyHook, "You Pushed ctrl-r!" ) );
+    pangolin::RegisterKeyPressCallback( pangolin::PANGO_CTRL + 'r', std::bind(GlobalKeyHook, "You Pushed ctrl-r!" ) );
 
     // Add keyhook to save window contents (including alpha). The framebuffer is saved just before it is swapped
-    pangolin::RegisterKeyPressCallback( 's', boost::bind(&pangolin::View::SaveOnRender, &pangolin::DisplayBase(), "window_OnRender" ) );
+    pangolin::RegisterKeyPressCallback( 's', std::bind(&pangolin::View::SaveOnRender, &pangolin::DisplayBase(), "window_OnRender" ) );
 
     // Add keyhook to save a particular view (including alpha) at 4 times the resolution of the screen. This creates an FBO and renders into it straight away.
-    pangolin::RegisterKeyPressCallback( 'r', boost::bind(&pangolin::View::SaveRenderNow, &view3d, "view3d_RenderNow", 4 ) );
+    pangolin::RegisterKeyPressCallback( 'r', std::bind(&pangolin::View::SaveRenderNow, &view3d, "view3d_RenderNow", 4 ) );
 
     // Default hooks for exiting (Esc) and fullscreen (tab).
     while( !pangolin::ShouldQuit() )
