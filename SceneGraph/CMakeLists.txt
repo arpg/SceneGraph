@@ -38,6 +38,7 @@ list(APPEND SOURCES
     GLObject.cpp
     GLLight.cpp
     GLAxis.cpp
+    GLCube.cpp
 )
 
 list(APPEND HEADERS
@@ -58,6 +59,7 @@ list(APPEND HEADERS
     GLGrid.h
     GLAxis.h
     GLCube.h
+    GLTeapot.h
     GLLineStrip.h
     GLPrimitives.h
     GLAxisHistory.h
