@@ -77,7 +77,7 @@ class ImageView : public pangolin::View {
         float min = *std::min_element(pfImageData, pfImageData + w*h);
         for (int jj = 0; jj < h; jj++) {
             for (int ii = 0; ii < w; ii++) {
-                pfImageData[ii + w*jj] = 1 - (pfImageData[ii + w*jj] - min) / (max - min);
+                pfImageData[ii + w*jj] = (pfImageData[ii + w*jj] - min) / (max - min);
             }
         }
     }
