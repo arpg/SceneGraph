@@ -1,6 +1,13 @@
 #pragma once
 
-#include <glut.h>
+#ifndef ANDROID
+#ifdef __APPLE_CC__
+#include <GLUT/glut.h>
+#else
+#include <GL/glut.h>
+#endif  // __APPLE_CC__
+#endif  // ANDROID
+
 #include <math.h>
 #include <SceneGraph/GLObject.h>
 
@@ -12,7 +19,9 @@ class GLTeapot : public GLObject {
   GLTeapot() {}
 
   void DrawCanonicalObject() {
+#ifndef ANDROID
     glutSolidTeapot(1);
+#endif  // ANDROID
   }
 };
 }  // namespace SceneGraph
