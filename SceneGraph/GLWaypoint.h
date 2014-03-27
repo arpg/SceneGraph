@@ -230,7 +230,7 @@ public:
         return pose5d;
     }
 
-    void ClampToPlane(Eigen::Vector4d N_p)
+    void ClampToPlane(const Eigen::Vector4d& N_p)
     {
         m_mClampPlaneN_p = N_p;
         m_bClampToPlane = true;

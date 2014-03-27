@@ -9,7 +9,7 @@ namespace SceneGraph
 
 class GLObjectPrePostRender;
 
-class GLSceneGraph : public GLObject
+class SCENEGRAPH_EXPORT GLSceneGraph : public GLObject
 {
     public:
         GLSceneGraph();
@@ -46,7 +46,7 @@ class GLSceneGraph : public GLObject
 
 };
 
-class GLObjectPrePostRender : public GLObject
+class SCENEGRAPH_EXPORT GLObjectPrePostRender : public GLObject
 {
 public:
     GLObjectPrePostRender() {}

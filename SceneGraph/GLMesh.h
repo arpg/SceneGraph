@@ -25,7 +25,7 @@ protected:
     std::string m_sWhat;
 };
 
-class GLMesh : public GLObject
+class SCENEGRAPH_EXPORT GLMesh : public GLObject
 {
     public:
         GLMesh();

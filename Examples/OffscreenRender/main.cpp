@@ -3,6 +3,8 @@
 
 #include <iostream>
 #include <iomanip>
+#include <thread>
+#include <chrono>
 
 using namespace SceneGraph;
 using namespace pangolin;
@@ -179,7 +181,7 @@ int main( int argc, char* argv[] )
         pangolin::FinishFrame();
 
         // Pause for 1/60th of a second.
-        usleep(1E6 / 60);
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000 / 60));
     }
     
     delete[] img_data;
