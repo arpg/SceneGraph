@@ -39,6 +39,7 @@ list(APPEND SOURCES
     GLLight.cpp
     GLAxis.cpp
     GLCube.cpp
+    GLGrid.cpp
 )
 
 list(APPEND HEADERS
