@@ -10,6 +10,8 @@ find_package(Bullet QUIET)
 if(BULLET_FOUND)
     include_directories(${BULLET_INCLUDE_DIRS})
 
+    # We require Bullet to be built with double precision
+    add_definitions(-DBT_USE_DOUBLE_PRECISION)
     add_executable(ModelPhysics main.cpp)
     target_link_libraries(ModelPhysics ${Pangolin_LIBRARIES})
     target_link_libraries(ModelPhysics ${SceneGraph_LIBRARIES})
