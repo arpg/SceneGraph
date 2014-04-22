@@ -9,12 +9,31 @@ namespace SceneGraph {
 
 class GLGrid : public GLObject {
  public:
-  GLGrid(int numLines = 50, float lineSpacing = 2.0, bool perceptable = false);
+  GLGrid(int num_lines = 50,
+         float line_spacing = 2.0,
+         bool perceptable = false);
 
-  // from mvl dispview
-  static void DrawGridZ0(bool filled, int numLines, float lineSpacing,
-                         GLColor colorPlane, GLColor colorLines,
-                         int num_minor_lines, GLColor minor_color);
+  /** Draw a grid centered at (0, 0, 0) with a specified number of
+   * lines in each direction.
+   *
+   * @param filled Should the grid squares be filled in
+   * @param num_lines_neg_x # of lines to draw in the -x direction
+   * @param num_lines_x # of lines to draw in the +x direction
+   * @param num_lines_neg_y # of lines to draw in the -y direction
+   * @param num_lines_y # of lines to draw in the +y direction
+   * @param line_spacing The space between major grid lines
+   * @param color_plane Color of filled grid squares. Ignored if filled == false
+   * @param major_color Color of major grid lines
+   * @param num_minor_lines Number of minor grid lines between each major line
+   * @param minor_color Color for minor grid lines
+   */
+  static void DrawGridZ0(
+      bool filled,
+      int num_lines_neg_x, int num_lines_x,
+      int num_lines_neg_y, int num_lines_y,
+      float line_spacing, GLColor color_plane, GLColor major_color,
+      int num_minor_lines, GLColor minor_color);
+
   void DrawCanonicalObject();
 
   void SetNumLines(int nNumLines) {
@@ -48,14 +67,21 @@ class GLGrid : public GLObject {
     return has_minor_lines_;
   }
 
+  /** Set the number of minor lines between major lines */
   void set_num_minor_lines(int num) {
     num_minor_ = num;
   }
 
+  /** Number of minor lines between major lines */
   int num_minor_lines() {
     return num_minor_;
   }
 
+  /** nd_o = (n_o / d_o)
+   *
+   * n_o : Normal of plane with respect to object frame of ref
+   * d_o : Distance of closest approach with origin of object frame
+   */
   void SetPlane(const Eigen::Vector3d& nd_o);
 
  protected:
