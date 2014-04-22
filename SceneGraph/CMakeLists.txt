@@ -40,6 +40,7 @@ list(APPEND SOURCES
     GLAxis.cpp
     GLCube.cpp
     GLGrid.cpp
+    GLDynamicGrid.cpp
 )
 
 list(APPEND HEADERS
