@@ -8,13 +8,9 @@ set( CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules ${CMAKE_MODULE_
 
 option(BUILD_EXAMPLES "Build Examples" ON)
 
-if(NOT ANDROID)
-   option(BUILD_SHARED_LIBS "Build Shared Library" ON)
-else()
-   set(BUILD_SHARED_LIBS OFF)
-   set(ANDROID_PACKAGE_NAME "edu.gwu.robotics.scenegraph")
-   include(AndroidUtils)
-endif()
+option(BUILD_SHARED_LIBS "Build Shared Library" ON)
+set(ANDROID_PACKAGE_NAME "edu.gwu.robotics.scenegraph")
+include(AndroidUtils)
 
 # Overide with cmake -DCMAKE_BUILD_TYPE=Debug {dir}
 if( NOT CMAKE_BUILD_TYPE )
