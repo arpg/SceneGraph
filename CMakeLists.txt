@@ -10,7 +10,6 @@ option(BUILD_EXAMPLES "Build Examples" ON)
 
 option(BUILD_SHARED_LIBS "Build Shared Library" ON)
 set(ANDROID_PACKAGE_NAME "edu.gwu.robotics.scenegraph")
-include(AndroidUtils)
 
 # Overide with cmake -DCMAKE_BUILD_TYPE=Debug {dir}
 if( NOT CMAKE_BUILD_TYPE )
