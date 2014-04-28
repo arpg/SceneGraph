@@ -1,5 +1,6 @@
 #pragma once
 
+#include <Eigen/StdVector>
 #include <SceneGraph/SceneGraph.h>
 #include <SceneGraph/PangolinGlCachedSizeableBuffer.h>
 
