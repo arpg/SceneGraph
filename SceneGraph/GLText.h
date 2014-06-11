@@ -45,7 +45,7 @@ class GLText : public GLObject {
   /////////////////////////////////
 
   GLText(std::string text = "", double x = 0, double y = 0, double z = 0)
-      : GLObject("Text: " + text), m_sText(text) {
+      : GLObject("Text: " + text), m_sText(text), viewpoint_invariant_(true) {
     m_bPerceptable = false;
     SetPosition(x,y,z);
   }
@@ -64,7 +64,11 @@ class GLText : public GLObject {
     pangolin::GlState gl;
     gl.glDisable(GL_DEPTH_TEST);
     gl.glDisable(GL_LIGHTING);
-    Draw(m_sText, 0, 0, 0);
+    if (viewpoint_invariant_) {
+      Draw(m_sText, 0, 0, 0);
+    } else {
+      Draw(m_sText);
+    }
   }
 
   void SetText(const std::string& sText) {
@@ -79,10 +83,16 @@ class GLText : public GLObject {
     m_Color = color;
   }
 
+  /** Configure if the GLText is 3D or attach to the window as a 2D object */
+  void set_viewpoint_invariant(bool is) {
+    viewpoint_invariant_ = is;
+  }
+
  private:
   std::string m_sText;
   pangolin::GlText m_gltext;
   GLColor m_Color;
+  bool viewpoint_invariant_;
 };
 } // SceneGraph
 
