@@ -2,11 +2,11 @@ include(CMakeParseArguments)
 include(SetSourceFlags)
 
 function(def_library lib)
-
+  
   string(TOUPPER ${lib} LIB)
 
   set(LIB_OPTIONS)
-  set(LIB_SINGLE_ARGS)
+  set(LIB_SINGLE_ARGS PACKAGE)
   set(LIB_MULTI_ARGS SOURCES DEPENDS CONDITIONS LINK_LIBS)
   cmake_parse_arguments(lib
     "${LIB_OPTIONS}"
@@ -21,10 +21,6 @@ function(def_library lib)
 
   set(cache_var BUILD_${LIB})
   set(${cache_var} ON CACHE BOOL "Enable ${LIB} compilation.")
-
-  set(export_var EXPORT_${LIB})
-  set(${export_var} OFF CACHE BOOL "Enable ${LIB} export.")
-  mark_as_advanced(${export_var})
 
   set(build_type_cache_var LIB${LIB}_BUILD_TYPE)
   set(${build_type_cache_var} "" CACHE STRING
@@ -66,11 +62,11 @@ function(def_library lib)
     endif()
 
     if(lib_DEPENDS)
-      target_link_libraries(${lib} ${lib_DEPENDS})
+      target_link_libraries(${lib} PRIVATE ${lib_DEPENDS})
     endif()
 
     if(lib_LINK_LIBS)
-      target_link_libraries(${lib} ${lib_LINK_LIBS})
+      target_link_libraries(${lib} PRIVATE ${lib_LINK_LIBS})
     endif()
 
     if(ANDROID)
@@ -79,7 +75,16 @@ function(def_library lib)
       if(NOT GNUSTL_SHARED_LIBRARY)
 	message(FATAL_ERROR "Could not find required GNU STL shared library.")
       endif()
-      target_link_libraries(${lib} log android z -pthread ${GNUSTL_SHARED_LIBRARY})
+      target_link_libraries(${lib} PRIVATE log android z -pthread ${GNUSTL_SHARED_LIBRARY})
+    endif()
+
+    if(lib_PACKAGE)
+      install(TARGETS ${lib}
+	EXPORT ${lib_PACKAGE}
+	RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/bin
+	LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib
+	ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/lib
+	)
     endif()
   endif()
 endfunction()

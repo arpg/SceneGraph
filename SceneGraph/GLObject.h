@@ -5,6 +5,7 @@
 #include <SceneGraph/GLHelpers.h>
 #include <SceneGraph/AxisAlignedBoundingBox.h>
 #include <Eigen/Eigen>
+#include <Eigen/StdVector>
 #include <string>
 #include <vector>
 #include <map>

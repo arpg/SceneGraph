@@ -30,6 +30,13 @@ struct GLColor {
     return color;
   }
 
+  GLColor(const Eigen::Vector4d& rgba) {
+    r = rgba[0];
+    g = rgba[1];
+    b = rgba[2];
+    a = rgba[3];
+  }
+
   GLColor(float tr = 1.0f, float tg = 1.0f, float tb = 1.0f, float ta = 1.0f) {
     r = tr;
     g = tg;

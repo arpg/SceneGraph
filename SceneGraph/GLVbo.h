@@ -3,6 +3,7 @@
 
 #include <SceneGraph/GLObject.h>
 #include <pangolin/glvbo.h>
+#include <SceneGraph/SimCam.h>
 
 namespace SceneGraph
 {
@@ -12,7 +13,8 @@ class GLVbo : public GLObject
 {
 public:
 
-    GLVbo(pangolin::GlBuffer* vbo, pangolin::GlBuffer* ibo=0, pangolin::GlBuffer* cbo=0, pangolin::GlBuffer* nbo=0)
+    GLVbo(pangolin::GlBuffer* vbo, pangolin::GlBuffer* ibo=0,
+          pangolin::GlBuffer* cbo=0, pangolin::GlBuffer* nbo=0)
         : GLObject("Vbo"), m_vbo(vbo), m_ibo(ibo), m_cbo(cbo), m_nbo(nbo)
     {
     }
