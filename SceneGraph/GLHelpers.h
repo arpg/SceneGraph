@@ -348,7 +348,7 @@ inline unsigned int GenerateAndBindRectTextureID(
     const unsigned int nHeight,
     const unsigned int nFormat,
     const unsigned int nType,
-    const unsigned char* pDatan) {
+    const unsigned char* pData) {
   GLuint texId;
   glGenTextures(1, &texId);
   glBindTexture(GL_TEXTURE_RECTANGLE_ARB, texId);
