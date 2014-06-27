@@ -1,186 +1,181 @@
-#ifndef _GLCYLINDER_H_
-#define _GLCYLINDER_H_
+//  Copyright 2014 ARPG
 
+#ifndef SCENEGRAPH_GLCYLINDER_H_
+#define SCENEGRAPH_GLCYLINDER_H_
+
+#include <math.h>
 #include <SceneGraph/GLObject.h>
 
-namespace SceneGraph
-{
+namespace SceneGraph {
 
-class GLCylinder : public GLObject
-{
-    public:
-        GLCylinder( GLuint texId = 0 );
-        ~GLCylinder();
+class GLCylinder : public GLObject {
+ public:
+  explicit GLCylinder(GLuint texId = 0);
+  ~GLCylinder();
+  void Init(
+      double base_radius,
+      double top_radius,
+      double height,
+      int    slices,
+      int    stacks);
+  void ClearTexture();
+  void SetColor(GLColor color);
+  void SetCheckerboard();
+  void SetTexture(GLuint texId);
+  void DrawCanonicalObject();
 
-        void Init( 
-                double dBbase,
-                double dTop,
-                double dHeight,
-                int    nSlices,
-                int    nStacks 
-                );
-
-        void ClearTexture();
-
-        void SetCheckerboard();
-
-        void SetTexture(GLuint texId);
-
-        void DrawCanonicalObject();
-
-    protected:
-        GLUquadric*   m_pQuadric;
-        GLUquadric*   m_pTopDisk;
-        GLUquadric*   m_pBottomDisk;
-
-        double        m_dBaseRadius;
-        double        m_dTopRadius;
-        double        m_dHeight;
-        double        m_nSlices;    
-        double        m_nStacks;
-        bool          m_bDrawCaps;
-
-        bool   m_bOwnsTexture;
-        GLuint m_nTexID;
-
-        const static int TEX_W = 64;
-        const static int TEX_H = 64;
+ protected:
+  double        base_radius_;
+  double        top_radius_;
+  double        height_;
+  double        slices_;
+  double        stacks_;
+  bool          draw_caps_;
+  bool          owns_texture_;
+  GLuint        texture_ID_;
+  GLColor color_;
+  static const int TEX_W = 64;
+  static const int TEX_H = 64;
 };
 
-//inline GLCylinder::GLCylinder()
-inline GLCylinder::GLCylinder( GLuint texId )
-{
-    m_bOwnsTexture = false;
-    m_nTexID = texId;
-    m_pQuadric = NULL;
-    m_bDrawCaps = true;
-    m_pTopDisk = NULL;
-    m_pBottomDisk = NULL;
-    SetCheckerboard();
+inline GLCylinder::GLCylinder(GLuint texId) {
+  owns_texture_ = false;
+  texture_ID_ = texId;
+  draw_caps_ = true;
+  SetCheckerboard();
 }
 
-inline GLCylinder::~GLCylinder()
-{
-    if( m_pQuadric ){
-        gluDeleteQuadric( m_pQuadric );
-    }
-    if( m_pTopDisk ){
-        gluDeleteQuadric( m_pTopDisk );
-    }
-    if( m_pBottomDisk ){ 
-        gluDeleteQuadric( m_pBottomDisk );
-    }
+inline GLCylinder::~GLCylinder() {
 }
 
-inline void GLCylinder::Init( 
-        double dBaseRadius,
-        double dTopRadius,
-        double dHeight,
-        int    nSlices,
-        int    nStacks 
-        )
-{
-    if( m_pQuadric ){
-        gluDeleteQuadric( m_pQuadric );
-    }
-    if( m_pTopDisk ){
-        gluDeleteQuadric( m_pTopDisk );
-    }
-    if( m_pBottomDisk ){ 
-        gluDeleteQuadric( m_pBottomDisk );
-    }
-
-    if( m_bDrawCaps ){
-        m_pTopDisk = gluNewQuadric();
-        gluQuadricNormals( m_pTopDisk, GLU_SMOOTH );
-        gluQuadricDrawStyle( m_pTopDisk, GLU_FILL );
-        gluQuadricTexture( m_pTopDisk, GL_TRUE );
-
-        m_pBottomDisk = gluNewQuadric();
-        gluQuadricNormals( m_pBottomDisk, GLU_SMOOTH );
-        gluQuadricDrawStyle( m_pBottomDisk, GLU_FILL );
-        gluQuadricTexture( m_pBottomDisk, GL_TRUE );
-
-    }
-
-
-    m_pQuadric = gluNewQuadric();
-    gluQuadricNormals( m_pQuadric, GLU_SMOOTH );
-    gluQuadricDrawStyle( m_pQuadric, GLU_FILL );
-    gluQuadricTexture( m_pQuadric, GL_TRUE );
-
-    m_dBaseRadius = dBaseRadius;
-    m_dTopRadius  = dTopRadius;
-    m_dHeight     = dHeight;
-    m_nSlices     = nSlices;
-    m_nStacks     = nStacks;
+inline void GLCylinder::Init(
+    double dBaseRadius,
+    double dTopRadius,
+    double dHeight_,
+    int    nSlices_,
+    int    nStacks_) {
+  base_radius_ = dBaseRadius;
+  top_radius_  = dTopRadius;
+  height_     = dHeight_;
+  slices_     = nSlices_;
+  stacks_     = nStacks_;
 }
 
-inline void GLCylinder::ClearTexture()
-{
-    if(m_nTexID > 0) {
-        if(m_bOwnsTexture) {
-            glDeleteTextures(1,&m_nTexID);
+inline void GLCylinder::ClearTexture() {
+  if (texture_ID_ > 0) {
+    if (owns_texture_) {
+      glDeleteTextures(1, &texture_ID_);
+    }
+    texture_ID_ = 0;
+  }
+}
+
+inline void GLCylinder::SetColor(GLColor color) {
+  color_ = color;
+}
+
+inline void GLCylinder::SetCheckerboard() {
+  ClearTexture();
+
+  // Texture Map Init
+  // after glTexImage2D(), array is no longer needed
+  GLubyte img[TEX_W][TEX_H][3];
+  for (int x = 0; x < TEX_W; x++) {
+    for (int y = 0; y < TEX_H; y++) {
+      GLubyte c = ((x & 16) ^ (y & 16)) ? 255 : 0;  // checkerboard
+      img[x][y][0] = c;
+      img[x][y][1] = c;
+      img[x][y][2] = c;
+    }
+  }
+  // Generate and bind the texture
+  owns_texture_ = true;
+  glGenTextures(1, &texture_ID_);
+  glBindTexture(GL_TEXTURE_2D, texture_ID_);
+  glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+  glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, TEX_W, TEX_H, 0,
+               GL_RGB, GL_UNSIGNED_BYTE, &img[0][0][0]);
+  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+}
+
+inline void GLCylinder::SetTexture(GLuint texId) {
+  ClearTexture();
+  owns_texture_ = false;
+  texture_ID_ = texId;
+}
+
+// adapted from http://math.hws.edu/graphicsnotes/source/glutil/UVCylinder.java
+inline void GLCylinder::DrawCanonicalObject() {
+  color_.Apply();
+  for (int j = 0; j < stacks_; j++) {
+    double z1 = (height_/stacks_) * j;
+    double z2 = (height_/stacks_) * (j + 1);
+    glBegin(GL_QUAD_STRIP);
+    for (int i = 0; i <= slices_; i++) {
+      double longitude = (2 * 3.14 / slices_) * i;
+      double sinLong = sin(longitude);
+      double cosLong = cos(longitude);
+      double x = cosLong;
+      double y = sinLong;
+      glNormal3d(x, y, 0);
+      if (owns_texture_) {
+        glTexCoord2d(1.0 / slices_ * i, 1.0 / stacks_ * (j+1));
+      }
+      glVertex3d(base_radius_ * x, base_radius_ * y, z2);
+      if (owns_texture_) {
+        glTexCoord2d(1.0 / slices_ * i, 1.0 / stacks_ * j);
+      }
+      glVertex3d(top_radius_ * x, top_radius_ * y, z1);
+    }
+    glEnd();
+  }
+  if (draw_caps_) {
+    // top
+    double rings = 5;
+    glNormal3d(0, 0, 1);
+    for (int j = 0; j < rings; j++) {
+      double d1 = (1.0 / rings) * j;
+      double d2 = (1.0 / rings) * (j + 1);
+      glBegin(GL_QUAD_STRIP);
+      for (int i = 0; i <= slices_; i++) {
+        double angle = (2 * 3.14 / slices_) * i;
+        double dsin = sin(angle);
+        double dcos = cos(angle);
+        if (owns_texture_)
+          glTexCoord2d(0.5 * (1 + dcos * d1), 0.5 * (1 + dsin * d1));
+        glVertex3d(top_radius_ * dcos * d1, top_radius_ * dsin * d1, height_);
+        if (owns_texture_)
+          glTexCoord2d(0.5 * (1 + dcos * d2), 0.5 * (1 + dsin * d2));
+        glVertex3d(top_radius_ * dcos * d2, top_radius_ * dsin * d2, height_);
+      }
+      glEnd();
+    }
+    // bottom
+    glNormal3d(0, 0, -1);
+    for (int j = 0; j < rings; j++) {
+      double d1 = (1.0 / rings) * j;
+      double d2 = (1.0 / rings) * (j + 1);
+      glBegin(GL_QUAD_STRIP);
+      for (int i = 0; i <= slices_; i++) {
+        double angle = (2 * 3.14 / slices_) * i;
+        double dsin = sin(angle);
+        double dcos = cos(angle);
+        if (owns_texture_) {
+          glTexCoord2d(0.5 * (1 + dcos * d2), 0.5 * (1 + dsin * d2));
         }
-        m_nTexID = 0;
-    }
-
-}
-
-inline void GLCylinder::SetCheckerboard()
-{
-    ClearTexture();
-
-    // Texture Map Init
-    GLubyte img[TEX_W][TEX_H][3]; // after glTexImage2D(), array is no longer needed
-    for (int x=0; x<TEX_W; x++) {
-        for (int y=0; y<TEX_H; y++) {
-            GLubyte c = ((x&16)^(y&16)) ? 255 : 0; // checkerboard
-            img[x][y][0] = c;
-            img[x][y][1] = c;
-            img[x][y][2] = c;
+        glVertex3d(base_radius_ * dcos * d2, base_radius_ * dsin * d2, 0);
+        if (owns_texture_) {
+          glTexCoord2d(0.5 * (1 + dcos * d1), 0.5 * (1 + dsin * d1));
         }
+        glVertex3d(base_radius_ * dcos * d1, base_radius_ * dsin * d1, 0);
+      }
+      glEnd();
     }
-
-    // Generate and bind the texture
-    m_bOwnsTexture = true;
-    glGenTextures( 1, &m_nTexID );
-    glBindTexture( GL_TEXTURE_2D, m_nTexID );
-    glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
-    glPixelStorei( GL_UNPACK_ALIGNMENT, 1);
-    glTexImage2D( GL_TEXTURE_2D, 0,
-            GL_RGB, TEX_W, TEX_H, 0, GL_RGB, GL_UNSIGNED_BYTE, &img[0][0][0] );
-    glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
-    glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+  }
 }
 
-inline void GLCylinder::SetTexture( GLuint texId )
-{
-    ClearTexture();
-    m_bOwnsTexture = false;
-    m_nTexID = texId;
-}
+}  // namespace SceneGraph
 
-inline void GLCylinder::DrawCanonicalObject()
-{
-    if(m_nTexID) {
-        glEnable( GL_TEXTURE_2D );
-        glBindTexture( GL_TEXTURE_2D, m_nTexID );
-    }
-
-    if( m_pQuadric ){
-        glTranslatef( 0, 0, -m_dHeight / 2 );
-        gluCylinder( m_pQuadric, m_dBaseRadius, m_dTopRadius, m_dHeight, m_nSlices, m_nStacks );
-
-        if( m_bDrawCaps ){
-            gluDisk( m_pBottomDisk, 0, m_dBaseRadius, m_nSlices, 2 );            
-            glTranslatef( 0, 0, m_dHeight );
-            gluDisk( m_pTopDisk, 0, m_dTopRadius, m_nSlices, 2 );
-        }
-    }
-}
-
-
-}
-
-#endif
+#endif  // SCENEGRAPH_GLCYLINDER_H_
