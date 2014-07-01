@@ -16,7 +16,6 @@
 #include <SceneGraph/GLAxis.h>
 #include <SceneGraph/GLLight.h>
 #include <SceneGraph/GLText.h>
-#include <SceneGraph/GLVbo.h>
 #include <SceneGraph/GLWireSphere.h>
 
 // GLObjects that use pangolin
@@ -30,6 +29,7 @@
 #include <SceneGraph/PangolinImageView.h>
 
 #ifndef HAVE_GLES
+    #include <SceneGraph/GLVbo.h>
     #include <SceneGraph/GLCube.h>
     #include <SceneGraph/GLBox.h>
     #include <SceneGraph/GLOpenBox.h>

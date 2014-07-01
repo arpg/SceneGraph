@@ -12,10 +12,12 @@ include(export_package)
 # Find required dependencies
 
 find_package( Eigen3 REQUIRED )
+find_package(MINIGLOG)
 
 # Basic includes / libraries
-list( APPEND LIB_INC_DIR "${CMAKE_CURRENT_BINARY_DIR}/..;${CMAKE_CURRENT_SOURCE_DIR}/.." )
-list( APPEND USER_INC    ${EIGEN3_INCLUDE_DIR} )
+list(APPEND LIB_INC_DIR "${CMAKE_CURRENT_BINARY_DIR}/..;${CMAKE_CURRENT_SOURCE_DIR}/..")
+list(APPEND USER_INC ${EIGEN3_INCLUDE_DIR} ${MINIGLOG_INCLUDE_DIRS})
+list(APPEND LINK_LIBS ${MINIGLOG_LIBRARIES})
 
 if(NOT _ANDROID_)
     find_package( OpenGL REQUIRED )
@@ -26,7 +28,9 @@ else()
     find_package(GLUES REQUIRED)
     list(APPEND LINK_LIBS "${GLUES_LIBRARY}" )
     list(APPEND LINK_LIBS "-lEGL;-lGLESv2;-lGLESv1_CM" )
+    list(APPEND LIB_INC_DIR "${GLUES_INCLUDE_DIR}")
     set(HAVE_GLES 1)
+    set(HAVE_GLUES 1)
 endif()
 
 
@@ -35,9 +39,9 @@ endif()
 
 list(APPEND SOURCES    
     GLSceneGraph.cpp
+    GLAxis.cpp
     GLObject.cpp
     GLLight.cpp
-    GLAxis.cpp
     GLCube.cpp
     GLGrid.cpp
     GLDynamicGrid.cpp

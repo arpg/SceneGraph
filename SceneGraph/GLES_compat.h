@@ -3,6 +3,10 @@
 #include <pangolin/gl_es_compat.h>
 #include <Eigen/Eigen>
 
+#ifdef HAVE_GLUES
+#include <glues/glues.h>
+#endif
+
 #define GL_ENABLE_BIT 0
 #define GL_LUMINANCE8 GL_LUMINANCE
 
