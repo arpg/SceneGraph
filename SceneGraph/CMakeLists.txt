@@ -12,12 +12,10 @@ include(export_package)
 # Find required dependencies
 
 find_package( Eigen3 REQUIRED )
-find_package(MINIGLOG)
 
 # Basic includes / libraries
 list(APPEND LIB_INC_DIR "${CMAKE_CURRENT_BINARY_DIR}/..;${CMAKE_CURRENT_SOURCE_DIR}/..")
-list(APPEND USER_INC ${EIGEN3_INCLUDE_DIR} ${MINIGLOG_INCLUDE_DIRS})
-list(APPEND LINK_LIBS ${MINIGLOG_LIBRARIES})
+list(APPEND USER_INC ${EIGEN3_INCLUDE_DIR})
 
 if(NOT _ANDROID_)
     find_package( OpenGL REQUIRED )
