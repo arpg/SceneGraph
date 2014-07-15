@@ -10,6 +10,7 @@
 
 /// Configured libraries
 #cmakedefine HAVE_GLES
+#cmakedefine HAVE_GLUES
 #cmakedefine HAVE_PANGOLIN
 #cmakedefine HAVE_ASSIMP
 #cmakedefine HAVE_DEVIL
