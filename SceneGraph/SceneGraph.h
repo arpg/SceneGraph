@@ -11,6 +11,7 @@
 #include <SceneGraph/GLHelpers.h>
 #include <SceneGraph/GLObject.h>
 #include <SceneGraph/GLSceneGraph.h>
+#include <SceneGraph/GLHeightmap.h>
 #include <SceneGraph/GLGroup.h>
 #include <SceneGraph/GLGrid.h>
 #include <SceneGraph/GLAxis.h>
