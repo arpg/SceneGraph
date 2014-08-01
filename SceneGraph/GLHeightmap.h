@@ -1,18 +1,16 @@
-#ifndef GLHEIGHTMAP_H
-#define GLHEIGHTMAP_H
+#ifndef SCENEGRAPH_GLHEIGHTMAP_H_
+#define SCENEGRAPH_GLHEIGHTMAP_H_
 
 #include "SceneGraph/GLObject.h"
 
 namespace SceneGraph {
-
 /// The SceneGraph heightmap
-class GLHeightmap : public GLObject
-{
+class GLHeightmap : public GLObject {
 public:
 
   GLHeightmap(std::vector<double> x_array, std::vector<double> y_array,
               std::vector<double> z_array,
-              double row_count, double col_count){
+              double row_count, double col_count) {
     X_ = x_array;
     Y_ = y_array;
     Z_ = z_array;
@@ -21,39 +19,39 @@ public:
     render_ = false;
   }
 
-  //////////////////////////////////////////////////////////////////////////////
-  void DrawCanonicalObject(){
-    if(render_){
-      glBegin(GL_TRIANGLES); // Render Polygons
+  /////////////////////////////////////////////////////////////////////////////
+  void DrawCanonicalObject() {
+    if (render_) {
+      glBegin(GL_TRIANGLES); //  Render Polygons
     } else {
-      glBegin(GL_LINES); // Render Lines Instead
+      glBegin(GL_LINES); //  Render Lines Instead
     }
     int index = 0;
-    for (int i=0;i<row_count_-1;i++) {
-      // Right now, I can't get the max height, so I color
-      // the mesh lighter as we go down the rows.
+    for (int i = 0; i<row_count_-1; i++) {
+      //  Right now, I can't get the max height, so I color
+      //  the mesh lighter as we go down the rows.
       float color_change = i/row_count_;
-      glColor3f(1,color_change,1);
-      for (int j=0;j<col_count_-1;j++) {
-        // Triangle 1
+      glColor3f(1, color_change, 1);
+      for (int j = 0; j<col_count_-1; j++) {
+        //  Triangle 1
         index = j*row_count_+i;
-        glVertex3f( X_[index], Y_[index], Z_[index] );
+        glVertex3f(X_[index], Y_[index], Z_[index]);
         index = j*row_count_+i+1;
-        glVertex3f( X_[index], Y_[index], Z_[index] );
+        glVertex3f(X_[index], Y_[index], Z_[index]);
         index = (j+1)*row_count_+i+1;
-        glVertex3f( X_[index], Y_[index], Z_[index] );
+        glVertex3f(X_[index], Y_[index], Z_[index]);
 
-        // Triangle 2
+        //  Triangle 2
         index = j*row_count_+i;
-        glVertex3f( X_[index], Y_[index], Z_[index] );
+        glVertex3f(X_[index], Y_[index], Z_[index]);
         index = (j+1)*row_count_+i+1;
-        glVertex3f( X_[index], Y_[index], Z_[index] );
+        glVertex3f(X_[index], Y_[index], Z_[index]);
         index = (j+1)*row_count_+i;
-        glVertex3f( X_[index], Y_[index], Z_[index] );
+        glVertex3f(X_[index], Y_[index], Z_[index]);
       }
     }
     glEnd();
-    // Reset color
+    //  Reset color
     glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
   }
 
@@ -68,4 +66,4 @@ private:
 
 }
 
-#endif // GLHEIGHTMAP_H
+#endif  // SCENEGRAPH_GLHEIGHTMAP_H_
