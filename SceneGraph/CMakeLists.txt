@@ -51,6 +51,7 @@ list(APPEND HEADERS
     GLHelpers.h
     GLSLHelpers.h
     GLSceneGraph.h
+    GLHeightmap.h
     GLObject.h
     GLGroup.h
     GLCylinder.h
