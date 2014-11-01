@@ -6,6 +6,7 @@
 #ifdef __clang__
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-parameter"
+#pragma clang diagnostic ignored "-Wc++11-narrowing"
 #endif
 
 #include <boost/gil/gil_all.hpp>
