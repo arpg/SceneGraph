@@ -1,4 +1,4 @@
-cmake_minimum_required( VERSION 3.0 )
+cmake_minimum_required( VERSION 2.8 )
 project( SceneGraph )
 set(VERSION_MAJOR 0)
 set(VERSION_MINOR 1)
