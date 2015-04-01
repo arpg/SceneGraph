@@ -35,7 +35,7 @@ endif()
 ################################################################################
 # Specify source files
 
-list(APPEND SOURCES    
+list(APPEND SOURCES
     GLSceneGraph.cpp
     GLAxis.cpp
     GLObject.cpp
@@ -70,7 +70,6 @@ list(APPEND HEADERS
     GLAxisHistory.h
     GLOpenBox.h
     GLHelpersLoadTextures.h
-    GLHelpersBoost.h
     GLHelpersDevil.h
     GLWireSphere.h
     AxisAlignedBoundingBox.h
@@ -125,7 +124,7 @@ if(IL_FOUND)
   list(APPEND USER_INC "${IL_INCLUDE_DIR};${IL_INCLUDE_DIR}/.." )
   list(APPEND LINK_LIBS "${IL_LIBRARIES};${ILU_LIBRARIES};${ILUT_LIBRARIES}" )
 else()
-  message(STATUS "DevIL not found, but it is only used to load images that boost cannot load")
+  message(STATUS "DevIL not found, but is required to load images.")
 endif()
 
 find_package(PNG QUIET)

@@ -1,7 +1,5 @@
 #pragma once
 
-#include "GLHelpersBoost.h"
-
 #ifdef HAVE_DEVIL
 #include "GLHelpersDevil.h"
 #endif
@@ -38,7 +36,6 @@ inline GLuint LoadGLTextureFromFile(const char* path, size_t length)
     std::string extension;
     extension = filename.substr( filename.rfind( "." ) + 1 );
 
-    glTexId = LoadGLTextureUsingGIL(filename, extension.c_str());
 
 #ifdef HAVE_DEVIL
     if(!glTexId) glTexId = LoadGLTextureFromDevIL(filename);
@@ -52,7 +49,6 @@ inline GLuint LoadGLTextureFromArray(const unsigned char* data, size_t bytes, co
 {
     GLuint glTexId = 0;
 
-    if(!glTexId) glTexId = LoadGLTextureUsingGIL(data,bytes,extensionHint);
 #ifdef HAVE_DEVIL
     if(!glTexId) glTexId = LoadGLTextureFromDevIL(data,bytes,extensionHint);
 #endif
