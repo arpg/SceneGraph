@@ -1,8 +1,6 @@
 #pragma once
 
-#ifdef HAVE_DEVIL
 #include "GLHelpersDevil.h"
-#endif
 
 ////////////////////////////////////////////////////////////////////////////
 // Interface
@@ -37,9 +35,7 @@ inline GLuint LoadGLTextureFromFile(const char* path, size_t length)
     extension = filename.substr( filename.rfind( "." ) + 1 );
 
 
-#ifdef HAVE_DEVIL
-    if(!glTexId) glTexId = LoadGLTextureFromDevIL(filename);
-#endif // HAVE_DEVIL
+    glTexId = LoadGLTextureFromDevIL(filename);
 
     return glTexId;
 }
@@ -49,9 +45,7 @@ inline GLuint LoadGLTextureFromArray(const unsigned char* data, size_t bytes, co
 {
     GLuint glTexId = 0;
 
-#ifdef HAVE_DEVIL
-    if(!glTexId) glTexId = LoadGLTextureFromDevIL(data,bytes,extensionHint);
-#endif
+    glTexId = LoadGLTextureFromDevIL(data,bytes,extensionHint);
 
     return glTexId;
 }
