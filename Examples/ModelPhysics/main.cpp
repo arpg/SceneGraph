@@ -1,5 +1,5 @@
 #include <iostream>
-#include <boost/bind.hpp>
+#include <functional>
 #include <Eigen/Eigen>
 
 #include <pangolin/pangolin.h>

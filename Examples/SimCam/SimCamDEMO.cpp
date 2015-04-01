@@ -2,7 +2,7 @@
 #include <pangolin/pangolin.h>
 #include <SceneGraph/SceneGraph.h>
 #include <SceneGraph/SimCam.h>
-#include <boost/bind.hpp>
+#include <functional>
 #include <Mvlpp/Mvl.h>
 
 #include "CVarHelpers.h"
@@ -208,20 +208,20 @@ int main(
     glBaseView.AddDisplay( glRightImg );
 
     // register key callbacks
-    pango::RegisterKeyPressCallback( 'e', boost::bind( _MoveCamera, 0, 0.01 ) );
-    pango::RegisterKeyPressCallback( 'q', boost::bind( _MoveCamera, 0, -0.01 ) );
-    pango::RegisterKeyPressCallback( 'a', boost::bind( _MoveCamera, 1, -0.01 ) );
-    pango::RegisterKeyPressCallback( 'd', boost::bind( _MoveCamera, 1, 0.01 ) );
-    pango::RegisterKeyPressCallback( 'w', boost::bind( _MoveCamera, 2, -0.01 ) );
-    pango::RegisterKeyPressCallback( 's', boost::bind( _MoveCamera, 2, 0.01 ) );
-    pango::RegisterKeyPressCallback( 'u', boost::bind( _MoveCamera, 3, -0.005 ) );
-    pango::RegisterKeyPressCallback( 'o', boost::bind( _MoveCamera, 3, 0.005 ) );
-    pango::RegisterKeyPressCallback( 'i', boost::bind( _MoveCamera, 4, 0.005 ) );
-    pango::RegisterKeyPressCallback( 'k', boost::bind( _MoveCamera, 4, -0.005 ) );
-    pango::RegisterKeyPressCallback( 'j', boost::bind( _MoveCamera, 5, -0.005 ) );
-    pango::RegisterKeyPressCallback( 'l', boost::bind( _MoveCamera, 5, 0.005 ) );
-    pango::RegisterKeyPressCallback( ' ', boost::bind( _StopCamera ) );
-    pango::RegisterKeyPressCallback( pango::PANGO_CTRL + 'r', boost::bind( _ResetCamera ) );
+    pango::RegisterKeyPressCallback( 'e', std::bind( _MoveCamera, 0, 0.01 ) );
+    pango::RegisterKeyPressCallback( 'q', std::bind( _MoveCamera, 0, -0.01 ) );
+    pango::RegisterKeyPressCallback( 'a', std::bind( _MoveCamera, 1, -0.01 ) );
+    pango::RegisterKeyPressCallback( 'd', std::bind( _MoveCamera, 1, 0.01 ) );
+    pango::RegisterKeyPressCallback( 'w', std::bind( _MoveCamera, 2, -0.01 ) );
+    pango::RegisterKeyPressCallback( 's', std::bind( _MoveCamera, 2, 0.01 ) );
+    pango::RegisterKeyPressCallback( 'u', std::bind( _MoveCamera, 3, -0.005 ) );
+    pango::RegisterKeyPressCallback( 'o', std::bind( _MoveCamera, 3, 0.005 ) );
+    pango::RegisterKeyPressCallback( 'i', std::bind( _MoveCamera, 4, 0.005 ) );
+    pango::RegisterKeyPressCallback( 'k', std::bind( _MoveCamera, 4, -0.005 ) );
+    pango::RegisterKeyPressCallback( 'j', std::bind( _MoveCamera, 5, -0.005 ) );
+    pango::RegisterKeyPressCallback( 'l', std::bind( _MoveCamera, 5, 0.005 ) );
+    pango::RegisterKeyPressCallback( ' ', std::bind( _StopCamera ) );
+    pango::RegisterKeyPressCallback( pango::PANGO_CTRL + 'r', std::bind( _ResetCamera ) );
 
     // temporal buffer to capture images
     char* pBuffImg   = (char*)malloc( g_nImgWidth * g_nImgHeight );

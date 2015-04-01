@@ -1,7 +1,6 @@
 #ifndef PHYSICSCLASS_H
 #define PHYSICSCLASS_H
 
-#include <boost/shared_ptr.hpp>
 #include <bullet/btBulletDynamicsCommon.h>
 #include <RPG/ModelGraph/Models.h>
 #include <RPG/ModelGraph/SE3.h>
@@ -133,9 +132,9 @@ class NodeMotionState : public btMotionState {
         Eigen::Matrix4d m_WorldPose;
 };
 
-typedef  boost::shared_ptr<btCollisionShape>            CollisionShapePtr;
-typedef  boost::shared_ptr<btRigidBody>                 RigidBodyPtr;
-typedef  boost::shared_ptr<NodeMotionState>             NodeMotionStatePtr;
+typedef  std::shared_ptr<btCollisionShape>            CollisionShapePtr;
+typedef  std::shared_ptr<btRigidBody>                 RigidBodyPtr;
+typedef  std::shared_ptr<NodeMotionState>             NodeMotionStatePtr;
 
 class DebugDraw : public btIDebugDraw
 {
@@ -337,16 +336,16 @@ class Phys
 
             btCollisionDispatcher* ptr = new btCollisionDispatcher(&m_CollisionConfiguration);
 
-            m_pDispatcher = boost::shared_ptr<btCollisionDispatcher>(ptr);
+            m_pDispatcher = std::shared_ptr<btCollisionDispatcher>(ptr);
 
             // Build the broadphase (approximate collision detection)
             m_pBroadphase
-                = boost::shared_ptr<btDbvtBroadphase>( new btDbvtBroadphase );
+                = std::shared_ptr<btDbvtBroadphase>( new btDbvtBroadphase );
             m_pSolver
-                = boost::shared_ptr<btSequentialImpulseConstraintSolver>( new btSequentialImpulseConstraintSolver );
+                = std::shared_ptr<btSequentialImpulseConstraintSolver>( new btSequentialImpulseConstraintSolver );
 
             /// the main machine
-            m_pDynamicsWorld = boost::shared_ptr<btDiscreteDynamicsWorld>(new btDiscreteDynamicsWorld(
+            m_pDynamicsWorld = std::shared_ptr<btDiscreteDynamicsWorld>(new btDiscreteDynamicsWorld(
                         m_pDispatcher.get(),
                         m_pBroadphase.get(),
                         m_pSolver.get(),
@@ -360,18 +359,18 @@ class Phys
         }
 
         ///////////////////////////////////////////////////////////////////
-        boost::shared_ptr<Entity> GetParentEntity( Entity &e )
+        std::shared_ptr<Entity> GetParentEntity( Entity &e )
         {
             if (e.GetParentName()) {
                 return m_mEntities[e.GetParentName()];
             }
-            return boost::shared_ptr<Entity>();
+            return std::shared_ptr<Entity>();
         }
 
         ///////////////////////////////////////////////////////////////////
         Eigen::Matrix4d GetRelativePose( Entity &rChild)
         {
-            boost::shared_ptr<Entity> pParent = GetParentEntity(rChild);
+            std::shared_ptr<Entity> pParent = GetParentEntity(rChild);
             if (pParent) {
                 Eigen::Matrix4d& Twp = pParent->m_pMotionState->m_WorldPose;
                 Eigen::Matrix4d& Twc = rChild.m_pMotionState->m_WorldPose;
@@ -416,7 +415,7 @@ class Phys
                     m_pDynamicsWorld->addRigidBody( pBulletBody.get() );
 
                     // save this object somewhere (to keep it's reference count above 0)
-                    boost::shared_ptr<Entity> pEntity( new Entity );
+                    std::shared_ptr<Entity> pEntity( new Entity );
                     pEntity->m_sName = sName;
                     pEntity->m_pRigidBody.swap(pBulletBody);
                     pEntity->m_pShape.swap(pBulletShape);
@@ -449,7 +448,7 @@ class Phys
                     m_pDynamicsWorld->addRigidBody( pBulletBody.get() );
 
                     // save this object somewhere (to keep it's reference count above 0)
-                    boost::shared_ptr<Entity> pEntity( new Entity );
+                    std::shared_ptr<Entity> pEntity( new Entity );
                     pEntity->m_sName = sName;
                     pEntity->m_pRigidBody.swap(pBulletBody);
                     pEntity->m_pShape.swap(pBulletShape);
@@ -463,10 +462,10 @@ class Phys
                 std::cout<<"Associating physics with a Hinge Joint!"<<std::endl;
                 HingeJoint* pHJ = (HingeJoint*) pItem;
 
-                boost::shared_ptr<Entity> pParent = m_mEntities[pHJ->m_pParentBody->GetName()];
+                std::shared_ptr<Entity> pParent = m_mEntities[pHJ->m_pParentBody->GetName()];
                 btRigidBody* pBodyA =  pParent->m_pRigidBody.get(); //localCreateRigidBody( 1.0f, tr, shape);
 
-                boost::shared_ptr<Entity> pChild = m_mEntities[pHJ->m_pChildBody->GetName()];
+                std::shared_ptr<Entity> pChild = m_mEntities[pHJ->m_pChildBody->GetName()];
                 btRigidBody* pBodyB = pChild->m_pRigidBody.get();
 
 
@@ -516,10 +515,10 @@ class Phys
                 std::cout<<"Associating physics with a Hinge2Joint!"<<std::endl;
                 Hinge2Joint* pH2J = (Hinge2Joint*) pItem;
 
-                boost::shared_ptr<Entity> pParent = m_mEntities[pH2J->m_pParentBody->GetName()];
+                std::shared_ptr<Entity> pParent = m_mEntities[pH2J->m_pParentBody->GetName()];
                 btRigidBody* pBodyA =  pParent->m_pRigidBody.get(); //localCreateRigidBody( 1.0f, tr, shape);
 
-                boost::shared_ptr<Entity> pChild = m_mEntities[pH2J->m_pChildBody->GetName()];
+                std::shared_ptr<Entity> pChild = m_mEntities[pH2J->m_pChildBody->GetName()];
                 btRigidBody* pBodyB = pChild->m_pRigidBody.get();
 
 
@@ -548,10 +547,10 @@ class Phys
                 std::cout<<"Associating physics with a Point2Point Joint!"<<std::endl;
                 Point2Point* pP2P = (Point2Point*) pItem;
 
-                boost::shared_ptr<Entity> pParent = m_mEntities[pP2P->m_pParentBody->GetName()];
+                std::shared_ptr<Entity> pParent = m_mEntities[pP2P->m_pParentBody->GetName()];
                 btRigidBody* pBodyA =  pParent->m_pRigidBody.get(); //localCreateRigidBody( 1.0f, tr, shape);
 
-                boost::shared_ptr<Entity> pChild = m_mEntities[pP2P->m_pChildBody->GetName()];
+                std::shared_ptr<Entity> pChild = m_mEntities[pP2P->m_pChildBody->GetName()];
                 btRigidBody* pBodyB = pChild->m_pRigidBody.get();
 
 
@@ -595,10 +594,10 @@ class Phys
                 std::cout<<"Associating physics with a Slider Joint!"<<std::endl;
                 SliderJoint* pSlider = (SliderJoint*) pItem;
 
-                boost::shared_ptr<Entity> pParent = m_mEntities[pSlider->m_pParentBody->GetName()];
+                std::shared_ptr<Entity> pParent = m_mEntities[pSlider->m_pParentBody->GetName()];
                 btRigidBody* pBodyA =  pParent->m_pRigidBody.get(); //localCreateRigidBody( 1.0f, tr, shape);
 
-                boost::shared_ptr<Entity> pChild = m_mEntities[pSlider->m_pChildBody->GetName()];
+                std::shared_ptr<Entity> pChild = m_mEntities[pSlider->m_pChildBody->GetName()];
                 btRigidBody* pBodyB = pChild->m_pRigidBody.get();
 
 
@@ -626,10 +625,10 @@ class Phys
                 std::cout<<"Associating physics with a Generic Joint!"<<std::endl;
                 GenericJoint* pGeneric = (GenericJoint*) pItem;
 
-                boost::shared_ptr<Entity> pParent = m_mEntities[pGeneric->m_pParentBody->GetName()];
+                std::shared_ptr<Entity> pParent = m_mEntities[pGeneric->m_pParentBody->GetName()];
                 btRigidBody* pBodyA =  pParent->m_pRigidBody.get(); //localCreateRigidBody( 1.0f, tr, shape);
 
-                boost::shared_ptr<Entity> pChild = m_mEntities[pGeneric->m_pChildBody->GetName()];
+                std::shared_ptr<Entity> pChild = m_mEntities[pGeneric->m_pChildBody->GetName()];
                 btRigidBody* pBodyB = pChild->m_pRigidBody.get();
 
 
@@ -652,10 +651,10 @@ class Phys
                 std::cout<<"Associating physics with a ConeTwist Joint!"<<std::endl;
                 ConeTwist* pConeTwist = (ConeTwist*) pItem;
 
-                boost::shared_ptr<Entity> pParent = m_mEntities[pConeTwist->m_pParentBody->GetName()];
+                std::shared_ptr<Entity> pParent = m_mEntities[pConeTwist->m_pParentBody->GetName()];
                 btRigidBody* pBodyA =  pParent->m_pRigidBody.get(); //localCreateRigidBody( 1.0f, tr, shape);
 
-                boost::shared_ptr<Entity> pChild = m_mEntities[pConeTwist->m_pChildBody->GetName()];
+                std::shared_ptr<Entity> pChild = m_mEntities[pConeTwist->m_pChildBody->GetName()];
                 btRigidBody* pBodyB = pChild->m_pRigidBody.get();
 
 
@@ -690,9 +689,9 @@ class Phys
             m_pDynamicsWorld->stepSimulation( m_dTimeStep,  m_nMaxSubSteps );
             // go through entities and set the node relative poses
 
-//            std::map<std::string, boost::shared_ptr<Entity> >::iterator it;
+//            std::map<std::string, std::shared_ptr<Entity> >::iterator it;
 //            for(it=m_mEntities.begin(); it != m_mEntities.end(); it++) {
-//                boost::shared_ptr<Entity> p = it->second;
+//                std::shared_ptr<Entity> p = it->second;
 //                p->m_pMotionState->object.SetPose( GetRelativePose(*p) );
 //            }
         }
@@ -701,16 +700,16 @@ class Phys
            return  *m_mEntities.find(name)->second;
         }
 
-        std::map<string,boost::shared_ptr<Entity> > m_mEntities;
+        std::map<string,std::shared_ptr<Entity> > m_mEntities;
 
     private:
 
             ///////////////////////////////////////////////////////////////////
         btDefaultCollisionConfiguration                        m_CollisionConfiguration;
-        boost::shared_ptr<btCollisionDispatcher>               m_pDispatcher;
-        boost::shared_ptr<btDbvtBroadphase>                    m_pBroadphase;
-        boost::shared_ptr<btSequentialImpulseConstraintSolver> m_pSolver;
-        boost::shared_ptr<btDiscreteDynamicsWorld>             m_pDynamicsWorld;
+        std::shared_ptr<btCollisionDispatcher>               m_pDispatcher;
+        std::shared_ptr<btDbvtBroadphase>                    m_pBroadphase;
+        std::shared_ptr<btSequentialImpulseConstraintSolver> m_pSolver;
+        std::shared_ptr<btDiscreteDynamicsWorld>             m_pDynamicsWorld;
         double                                                 m_dTimeStep;
         double                                                 m_dGravity;
         int                                                    m_nMaxSubSteps;

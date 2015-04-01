@@ -8,6 +8,7 @@
 namespace Eigen
 {
     typedef Matrix<double,5,1> Vector5d;
+    typedef Matrix<double,6,1> Vector6d;
 }
 
 ////////////////////////////////////////////////////////////////////////////

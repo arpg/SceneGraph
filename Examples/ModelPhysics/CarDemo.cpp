@@ -1,13 +1,12 @@
 #include <iostream>
-#include <boost/bind.hpp>
+#include <functional>
 #include <Eigen/Eigen>
-
-#include <pangolin/pangolin.h>
-#include <SceneGraph/SceneGraph.h>
 
 
 #include "CVarHelpers.h"
+#include <SceneGraph/SceneGraph.h>
 #include <CVars/CVar.h>
+#include <pangolin/pangolin.h>
 #include "BulletWrapper.h"
 
 using namespace std;
@@ -165,7 +164,7 @@ int main( int /*argc*/, char** /*argv*/ )
 
     // register a keyboard hook to trigger the reset method
     pangolin::RegisterKeyPressCallback( pangolin::PANGO_CTRL + 'r', 
-            boost::bind( &App::InitReset, &app ) );
+            std::bind( &App::InitReset, &app ) );
 
     // </Pangolin boilerplate>
 

@@ -1,6 +1,4 @@
 #include <iostream>
-#include <boost/bind.hpp>
-#include <boost/shared_ptr.hpp>               // for reference counting pointers
 #include <Eigen/Eigen>                        // for vector maths
 #include <pangolin/pangolin.h>                // for open GL state management
 #include <SceneGraph/SceneGraph.h>            // for open GL scene graph
@@ -15,7 +13,6 @@ using namespace std;
 using namespace CVarUtils;
 using namespace pangolin;
 using namespace SceneGraph;
-using namespace boost;
 
 #define USAGE    \
 "USAGE: Robot -n <name> -d <media directory>\n"\
@@ -369,7 +366,7 @@ int main( int argc, char** argv )
 
     // register a keyboard hook to trigger the reset method
     pangolin::RegisterKeyPressCallback( pangolin::PANGO_CTRL + 'r',
-            boost::bind( &App::InitReset, &app ) );
+            std::bind( &App::InitReset, &app ) );
 
     // simple asdw control
 //    RegisterKeyPressCallback( 'a', bind( &Robot::LeftKey, &app ) );
