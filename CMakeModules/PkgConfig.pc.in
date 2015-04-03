@@ -1,0 +1,11 @@
+prefix=@CMAKE_INSTALL_PREFIX@
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: lib@PACKAGE_LIBRARY@
+Description: @PACKAGE_DESCRIPTION@
+Version: @PACKAGE_VERSION@
+Cflags: -I@PACKAGE_CFLAGS@
+Libs: -L${libdir} @PACKAGE_PRIVATE_LIBS@ -l@PACKAGE_LIBRARY@ 
+

@@ -1,6 +1,6 @@
-#include "GLMesh.h"
+#include <SceneGraph/GLMesh.h>
 
-#include "GLHelpersLoadTextures.h"
+#include <SceneGraph/GLHelpersLoadTextures.h>
 
 #include <assimp/cimport.h>
 #include <assimp/postprocess.h>

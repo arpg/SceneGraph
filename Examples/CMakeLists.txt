@@ -13,13 +13,4 @@ if(NOT _ANDROID_)
       ADD_SUBDIRECTORY(OffscreenRender)
     ENDIF()
 
-    FIND_PACKAGE( MVL QUIET )
-    IF( MVL_FOUND )
-      ADD_SUBDIRECTORY(SimCam)
-    ENDIF()
-
-    FIND_PACKAGE( ModelGraph QUIET )
-    IF( ModelGraph_FOUND )
-        ADD_SUBDIRECTORY(ConstraintDemo)
-    ENDIF()
 endif()

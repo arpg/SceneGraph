@@ -1,4 +1,4 @@
-#include "SimCam.h"
+#include <SceneGraph/SimCam.h>
 
 using namespace SceneGraph;
 

@@ -5,7 +5,7 @@
 
 #include <pangolin/pangolin.h>
 #include <SceneGraph/SceneGraph.h>
-#include "Widgets/GLWidgetView.h"
+#include <SceneGraph/Widgets/GLWidgetView.h>
 
 #define WINDOW_HEIGHT 480.0f
 #define WINDOW_WIDTH 640.0f
