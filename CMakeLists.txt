@@ -1,11 +1,16 @@
-project( scenegraph )
+project( SceneGraph )
 cmake_minimum_required(VERSION 2.8)
 set(VERSION_MAJOR 0)
 set(VERSION_MINOR 1)
 set(VERSION ${VERSION_MAJOR}.${VERSION_MINOR})
 
 # Add to module path, so we can find our cmake modules
-list( APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules )
+
+
+list( APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules )
+
+message( STATUS "CMAKE_ROOT ${CMAKE_ROOT}")
+message( STATUS "CMAKE_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX}")
 
 include( install_library )
 
@@ -62,7 +67,7 @@ endif()
 ################################################################################
 # Specify source files
 
-set(SCENEGRAPH_SRCS
+set( SCENEGRAPH_SRCS
     src/GLSceneGraph.cpp
     src/GLAxis.cpp
     src/GLObject.cpp
@@ -182,7 +187,7 @@ else()
 endif()
 
 # Find Pangolin (https://github.com/stevenlovegrove/Pangolin)
-find_package(Pangolin 0.1 REQUIRED)
+find_package(Pangolin CONFIG REQUIRED)
 if(Pangolin_FOUND)
   set(HAVE_PANGOLIN 1)
   list(APPEND REQUIRED_INCLUDE_DIRS ${Pangolin_INCLUDE_DIRS})
