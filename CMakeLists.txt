@@ -12,7 +12,7 @@ list( APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules )
 message( STATUS "CMAKE_ROOT ${CMAKE_ROOT}")
 message( STATUS "CMAKE_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX}")
 
-include( install_library )
+include( install_package )
 
 ################################################################################
 
@@ -202,15 +202,16 @@ include_directories( ${CMAKE_SOURCE_DIR}/include ${CMAKE_BINARY_DIR} )
 add_library( scenegraph ${SCENEGRAPH_SRCS} )
 target_link_libraries( scenegraph ${REQUIRED_LIBRARIES} )
 
-install_library(
-  LIBRARY ${LIBRARY_NAME}
+install_package(
+  PKG_NAME SceneGraph
+  LIB_NAME scenegraph
   VERSION ${VERSION}
   DESCRIPTION "Allows for the viewing of SceneGraphs"
-  HEADERS ${SCENEGRAPH_HDRS}
-  HEADER_DESTINATION ${CMAKE_INSTALL_PREFIX}/include/SceneGraph
+  INSTALL_INCLUDE_DIR true
+  INSTALL_HEADER_DIRS ${CMAKE_CURRENT_BINARY_DIR}/include/SceneGraph
+  DESTINATION ${CMAKE_INSTALL_PREFIX}
   INCLUDE_DIRS ${REQUIRED_INCLUDE_DIRS}
-  LIB_DEPENDS ${REQUIRED_LIBRARIES}
-  LINK_DIRS /usr/local/lib
+  LINK_LIBS ${REQUIRED_LIBRARIES}
   )
 
 ## Generate symbol export helper header on MSVC
