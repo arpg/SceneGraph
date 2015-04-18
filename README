@@ -5,12 +5,10 @@ funciton.
 
 Presently, SceneGraph is used with Pangolin.
 
-
 Dependencies:
-CVARS (svn co https://glconsole.svn.sourceforge.net/svnroot/glconsole glconsole)
+CVars (https://github.com/arpg/CVars)
 OpenGL
 ASSIMP
 Eigen3
-ZeroMQ
-Pangolin
+Pangolin (https://github.com/arpg/Pangolin)
 
