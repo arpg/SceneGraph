@@ -9,9 +9,6 @@ set(VERSION ${VERSION_MAJOR}.${VERSION_MINOR})
 
 list( APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules )
 
-message( STATUS "CMAKE_ROOT ${CMAKE_ROOT}")
-message( STATUS "CMAKE_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX}")
-
 include( install_package )
 
 ################################################################################
