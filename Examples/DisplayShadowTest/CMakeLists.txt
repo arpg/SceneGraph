@@ -3,9 +3,11 @@ find_package(Pangolin 0.1 REQUIRED)
 include_directories(${Pangolin_INCLUDE_DIRS})
 
 # Find Scenegraph
-find_package(SceneGraph 0.1 REQUIRED)
-include_directories(${SceneGraph_INCLUDE_DIRS})
+include_directories(${CMAKE_BINARY_DIR}/Examples/DisplayShadowTest ${SCENEGRAPH_INCLUDE_DIRS})
+
+# Set GCC style compiler flags
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 add_executable(DisplayShadowTest main.cpp)
 target_link_libraries(DisplayShadowTest ${Pangolin_LIBRARIES})
-target_link_libraries(DisplayShadowTest ${SceneGraph_LIBRARIES})
+target_link_libraries(DisplayShadowTest ${SCENEGRAPH_LIBRARIES})

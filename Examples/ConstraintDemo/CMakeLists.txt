@@ -4,10 +4,9 @@ INCLUDE_DIRECTORIES(${Pangolin_INCLUDE_DIRS})
 LINK_DIRECTORIES(${Pangolin_LIBRARY_DIRS})
 LINK_LIBRARIES(${Pangolin_LIBRARIES})
 
-# Find Scenegraph
-FIND_PACKAGE(SceneGraph REQUIRED)
-INCLUDE_DIRECTORIES(${SceneGraph_INCLUDE_DIRS})
-LINK_LIBRARIES(${SceneGraph_LIBRARIES})
+# include SceneGraph dirs
+INCLUDE_DIRECTORIES(${SCENEGRAPH_INCLUDE_DIRS})
+LINK_LIBRARIES(${SCENEGRAPH_LIBRARIES})
 
 find_package(ModelGraph REQUIRED)
 include_directories(${RPG_INCLUDE_DIRS})
@@ -21,5 +20,5 @@ ADD_EXECUTABLE(ContsraintDemo main.cpp)
 
 # In your own code, you can ommit these lines
 IF( ${SCENEGRAPH_EXAMPLE} )
-  add_dependencies(ContsraintDemo SceneGraph)
+  add_dependencies(ContsraintDemo scenegraph)
 ENDIF()

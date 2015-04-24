@@ -7,6 +7,14 @@
 namespace SceneGraph
 {
 
+typedef Eigen::Matrix<double, 6, 1> Vector6d;
+
+typedef std::vector<Vector6d, Eigen::aligned_allocator<Vector6d> >
+Vector6dAlignedVec;
+
+typedef std::vector<Eigen::Vector3d, Eigen::aligned_allocator<Eigen::Vector3d> >
+Vector3dAlignedVec;
+
 template<typename GlBufferType = pangolin::GlSizeableBuffer>
 class GLPrimitives
   : public GLObject
@@ -59,6 +67,22 @@ public:
         temp = p.cast<double>();
         GLObject::m_aabb.Insert(temp);
         m_vbo.Add( p );
+    }
+
+    void AddVerticesFromTrajectory(const Vector6dAlignedVec& vPts) {
+      m_vbo.Clear();
+      for (size_t i = 0; i < vPts.size(); ++i ) {
+        AddVertex(vPts[i][0], vPts[i][1], vPts[i][2]);
+      }
+    }
+
+    void AddVerticesFromTrajectory(const Vector3dAlignedVec& vPts) {
+      m_vbo.Clear();
+      for (size_t i = 0; i < vPts.size(); ++i ) {
+        Eigen::Vector3f vPt;
+        vPt << vPts[i][0], vPts[i][1], vPts[i][2];
+        AddVertex(vPt);
+      }
     }
 
     void Clear()

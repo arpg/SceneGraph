@@ -8,7 +8,7 @@
 // Copyright (c) NVIDIA Corporation. All rights reserved.
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "nvGLWidgets.h"
+#include <SceneGraph/Widgets/nvGLWidgets.h>
 
 #include <algorithm>
 #include <math.h> // sqrtf
@@ -24,7 +24,7 @@
 #endif
 
 #define NV_REPORT_COMPILE_ERRORS
-#include "nvShaderUtils.h"
+#include <SceneGraph/Widgets/nvShaderUtils.h>
 
 
 using namespace nv;

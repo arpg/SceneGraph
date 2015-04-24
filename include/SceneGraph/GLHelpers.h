@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
-#include <SceneGraph/config.h>
+#include "SceneGraph/SceneGraphConfig.h"
 #include <SceneGraph/GLinclude.h>
 #undef Success
 #include <Eigen/Core>

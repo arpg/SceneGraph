@@ -51,9 +51,9 @@ class SceneGraphMotionState : public btMotionState {
         SceneGraph::GLObject& object;
 };
 
-typedef  boost::shared_ptr<btCollisionShape>            CollisionShapePtr;
-typedef  boost::shared_ptr<SceneGraphMotionState>       MotionStatePtr;
-typedef  boost::shared_ptr<btRigidBody>                 RigidBodyPtr;
+typedef  std::shared_ptr<btCollisionShape>            CollisionShapePtr;
+typedef  std::shared_ptr<SceneGraphMotionState>       MotionStatePtr;
+typedef  std::shared_ptr<btRigidBody>                 RigidBodyPtr;
 
 class Entity
 {
@@ -116,15 +116,15 @@ class Sim
 
             // Physics stuff see http://bulletphysics.org/mediawiki-1.5.8/index.php/Hello_World
             m_pDispatcher 
-                = boost::shared_ptr<btCollisionDispatcher>( new btCollisionDispatcher(&m_CollisionConfiguration) );
+                = std::shared_ptr<btCollisionDispatcher>( new btCollisionDispatcher(&m_CollisionConfiguration) );
             // Build the broadphase (approximate collision detection)
             m_pBroadphase 
-                = boost::shared_ptr<btDbvtBroadphase>( new btDbvtBroadphase );
+                = std::shared_ptr<btDbvtBroadphase>( new btDbvtBroadphase );
             m_pSolver
-                = boost::shared_ptr<btSequentialImpulseConstraintSolver>( new btSequentialImpulseConstraintSolver );
+                = std::shared_ptr<btSequentialImpulseConstraintSolver>( new btSequentialImpulseConstraintSolver );
 
             /// the main machine
-            m_pDynamicsWorld = boost::shared_ptr<btDiscreteDynamicsWorld>(new btDiscreteDynamicsWorld(
+            m_pDynamicsWorld = std::shared_ptr<btDiscreteDynamicsWorld>(new btDiscreteDynamicsWorld(
                         m_pDispatcher.get(),
                         m_pBroadphase.get(),
                         m_pSolver.get(),
@@ -264,7 +264,7 @@ class Sim
             m_pDynamicsWorld->addRigidBody( body.get() );
 
             // save this object somewhere (to keep it's reference count above 0)
-            boost::shared_ptr<Entity> pEntity( new Entity );
+            std::shared_ptr<Entity> pEntity( new Entity );
             pEntity->m_pRigidBody = body;
             pEntity->m_pShape = pShape;
             pEntity->m_pMotionState = pMotionState;
@@ -379,7 +379,7 @@ class Sim
             m_pDynamicsWorld->addRigidBody( body.get() );
 
             // save this object somewhere (to keep it's reference count above 0)
-            boost::shared_ptr<Entity> pEntity( new Entity );
+            std::shared_ptr<Entity> pEntity( new Entity );
             pEntity->m_pRigidBody = body;
             pEntity->m_pShape = pShape;
             pEntity->m_pMotionState = pMotionState;
@@ -422,7 +422,7 @@ class Sim
             m_pDynamicsWorld->addRigidBody( body.get() );
 
             // save this object somewhere (to keep it's reference count above 0)
-            boost::shared_ptr<Entity> pEntity( new Entity ); 
+            std::shared_ptr<Entity> pEntity( new Entity ); 
             pEntity->m_pRigidBody = body;
             pEntity->m_pShape = pShape;
             pEntity->m_pMotionState = pMotionState;
@@ -442,7 +442,7 @@ class Sim
            return  *m_mEntities.find(name)->second;
         }
 
-        std::map<string,boost::shared_ptr<Entity> > m_mEntities;
+        std::map<string,std::shared_ptr<Entity> > m_mEntities;
 
     private:
 
@@ -478,10 +478,10 @@ class Sim
 
         ///////////////////////////////////////////////////////////////////
         btDefaultCollisionConfiguration                        m_CollisionConfiguration;
-        boost::shared_ptr<btCollisionDispatcher>               m_pDispatcher;
-        boost::shared_ptr<btDbvtBroadphase>                    m_pBroadphase;
-        boost::shared_ptr<btSequentialImpulseConstraintSolver> m_pSolver;
-        boost::shared_ptr<btDiscreteDynamicsWorld>             m_pDynamicsWorld;
+        std::shared_ptr<btCollisionDispatcher>               m_pDispatcher;
+        std::shared_ptr<btDbvtBroadphase>                    m_pBroadphase;
+        std::shared_ptr<btSequentialImpulseConstraintSolver> m_pSolver;
+        std::shared_ptr<btDiscreteDynamicsWorld>             m_pDynamicsWorld;
         double                                                 m_dTimeStep;
         double                                                 m_dGravity;
         int                                                    m_nMaxSubSteps;

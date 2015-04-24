@@ -12,7 +12,7 @@
 // Copyright (c) NVIDIA Corporation. All rights reserved.
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#include "nvGlutWidgets.h"
+#include <SceneGraph/Widgets/nvGlutWidgets.h>
 
 #include <stdlib.h> // exit, needed by GL/glut.h
 #include <GL/glew.h>

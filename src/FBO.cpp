@@ -1,4 +1,4 @@
-#include "FBO.h"
+#include <SceneGraph/FBO.h>
 
 namespace SceneGraph
 {

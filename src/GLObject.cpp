@@ -1,4 +1,4 @@
-#include "GLObject.h"
+#include <SceneGraph/GLObject.h>
 
 namespace SceneGraph
 {

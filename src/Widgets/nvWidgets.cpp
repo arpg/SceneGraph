@@ -8,7 +8,7 @@
 // Copyright (c) NVIDIA Corporation. All rights reserved.
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "nvWidgets.h"
+#include <SceneGraph/Widgets/nvWidgets.h>
 
 #include <time.h> // clock, time_t
 #include <math.h> // fabs

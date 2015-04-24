@@ -1,6 +1,7 @@
 #include <iostream>
-#include <boost/bind.hpp>
+#include <functional>
 #include <Eigen/Eigen>
+#include <unistd.h>
 
 #include <pangolin/pangolin.h>
 #include <SceneGraph/SceneGraph.h>
