@@ -35,8 +35,6 @@ endif()
 
 string( TOLOWER ${PROJECT_NAME} LIBRARY_NAME )
 
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/SceneGraph/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/include/SceneGraph/SceneGraphConfig.h)
-
 ################################################################################
 # Find required dependencies
 
@@ -136,7 +134,7 @@ endif()
 ################################################################################
 # Find optional libraries
 
-find_package( ASSIMP QUIET)
+find_package(ASSIMP QUIET)
 if(ASSIMP_FOUND)
   set(HAVE_ASSIMP 1)
   list(APPEND REQUIRED_INCLUDE_DIRS "${ASSIMP_INCLUDE_DIR}" )
@@ -190,6 +188,8 @@ if(Pangolin_FOUND)
   list(APPEND REQUIRED_INCLUDE_DIRS ${Pangolin_INCLUDE_DIRS})
   list(APPEND REQUIRED_LIBRARIES ${Pangolin_LIBRARIES})
 endif()
+
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/SceneGraph/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/include/SceneGraph/SceneGraphConfig.h)
 
 ################################################################################
 # Include collected includes / libraries
