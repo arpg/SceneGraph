@@ -38,10 +38,17 @@ class GLCylinder : public GLObject {
   static const int TEX_H = 64;
 };
 
-inline GLCylinder::GLCylinder(GLuint texId) {
+inline GLCylinder::GLCylinder(GLuint texId) 
+{
   owns_texture_ = false;
   texture_ID_ = texId;
   draw_caps_ = true;
+  base_radius_ = 1;
+  top_radius_ = 1;
+  height_ = 2;
+  slices_ = 32;
+  stacks_ = 32;
+
   SetCheckerboard();
 }
 

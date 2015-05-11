@@ -1,4 +1,5 @@
 #include <SceneGraph/GLGrid.h>
+#include <SceneGraph/gldraw.h>
 
 namespace SceneGraph {
 GLGrid::GLGrid(int num_lines, float line_spacing, bool perceptable)
@@ -24,10 +25,10 @@ inline void DrawMajorGridLines(
     if (!i) continue;
     float major_pos = i * spacing;
     if (along_x) {
-      pangolin::glDrawLine(max, major_pos, 0.0,
+      SceneGraph::glDrawLine(max, major_pos, 0.0,
                            min, major_pos, 0.0);
     } else {
-      pangolin::glDrawLine(major_pos, max, 0.0,
+      SceneGraph::glDrawLine(major_pos, max, 0.0,
                            major_pos, min, 0.0);
     }
   }
@@ -46,10 +47,10 @@ inline void DrawMinorGridLines(int num_major_neg,
     for (int j = 0; j < num_minor_lines; ++j) {
       minor_pos += minor_spacing;
       if (along_x) {
-        pangolin::glDrawLine(max, minor_pos, 0.0,
+        SceneGraph::glDrawLine(max, minor_pos, 0.0,
                              min, minor_pos, 0.0);
       } else {
-        pangolin::glDrawLine(minor_pos, max, 0.0,
+        SceneGraph::glDrawLine(minor_pos, max, 0.0,
                              minor_pos, min, 0.0);
       }
     }
@@ -64,15 +65,15 @@ void GLGrid::DrawGridZ0(
     float line_spacing,
     GLColor color_plane, GLColor major_color,
     int num_minor_lines, GLColor minor_color) {
-  pangolin::GlState gl;
+
 #ifdef ANDROID
-  gl.glDisable(GL_LINE_SMOOTH);
+  glDisable(GL_LINE_SMOOTH);
 #endif
 
   // Prevent Z-Fighting between plane and lines
   glPolygonOffset(1.0, 1.0);
-  gl.glEnable(GL_POLYGON_OFFSET_FILL);
-  gl.glDisable(GL_CULL_FACE);
+  glEnable(GL_POLYGON_OFFSET_FILL);
+  glDisable(GL_CULL_FACE);
 
   //            glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT);
   GLfloat ambient[4] = {1,1,1,1};
@@ -94,7 +95,7 @@ void GLGrid::DrawGridZ0(
     glRectf(minx, miny, maxx, maxy);
 
     // Don't overwrite this depth when drawing lines:
-    gl.glDepthMask(GL_FALSE);
+    glDepthMask(GL_FALSE);
   }
 
   major_color.Apply();
@@ -110,10 +111,12 @@ void GLGrid::DrawGridZ0(
                      line_spacing, maxx, minx, true);
 
   glColor4ub(255, 0, 0, 128);
-  pangolin::glDrawLine(minx, 0.0, 0.0, maxx , 0.0, 0.0);
+  SceneGraph::glDrawLine(minx, 0.0, 0.0, maxx , 0.0, 0.0);
 
   glColor4ub(0, 255, 0, 128);
-  pangolin::glDrawLine(0.0, miny, 0.0, 0.0, maxy, 0.0);
+  SceneGraph::glDrawLine(0.0, miny, 0.0, 0.0, maxy, 0.0);
+
+  glDepthMask(GL_TRUE);
 }
 
 void GLGrid::DrawCanonicalObject(void) {

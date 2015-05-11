@@ -49,8 +49,8 @@ inline GLuint LoadGLTextureFromDevIL(ILuint ilTexId)
     glTexImage2D(GL_TEXTURE_2D, 0, ilGetInteger(IL_IMAGE_BPP), ilGetInteger(IL_IMAGE_WIDTH), ilGetInteger(IL_IMAGE_HEIGHT),
                  0, ilGetInteger(IL_IMAGE_FORMAT), GL_UNSIGNED_BYTE, ilGetData() );
 //            glGenerateMipmap( GL_TEXTURE_2D );
-    gluBuild2DMipmaps(GL_TEXTURE_2D, 3, ilGetInteger(IL_IMAGE_WIDTH), ilGetInteger(IL_IMAGE_HEIGHT),
-                ilGetInteger(IL_IMAGE_FORMAT), GL_UNSIGNED_BYTE, ilGetData() );
+//    gluBuild2DMipmaps(GL_TEXTURE_2D, 3, ilGetInteger(IL_IMAGE_WIDTH), ilGetInteger(IL_IMAGE_HEIGHT),
+//                ilGetInteger(IL_IMAGE_FORMAT), GL_UNSIGNED_BYTE, ilGetData() );
     return glTexId;
 }
 

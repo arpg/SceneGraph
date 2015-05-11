@@ -1,5 +1,20 @@
-#ifndef SCENEGRAPH_CONFIG_H
-#define SCENEGRAPH_CONFIG_H
+#pragma once
+
+/// Version
+#define SCENEGRAPH_VERSION_MAJOR @SCENEGRAPH_VERSION_MAJOR@
+#define SCENEGRAPH_VERSION_MINOR @SCENEGRAPH_VERSION_MINOR@
+#define SCENEGRAPH_VERSION_STRING "@SCENEGRAPH_VERSION@"
+
+/// Configured libraries
+#cmakedefine HAVE_CUDA
+#cmakedefine HAVE_EIGEN
+#cmakedefine HAVE_APPLE_OPENGL_FRAMEWORK
+#cmakedefine HAVE_GLES
+#cmakedefine HAVE_GLES_2
+
+#cmakedefine HAVE_PNG
+#cmakedefine HAVE_JPEG
+#cmakedefine HAVE_TIFF
 
 /// Platform
 #cmakedefine _UNIX_
@@ -7,15 +22,10 @@
 #cmakedefine _OSX_
 #cmakedefine _LINUX_
 #cmakedefine _ANDROID_
+#cmakedefine _IOS_
 
-/// Configured libraries
-#cmakedefine HAVE_GLES
-#cmakedefine HAVE_GLUES
-#cmakedefine HAVE_PANGOLIN
-#cmakedefine HAVE_ASSIMP
-#cmakedefine HAVE_DEVIL
-#cmakedefine HAVE_PNG
-#cmakedefine HAVE_JPEG
-#cmakedefine HAVE_TIFF
+/// Compiler
+#cmakedefine _GCC_
+#cmakedefine _CLANG_
+#cmakedefine _MSVC_
 
-#endif //SCENEGRAPH_CONFIG_H

@@ -30,10 +30,7 @@ class SCENEGRAPH_EXPORT GLSceneGraph : public GLObject
         void DrawCanonicalObject();
 
         void DrawObjectAndChildren(RenderMode renderMode = eRenderVisible);
-
         static void ApplyPreferredGlSettings();
-
-
 
     private:
         void PreDraw();

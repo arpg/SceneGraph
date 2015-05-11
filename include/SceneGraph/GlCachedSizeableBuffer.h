@@ -1,19 +1,19 @@
 #pragma once
 
 #include <SceneGraph/SceneGraph.h>
-#include <pangolin/gl.h>
+#include <SceneGraph/gl.h>
 
 namespace SceneGraph
 {
 
-/// Public interface mirroring pangolin::GlSizeableBuffer
+/// Public interface mirroring SceneGraph::GlSizeableBuffer
 /// but with cpu cache for delayed batch upload.
 class GlCachedSizeableBuffer
-    : public pangolin::GlSizeableBuffer
+    : public SceneGraph::GlSizeableBuffer
 {
 public:
-    GlCachedSizeableBuffer(pangolin::GlBufferType buffer_type, GLuint initial_num_elements, GLenum datatype, GLuint count_per_element, GLenum gluse = GL_DYNAMIC_DRAW )
-        : pangolin::GlSizeableBuffer(buffer_type, initial_num_elements, datatype, count_per_element, gluse),
+    GlCachedSizeableBuffer(SceneGraph::GlBufferType buffer_type, GLuint initial_num_elements, GLenum datatype, GLuint count_per_element, GLenum gluse = GL_DYNAMIC_DRAW )
+        : SceneGraph::GlSizeableBuffer(buffer_type, initial_num_elements, datatype, count_per_element, gluse),
           m_dirty(false),
           m_num_verts(0),
           m_vs(count_per_element, initial_num_elements)
@@ -25,14 +25,14 @@ public:
     /// Clear cache
     inline void Clear() {
         m_num_verts = 0;
-        pangolin::GlSizeableBuffer::Clear();
+        SceneGraph::GlSizeableBuffer::Clear();
     }
 
     /// Add vertices to cpu cache
     template<typename Derived> inline
     void Add(const Eigen::DenseBase<Derived>& vec)
     {
-        assert(vec.rows() == (int)pangolin::GlSizeableBuffer::count_per_element);
+        assert(vec.rows() == (int)SceneGraph::GlSizeableBuffer::count_per_element);
         CheckResize(m_num_verts + vec.cols() );
         m_vs.block(0,m_num_verts,vec.rows(),vec.cols()) = vec;
         m_num_verts += vec.cols();
@@ -42,7 +42,7 @@ public:
     template<typename Derived>
     void Update(const Eigen::DenseBase<Derived>& vec, size_t position = 0)
     {
-        assert(vec.rows() == pangolin::GlSizeableBuffer::count_per_element);
+        assert(vec.rows() == SceneGraph::GlSizeableBuffer::count_per_element);
         CheckResize(position + vec.cols());
         m_vs.block(0,position, vec.rows(), vec.cols()) = vec;
         m_num_verts = std::max(position+vec.cols(), m_num_verts);        
@@ -53,7 +53,7 @@ public:
     inline void Sync()
     {
         if(m_dirty) {
-            pangolin::GlSizeableBuffer::Update( m_vs.leftCols(m_num_verts) );
+            SceneGraph::GlSizeableBuffer::Update( m_vs.leftCols(m_num_verts) );
             m_dirty = false;
         }        
     }
@@ -62,7 +62,7 @@ public:
     inline void Bind()
     {
         Sync();
-        pangolin::GlSizeableBuffer::Bind();
+        SceneGraph::GlSizeableBuffer::Bind();
     }
     
     size_t start() const
@@ -80,7 +80,7 @@ protected:
     {
         if( num_verts > m_vs.cols()) {
             const size_t new_size = NextSize(num_verts);
-            Eigen::MatrixXf tmp(pangolin::GlSizeableBuffer::count_per_element, new_size);
+            Eigen::MatrixXf tmp(SceneGraph::GlSizeableBuffer::count_per_element, new_size);
             tmp.leftCols(m_num_verts) = m_vs.leftCols(m_num_verts);
             std::swap(m_vs, tmp);
         }

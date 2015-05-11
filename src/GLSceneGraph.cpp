@@ -81,22 +81,20 @@ void GLSceneGraph::DrawCanonicalObject()
 
 void GLSceneGraph::DrawObjectAndChildren(RenderMode renderMode)
 {
-    pangolin::GlState gl;
-    
     glPushMatrix();
     glMultMatrixd(m_T_po.data());
     glScaled(m_dScale[0],m_dScale[1],m_dScale[2]);
 
     if(m_bEnableLighting) {
-        gl.glEnable( GL_LIGHTING );
-        gl.glEnable( GL_COLOR_MATERIAL );
+        glEnable( GL_LIGHTING );
+        glEnable( GL_COLOR_MATERIAL );
 #ifndef HAVE_GLES
         glColorMaterial( GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE );
 #endif
         glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
     }else{
-        gl.glDisable( GL_LIGHTING );
-        gl.glDisable( GL_COLOR_MATERIAL );
+        glDisable( GL_LIGHTING );
+        glDisable( GL_COLOR_MATERIAL );
         glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE );
     }
 
@@ -118,7 +116,7 @@ void GLSceneGraph::DrawObjectAndChildren(RenderMode renderMode)
 void GLSceneGraph::ApplyPreferredGlSettings()
 {
     // Default to transparent white background for better screenshots
-    glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
+    glClearColor(0.0f, 0.0f, 0.0f, 0.5f);
     
     // Disable multisample for general use (it messes up antialiased lines)
     // Enable individually for particular GLObjects

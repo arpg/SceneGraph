@@ -8,30 +8,73 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
-#include "SceneGraph/SceneGraphConfig.h"
-#include <SceneGraph/GLinclude.h>
-#undef Success
 #include <Eigen/Core>
 
-namespace SceneGraph {
+//////////////////////////////////////////////////////////
+// Attempt to portably include Necessary OpenGL headers
+//////////////////////////////////////////////////////////
+
+#include <GL/glew.h>
+#include "platform.h"
+
+#ifdef _WIN_
+    // Define maths quantities when using <cmath> to match posix systems
+    #define _USE_MATH_DEFINES
+
+    // Don't define min / max macros in windows.h or other unnecessary macros
+    #define NOMINMAX
+    #define WIN32_LEAN_AND_MEAN
+    #include <Windows.h>
+
+    // Undef nuisance Windows.h macros which interfere with our methods
+    #undef LoadImage
+    #undef near
+    #undef far
+#endif
+
+
+#ifdef HAVE_GLES
+   #if defined(_ANDROID_)
+        #include <EGL/egl.h>
+        #ifdef HAVE_GLES_2
+            #include <GLES2/gl2.h>
+            #include <GLES2/gl2ext.h>
+        #else
+            #include <GLES/gl.h>
+            #define GL_GLEXT_PROTOTYPES
+            #include <GLES/glext.h>
+        #endif
+    #elif defined(_APPLE_IOS_)
+        #include <OpenGLES/ES2/gl.h>
+        #include <OpenGLES/ES2/glext.h>
+    #endif
+#else
+    #ifdef _OSX_
+        #include <OpenGL/gl.h>
+    #else
+        #include <GL/gl.h>
+    #endif
+#endif // HAVE_GLES
+
+// replacement for glu functions
+#include <SceneGraph/glu.h>
 
 #define CheckForGLErrors() SceneGraph::_CheckForGLErrors(__FILE__, __LINE__);
+
+namespace SceneGraph {
 
 //////////////////////////////////////
 ///  If a GL error has occured, this function outputs "msg" and the
 //   programme exits. To avoid exiting @see WarnForGLErrors.
-SCENEGRAPH_EXPORT
 void _CheckForGLErrors(const char *sFile = NULL, const int nLine = -1);
 
 //////////////////////////////////////
 // Extract current camera pose from opengl in the
 // Robotics Coordinate frame convention
-SCENEGRAPH_EXPORT
 Eigen::Matrix4d GLGetCameraPose();
 
 //////////////////////////////////////
 /// Convert opengl projection matrix into computer vision K matrix
-SCENEGRAPH_EXPORT
 Eigen::Matrix3d GLGetProjectionMatrix();
 
 //////////////////////////////////////
@@ -229,7 +272,8 @@ inline Eigen::Matrix4d GLCart2T(const Eigen::Matrix<double, 6, 1>& x) {
   return GLCart2T(x(0), x(1), x(2), x(3), x(4), x(5));
 }
 
-inline Eigen::Vector3d GLR2Cart(const Eigen::Matrix3d& R) {
+inline Eigen::Vector3d GLR2Cart(const Eigen::Matrix3d& R) 
+{
   Eigen::Vector3d rpq;
   // roll
   rpq[0] = atan2(R(2, 1), R(2, 2));

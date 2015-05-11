@@ -3,7 +3,6 @@
 
 #include <SceneGraph/GLObject.h>
 #include <SceneGraph/GLColor.h>
-#include <pangolin/gldraw.h>
 
 namespace SceneGraph {
 

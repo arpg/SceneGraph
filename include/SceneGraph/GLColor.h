@@ -4,7 +4,8 @@
 #include <sstream>
 #include <cstdio>
 #include <cmath>
-#include <SceneGraph/GLinclude.h>
+#include <Eigen/Eigen>
+#include <SceneGraph/GLHelpers.h>
 
 namespace SceneGraph {
 

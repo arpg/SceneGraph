@@ -11,19 +11,6 @@
 #include <map>
 #include <stdio.h>
 
-#ifdef _ANDROID_
-#include <SceneGraph/GLES_compat.h>
-#endif // _ANDROID_
-
-
-#ifdef __GNUC__
-#  define SCENEGRAPH_DEPRECATED __attribute__((deprecated))
-#elif defined _MSC_VER
-#  define SCENEGRAPH_DEPRECATED __declspec(deprecated)
-#else
-#  define SCENEGRAPH_DEPRECATED
-#endif
-
 namespace Eigen{
     typedef Matrix<double, 6, 1> Vector6d;
     typedef std::vector<Eigen::Vector6d,Eigen::aligned_allocator<Eigen::Vector6d> > Vector6dAlignedVec;

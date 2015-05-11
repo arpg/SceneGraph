@@ -5,6 +5,7 @@
  */ 
 
 #include <SceneGraph/GLHelpers.h>
+#include <SceneGraph/gl.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
@@ -17,27 +18,49 @@
 namespace SceneGraph
 {
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-///  If a GL error has occured, this function outputs "msg" and the
-//   programme exits. To avoid exiting @see WarnForGLErrors.
-void _CheckForGLErrors( const char *sFile, const int nLine )
-{
+  const GLubyte gNotErrorLookup[] = "Unknown error";
+  const GLubyte gInvalidEnum[] = "Invalid enum";
+  const GLubyte gInvalidValue[] = "Invalid value";
+  const GLubyte gInvalidOperation[] = "Invalid operation";
+  const GLubyte gStackOverflow[] = "Stack overflow";
+  const GLubyte gStackUnderflow[] = "Stack underflow";
+  const GLubyte gOutOfMemory[] = "Out of memory";
+
+  const GLubyte* glErrorString(GLenum error )
+  {
+    // TODO: Implement glErrorString
+    switch( error ){
+      case GL_INVALID_ENUM: return gInvalidEnum;
+      case GL_INVALID_VALUE: return gInvalidValue;
+      case GL_INVALID_OPERATION: return gInvalidOperation;
+      case GL_STACK_OVERFLOW: return gStackOverflow;
+      case GL_STACK_UNDERFLOW: return gStackUnderflow;
+      case GL_OUT_OF_MEMORY: return gOutOfMemory;
+    }
+    return gNotErrorLookup;
+  }
+
+
+  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  ///  If a GL error has occured, this function outputs "msg" and the
+  //   programme exits. To avoid exiting @see WarnForGLErrors.
+
+  void _CheckForGLErrors( const char *sFile, const int nLine )
+  {
     GLenum glError = glGetError();
     if( glError != GL_NO_ERROR ) {
-        fprintf( stderr, "ERROR: %s -- %s line %d\n", 
-                (char*)gluErrorString(glError), sFile, nLine );
-        //FIXME: On my box, glError is not totally free of error.
-        // there's probably something wrong with one of the glEnable(...) in GLWindow.cpp
-        // so I temporarily comment out the exit() call here. 
-        exit( -1 );
+      fprintf( stderr, "ERROR: %s -- %s line %d\n", 
+          (char*)glErrorString(glError), sFile, nLine );
+      fprintf( stderr, "In: %s, line %d\n", sFile, nLine );
+      exit( -1 );
     }
-}
+  }
 
 
-//////////////////////////////////////////////////////////////////////////////
-// Extract current camera pose from opengl in the Robotics Coordinate frame convention
-Eigen::Matrix4d GLGetCameraPose()
-{
+  //////////////////////////////////////////////////////////////////////////////
+  // Extract current camera pose from opengl in the Robotics Coordinate frame convention
+  Eigen::Matrix4d GLGetCameraPose()
+  {
     Eigen::Matrix<double,4,4,Eigen::ColMajor> M; // for opengl
     glGetDoublev( GL_MODELVIEW_MATRIX, M.data() );
 
@@ -54,14 +77,14 @@ Eigen::Matrix4d GLGetCameraPose()
     T.block<1,4>(3,0) << 0, 0, 0, 1;
 
     return T;
-}
+  }
 
 
 
-///////////////////////////////////////////////////////////////////////////////
-/// Convert opengl projection matrix into computer vision K matrix
-Eigen::Matrix3d GLGetProjectionMatrix()
-{
+  ///////////////////////////////////////////////////////////////////////////////
+  /// Convert opengl projection matrix into computer vision K matrix
+  Eigen::Matrix3d GLGetProjectionMatrix()
+  {
     Eigen::Matrix<double,4,4,Eigen::ColMajor> P; // for opengl
     glGetDoublev( GL_PROJECTION_MATRIX, P.data() );
     GLint vViewport[4];
@@ -85,76 +108,76 @@ Eigen::Matrix3d GLGetProjectionMatrix()
     //    cout << "K:\n" << K <<  endl << endl;
 
     return K;
-}
+  }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/// If a GL error has occured, this function outputs "msg" and  automatically sets 
-//  the gl error state back to normal.
-void WarnForGLErrors( const char * msg )
-{
+  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  /// If a GL error has occured, this function outputs "msg" and  automatically sets 
+  //  the gl error state back to normal.
+  void WarnForGLErrors( const char * msg )
+  {
     GLenum glError = (GLenum)glGetError();
     if( glError != GL_NO_ERROR ) {
-        if( msg ) {
-            fprintf( stderr, "WARNING: %s\n", msg );
-        }
-        fprintf( stderr, "ERROR: %s\n", (char *) gluErrorString(glError) );
+      if( msg ) {
+        fprintf( stderr, "WARNING: %s\n", msg );
+      }
+      fprintf( stderr, "ERROR: %s\n", (char *) glErrorString(glError) );
     }
-}
+  }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/// Given a particular OpenGL Format, return the appropriate number of image channels.
-unsigned int NumChannels( unsigned int nFormat )
-{
+  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  /// Given a particular OpenGL Format, return the appropriate number of image channels.
+  unsigned int NumChannels( unsigned int nFormat )
+  {
     switch( nFormat ){
-        case GL_LUMINANCE:
-        case GL_RED:
-        case GL_BLUE:
-        case GL_GREEN:
-        case GL_ALPHA:
-            return 1;
-        case GL_RGB:
-            return 3;
-        case GL_RGBA: 
-            return 4;
-        default:
-            fprintf( stderr, "NumChannels() - unknown format\n" );
-            return 0;
+      case GL_LUMINANCE:
+      case GL_RED:
+      case GL_BLUE:
+      case GL_GREEN:
+      case GL_ALPHA:
+        return 1;
+      case GL_RGB:
+        return 3;
+      case GL_RGBA: 
+        return 4;
+      default:
+        fprintf( stderr, "NumChannels() - unknown format\n" );
+        return 0;
     }
     return 0;
-}
+  }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// Given an OpenGL Type, return the associated number of bits used.
-unsigned int BitsPerChannel( unsigned int nType )
-{
+  ////////////////////////////////////////////////////////////////////////////////////////////////////
+  /// Given an OpenGL Type, return the associated number of bits used.
+  unsigned int BitsPerChannel( unsigned int nType )
+  {
     switch( nType ){
-        case GL_UNSIGNED_BYTE:
-        case GL_BYTE:
-            return 8;
-        case GL_2_BYTES:
-        case GL_SHORT:
-        case GL_UNSIGNED_SHORT:
-            return 16;
-        case GL_4_BYTES:
-        case GL_FLOAT:
-        case GL_UNSIGNED_INT:
-        case GL_INT:
-            return 32;
-        case GL_DOUBLE:
-            return 64;
-        case GL_3_BYTES:
-            return 24;
-        default:
-            fprintf( stderr, "\nBitsPerChannel() - unknown image Type");
-            return 0;
+      case GL_UNSIGNED_BYTE:
+      case GL_BYTE:
+        return 8;
+      case GL_2_BYTES:
+      case GL_SHORT:
+      case GL_UNSIGNED_SHORT:
+        return 16;
+      case GL_4_BYTES:
+      case GL_FLOAT:
+      case GL_UNSIGNED_INT:
+      case GL_INT:
+        return 32;
+      case GL_DOUBLE:
+        return 64;
+      case GL_3_BYTES:
+        return 24;
+      default:
+        fprintf( stderr, "\nBitsPerChannel() - unknown image Type");
+        return 0;
     }
     return 0;
-}
+  }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-// Change to orthographic projection (for image drawing, etc)
-void PushOrtho( const unsigned int nWidth, const unsigned int nHeight )
-{
+  ////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Change to orthographic projection (for image drawing, etc)
+  void PushOrtho( const unsigned int nWidth, const unsigned int nHeight )
+  {
     // load ortho to the size of the window 
     glPushMatrix();
     glLoadIdentity();
@@ -163,30 +186,30 @@ void PushOrtho( const unsigned int nWidth, const unsigned int nHeight )
     glLoadIdentity();
     glOrtho(0, nWidth, nHeight, 0, -1, 1); // left, right, top, bottom, near, far
     glMatrixMode( GL_MODELVIEW );
-}
+  }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// Set projection matrix
-void PopOrtho()
-{
+  ////////////////////////////////////////////////////////////////////////////////////////////////////
+  /// Set projection matrix
+  void PopOrtho()
+  {
     glBindTexture( GL_TEXTURE_RECTANGLE_ARB, 0 );
     glMatrixMode(GL_PROJECTION);
     glPopMatrix();
     glMatrixMode(GL_MODELVIEW);
     glPopMatrix();
-}
+  }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// Set projection matrix
-void OrthoQuad( 
-        const int nTexWidth,    //< Input:
-        const int nTexHeight,   //< Input:
-        const int nTop,      //< Input:
-        const int nLeft,     //< Input:
-        const int nBottom,   //< Input:
-        const int nRight     //< Input:
-        )
-{
+  ////////////////////////////////////////////////////////////////////////////////////////////////////
+  /// Set projection matrix
+  void OrthoQuad( 
+      const int nTexWidth,    //< Input:
+      const int nTexHeight,   //< Input:
+      const int nTop,      //< Input:
+      const int nLeft,     //< Input:
+      const int nBottom,   //< Input:
+      const int nRight     //< Input:
+      )
+  {
     /*
        glBegin( GL_QUADS );
        glTexCoord2f(    0.0,    0.0  ); glVertex3f( nLeft,  nBottom, 1 );
@@ -205,16 +228,16 @@ void OrthoQuad(
     glEnd();
 
 
-}
+  }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-void DrawBorderAsWindowPercentage(
-        const float fTop,
-        const float fLeft,
-        const float fBottom,
-        const float fRight
-        )
-{
+  ////////////////////////////////////////////////////////////////////////////////////////////////////
+  void DrawBorderAsWindowPercentage(
+      const float fTop,
+      const float fLeft,
+      const float fBottom,
+      const float fRight
+      )
+  {
     GLint vViewport[4];
     glGetIntegerv( GL_VIEWPORT, vViewport );
 
@@ -229,19 +252,19 @@ void DrawBorderAsWindowPercentage(
     glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 
     PopOrtho();
-}
+  }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-void DrawTextureAsWindowPercentage(
-        const unsigned int nTexId,      //< Input:
-        const unsigned int nTexWidth, //< Input:
-        const unsigned int nTexHeight,//< Input:
-        const float fTop,
-        const float fLeft,
-        const float fBottom,
-        const float fRight
-        )
-{
+  ////////////////////////////////////////////////////////////////////////////////////////////////////
+  void DrawTextureAsWindowPercentage(
+      const unsigned int nTexId,      //< Input:
+      const unsigned int nTexWidth, //< Input:
+      const unsigned int nTexHeight,//< Input:
+      const float fTop,
+      const float fLeft,
+      const float fBottom,
+      const float fRight
+      )
+  {
     glDisable( GL_LIGHTING );
     glColor4f( 1,1,1,1 ); // only scoop up texture colors
 
@@ -253,23 +276,23 @@ void DrawTextureAsWindowPercentage(
 
     PushOrtho( vViewport[2], vViewport[3] );
     OrthoQuad( nTexWidth, nTexHeight, 
-            fTop*vViewport[3], fLeft*vViewport[2], 
-            fBottom*vViewport[3], fRight*vViewport[2] ); 
+        fTop*vViewport[3], fLeft*vViewport[2], 
+        fBottom*vViewport[3], fRight*vViewport[2] ); 
 
     PopOrtho();
-}
+  }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-void DrawTexture(
-        const unsigned int nTexId,      //< Input:
-        const unsigned int nTexWidth, //< Input:
-        const unsigned int nTexHeight,//< Input:
-        const unsigned int nTop,        //< Input:
-        const unsigned int nLeft,       //< Input:
-        const unsigned int nBottom,     //< Input:
-        const unsigned int nRight       //< Input:
-        )
-{
+  ////////////////////////////////////////////////////////////////////////////////////////////////////
+  void DrawTexture(
+      const unsigned int nTexId,      //< Input:
+      const unsigned int nTexWidth, //< Input:
+      const unsigned int nTexHeight,//< Input:
+      const unsigned int nTop,        //< Input:
+      const unsigned int nLeft,       //< Input:
+      const unsigned int nBottom,     //< Input:
+      const unsigned int nRight       //< Input:
+      )
+  {
     // NB DECAL ignores lighting
     //    glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL );
     glDisable( GL_LIGHTING );
@@ -284,129 +307,129 @@ void DrawTexture(
     PushOrtho( vViewport[2], vViewport[3] );
     OrthoQuad( nTexWidth, nTexHeight, nTop, nLeft, nBottom, nRight ); 
     PopOrtho();
-}
+  }
 
-//////////////////////////////////////////////////////////////////////////////
-// read from opengl buffer into our own vector
-void ReadPixels( 
-        std::vector<unsigned char>& vPixels,
-        int nWidth,
-        int nHeight,
-        bool bFlip /// default to true
-        )
-{
+  //////////////////////////////////////////////////////////////////////////////
+  // read from opengl buffer into our own vector
+  void ReadPixels( 
+      std::vector<unsigned char>& vPixels,
+      int nWidth,
+      int nHeight,
+      bool bFlip /// default to true
+      )
+  {
     int nFormat = GL_RGBA;
     int nType = GL_UNSIGNED_BYTE;
 
     unsigned int nBpp = GLBytesPerPixel( nFormat, nType );
     if( vPixels.size() < nWidth*nBpp*nHeight ){
-        vPixels.resize( nWidth*nBpp*nHeight );
+      vPixels.resize( nWidth*nBpp*nHeight );
     }
     char* pPixelData = (char*)&vPixels[0];
 
     glReadPixels( 0, 0, nWidth, nHeight, nFormat, nType, pPixelData );
 
     if( bFlip ){
-        int inc = nBpp*nWidth;
-        char* pSwap = (char*)malloc( inc );
-        char* pTopDown = pPixelData;
-        char* pBottomUp = &pPixelData[ nWidth*nBpp*nHeight ];
-        for( ; pTopDown < pBottomUp; pTopDown += inc, pBottomUp -= inc ){
-            memcpy( pSwap, pTopDown, inc ); 
-            memcpy( pTopDown, pBottomUp, inc ); 
-            memcpy( pBottomUp, pSwap, inc ); 
-        }
-        free( pSwap );
+      int inc = nBpp*nWidth;
+      char* pSwap = (char*)malloc( inc );
+      char* pTopDown = pPixelData;
+      char* pBottomUp = &pPixelData[ nWidth*nBpp*nHeight ];
+      for( ; pTopDown < pBottomUp; pTopDown += inc, pBottomUp -= inc ){
+        memcpy( pSwap, pTopDown, inc ); 
+        memcpy( pTopDown, pBottomUp, inc ); 
+        memcpy( pBottomUp, pSwap, inc ); 
+      }
+      free( pSwap );
     }
-}
+  }
 
 
-//////////////////////////////////////////////////////////////////////////////
-// read from opengl buffer into our own vector
-void ReadDepthPixels( 
-        std::vector<float>& vPixels,
-        int nWidth,
-        int nHeight,
-        bool bFlip // defaults to true
-        )
-{
+  //////////////////////////////////////////////////////////////////////////////
+  // read from opengl buffer into our own vector
+  void ReadDepthPixels( 
+      std::vector<float>& vPixels,
+      int nWidth,
+      int nHeight,
+      bool bFlip // defaults to true
+      )
+  {
     int nFormat = GL_RGBA;
     int nType = GL_UNSIGNED_BYTE;
 
 
     unsigned int nBpp = GLBytesPerPixel( nFormat, nType );
     if( vPixels.size() < nWidth*nBpp*nHeight ){
-        vPixels.resize( nWidth*nBpp*nHeight );
+      vPixels.resize( nWidth*nBpp*nHeight );
     }
     char* pPixelData = (char*)&vPixels[0];
 
     glReadPixels( 0, 0, nWidth, nHeight, nFormat, nType, pPixelData );
 
     if( bFlip ){
-        int inc = nBpp*nWidth;
-        char* pSwap = (char*)malloc( inc );
-        char* pTopDown = pPixelData;
-        char* pBottomUp = &pPixelData[ nWidth*nBpp*nHeight ];
-        for( ; pTopDown < pBottomUp; pTopDown += inc, pBottomUp -= inc ){
-            memcpy( pSwap, pTopDown, inc ); 
-            memcpy( pTopDown, pBottomUp, inc ); 
-            memcpy( pBottomUp, pSwap, inc ); 
-        }
-        free( pSwap );
+      int inc = nBpp*nWidth;
+      char* pSwap = (char*)malloc( inc );
+      char* pTopDown = pPixelData;
+      char* pBottomUp = &pPixelData[ nWidth*nBpp*nHeight ];
+      for( ; pTopDown < pBottomUp; pTopDown += inc, pBottomUp -= inc ){
+        memcpy( pSwap, pTopDown, inc ); 
+        memcpy( pTopDown, pBottomUp, inc ); 
+        memcpy( pBottomUp, pSwap, inc ); 
+      }
+      free( pSwap );
     }
-}
+  }
 
 
-//////////////////////////////////////////////////////////////////////////////
-void CheckFBOStatus()
-{
+  //////////////////////////////////////////////////////////////////////////////
+  void CheckFBOStatus()
+  {
     //Does the GPU support current FBO configuration?
     GLenum status;
     status = glCheckFramebufferStatusEXT( GL_FRAMEBUFFER_EXT );
     switch(status) {
-        case GL_FRAMEBUFFER_COMPLETE_EXT:
-            //    std::cerr << "The framebuffer is complete and valid for rendering.\n";
-            break;
-        case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT_EXT:
-            std::cerr << "One or more attachment points are not framebuffer attachment complete.\n";
-            break;
-        case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT_EXT:
-            std::cerr << "There are no attachments.\n";
-            break;
-        case GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS_EXT:
-            std::cerr << "Attachments are of different size. All attachments must have the same width and height.\n";
-            break;
-        case GL_FRAMEBUFFER_INCOMPLETE_FORMATS_EXT:
-            std::cerr << "The color attachments have different format. All color attachments must have the same format.\n";
-            break;
-        case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER_EXT:
-            std::cerr << "An attachment point referenced by glDrawBuffers() doesn’t have an attachment.\n";
-            break;
-        case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER_EXT:
-            std::cerr << "The attachment point referenced by glReadBuffers() doesn’t have an attachment.\n";
-            break;
-        case GL_FRAMEBUFFER_UNSUPPORTED_EXT:
-            std::cerr << "This particular FBO configuration is not supported by the implementation.\n";
-            break;
+      case GL_FRAMEBUFFER_COMPLETE_EXT:
+        //    std::cerr << "The framebuffer is complete and valid for rendering.\n";
+        break;
+      case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT_EXT:
+        std::cerr << "One or more attachment points are not framebuffer attachment complete.\n";
+        break;
+      case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT_EXT:
+        std::cerr << "There are no attachments.\n";
+        break;
+      case GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS_EXT:
+        std::cerr << "Attachments are of different size. All attachments must have the same width and height.\n";
+        break;
+      case GL_FRAMEBUFFER_INCOMPLETE_FORMATS_EXT:
+        std::cerr << "The color attachments have different format. All color attachments must have the same format.\n";
+        break;
+      case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER_EXT:
+        std::cerr << "An attachment point referenced by glDrawBuffers() doesn’t have an attachment.\n";
+        break;
+      case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER_EXT:
+        std::cerr << "The attachment point referenced by glReadBuffers() doesn’t have an attachment.\n";
+        break;
+      case GL_FRAMEBUFFER_UNSUPPORTED_EXT:
+        std::cerr << "This particular FBO configuration is not supported by the implementation.\n";
+        break;
     }
-}
+  }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// set perspective view.  same as gluperspective().
-void Perspective( double fovy, double aspect, double zNear, double zFar)
-{
+  ////////////////////////////////////////////////////////////////////////////////////////////////////
+  /// set perspective view.  same as gluperspective().
+  void Perspective( double fovy, double aspect, double zNear, double zFar)
+  {
     double xmin, xmax, ymin, ymax;
     ymax = zNear * tan(fovy * M_PI / 360.0);
     ymin = -ymax;
     xmin = ymin * aspect;
     xmax = ymax * aspect;
     glFrustum(xmin, xmax, ymin, ymax, zNear, zFar);
-}
+  }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// Reshape viewport whenever window changes size.
-void ReshapeViewport( int w, int h )
-{
+  ////////////////////////////////////////////////////////////////////////////////////////////////////
+  /// Reshape viewport whenever window changes size.
+  void ReshapeViewport( int w, int h )
+  {
     // Viewport
     glViewport(0, 0, w, h );
 
@@ -419,26 +442,26 @@ void ReshapeViewport( int w, int h )
     // Model view
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-}
+  }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-// local little helper
-Eigen::Vector4d Vec4( double a, double b, double c, double d )
-{
+  ////////////////////////////////////////////////////////////////////////////////////////////////////
+  // local little helper
+  Eigen::Vector4d Vec4( double a, double b, double c, double d )
+  {
     Eigen::Vector4d tmp;
     tmp << a, b, c, d;
     return tmp;
-}
+  }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-void DrawCamera(
-        int nTexWidth,
-        int nTexHeight,
-        int nTexId,
-        const Eigen::Matrix4d& dModelViewMatrix,
-        const Eigen::Matrix4d& dProjectionMatrix
-        )
-{
+  ////////////////////////////////////////////////////////////////////////////////////////////////////
+  void DrawCamera(
+      int nTexWidth,
+      int nTexHeight,
+      int nTexId,
+      const Eigen::Matrix4d& dModelViewMatrix,
+      const Eigen::Matrix4d& dProjectionMatrix
+      )
+  {
     // OK 
     Eigen::Matrix4d M = dProjectionMatrix.inverse();
     Eigen::Matrix4d T = dModelViewMatrix.inverse();
@@ -574,7 +597,7 @@ void DrawCamera(
     glEnable( GL_DEPTH_TEST );
     glEnable( GL_CULL_FACE );
 
-}
+  }
 
 } // SceneGraph
 

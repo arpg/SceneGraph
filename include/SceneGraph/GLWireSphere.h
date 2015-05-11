@@ -1,8 +1,6 @@
 #ifndef GLWIRESPHERE_H
 #define GLWIRESPHERE_H
 
-#include <SceneGraph/GLPrimitives.h>
-#include <pangolin/pangolin.h>
 #include <Eigen/Eigen>
 
 #define rads 180/M_PI

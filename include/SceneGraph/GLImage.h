@@ -135,11 +135,10 @@ inline void GLImage::DrawCanonicalObject()
 
     PushOrtho( WindowWidth(), WindowHeight() );
 
-    pangolin::GlState gl;
-    gl.glDisable(GL_BLEND);
-    gl.glDisable( GL_LIGHTING );
-    gl.glDisable( GL_DEPTH_TEST );
-    gl.glEnable( GL_TEXTURE_RECTANGLE_ARB );
+    glDisable(GL_BLEND);
+    glDisable( GL_LIGHTING );
+    glDisable( GL_DEPTH_TEST );
+    glEnable( GL_TEXTURE_RECTANGLE_ARB );
 
     glBindTexture( GL_TEXTURE_RECTANGLE_ARB, m_nTex );
 

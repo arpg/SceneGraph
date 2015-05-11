@@ -28,8 +28,7 @@ public:
     virtual void DrawCanonicalObject()
     {
         // TODO: Draw something that better resembles a light
-        pangolin::GlState gl;
-        gl.glDisable( GL_LIGHTING );
+        glDisable( GL_LIGHTING );
         GLAxis::DrawAxis(1.0);
     }
 
