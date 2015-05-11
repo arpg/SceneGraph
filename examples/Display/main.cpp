@@ -21,6 +21,13 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
     glfwSetWindowShouldClose(window, GL_TRUE);
 }
 
+template<typename T>
+void setRandomImageData(T* imageArray, int width, int height, int channels){
+  for(int i = 0 ; i < channels*width*height;i++) {
+    imageArray[i] = std::numeric_limits<T>::max() * ((float)rand()/RAND_MAX);
+  }
+}
+
 // the object that defines what a user sees
 class View3d
 {
@@ -107,6 +114,37 @@ class View3d
     GLFWwindow* window_;
 };
 
+
+/*
+class View2d
+{
+  public:
+    View2d( GLFWwindow* window ) : window_( window )
+    {
+      glfwGetFramebufferSize(window_, &width_, &height_);
+      glViewport(0,0,width_,height_);
+      glMatrixMode(GL_PROJECTION);
+      glLoadIdentity();
+      glMatrixMode(GL_MODELVIEW);
+      glLoadIdentity();
+    };
+
+    void SetSize( int top, int left, int with, height )
+    {
+
+    }
+
+    float near_;
+    float far_;
+    float fovxy_;
+    int width_;
+    int height_;
+    Eigen::Matrix4f pose_;
+    GLFWwindow* window_;
+};
+*/
+
+
 GLFWwindow* GuiWindow( int w, int h, const char* name )
 {
   GLFWwindow* window;
@@ -159,6 +197,14 @@ int main( int /*argc*/, char** /*argv[]*/ )
   cylinder.SetPosition( 0,0, -4 ); 
   SceneGraph::GLAxis axis;
   SceneGraph::GLLight light;
+  SceneGraph::GLImage image;
+
+  // Synthetic random image for demonstration
+  const int w = 64;
+  const int h = 48;
+  unsigned char uImage[w*h*3];
+  setRandomImageData(uImage,w,h,3);
+  image.SetImage( uImage, w, h, GL_RGB, GL_UNSIGNED_BYTE );
 
   // add all these objects to a scene graph
   SceneGraph::GLSceneGraph graph;
@@ -179,6 +225,10 @@ int main( int /*argc*/, char** /*argv[]*/ )
 
     // position guide the "camera"
     view.LookAt( -5,5,-5, 0,0,0, 0,0,-1 );
+
+     // These calls can safely be made outside of the OpenGL thread.
+    setRandomImageData(uImage,w,h,3);
+    image.SetImage(uImage, w,h, GL_RGB, GL_RGB, GL_UNSIGNED_BYTE);
 
     // roll the cube
     Eigen::Vector6d p = cube.GetPose();
