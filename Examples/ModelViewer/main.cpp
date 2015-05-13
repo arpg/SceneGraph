@@ -55,8 +55,6 @@ int main( int argc, char* argv[] )
     
     const Eigen::Vector3d center = bbox.Center();
     double size = bbox.Size().norm();
-    const double far = 10*size;
-    const double near = far / 1E3;
    
     // Define Camera Render Object (for view / scene browsing)
     pangolin::OpenGlRenderState stacks3d(
