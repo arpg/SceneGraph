@@ -24,6 +24,7 @@ int main( int argc, char* argv[] )
     // Create OpenGL window in single line thanks to GLUT
     pangolin::CreateWindowAndBind("Main",640,480);
     SceneGraph::GLSceneGraph::ApplyPreferredGlSettings();
+    glClearColor( 0,0,0,0);
     glewInit();
 
     // Scenegraph to hold GLObjects and relative transformations
@@ -31,6 +32,9 @@ int main( int argc, char* argv[] )
 
     SceneGraph::GLLight light(10,10,-100);
     glGraph.AddChild(&light);
+
+    SceneGraph::GLGrid grid(10,1,true);
+    glGraph.AddChild(&grid);
 
     SceneGraph::AxisAlignedBoundingBox bbox;
     
@@ -42,21 +46,21 @@ int main( int argc, char* argv[] )
         glGraph.AddChild(&glMesh);
         bbox = glMesh.ObjectAndChildrenBounds();
     }catch(exception e) {
-        cerr << "Cannot load mesh. Check file exists" << endl;
+        cerr << "Cannot load mesh." << endl;
         cerr << e.what() << std::endl;
         exit(-1);
     }
 #endif // HAVE_ASSIMP
 
-     
+    
     const Eigen::Vector3d center = bbox.Center();
-    const double size = bbox.Size().norm();
+    double size = bbox.Size().norm();
     const double far = 10*size;
     const double near = far / 1E3;
-
+   
     // Define Camera Render Object (for view / scene browsing)
     pangolin::OpenGlRenderState stacks3d(
-        pangolin::ProjectionMatrix(640,480,420,420,320,240,near,far),
+        pangolin::ProjectionMatrix(640,480,420,420,320,240, 0.01, 1000),
         pangolin::ModelViewLookAt(center(0), center(1) + size, center(2) + size/4, center(0), center(1), center(2), pangolin::AxisZ)
     );
 
