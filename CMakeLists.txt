@@ -4,9 +4,11 @@ set(VERSION_MAJOR 0)
 set(VERSION_MINOR 1)
 set(VERSION ${VERSION_MAJOR}.${VERSION_MINOR})
 
+if(POLICY CMP0042)
+    cmake_policy(SET CMP0042 NEW) # MACOSX_RPATH
+endif()
+
 # Add to module path, so we can find our cmake modules
-
-
 list( APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules )
 
 include( install_package )
