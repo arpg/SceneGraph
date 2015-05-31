@@ -92,14 +92,15 @@ inline GLenum GLWrapFromAiMapMode(aiTextureMapMode mode)
 ////////////////////////////////////////////////////////////////////////////
 GLMesh::GLMesh()
     : GLObject("Mesh"), m_pScene(0), m_fAlpha(1),
-      m_iMeshID(-1), m_bShowMeshNormals(false),m_uMeshCount(0)
+      m_iMeshID(AllocSelectionId()), m_bShowMeshNormals(false),m_uMeshCount(0)
 {
+  std::cout << "-- meshid is :" << m_iMeshID << std::endl;
 }
 
 ////////////////////////////////////////////////////////////////////////////
 GLMesh::GLMesh(const std::string& sMeshFile)
     : GLObject("Mesh"), m_pScene(0), m_fAlpha(1),
-      m_iMeshID(-1), m_bShowMeshNormals(false),m_uMeshCount(0)
+      m_iMeshID(AllocSelectionId()), m_bShowMeshNormals(false),m_uMeshCount(0)
 {
     Init(sMeshFile);
 }
@@ -214,6 +215,7 @@ void GLMesh::ShowNormals(bool showNormals )
 void  GLMesh::DrawCanonicalObject()
 {
     if( m_pScene ){
+        glPushName(m_iMeshID);
         for (unsigned int i = 0 ; i < m_Meshes.size() ; i++) {
             glBindBuffer(GL_ARRAY_BUFFER, m_Meshes[i].m_uVB);
             glVertexPointer(3, GL_FLOAT, sizeof(Vertex), 0);
@@ -278,12 +280,12 @@ void  GLMesh::DrawCanonicalObject()
             glDisableClientState(GL_TEXTURE_COORD_ARRAY);
         }
 
-
+        glPopName();
         glBindBuffer(GL_ARRAY_BUFFER,0);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,0);
     }
 }
-\
+
 void GLMesh::ComputeNodeBounds( const struct aiScene *pAIScene, const struct aiNode *pAINode, AxisAlignedBoundingBox& aabb, aiMatrix4x4 dParentTransform )
 {
     aiMesh *pAIMesh;

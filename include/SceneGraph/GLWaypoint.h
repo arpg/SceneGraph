@@ -43,6 +43,7 @@ class GLWayPoint : public GLObject {
              const Eigen::Vector3d& /*obj*/,
              const Eigen::Vector3d& /*normal*/,
              bool /*pressed*/, int /*button_state*/, int /*pickId*/) {
+      std::cout << " -- glwaypoint Mouse method called !!!" << std::endl;
     if (button == MouseButtonLeft && m_bLocked == false) {
       m_bPendingActive = true;
     } else if (button == MouseWheelUp && m_bLocked == false) {
@@ -141,7 +142,9 @@ class GLWayPoint : public GLObject {
     } else {
       glColor3ub(0, 255 * multiplier, 0);
     }
+    glPopName();
     // draw center point
+    glPushName(m_nBaseId);
     glPointSize(5);
     glBegin(GL_POINTS);
     glVertex3d(0, 0, 0);

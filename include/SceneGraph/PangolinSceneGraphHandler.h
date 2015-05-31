@@ -159,6 +159,8 @@ struct HandlerSceneGraph : pangolin::Handler3D {
     glFlush();
 
     GLint nHits = glRenderMode(eRenderVisible);
+    std::cout << "Number of Hits are: " << nHits << std::endl;
+    std::cout << "size of hitobjects: " << hit_objects.size() << std::endl;
     if (nHits > 0) {
       ProcessHitBuffer(nHits, vSelectBuf, hit_objects);
     }
@@ -174,6 +176,7 @@ struct HandlerSceneGraph : pangolin::Handler3D {
     if (pressed) {
       m_selected_objects.clear();
       ComputeHits(view, *cam_state, x, y, m_grab_width, m_selected_objects);
+      std::cout << " -- selected objests#: " << m_selected_objects.size() << std::endl;
       for (std::map<int, SceneGraph::GLObject*>::iterator i =
                m_selected_objects.begin();
            i != m_selected_objects.end(); ++i ) {

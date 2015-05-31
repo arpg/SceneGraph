@@ -25,7 +25,7 @@ protected:
     std::string m_sWhat;
 };
 
-class SCENEGRAPH_EXPORT GLMesh : public GLObject
+class GLMesh : public GLObject
 {
     public:
         GLMesh();
@@ -35,6 +35,14 @@ class SCENEGRAPH_EXPORT GLMesh : public GLObject
         void Init( const std::string& sMeshFile,
                    bool bFlipUVs = false );
         void Init( const struct aiScene* pScene );
+
+        bool Mouse(int button, const Eigen::Vector3d& /*win*/,
+                   const Eigen::Vector3d& /*obj*/,
+                   const Eigen::Vector3d& /*normal*/,
+                   bool /*pressed*//*, int*/ /*button_state*/, int pickId) {
+            std::cout << " -- glmesh picid is: " << pickId << std::endl;
+          return true;
+        }
 
         virtual void ComputeDimensions();
         virtual void  DrawCanonicalObject();
