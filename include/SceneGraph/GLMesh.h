@@ -57,6 +57,7 @@ class GLMesh : public GLObject
 
         void SetAlpha(const double a) { m_fAlpha = a; }
 
+        bool IsSelectable();
         // TODO: Ideally we would deprecate this and not make
         // ASSIMP structures public.
         const struct aiScene *GetScene( void );
