@@ -122,6 +122,10 @@ class SCENEGRAPH_EXPORT GLObject
         /// Ignore depth buffer when rendering this object
         void SetIgnoreDepth( bool bIgnoreDepth );
 
+        /// Set wether object should be selectable with glpick or not
+        bool IsSelectable() const;
+        void SetSelectable( bool bSelectable );
+
         /////////////////////////////////
         // Object Pose
         /////////////////////////////////
