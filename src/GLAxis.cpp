@@ -6,11 +6,16 @@ namespace SceneGraph {
 
 GLAxis::GLAxis(const float axisSize, const bool bPretty)
     : GLObject("Axis"), m_fAxisScale(axisSize), m_bPretty(bPretty) {
+  m_iAxisID = AllocSelectionId();
   m_bPerceptable = false;
   m_aabb.SetZero();
 }
 
 GLAxis::~GLAxis() {
+}
+
+bool GLAxis::IsSelectable() {
+  return m_bIsSelectable;
 }
 
 void GLAxis::DrawAxis(float fScale) {
@@ -40,7 +45,9 @@ void GLAxis::DrawAxis(float fScale) {
 }
 
 void GLAxis::DrawCanonicalObject() {
+  glPushName( m_iAxisID );
   DrawAxis(m_fAxisScale);
+  glPopName();
 }
 
 }  // namespace SceneGraph
