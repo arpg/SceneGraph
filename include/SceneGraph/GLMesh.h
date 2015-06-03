@@ -36,12 +36,18 @@ class GLMesh : public GLObject
                    bool bFlipUVs = false );
         void Init( const struct aiScene* pScene );
 
-        bool Mouse(int button, const Eigen::Vector3d& /*win*/,
+        bool Mouse(int /*button*/, const Eigen::Vector3d& /*win*/,
                    const Eigen::Vector3d& /*obj*/,
                    const Eigen::Vector3d& /*normal*/,
-                   bool /*pressed*//*, int*/ /*button_state*/, int pickId) {
-            std::cout << " -- glmesh picid is: " << pickId << std::endl;
-          return true;
+                   bool /*pressed*/, int /*button_state*/, int /*pickId*/) {
+          return false;
+        }
+
+        bool MouseMotion(const Eigen::Vector3d& /*win*/,
+                         const Eigen::Vector3d& /*obj*/,
+                         const Eigen::Vector3d& /*normal*/,
+                         int /*button_state*/, int /*pickId*/) {
+          return false;
         }
 
         virtual void ComputeDimensions();

@@ -126,6 +126,9 @@ class SCENEGRAPH_EXPORT GLObject
         bool IsSelectable() const;
         void SetSelectable( bool bSelectable );
 
+        /// return name of the current object
+        void GetName(std::string& obj_name) { obj_name = m_sObjectName; }
+
         /////////////////////////////////
         // Object Pose
         /////////////////////////////////

@@ -11,7 +11,6 @@
 #include <map>
 #include <limits>
 
-
 namespace SceneGraph {
 
 struct HandlerSceneGraph : pangolin::Handler3D {
@@ -159,8 +158,8 @@ struct HandlerSceneGraph : pangolin::Handler3D {
     glFlush();
 
     GLint nHits = glRenderMode(eRenderVisible);
-    std::cout << "Number of Hits are: " << nHits << std::endl;
-    std::cout << "size of hitobjects: " << hit_objects.size() << std::endl;
+//    std::cout << " -- Number of Hits are: " << nHits << std::endl;
+//    std::cout << " -- size of hitobjects: " << hit_objects.size() << std::endl;
     if (nHits > 0) {
       ProcessHitBuffer(nHits, vSelectBuf, hit_objects);
     }
@@ -169,14 +168,27 @@ struct HandlerSceneGraph : pangolin::Handler3D {
 
   void Mouse(pangolin::View& view, pangolin::MouseButton button,
              int x, int y, bool pressed, int button_state) {
-    GetPosNormal(view, x, y, p, Pw, Pc, n);
 
+
+    std::cout << " -- waypoint Mouse is called !!!" << std::endl;
+
+    GetPosNormal(view, x, y, p, Pw, Pc, n);
     bool handled = false;
 
     if (pressed) {
       m_selected_objects.clear();
       ComputeHits(view, *cam_state, x, y, m_grab_width, m_selected_objects);
-      std::cout << " -- selected objests#: " << m_selected_objects.size() << std::endl;
+      for (std::map<int, SceneGraph::GLObject*>::iterator i =
+               m_selected_objects.begin();
+           i != m_selected_objects.end(); ++i ) {
+          std::string objname;
+          i->second->GetName(objname);
+          if( objname.find("Waypoint") != std::string::npos) {
+            i->second->SetVisible(false);
+            GetPosNormal(view, x, y, p, Pw, Pc, n);
+          }
+      }
+
       for (std::map<int, SceneGraph::GLObject*>::iterator i =
                m_selected_objects.begin();
            i != m_selected_objects.end(); ++i ) {
@@ -188,6 +200,15 @@ struct HandlerSceneGraph : pangolin::Handler3D {
             pressed, button_state, i->first);
       }
     } else {
+        for (std::map<int, SceneGraph::GLObject*>::iterator i =
+                 m_selected_objects.begin();
+             i != m_selected_objects.end(); ++i ) {
+            std::string objname;
+            i->second->GetName(objname);
+            if( objname.find("Waypoint") != std::string::npos) {
+              i->second->SetVisible(true);
+            }
+        }
       for (std::map<int, SceneGraph::GLObject*>::iterator i =
                m_selected_objects.begin();
            i != m_selected_objects.end(); ++i ) {
@@ -199,6 +220,7 @@ struct HandlerSceneGraph : pangolin::Handler3D {
             pressed, button_state, i->first);
       }
     }
+
     if (!handled) {
       Handler3D::Mouse(view, button, x, y, pressed, button_state);
     }
@@ -207,6 +229,19 @@ struct HandlerSceneGraph : pangolin::Handler3D {
   void MouseMotion(pangolin::View& view, int x, int y, int button_state) {
     GetPosNormal(view, x, y, p, Pw, Pc, n);
     bool handled = false;
+//    m_selected_objects.clear();
+//    ComputeHits(view, *cam_state, x, y, m_grab_width, m_selected_objects);
+//    for (std::map<int, SceneGraph::GLObject*>::iterator i =
+//             m_selected_objects.begin();
+//         i != m_selected_objects.end(); ++i ) {
+//        std::string objname;
+//        i->second->GetName(objname);
+//        if( objname.find("Waypoint") != std::string::npos) {
+//          i->second->SetVisible(false);
+//          GetPosNormal(view, x, y, p, Pw, Pc, n);
+//          i->second->SetVisible(true);
+//        }
+//    }
     for (std::map<int, SceneGraph::GLObject*>::iterator i =
              m_selected_objects.begin(); i != m_selected_objects.end(); ++i ) {
       handled |= i->second->MouseMotion(
@@ -232,6 +267,7 @@ struct HandlerSceneGraph : pangolin::Handler3D {
 
     if (inType == pangolin::InputSpecialScroll) {
       m_selected_objects.clear();
+
       ComputeHits(view, *cam_state, x, y, m_grab_width, m_selected_objects);
       const pangolin::MouseButton button = p2 > 0 ?
           pangolin::MouseWheelUp : pangolin::MouseWheelDown;

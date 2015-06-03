@@ -27,7 +27,7 @@ class GLWayPoint : public GLObject {
     // Set unique waypoint name
     static int wid = 0;
     char buf[128];
-    snprintf(buf, sizeof(buf), "WayPoint-%d", wid++);
+    snprintf(buf, sizeof(buf), "Waypoint-%d", wid++);
     SetObjectName(buf);
 
     // Allocate extra picking id for front point
@@ -42,8 +42,7 @@ class GLWayPoint : public GLObject {
   bool Mouse(int button, const Eigen::Vector3d& /*win*/,
              const Eigen::Vector3d& /*obj*/,
              const Eigen::Vector3d& /*normal*/,
-             bool /*pressed*/, int /*button_state*/, int /*pickId*/) {
-      std::cout << " -- glwaypoint Mouse method called !!!" << std::endl;
+             bool /*pressed*/, int /*button_state*/, int pickId) {
     if (button == MouseButtonLeft && m_bLocked == false) {
       m_bPendingActive = true;
     } else if (button == MouseWheelUp && m_bLocked == false) {
@@ -136,16 +135,20 @@ class GLWayPoint : public GLObject {
     glVertex3d(1, 0, 0);
     glEnd();
     glPopName();
+
+    glPushName(m_nBaseId);
     DrawAxis(1);
+    glPopName();
+
     if (m_bAerial) {
       glColor3ub(0, 0, 255 * multiplier);
     } else {
       glColor3ub(0, 255 * multiplier, 0);
     }
-    glPopName();
+
     // draw center point
     glPushName(m_nBaseId);
-    glPointSize(5);
+    glPointSize(10);
     glBegin(GL_POINTS);
     glVertex3d(0, 0, 0);
     glEnd();
