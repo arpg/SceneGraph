@@ -147,12 +147,57 @@ class GLWayPoint : public GLObject {
     }
 
     // draw center point
+//    glPushName(m_nBaseId);
+//    glPointSize(10);
+//    glBegin(GL_POINTS);
+//    glVertex3d(0, 0, 0);
+//    glEnd();
+//    glPopName();
+
+    // Draw Center Cube
     glPushName(m_nBaseId);
-    glPointSize(10);
-    glBegin(GL_POINTS);
-    glVertex3d(0, 0, 0);
+    glBegin(GL_QUADS);
+    // left
+    glColor3f(0.0f, velx/10, 0.0f);
+    glNormal3f(0.0f, 1.0f, 0.0f);
+    glVertex3f(-CENTER_CUBE_SIDE, CENTER_CUBE_SIDE, CENTER_CUBE_SIDE);
+    glVertex3f(CENTER_CUBE_SIDE, CENTER_CUBE_SIDE, CENTER_CUBE_SIDE);
+    glVertex3f(CENTER_CUBE_SIDE, CENTER_CUBE_SIDE, -CENTER_CUBE_SIDE);
+    glVertex3f(-CENTER_CUBE_SIDE, CENTER_CUBE_SIDE, -CENTER_CUBE_SIDE);
+    // right
+    glNormal3f(0.0f, -1.0f, 0.0f);
+    glVertex3f(-CENTER_CUBE_SIDE, -CENTER_CUBE_SIDE, CENTER_CUBE_SIDE);
+    glVertex3f(CENTER_CUBE_SIDE, -CENTER_CUBE_SIDE, CENTER_CUBE_SIDE);
+    glVertex3f(CENTER_CUBE_SIDE, -CENTER_CUBE_SIDE, -CENTER_CUBE_SIDE);
+    glVertex3f(-CENTER_CUBE_SIDE, -CENTER_CUBE_SIDE, -CENTER_CUBE_SIDE);
+    // top
+    glNormal3f(0.0f, 0.0f, 1.0f);
+    glVertex3f(CENTER_CUBE_SIDE, -CENTER_CUBE_SIDE, CENTER_CUBE_SIDE);
+    glVertex3f(CENTER_CUBE_SIDE, CENTER_CUBE_SIDE, CENTER_CUBE_SIDE);
+    glVertex3f(-CENTER_CUBE_SIDE, CENTER_CUBE_SIDE, CENTER_CUBE_SIDE);
+    glVertex3f(-CENTER_CUBE_SIDE, -CENTER_CUBE_SIDE, CENTER_CUBE_SIDE);
+    // bottom
+    glNormal3f(0.0f, 0.0f, -1.0f);
+    glVertex3f(CENTER_CUBE_SIDE, -CENTER_CUBE_SIDE, -CENTER_CUBE_SIDE);
+    glVertex3f(CENTER_CUBE_SIDE, CENTER_CUBE_SIDE, -CENTER_CUBE_SIDE);
+    glVertex3f(-CENTER_CUBE_SIDE, CENTER_CUBE_SIDE, -CENTER_CUBE_SIDE);
+    glVertex3f(-CENTER_CUBE_SIDE, -CENTER_CUBE_SIDE, -CENTER_CUBE_SIDE);
+    // front
+    glNormal3f(1.0f, 0.0f, 0.0f);
+    glVertex3f(CENTER_CUBE_SIDE, CENTER_CUBE_SIDE, -CENTER_CUBE_SIDE);
+    glVertex3f(CENTER_CUBE_SIDE, CENTER_CUBE_SIDE, CENTER_CUBE_SIDE);
+    glVertex3f(CENTER_CUBE_SIDE, -CENTER_CUBE_SIDE, CENTER_CUBE_SIDE);
+    glVertex3f(CENTER_CUBE_SIDE, -CENTER_CUBE_SIDE, -CENTER_CUBE_SIDE);
+    // back
+    glNormal3f(-1.0f, 0.0f, 0.0f);
+    glVertex3f(-CENTER_CUBE_SIDE, CENTER_CUBE_SIDE, -CENTER_CUBE_SIDE);
+    glVertex3f(-CENTER_CUBE_SIDE, CENTER_CUBE_SIDE, CENTER_CUBE_SIDE);
+    glVertex3f(-CENTER_CUBE_SIDE, -CENTER_CUBE_SIDE, CENTER_CUBE_SIDE);
+    glVertex3f(-CENTER_CUBE_SIDE, -CENTER_CUBE_SIDE, -CENTER_CUBE_SIDE);
+
     glEnd();
     glPopName();
+
     // draw front velocity point
     glPushName(m_nFrontId);
     glPointSize(5);
@@ -197,6 +242,7 @@ class GLWayPoint : public GLObject {
   int             m_nFrontId;
   bool            m_bClampToPlane;
   Eigen::Vector4d m_mClampPlaneN_p;
+  const float     CENTER_CUBE_SIDE = 0.2;
 
 };
 
