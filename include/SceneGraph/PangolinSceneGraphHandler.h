@@ -168,23 +168,21 @@ struct HandlerSceneGraph : pangolin::Handler3D {
 
   void Mouse(pangolin::View& view, pangolin::MouseButton button,
              int x, int y, bool pressed, int button_state) {
-
-
-    std::cout << " -- waypoint Mouse is called !!!" << std::endl;
-
     GetPosNormal(view, x, y, p, Pw, Pc, n);
     bool handled = false;
 
     if (pressed) {
       m_selected_objects.clear();
       ComputeHits(view, *cam_state, x, y, m_grab_width, m_selected_objects);
+      // find the waypoint object among selected objects and setvisible to false
+      // otherwise when draging object it will keep moving toward camera
       for (std::map<int, SceneGraph::GLObject*>::iterator i =
                m_selected_objects.begin();
            i != m_selected_objects.end(); ++i ) {
           std::string objname;
           i->second->GetName(objname);
-          if( objname.find("Waypoint") != std::string::npos) {
-            i->second->SetVisible(false);
+          if(objname.find("Waypoint") != std::string::npos) {
+//              i->second->SetVisible(false);
             GetPosNormal(view, x, y, p, Pw, Pc, n);
           }
       }
@@ -200,13 +198,14 @@ struct HandlerSceneGraph : pangolin::Handler3D {
             pressed, button_state, i->first);
       }
     } else {
+        // set waypoints to visible when click released
         for (std::map<int, SceneGraph::GLObject*>::iterator i =
                  m_selected_objects.begin();
              i != m_selected_objects.end(); ++i ) {
             std::string objname;
             i->second->GetName(objname);
-            if( objname.find("Waypoint") != std::string::npos) {
-              i->second->SetVisible(true);
+            if(objname.find("Waypoint") != std::string::npos) {
+//              i->second->SetVisible(true);
             }
         }
       for (std::map<int, SceneGraph::GLObject*>::iterator i =
@@ -229,19 +228,6 @@ struct HandlerSceneGraph : pangolin::Handler3D {
   void MouseMotion(pangolin::View& view, int x, int y, int button_state) {
     GetPosNormal(view, x, y, p, Pw, Pc, n);
     bool handled = false;
-//    m_selected_objects.clear();
-//    ComputeHits(view, *cam_state, x, y, m_grab_width, m_selected_objects);
-//    for (std::map<int, SceneGraph::GLObject*>::iterator i =
-//             m_selected_objects.begin();
-//         i != m_selected_objects.end(); ++i ) {
-//        std::string objname;
-//        i->second->GetName(objname);
-//        if( objname.find("Waypoint") != std::string::npos) {
-//          i->second->SetVisible(false);
-//          GetPosNormal(view, x, y, p, Pw, Pc, n);
-//          i->second->SetVisible(true);
-//        }
-//    }
     for (std::map<int, SceneGraph::GLObject*>::iterator i =
              m_selected_objects.begin(); i != m_selected_objects.end(); ++i ) {
       handled |= i->second->MouseMotion(
@@ -250,7 +236,6 @@ struct HandlerSceneGraph : pangolin::Handler3D {
           Eigen::Map<Eigen::Matrix<GLdouble, 3, 1> >(n).cast<double>(),
           button_state, i->first);
     }
-
     if (!handled) {
       pangolin::Handler3D::MouseMotion(view, x, y, button_state);
     }
@@ -276,9 +261,9 @@ struct HandlerSceneGraph : pangolin::Handler3D {
            i != m_selected_objects.end(); ++i ) {
         handled |= i->second->Mouse(
             button,
-            Eigen::Map<Eigen::Matrix<GLdouble, 3, 1> >(p).cast<double>(),
-            Eigen::Map<Eigen::Matrix<GLdouble, 3, 1> >(Pw).cast<double>(),
-            Eigen::Map<Eigen::Matrix<GLdouble, 3, 1> >(n).cast<double>(),
+            Eigen::Map<Eigen::Matrix<GLdouble, 3, 1>>(p).cast<double>(),
+            Eigen::Map<Eigen::Matrix<GLdouble, 3, 1>>(Pw).cast<double>(),
+            Eigen::Map<Eigen::Matrix<GLdouble, 3, 1>>(n).cast<double>(),
             true, button_state, i->first);
       }
     }
@@ -290,6 +275,7 @@ struct HandlerSceneGraph : pangolin::Handler3D {
   }
 
   std::map<int, SceneGraph::GLObject*> m_selected_objects;
+  std::map<int, SceneGraph::GLObject*> m_selected_objects_;
   SceneGraph::GLSceneGraph& m_scenegraph;
   unsigned m_grab_width;
 };

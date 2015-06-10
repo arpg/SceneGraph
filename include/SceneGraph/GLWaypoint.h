@@ -4,6 +4,7 @@
 #define SCENEGRAPH_GLWAYPOINT_H_
 
 #include <SceneGraph/GLObject.h>
+#include <pangolin/pangolin.h>
 
 namespace SceneGraph {
 
@@ -71,11 +72,11 @@ class GLWayPoint : public GLObject {
       const Eigen::Vector3d n = m_mClampPlaneN_p.head<3>();
       const double d = m_mClampPlaneN_p(3);
       p_w = p_w - ((p_w.dot(n)-d) * n);
-      n_w = -n;
+      n_w = n;
     }
 
     if (pickId == m_nBaseId  && m_bLocked == false) {
-      Eigen::Vector3d d = -n_w;
+      Eigen::Vector3d d = n_w;
       Eigen::Vector3d f = T.block <3, 1> (0, 0);
       Eigen::Vector3d r = d.cross(f).normalized();
       f = r.cross(d).normalized();
@@ -122,6 +123,7 @@ class GLWayPoint : public GLObject {
   }
 
   void DrawCanonicalObject() {
+    glDepthMask(false);
     pangolin::GlState gl;
     double multiplier = m_bActive && !m_bLocked ? 1.0 : 0.8;
     gl.glDisable(GL_LIGHTING);
@@ -145,14 +147,6 @@ class GLWayPoint : public GLObject {
     } else {
       glColor3ub(0, 255 * multiplier, 0);
     }
-
-    // draw center point
-//    glPushName(m_nBaseId);
-//    glPointSize(10);
-//    glBegin(GL_POINTS);
-//    glVertex3d(0, 0, 0);
-//    glEnd();
-//    glPopName();
 
     // Draw Center Cube
     glPushName(m_nBaseId);
@@ -205,6 +199,8 @@ class GLWayPoint : public GLObject {
     glVertex3d(velx, 0, 0);
     glEnd();
     glPopName();
+
+    glDepthMask(true);
   }
 
   void SetAerial(bool bVal) { m_bAerial = bVal; }
