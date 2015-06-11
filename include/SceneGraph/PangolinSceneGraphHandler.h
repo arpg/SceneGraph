@@ -174,18 +174,6 @@ struct HandlerSceneGraph : pangolin::Handler3D {
     if (pressed) {
       m_selected_objects.clear();
       ComputeHits(view, *cam_state, x, y, m_grab_width, m_selected_objects);
-      // find the waypoint object among selected objects and setvisible to false
-      // otherwise when draging object it will keep moving toward camera
-      for (std::map<int, SceneGraph::GLObject*>::iterator i =
-               m_selected_objects.begin();
-           i != m_selected_objects.end(); ++i ) {
-          std::string objname;
-          i->second->GetName(objname);
-          if(objname.find("Waypoint") != std::string::npos) {
-//              i->second->SetVisible(false);
-            GetPosNormal(view, x, y, p, Pw, Pc, n);
-          }
-      }
 
       for (std::map<int, SceneGraph::GLObject*>::iterator i =
                m_selected_objects.begin();
@@ -198,16 +186,6 @@ struct HandlerSceneGraph : pangolin::Handler3D {
             pressed, button_state, i->first);
       }
     } else {
-        // set waypoints to visible when click released
-        for (std::map<int, SceneGraph::GLObject*>::iterator i =
-                 m_selected_objects.begin();
-             i != m_selected_objects.end(); ++i ) {
-            std::string objname;
-            i->second->GetName(objname);
-            if(objname.find("Waypoint") != std::string::npos) {
-//              i->second->SetVisible(true);
-            }
-        }
       for (std::map<int, SceneGraph::GLObject*>::iterator i =
                m_selected_objects.begin();
            i != m_selected_objects.end(); ++i ) {

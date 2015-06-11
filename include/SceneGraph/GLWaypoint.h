@@ -72,11 +72,11 @@ class GLWayPoint : public GLObject {
       const Eigen::Vector3d n = m_mClampPlaneN_p.head<3>();
       const double d = m_mClampPlaneN_p(3);
       p_w = p_w - ((p_w.dot(n)-d) * n);
-      n_w = n;
+      n_w = -n;
     }
 
     if (pickId == m_nBaseId  && m_bLocked == false) {
-      Eigen::Vector3d d = n_w;
+      Eigen::Vector3d d = -n_w;
       Eigen::Vector3d f = T.block <3, 1> (0, 0);
       Eigen::Vector3d r = d.cross(f).normalized();
       f = r.cross(d).normalized();
