@@ -13,13 +13,13 @@ class SCENEGRAPH_EXPORT GLAxis : public GLObject {
   virtual ~GLAxis();
   static void DrawAxis(float fScale = 1.0f);
   void DrawCanonicalObject();
-  void SetAxisSize(float fScale) {
-    m_fAxisScale = fScale;
-  }
+  void SetAxisSize(float fScale) { m_fAxisScale = fScale; }
   float GetAxisSize() { return m_fAxisScale; }
+  bool IsSelectable();
  protected:
-  float m_fAxisScale;
-  bool m_bPretty;
+  float     m_fAxisScale;
+  bool      m_bPretty;
+  int       m_iAxisID;
 };
 
 }  // namespace SceneGraph

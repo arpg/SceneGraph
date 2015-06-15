@@ -4,6 +4,7 @@
 #define SCENEGRAPH_GLWAYPOINT_H_
 
 #include <SceneGraph/GLObject.h>
+#include <pangolin/pangolin.h>
 
 namespace SceneGraph {
 
@@ -27,7 +28,7 @@ class GLWayPoint : public GLObject {
     // Set unique waypoint name
     static int wid = 0;
     char buf[128];
-    snprintf(buf, sizeof(buf), "WayPoint-%d", wid++);
+    snprintf(buf, sizeof(buf), "Waypoint-%d", wid++);
     SetObjectName(buf);
 
     // Allocate extra picking id for front point
@@ -42,7 +43,7 @@ class GLWayPoint : public GLObject {
   bool Mouse(int button, const Eigen::Vector3d& /*win*/,
              const Eigen::Vector3d& /*obj*/,
              const Eigen::Vector3d& /*normal*/,
-             bool /*pressed*/, int /*button_state*/, int /*pickId*/) {
+             bool /*pressed*/, int /*button_state*/, int pickId) {
     if (button == MouseButtonLeft && m_bLocked == false) {
       m_bPendingActive = true;
     } else if (button == MouseWheelUp && m_bLocked == false) {
@@ -122,6 +123,7 @@ class GLWayPoint : public GLObject {
   }
 
   void DrawCanonicalObject() {
+    glDepthMask(false);
     pangolin::GlState gl;
     double multiplier = m_bActive && !m_bLocked ? 1.0 : 0.8;
     gl.glDisable(GL_LIGHTING);
@@ -135,18 +137,61 @@ class GLWayPoint : public GLObject {
     glVertex3d(1, 0, 0);
     glEnd();
     glPopName();
+
+    glPushName(m_nBaseId);
     DrawAxis(1);
+    glPopName();
+
     if (m_bAerial) {
       glColor3ub(0, 0, 255 * multiplier);
     } else {
       glColor3ub(0, 255 * multiplier, 0);
     }
-    // draw center point
-    glPointSize(5);
-    glBegin(GL_POINTS);
-    glVertex3d(0, 0, 0);
+
+    // Draw Center Cube
+    glPushName(m_nBaseId);
+    glBegin(GL_QUADS);
+    // left
+    glColor3f(0.0f, velx/10, 0.0f);
+    glNormal3f(0.0f, 1.0f, 0.0f);
+    glVertex3f(-CENTER_CUBE_SIDE, CENTER_CUBE_SIDE, CENTER_CUBE_SIDE);
+    glVertex3f(CENTER_CUBE_SIDE, CENTER_CUBE_SIDE, CENTER_CUBE_SIDE);
+    glVertex3f(CENTER_CUBE_SIDE, CENTER_CUBE_SIDE, -CENTER_CUBE_SIDE);
+    glVertex3f(-CENTER_CUBE_SIDE, CENTER_CUBE_SIDE, -CENTER_CUBE_SIDE);
+    // right
+    glNormal3f(0.0f, -1.0f, 0.0f);
+    glVertex3f(-CENTER_CUBE_SIDE, -CENTER_CUBE_SIDE, CENTER_CUBE_SIDE);
+    glVertex3f(CENTER_CUBE_SIDE, -CENTER_CUBE_SIDE, CENTER_CUBE_SIDE);
+    glVertex3f(CENTER_CUBE_SIDE, -CENTER_CUBE_SIDE, -CENTER_CUBE_SIDE);
+    glVertex3f(-CENTER_CUBE_SIDE, -CENTER_CUBE_SIDE, -CENTER_CUBE_SIDE);
+    // top
+    glNormal3f(0.0f, 0.0f, 1.0f);
+    glVertex3f(CENTER_CUBE_SIDE, -CENTER_CUBE_SIDE, CENTER_CUBE_SIDE);
+    glVertex3f(CENTER_CUBE_SIDE, CENTER_CUBE_SIDE, CENTER_CUBE_SIDE);
+    glVertex3f(-CENTER_CUBE_SIDE, CENTER_CUBE_SIDE, CENTER_CUBE_SIDE);
+    glVertex3f(-CENTER_CUBE_SIDE, -CENTER_CUBE_SIDE, CENTER_CUBE_SIDE);
+    // bottom
+    glNormal3f(0.0f, 0.0f, -1.0f);
+    glVertex3f(CENTER_CUBE_SIDE, -CENTER_CUBE_SIDE, -CENTER_CUBE_SIDE);
+    glVertex3f(CENTER_CUBE_SIDE, CENTER_CUBE_SIDE, -CENTER_CUBE_SIDE);
+    glVertex3f(-CENTER_CUBE_SIDE, CENTER_CUBE_SIDE, -CENTER_CUBE_SIDE);
+    glVertex3f(-CENTER_CUBE_SIDE, -CENTER_CUBE_SIDE, -CENTER_CUBE_SIDE);
+    // front
+    glNormal3f(1.0f, 0.0f, 0.0f);
+    glVertex3f(CENTER_CUBE_SIDE, CENTER_CUBE_SIDE, -CENTER_CUBE_SIDE);
+    glVertex3f(CENTER_CUBE_SIDE, CENTER_CUBE_SIDE, CENTER_CUBE_SIDE);
+    glVertex3f(CENTER_CUBE_SIDE, -CENTER_CUBE_SIDE, CENTER_CUBE_SIDE);
+    glVertex3f(CENTER_CUBE_SIDE, -CENTER_CUBE_SIDE, -CENTER_CUBE_SIDE);
+    // back
+    glNormal3f(-1.0f, 0.0f, 0.0f);
+    glVertex3f(-CENTER_CUBE_SIDE, CENTER_CUBE_SIDE, -CENTER_CUBE_SIDE);
+    glVertex3f(-CENTER_CUBE_SIDE, CENTER_CUBE_SIDE, CENTER_CUBE_SIDE);
+    glVertex3f(-CENTER_CUBE_SIDE, -CENTER_CUBE_SIDE, CENTER_CUBE_SIDE);
+    glVertex3f(-CENTER_CUBE_SIDE, -CENTER_CUBE_SIDE, -CENTER_CUBE_SIDE);
+
     glEnd();
     glPopName();
+
     // draw front velocity point
     glPushName(m_nFrontId);
     glPointSize(5);
@@ -154,6 +199,8 @@ class GLWayPoint : public GLObject {
     glVertex3d(velx, 0, 0);
     glEnd();
     glPopName();
+
+    glDepthMask(true);
   }
 
   void SetAerial(bool bVal) { m_bAerial = bVal; }
@@ -191,6 +238,7 @@ class GLWayPoint : public GLObject {
   int             m_nFrontId;
   bool            m_bClampToPlane;
   Eigen::Vector4d m_mClampPlaneN_p;
+  const float     CENTER_CUBE_SIDE = 0.2;
 
 };
 

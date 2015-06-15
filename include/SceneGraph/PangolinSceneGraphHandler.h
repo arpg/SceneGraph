@@ -11,7 +11,6 @@
 #include <map>
 #include <limits>
 
-
 namespace SceneGraph {
 
 struct HandlerSceneGraph : pangolin::Handler3D {
@@ -159,6 +158,8 @@ struct HandlerSceneGraph : pangolin::Handler3D {
     glFlush();
 
     GLint nHits = glRenderMode(eRenderVisible);
+//    std::cout << " -- Number of Hits are: " << nHits << std::endl;
+//    std::cout << " -- size of hitobjects: " << hit_objects.size() << std::endl;
     if (nHits > 0) {
       ProcessHitBuffer(nHits, vSelectBuf, hit_objects);
     }
@@ -168,12 +169,12 @@ struct HandlerSceneGraph : pangolin::Handler3D {
   void Mouse(pangolin::View& view, pangolin::MouseButton button,
              int x, int y, bool pressed, int button_state) {
     GetPosNormal(view, x, y, p, Pw, Pc, n);
-
     bool handled = false;
 
     if (pressed) {
       m_selected_objects.clear();
       ComputeHits(view, *cam_state, x, y, m_grab_width, m_selected_objects);
+
       for (std::map<int, SceneGraph::GLObject*>::iterator i =
                m_selected_objects.begin();
            i != m_selected_objects.end(); ++i ) {
@@ -196,6 +197,7 @@ struct HandlerSceneGraph : pangolin::Handler3D {
             pressed, button_state, i->first);
       }
     }
+
     if (!handled) {
       Handler3D::Mouse(view, button, x, y, pressed, button_state);
     }
@@ -212,7 +214,6 @@ struct HandlerSceneGraph : pangolin::Handler3D {
           Eigen::Map<Eigen::Matrix<GLdouble, 3, 1> >(n).cast<double>(),
           button_state, i->first);
     }
-
     if (!handled) {
       pangolin::Handler3D::MouseMotion(view, x, y, button_state);
     }
@@ -229,6 +230,7 @@ struct HandlerSceneGraph : pangolin::Handler3D {
 
     if (inType == pangolin::InputSpecialScroll) {
       m_selected_objects.clear();
+
       ComputeHits(view, *cam_state, x, y, m_grab_width, m_selected_objects);
       const pangolin::MouseButton button = p2 > 0 ?
           pangolin::MouseWheelUp : pangolin::MouseWheelDown;
@@ -237,9 +239,9 @@ struct HandlerSceneGraph : pangolin::Handler3D {
            i != m_selected_objects.end(); ++i ) {
         handled |= i->second->Mouse(
             button,
-            Eigen::Map<Eigen::Matrix<GLdouble, 3, 1> >(p).cast<double>(),
-            Eigen::Map<Eigen::Matrix<GLdouble, 3, 1> >(Pw).cast<double>(),
-            Eigen::Map<Eigen::Matrix<GLdouble, 3, 1> >(n).cast<double>(),
+            Eigen::Map<Eigen::Matrix<GLdouble, 3, 1>>(p).cast<double>(),
+            Eigen::Map<Eigen::Matrix<GLdouble, 3, 1>>(Pw).cast<double>(),
+            Eigen::Map<Eigen::Matrix<GLdouble, 3, 1>>(n).cast<double>(),
             true, button_state, i->first);
       }
     }
@@ -251,6 +253,7 @@ struct HandlerSceneGraph : pangolin::Handler3D {
   }
 
   std::map<int, SceneGraph::GLObject*> m_selected_objects;
+  std::map<int, SceneGraph::GLObject*> m_selected_objects_;
   SceneGraph::GLSceneGraph& m_scenegraph;
   unsigned m_grab_width;
 };
