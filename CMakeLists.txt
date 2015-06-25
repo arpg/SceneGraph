@@ -147,7 +147,7 @@ else()
   message(STATUS "ASSIMP Not found, but required for mesh loading.")
 endif()
 
-find_package( DevIL QUIET )
+find_package( DevIL REQUIRED QUIET )
 if(IL_FOUND)
   set(HAVE_DEVIL 1)
   list(APPEND REQUIRED_INCLUDE_DIRS "${IL_INCLUDE_DIR};${IL_INCLUDE_DIR}/.." )
