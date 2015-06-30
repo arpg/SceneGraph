@@ -12,7 +12,7 @@ GLMesh::Mesh::Mesh() {
   m_uIB = 0;
   m_uNumIndices = 0;
   m_uMaterialIndex = -1;
-};
+}
 
 GLMesh::Mesh::~Mesh() {
   if (m_uVB != 0) {
@@ -28,7 +28,6 @@ GLvoid GLMesh::Mesh::Init(const std::vector<Vertex>& vVertices,
                           const std::vector<unsigned int>& vIndices,
                           const aiMatrix4x4& mTrans) {
   m_Transformation = mTrans;
-
   m_uNumIndices = vIndices.size();
   int nVertexSize = sizeof(Vertex);
 
@@ -88,6 +87,7 @@ GLMesh::GLMesh()
       m_pScene(0),
       m_fAlpha(1),
       m_bShowMeshNormals(false),
+      m_meshcolor(SceneGraph::GLColor(1.0f, 1.0f, 1.0f)), //default mesh color
       m_uMeshCount(0) {
   m_iMeshID = AllocSelectionId();
 }
@@ -98,6 +98,7 @@ GLMesh::GLMesh(const std::string& sMeshFile)
       m_pScene(0),
       m_fAlpha(1),
       m_bShowMeshNormals(false),
+      m_meshcolor(SceneGraph::GLColor(1.0f, 1.0f, 1.0f)), //default mesh color
       m_uMeshCount(0) {
   m_iMeshID = AllocSelectionId();
   Init(sMeshFile);
@@ -116,7 +117,10 @@ GLMesh::~GLMesh() {
     aiReleaseImport(m_pScene);
   }
 }
-
+////////////////////////////////////////////////////////////////////////////
+void GLMesh::SetMeshColor(SceneGraph::GLColor& mesh_color) {
+  m_meshcolor = mesh_color;
+}
 ////////////////////////////////////////////////////////////////////////////
 void GLMesh::Init(const std::string& sMeshFile, bool bFlipUVs /*= false*/) {
   SetObjectName("mesh");
@@ -215,6 +219,7 @@ void GLMesh::ShowNormals(bool showNormals) { m_bShowMeshNormals = showNormals; }
 void GLMesh::DrawCanonicalObject() {
   if (m_pScene) {
     glPushName(m_iMeshID);
+    glColor4f(m_meshcolor.r, m_meshcolor.g, m_meshcolor.b, m_meshcolor.a);
     for (unsigned int i = 0; i < m_Meshes.size(); i++) {
       glBindBuffer(GL_ARRAY_BUFFER, m_Meshes[i].m_uVB);
       glVertexPointer(3, GL_FLOAT, sizeof(Vertex), 0);

@@ -63,6 +63,8 @@ class GLMesh : public GLObject
 
         void SetAlpha(const double a) { m_fAlpha = a; }
 
+        void SetMeshColor(SceneGraph::GLColor& mesh_color);
+
         bool IsSelectable();
         // TODO: Ideally we would deprecate this and not make
         // ASSIMP structures public.
@@ -132,6 +134,7 @@ protected:
 
 
         const struct aiScene*   m_pScene;
+        SceneGraph::GLColor     m_meshcolor;
         float                   m_fAlpha; // render translucent meshes?
         unsigned int            m_iMeshID;
         bool                    m_bShowMeshNormals;
