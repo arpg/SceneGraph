@@ -194,7 +194,7 @@ class Sim
         ///////////////////////////////////////////////////////////////////
         void StepSimulation()
         {
-            m_pDynamicsWorld->stepSimulation( m_dTimeStep,  m_nMaxSubSteps );
+            m_pDynamicsWorld->stepSimulation( m_dTimeStep,  (float)m_nMaxSubSteps );
         }
 
 

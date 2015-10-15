@@ -24,7 +24,7 @@ GLMesh::Mesh::~Mesh() {
   }
 }
 
-GLvoid GLMesh::Mesh::Init(const std::vector<Vertex>& vVertices,
+bool GLMesh::Mesh::Init(const std::vector<Vertex>& vVertices,
                           const std::vector<unsigned int>& vIndices,
                           const aiMatrix4x4& mTrans) {
   m_Transformation = mTrans;
@@ -42,6 +42,8 @@ GLvoid GLMesh::Mesh::Init(const std::vector<Vertex>& vVertices,
   glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * m_uNumIndices,
                &vIndices[0], GL_DYNAMIC_DRAW);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+ 
+  return true; 
 }
 
 ////////////////////////////////////////////////////////////////////////////
@@ -92,6 +94,7 @@ GLMesh::GLMesh()
   m_iMeshID = AllocSelectionId();
 }
 
+/*
 ////////////////////////////////////////////////////////////////////////////
 GLMesh::GLMesh(const std::string& sMeshFile)
     : GLObject("Mesh"),
@@ -103,6 +106,7 @@ GLMesh::GLMesh(const std::string& sMeshFile)
   m_iMeshID = AllocSelectionId();
   Init(sMeshFile);
 }
+*/
 
 ////////////////////////////////////////////////////////////////////////////
 GLMesh::~GLMesh() {
@@ -122,7 +126,7 @@ void GLMesh::SetMeshColor(SceneGraph::GLColor& mesh_color) {
   m_meshcolor = mesh_color;
 }
 ////////////////////////////////////////////////////////////////////////////
-void GLMesh::Init(const std::string& sMeshFile, bool bFlipUVs /*= false*/) {
+bool GLMesh::Init(const std::string& sMeshFile, bool bFlipUVs /*= false*/) {
   SetObjectName("mesh");
   m_pScene = aiImportFile(
       sMeshFile.c_str(),
@@ -143,19 +147,19 @@ void GLMesh::Init(const std::string& sMeshFile, bool bFlipUVs /*= false*/) {
           |
           aiProcess_FixInfacingNormals);
   if (m_pScene == NULL) {
-    throw GLMeshException("Unable to load mesh.");
-  } else {
-    Init(m_pScene);
+    return false;
   }
+  return Init(m_pScene);
 }
 
 ////////////////////////////////////////////////////////////////////////////
-void GLMesh::Init(const struct aiScene* pScene) {
+bool GLMesh::Init(const struct aiScene* pScene) {
   m_pScene = pScene;
   m_Meshes.resize(pScene->mNumMeshes);
   InitNode(m_pScene, m_pScene->mRootNode, aiMatrix4x4());
   LoadMeshTextures();
   ComputeDimensions();
+  return true;
 }
 
 ////////////////////////////////////////////////////////////////////////////
