@@ -1,6 +1,7 @@
 #ifndef __BULLET_WRAPPER_
 #define __BULLET_WRAPPER_
 
+#include <memory>
 #include <pangolin/pangolin.h>
 #include <SceneGraph/SceneGraph.h>
 
