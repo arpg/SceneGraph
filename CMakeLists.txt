@@ -271,12 +271,6 @@ set( SCENEGRAPH_LIBRARIES ${REQUIRED_LIBRARIES} scenegraph )
 set( SCENEGRAPH_INCLUDE_DIRS ${REQUIRED_INCLUDE_DIRS} )
 
 if(BUILD_EXAMPLES)
-    find_package( CVars CONFIG REQUIRED)
-    if(CVars_FOUND)
-        set(HAVE_CVARS 1)
-        list(APPEND REQUIRED_INCLUDE_DIRS ${CVars_INCLUDE_DIRS})
-        list(APPEND REQUIRED_LIBRARIES ${CVars_LIBRARIES})
-    endif()
   add_subdirectory( Examples )
 endif()
 
