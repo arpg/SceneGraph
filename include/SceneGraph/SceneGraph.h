@@ -5,7 +5,7 @@
 
 // OpenGL defines are in here
 #include <pangolin/pangolin.h>
-#include <pangolin/gldraw.h>
+#include <pangolin/gl/gldraw.h>
 
 #include <SceneGraph/AxisAlignedBoundingBox.h>
 #include <SceneGraph/GLHelpers.h>

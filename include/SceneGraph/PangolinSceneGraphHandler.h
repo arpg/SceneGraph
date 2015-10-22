@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <pangolin/simple_math.h>
+#include <pangolin/utils/simple_math.h>
 #include <pangolin/pangolin.h>
 #include <SceneGraph/SceneGraph.h>
 #include <map>

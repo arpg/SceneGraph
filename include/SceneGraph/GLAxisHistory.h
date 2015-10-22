@@ -1,7 +1,7 @@
 #pragma once
 
+#include <pangolin/gl/gl.h>
 #include <SceneGraph/SceneGraph.h>
-#include <pangolin/gl.h>
 
 namespace SceneGraph
 {
