@@ -6,7 +6,7 @@
 #include <Mvlpp/Mvl.h>
 
 #include "CVarHelpers.h"
-#include <CVars/CVar.h>
+#include <cvars/CVar.h>
 
 using namespace std;
 
