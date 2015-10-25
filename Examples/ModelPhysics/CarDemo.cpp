@@ -5,7 +5,7 @@
 
 #include "CVarHelpers.h"
 #include <SceneGraph/SceneGraph.h>
-#include <CVars/CVar.h>
+#include <cvars/CVar.h>
 #include <pangolin/pangolin.h>
 #include "BulletWrapper.h"
 

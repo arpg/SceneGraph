@@ -1,7 +1,7 @@
 #ifndef _CVAR_HELPERS_
 #define _CVAR_HELPERS_
 
-#include <CVars/CVarVectorIO.h>
+#include <cvars/CVarVectorIO.h>
 
 #include <Eigen/Core>
 
