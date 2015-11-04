@@ -13,6 +13,10 @@ list( APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules )
 
 include( install_package )
 
+# Add package to CMake package registery for use from the build tree
+option( EXPORT_${PROJECT_NAME}
+  "Should the ${PROJECT_NAME} package be exported for use by other software" ON )
+
 ################################################################################
 
 option(BUILD_EXAMPLES "Build Examples" ON)
