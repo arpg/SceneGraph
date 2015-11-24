@@ -238,7 +238,7 @@ class GLWayPoint : public GLObject {
   int             m_nFrontId;
   bool            m_bClampToPlane;
   Eigen::Vector4d m_mClampPlaneN_p;
-  const float     CENTER_CUBE_SIDE = 0.2;
+  float           CENTER_CUBE_SIDE = 0.2;
 
 };
 
