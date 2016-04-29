@@ -17,11 +17,11 @@
 
 #include <GL/glew.h>
 
-//#ifdef __APPLE_CC__
-//#include <GLUT/glut.h>
-//#else
+#ifdef __APPLE_CC__
+#include <GLUT/glut.h>
+#else
 #include <GL/glut.h> // glutBitmapWidth, glutBitmapCharacter
-//#endif
+#endif
 
 #define NV_REPORT_COMPILE_ERRORS
 #include <SceneGraph/Widgets/nvShaderUtils.h>
