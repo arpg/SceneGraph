@@ -20,11 +20,11 @@ add_executable( SimCamDEMO ${HDRS} ${SRCS} )
 
 target_link_libraries( SimCamDEMO
                         ${Pangolin_LIBRARIES}
-                        ${SCENEGRAPH_LIBRARIES}
+                        ${SceneGraph_LIBRARIES}
                         ${MVL_LIBRARIES}
                      )
 
 # In your own code, you can ommit these lines
-IF( ${SCENEGRAPH_EXAMPLE} )
+IF( ${SceneGraph_EXAMPLE} )
   add_dependencies(SimCamDEMO scenegraph )
 ENDIF()

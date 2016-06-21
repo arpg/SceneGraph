@@ -94,7 +94,7 @@ int main( int /*argc*/, char** /*argv*/ )
 
         // Pause for 1/60th of a second.
         usleep(1E6 / 60);
-        dynamicsWorld.stepSimulation(1/60.f,10);
+        dynamicsWorld.stepSimulation(1/60,10);
     }
 
     dynamicsWorld.removeRigidBody(fallRigidBody);
