@@ -134,6 +134,7 @@ namespace SceneGraph
 
 
       const struct aiScene*   m_pScene;
+      std::string			  m_sMeshPath;
       SceneGraph::GLColor     m_meshcolor;
       float                   m_fAlpha; // render translucent meshes?
       unsigned int            m_iMeshID;

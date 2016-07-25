@@ -1,3 +1,5 @@
+#include <stdlib.h>
+#include <limits.h>
 #include <SceneGraph/GLMesh.h>
 
 #include <SceneGraph/GLHelpersLoadTextures.h>
@@ -128,6 +130,8 @@ void GLMesh::SetMeshColor(SceneGraph::GLColor& mesh_color) {
 ////////////////////////////////////////////////////////////////////////////
 bool GLMesh::Init(const std::string& sMeshFile, bool bFlipUVs /*= false*/) {
   SetObjectName("mesh");
+  std::string sMeshPath(realpath(sMeshFile.c_str(), NULL));
+  m_sMeshPath = sMeshPath.substr(0, sMeshPath.find_last_of("\\/")) + "/";
   m_pScene = aiImportFile(
       sMeshFile.c_str(),
       aiProcess_Triangulate | aiProcess_GenSmoothNormals |
@@ -389,10 +393,15 @@ void GLMesh::LoadMaterialTextures(aiMaterial* pMaterial) {
       aiReturn texFound = pMaterial->GetTexture(tt, dt, &path, mapping, uvindex,
                                                 blend, op, mapmode);
 
+      char fullMeshPath[PATH_MAX+1];
+      strncpy(fullMeshPath, m_sMeshPath.c_str(), sizeof(fullMeshPath));
+      strncat(fullMeshPath, path.C_Str(), sizeof(fullMeshPath));
+      aiString meshfile(fullMeshPath);
+
       // Attempt to load reference to texture data as OpenGL
       // texture, with appropriate properties set.
       if (texFound == AI_SUCCESS) {
-        GLuint glTex = LoadGLTextureResource(path);
+        GLuint glTex = LoadGLTextureResource(meshfile);
 
         if (glTex > 0) {
           m_mapPathToGLTex[path.data] = glTex;
@@ -427,11 +436,11 @@ void GLMesh::LoadMaterialTextures(aiMaterial* pMaterial) {
           glBindTexture(GL_TEXTURE_2D, 0);
         } else {
           std::cerr << "Failed to load texture. Type: " << (int)tt
-                    << ", id: " << dt << " path: " << path.C_Str() << std::endl;
+                    << ", id: " << dt << " path: " << meshfile.C_Str() << std::endl;
         }
       } else {
         std::cerr << "Failed to get texture. Type: " << (int)tt
-                  << ", id: " << dt << " path: " << path.C_Str() << std::endl;
+                  << ", id: " << dt << " path: " << meshfile.C_Str() << std::endl;
       }
     }
   }
