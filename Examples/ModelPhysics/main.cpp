@@ -3,6 +3,9 @@
 #include <Eigen/Eigen>
 #include <unistd.h>
 
+#warning "Using Bullet in double precision mode, comment the following line if you use bullet in single precision mode"
+#define BT_USE_DOUBLE_PRECISION
+
 #include <pangolin/pangolin.h>
 #include <SceneGraph/SceneGraph.h>
 #include "BulletWrapper.h"
