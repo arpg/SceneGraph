@@ -25,6 +25,7 @@ class GLWayPoint : public GLObject {
     m_bPerceptable = false;
     m_dScale = Eigen::Vector3d(0.25, 0.25, 0.25);
     m_dColor = Eigen::Vector3d(0,1,0);
+    CENTER_CUBE_SIDE = 0.5;
     // Set unique waypoint name
     static int wid = 0;
     char buf[128];
@@ -45,6 +46,9 @@ class GLWayPoint : public GLObject {
     m_dColor[2] = b;
   }
 
+  void SetCubeDim(float side_dim) {
+    CENTER_CUBE_SIDE = side_dim;
+  }
 
   bool Mouse(int button, const Eigen::Vector3d& /*win*/,
              const Eigen::Vector3d& /*obj*/,
@@ -67,7 +71,7 @@ class GLWayPoint : public GLObject {
   bool MouseMotion(const Eigen::Vector3d& /*win*/,
                    const Eigen::Vector3d &obj,
                    const Eigen::Vector3d& normal,
-                   int button_state, int pickId) {
+                   int button_state, int pickId)  {
     m_bDirty = true;  // flag for update
     Eigen::Matrix4d& T = m_T_po;
     Eigen::Vector3d p_w = obj;
@@ -245,7 +249,7 @@ class GLWayPoint : public GLObject {
   int             m_nFrontId;
   bool            m_bClampToPlane;
   Eigen::Vector4d m_mClampPlaneN_p;
-  float           CENTER_CUBE_SIDE = 0.5;
+  float           CENTER_CUBE_SIDE;
   Eigen::Vector3d m_dColor;
 };
 
