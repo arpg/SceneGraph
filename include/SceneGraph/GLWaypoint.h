@@ -26,7 +26,8 @@ class GLWayPoint : public GLObject {
     m_dScale = Eigen::Vector3d(0.25, 0.25, 0.25);
     m_dColor = Eigen::Vector3d(0,1,0);
     CENTER_CUBE_SIDE = 0.5;
-    // Set unique waypoint name
+    
+// Set unique waypoint name
     static int wid = 0;
     char buf[128];
     snprintf(buf, sizeof(buf), "Waypoint-%d", wid++);
