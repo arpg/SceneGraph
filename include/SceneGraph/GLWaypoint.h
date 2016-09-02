@@ -24,8 +24,10 @@ class GLWayPoint : public GLObject {
     m_dVelocity = 1.0;
     m_bPerceptable = false;
     m_dScale = Eigen::Vector3d(0.25, 0.25, 0.25);
-
-    // Set unique waypoint name
+    m_dColor = Eigen::Vector3d(0,1,0);
+    CENTER_CUBE_SIDE = 0.5;
+    
+// Set unique waypoint name
     static int wid = 0;
     char buf[128];
     snprintf(buf, sizeof(buf), "Waypoint-%d", wid++);
@@ -39,6 +41,15 @@ class GLWayPoint : public GLObject {
   ~GLWayPoint() {
   }
 
+  void SetColor(double r,double g,double b) {
+    m_dColor[0] = r;
+    m_dColor[1] = g;
+    m_dColor[2] = b;
+  }
+
+  void SetCubeDim(float side_dim) {
+    CENTER_CUBE_SIDE = side_dim;
+  }
 
   bool Mouse(int button, const Eigen::Vector3d& /*win*/,
              const Eigen::Vector3d& /*obj*/,
@@ -61,7 +72,7 @@ class GLWayPoint : public GLObject {
   bool MouseMotion(const Eigen::Vector3d& /*win*/,
                    const Eigen::Vector3d &obj,
                    const Eigen::Vector3d& normal,
-                   int button_state, int pickId) {
+                   int button_state, int pickId)  {
     m_bDirty = true;  // flag for update
     Eigen::Matrix4d& T = m_T_po;
     Eigen::Vector3d p_w = obj;
@@ -141,7 +152,6 @@ class GLWayPoint : public GLObject {
     glPushName(m_nBaseId);
     DrawAxis(1);
     glPopName();
-
     if (m_bAerial) {
       glColor3ub(0, 0, 255 * multiplier);
     } else {
@@ -152,7 +162,8 @@ class GLWayPoint : public GLObject {
     glPushName(m_nBaseId);
     glBegin(GL_QUADS);
     // left
-    glColor3f(0.0f, velx/10, 0.0f);
+    double scaled_velx = velx*0.1;
+    glColor3f(m_dColor[0]*scaled_velx, m_dColor[1]*scaled_velx, m_dColor[2]*scaled_velx);
     glNormal3f(0.0f, 1.0f, 0.0f);
     glVertex3f(-CENTER_CUBE_SIDE, CENTER_CUBE_SIDE, CENTER_CUBE_SIDE);
     glVertex3f(CENTER_CUBE_SIDE, CENTER_CUBE_SIDE, CENTER_CUBE_SIDE);
@@ -194,7 +205,8 @@ class GLWayPoint : public GLObject {
 
     // draw front velocity point
     glPushName(m_nFrontId);
-    glPointSize(5);
+    glPointSize(15);
+    glEnable(GL_POINT_SMOOTH);
     glBegin(GL_POINTS);
     glVertex3d(velx, 0, 0);
     glEnd();
@@ -238,8 +250,8 @@ class GLWayPoint : public GLObject {
   int             m_nFrontId;
   bool            m_bClampToPlane;
   Eigen::Vector4d m_mClampPlaneN_p;
-  const float     CENTER_CUBE_SIDE = 0.2;
-
+  float           CENTER_CUBE_SIDE;
+  Eigen::Vector3d m_dColor;
 };
 
 }  // namespace SceneGraph

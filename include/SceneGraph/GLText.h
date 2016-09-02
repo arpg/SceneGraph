@@ -1,8 +1,8 @@
 #ifndef _GL_TEXT_H_
 #define _GL_TEXT_H_
 
-#include <pangolin/glinclude.h>
-#include <pangolin/glfont.h>
+#include <pangolin/gl/glinclude.h>
+#include <pangolin/gl/glfont.h>
 
 #include <SceneGraph/GLObject.h>
 #include <SceneGraph/GLColor.h>
@@ -14,8 +14,7 @@ namespace SceneGraph {
 class GLText : public GLObject {
  public:
   static pangolin::GlFont& GetFont() {
-    static pangolin::GlFont s_font;
-    return s_font;
+    return pangolin::GlFont::I();
   }
 
   /////////////////////////////////

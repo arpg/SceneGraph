@@ -2,15 +2,14 @@
 #include <functional>
 #include <Eigen/Eigen>
 
+#include "VarHelpers.h"
 
-#include "CVarHelpers.h"
 #include <SceneGraph/SceneGraph.h>
-#include <cvars/CVar.h>
+//#include <cvars/CVar.h>
 #include <pangolin/pangolin.h>
 #include "BulletWrapper.h"
 
 using namespace std;
-using namespace CVarUtils;
 
 /*
 
@@ -55,12 +54,11 @@ struct App
         m_dGravity = 9.8;
 
         // Allow user to change these values from the console.
-        AttachCVar( "sim.ramp1.Pose", &m_dRamp1Pose, "Use this to change the pose of the first ramp" );
-        AttachCVar( "sim.ramp1.Extent", &m_dRamp1Extent, "Use this to change the extent of the first ramp" );
-        AttachCVar( "sim.ramp2.Pose", &m_dRamp2Pose, "Use this to change the pose of the first ramp" );
-        AttachCVar( "sim.ramp2.Extent", &m_dRamp2Extent, "Use this to change the extent of the first ramp" );
-        AttachCVar( "sim.Gravity", &m_dGravity, "Use this to change gravity" );
-
+        pangolin::Var<Eigen::Vector6d>::Attach( "sim.ramp1.Pose", m_dRamp1Pose);
+        pangolin::Var<Eigen::Vector3d>::Attach( "sim.ramp1.Extent", m_dRamp1Extent);
+        pangolin::Var<Eigen::Vector6d>::Attach( "sim.ramp2.Pose", m_dRamp2Pose);
+        pangolin::Var<Eigen::Vector3d>::Attach( "sim.ramp2.Extent", m_dRamp2Extent);
+        pangolin::Var<double>::Attach( "sim.Gravity", m_dGravity);
         InitReset(); // this will populate the scene graph with objects and
                      // register these objects with the simulator.
     }

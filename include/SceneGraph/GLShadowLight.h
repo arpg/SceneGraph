@@ -1,6 +1,6 @@
 #pragma once
 
-#include <pangolin/gl.h>
+#include <pangolin/gl/gl.h>
 #include <SceneGraph/SceneGraph.h>
 #include <SceneGraph/GLLight.h>
 

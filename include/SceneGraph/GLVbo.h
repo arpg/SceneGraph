@@ -1,8 +1,8 @@
 #ifndef GLVBO_H
 #define GLVBO_H
 
+#include <pangolin/gl/glvbo.h>
 #include <SceneGraph/GLObject.h>
-#include <pangolin/glvbo.h>
 #include <SceneGraph/SimCam.h>
 
 namespace SceneGraph

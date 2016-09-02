@@ -49,11 +49,13 @@ int main( int /*argc*/, char** /*argv[]*/ )
 
     // Define movable waypoint object with velocity
     SceneGraph::GLWayPoint glWaypoint;
-    glWaypoint.SetPose(0.5,0.5,-0.1,0,0,0);
+    glWaypoint.SetPose(0.5,0.5,0.5,0,0,0);
     glGraph.AddChild(&glWaypoint);
+    glWaypoint.SetColor(0.8,0.5,1);
+    glWaypoint.SetLocked(false);
 
     // Optionally clamp waypoint to specific plane
-    glWaypoint.ClampToPlane(Eigen::Vector4d(0,0,1,0));
+//    glWaypoint.ClampToPlane(Eigen::Vector4d(0,0,1,0));
 #endif
 
     // Define Camera Render Object (for view / scene browsing)
