@@ -43,6 +43,7 @@ public:
         m_vbo.Bind();
         glVertexPointer(m_vbo.count_per_element, m_vbo.datatype, 0, 0);
         glEnableClientState(GL_VERTEX_ARRAY);
+        glLineWidth(5);
         glDrawArrays(m_mode, m_vbo.start(), m_vbo.size() );
         glDisableClientState(GL_VERTEX_ARRAY);
         m_vbo.Unbind();        
@@ -94,8 +95,10 @@ public:
     void SetColor( const GLColor& c )
     {
         m_color = c;
-    }     
-    
+    }
+
+
+
 protected:
     GLenum m_mode;
     SceneGraph::GLColor m_color;

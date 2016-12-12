@@ -28,11 +28,12 @@ int main( int /*argc*/, char** /*argv[]*/ )
     glGraph.AddChild(&glAxis);
     
     // Define 3D spiral using a GLCachedPrimitives object
-    SceneGraph::GLCachedPrimitives glSpiral(GL_LINE_STRIP, SceneGraph::GLColor(1.0f,0.7f,0.2f) );
+    SceneGraph::GLCachedPrimitives glSpiral;//(GL_LINE_STRIP, SceneGraph::GLColor(1.0f,0.7f,0.2f) );
     for(double t=0; t < 10*M_PI; t+= M_PI/50) {
-        glSpiral.AddVertex(Eigen::Vector3d(cos(t)+2, sin(t)+2, -0.1*t) );
+        glSpiral.AddVertex(Eigen::Vector3d(cos(t), sin(t), -0.1*t) );
     }
-    glGraph.AddChild(&glSpiral);    
+//    glSpiral.SetColor(0.5,0.8,0.6);
+    glGraph.AddChild(&glSpiral);
 
     // Define 3D floating text object
     SceneGraph::GLText glText3d("3D Floating Text", -1, 1, -1);
