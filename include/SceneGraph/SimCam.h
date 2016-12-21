@@ -152,6 +152,28 @@ class SCENEGRAPH_EXPORT GLSimCam
 #endif
 
 #if VISION
+        Eigen::Matrix4d ProjectionMatrixRDF_BottomLeft(int w, int h, double fu, double fv, double u0, double v0, double zNear, double zFar )
+        {
+            // http://www.songho.ca/opengl/gl_projectionmatrix.html
+            const double L = -(u0) * zNear / fu;
+            const double R = +(w-u0) * zNear / fu;
+            const double B = -(v0) * zNear / fv;
+            const double T = +(h-v0) * zNear / fv;
+
+            Eigen::Matrix4d P;
+
+            P(0,0) = 2 * zNear / (R-L);
+            P(1,1) = 2 * zNear / (T-B);
+
+            P(2,0) = (R+L)/(L-R);
+            P(2,1) = (T+B)/(B-T);
+            P(2,2) = (zFar +zNear) / (zFar - zNear);
+            P(2,3) = 1.0;
+
+            P(3,2) =  (2*zFar*zNear)/(zNear - zFar);
+            return P;
+        }
+
         ///////////////////////////////////////////////////////////////////////////////
 
         void SetIntrinsics( const Eigen::Matrix3d& dK )
@@ -160,7 +182,7 @@ class SCENEGRAPH_EXPORT GLSimCam
             m_dKinv << 1.0 / dK( 0, 0 ), 0, -dK( 0, 2 ) / dK( 0, 0 ),
                     0, 1.0 / dK( 1, 1 ), -dK( 1, 2 ) / dK( 1, 1 ),
                     0, 0, 1;
-            m_dKgl = (Eigen::Matrix4d)pangolin::ProjectionMatrixRDF_BottomLeft( m_nSensorWidth, m_nSensorHeight, m_dK( 0, 0 ), m_dK( 1, 1 ), m_dK( 0, 2 ), m_dK( 1, 2 ), m_fNear, m_fFar );
+            m_dKgl = ProjectionMatrixRDF_BottomLeft( m_nSensorWidth, m_nSensorHeight, m_dK( 0, 0 ), m_dK( 1, 1 ), m_dK( 0, 2 ), m_dK( 1, 2 ), m_fNear, m_fFar );
         }
 
 #else
