@@ -160,7 +160,7 @@ class SCENEGRAPH_EXPORT GLSimCam
             m_dKinv << 1.0 / dK( 0, 0 ), 0, -dK( 0, 2 ) / dK( 0, 0 ),
                     0, 1.0 / dK( 1, 1 ), -dK( 1, 2 ) / dK( 1, 1 ),
                     0, 0, 1;
-            m_dKgl = (Eigen::Matrix4d)pangolin::ProjectionMatrixRDF_BottomLeft( m_nSensorWidth, m_nSensorHeight, m_dK( 0, 0 ), m_dK( 1, 1 ), m_dK( 0, 2 ), m_dK( 1, 2 ), m_fNear, m_fFar );
+            m_dKgl = Eigen::Map<Eigen::Matrix4d, Eigen::ColMajor>(pangolin::ProjectionMatrixRDF_BottomLeft( m_nSensorWidth, m_nSensorHeight, m_dK( 0, 0 ), m_dK( 1, 1 ), m_dK( 0, 2 ), m_dK( 1, 2 ), m_fNear, m_fFar ).m);
         }
 
 #else
