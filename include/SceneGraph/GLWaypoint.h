@@ -26,6 +26,8 @@ class GLWayPoint : public GLObject {
     m_dScale = Eigen::Vector3d(0.25, 0.25, 0.25);
     m_dColor = Eigen::Vector3d(0,1,0);
     CENTER_CUBE_SIDE = 0.5;
+    m_nVelocityAxis = 0;
+    m_bZAxisDown = true;
     
 // Set unique waypoint name
     static int wid = 0;
@@ -83,11 +85,20 @@ class GLWayPoint : public GLObject {
       const Eigen::Vector3d n = m_mClampPlaneN_p.head<3>();
       const double d = m_mClampPlaneN_p(3);
       p_w = p_w - ((p_w.dot(n)-d) * n);
-      n_w = -n;
+      if(m_bZAxisDown) {
+        n_w = -n;
+      } else {
+        n_w = n;
+      }
     }
 
     if (pickId == m_nBaseId  && m_bLocked == false) {
-      Eigen::Vector3d d = -n_w;
+      Eigen::Vector3d d;
+      if(m_bZAxisDown) {
+        d = -n_w;
+      } else {
+        d = n_w;
+      }
       Eigen::Vector3d f = T.block <3, 1> (0, 0);
       Eigen::Vector3d r = d.cross(f).normalized();
       f = r.cross(d).normalized();
@@ -110,6 +121,7 @@ class GLWayPoint : public GLObject {
   }
 
   void DrawAxis(float fScale) {
+    glLineWidth(5);
     glEnableClientState(GL_VERTEX_ARRAY);
     GLfloat axis[] = {
       0.0, 0.0, 0.0,
@@ -138,20 +150,24 @@ class GLWayPoint : public GLObject {
     pangolin::GlState gl;
     double multiplier = m_bActive && !m_bLocked ? 1.0 : 0.8;
     gl.glDisable(GL_LIGHTING);
-    const double velx = m_dVelocity/(m_dScale[0]*VELOCITY_MULTIPLIER);
+    const double vel = m_dVelocity/(m_dScale[m_nVelocityAxis]*VELOCITY_MULTIPLIER);
 
     // draw velocity line
     glPushName(m_nFrontId);
     glColor4ub(255 * multiplier, 255 * multiplier, 255 * multiplier, 255);
     glBegin(GL_LINES);
-    glVertex3d(velx, 0, 0);
-    glVertex3d(1, 0, 0);
+    glLineWidth(3);
+    if(m_nVelocityAxis == 0) {
+      glVertex3d(vel, 0, 0);
+    } else if(m_nVelocityAxis == 1) {
+      glVertex3d(0, vel, 0);
+    } else if(m_nVelocityAxis == 2) {
+      glVertex3d(0, 0, vel);
+    }
+    glVertex3d(0, 0, 0);
     glEnd();
     glPopName();
 
-    glPushName(m_nBaseId);
-    DrawAxis(1);
-    glPopName();
     if (m_bAerial) {
       glColor3ub(0, 0, 255 * multiplier);
     } else {
@@ -162,8 +178,8 @@ class GLWayPoint : public GLObject {
     glPushName(m_nBaseId);
     glBegin(GL_QUADS);
     // left
-    double scaled_velx = velx*0.1;
-    glColor3f(m_dColor[0]*scaled_velx, m_dColor[1]*scaled_velx, m_dColor[2]*scaled_velx);
+    double scaled_vel = vel*0.1;
+    glColor3f(m_dColor[0]*scaled_vel, m_dColor[1]*scaled_vel, m_dColor[2]*scaled_vel);
     glNormal3f(0.0f, 1.0f, 0.0f);
     glVertex3f(-CENTER_CUBE_SIDE, CENTER_CUBE_SIDE, CENTER_CUBE_SIDE);
     glVertex3f(CENTER_CUBE_SIDE, CENTER_CUBE_SIDE, CENTER_CUBE_SIDE);
@@ -208,9 +224,20 @@ class GLWayPoint : public GLObject {
     glPointSize(15);
     glEnable(GL_POINT_SMOOTH);
     glBegin(GL_POINTS);
-    glVertex3d(velx, 0, 0);
+    if(m_nVelocityAxis == 0) {
+      glVertex3d(vel, 0, 0);
+    } else if(m_nVelocityAxis == 1) {
+      glVertex3d(0, vel, 0);
+    } else if(m_nVelocityAxis == 2) {
+      glVertex3d(0, 0, vel);
+    }
     glEnd();
     glPopName();
+
+    glPushName(m_nBaseId);
+    DrawAxis(1);
+    glPopName();
+    glLineWidth(1);
 
     glDepthMask(true);
   }
@@ -237,6 +264,14 @@ class GLWayPoint : public GLObject {
     m_bClampToPlane = true;
   }
 
+  void SetVelocityAxis(int axis){
+    m_nVelocityAxis = axis;
+  }
+
+  void SetZAxisDown(bool status){
+    m_bZAxisDown = status;
+  }
+
   bool            m_bPendingActive;
   bool            m_bActive;
   bool            m_bLocked;
@@ -252,6 +287,8 @@ class GLWayPoint : public GLObject {
   Eigen::Vector4d m_mClampPlaneN_p;
   float           CENTER_CUBE_SIDE;
   Eigen::Vector3d m_dColor;
+  int             m_nVelocityAxis;
+  bool            m_bZAxisDown;
 };
 
 }  // namespace SceneGraph
