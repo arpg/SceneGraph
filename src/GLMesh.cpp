@@ -533,7 +533,7 @@ void GLMesh::ApplyMaterial(const struct aiMaterial* mtl) {
   c[3] *= m_fAlpha;
   glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, c);
 
-  CheckForGLErrors();
+  // CheckForGLErrors();
 
   max = 1;
   ret1 = aiGetMaterialFloatArray(mtl, AI_MATKEY_SHININESS, &shininess, &max);
@@ -543,18 +543,18 @@ void GLMesh::ApplyMaterial(const struct aiMaterial* mtl) {
                                    &max);
     if (ret2 == AI_SUCCESS) {
       glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, shininess * strength);
-      CheckForGLErrors();
+      // CheckForGLErrors();
     } else {
       //                    glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS,
       //                    shininess);
       glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 1);
-      CheckForGLErrors();
+      // CheckForGLErrors();
     }
   } else {
     glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 0.0f);
     set_float4(c, 0.0f, 0.0f, 0.0f, 0.0f);
     glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, c);
-    CheckForGLErrors();
+    // CheckForGLErrors();
   }
 
   return;
@@ -566,17 +566,17 @@ void GLMesh::ApplyMaterial(const struct aiMaterial* mtl) {
     fill_mode = GL_FILL;
   }
   glPolygonMode(GL_FRONT_AND_BACK, fill_mode);
-  CheckForGLErrors();
+  // CheckForGLErrors();
 
   max = 1;
   if ((AI_SUCCESS ==
        aiGetMaterialIntegerArray(mtl, AI_MATKEY_TWOSIDED, &two_sided, &max)) &&
       two_sided) {
     glDisable(GL_CULL_FACE);
-    CheckForGLErrors();
+    // CheckForGLErrors();
   } else {
     glEnable(GL_CULL_FACE);
-    CheckForGLErrors();
+    // CheckForGLErrors();
   }
 }
 
